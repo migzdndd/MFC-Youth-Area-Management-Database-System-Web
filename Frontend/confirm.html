@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<!--
+  =============================================================================
+  MFC Youth Area Management System
+  File: confirm.html
+  Description: Email or account confirmation verification page.
+  =============================================================================
+-->
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Account provisioning and confirmation for the MFC Youth Area Management System.">
+  <meta name="theme-color" content="#002847">
+  <title>Account Provisioning - MFC Youth Area Management System</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  </style>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/img/logo-2.png">
+</head>
+
+<body class="auth-body">
+  <main class="auth-page">
+    <section class="login-card auth-card">
+      <div class="login-header">
+        <img class="logo-mark" src="/img/logo.png" alt="MFC Youth Logo">
+        <h1>Registration Flow Updated</h1>
+        <p>Public account verification is no longer used.</p>
+      </div>
+      <div class="login-form account-provision-info">
+        <p class="prototype-note">Member Portal accounts are created by Members using a verified email address already stored in the Members database.</p>
+        <div class="login-buttons"><button class="btn-auth btn-primary" type="button"
+            onclick="navigateWithLoader('/register')">View Account Access</button></div>
+      </div>
+    </section>
+  </main>
+  <footer class="auth-footer" style="padding: 2rem; text-align: center; margin-top: auto;">
+    Powered & designed by <a href="https://migzdndd.github.io/web-portfolio/" target="_blank" rel="noopener noreferrer" style="color: inherit; font-weight: bold; text-decoration: none;">migz.dev</a>
+  </footer>
+  <script src="/js/loader.js"></script>
+  <script src="/js/auth.js"></script>
+</body>
+
+</html>

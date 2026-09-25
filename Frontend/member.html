@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<!--
+  =============================================================================
+  MFC Youth Area Management System
+  File: member.html
+  Description: Personal portal for general MFC Youth members.
+  =============================================================================
+-->
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#002847">
+  <meta name="description" content="MFC Youth Member Portal.">
+  <title>Member Portal - MFC Youth</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  </style>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/img/logo-2.png">
+</head>
+
+<body class="layout-body member-portal-layout">
+  <!-- Top Navigation Header -->
+  <header class="top-header member-portal-header">
+    <div class="member-portal-brand">
+      <img src="/img/logo-2.png" alt="MFC Youth Logo">
+      <div>
+        <strong>MFC YOUTH</strong>
+        <span>Member Portal</span>
+      </div>
+    </div>
+
+    <nav class="member-portal-nav" aria-label="Member portal navigation">
+      <a href="#overview">Home</a>
+      <a href="#upcoming">Upcoming</a>
+      <a href="#recent">Recent</a>
+      <a href="#profile">My Profile</a>
+    </nav>
+
+    <div class="member-portal-actions">
+      <button class="btn" id="changePasswordBtn" type="button">Change Password</button>
+      <button class="btn red" id="memberLogoutBtn" type="button">Logout</button>
+    </div>
+  </header>
+
+  <!-- Main Portal Content -->
+  <main class="main-content member-portal-content" id="memberPortalContent"></main>
+
+  <footer class="auth-footer" style="padding: 2rem; text-align: center; margin-top: auto;">
+    Powered & designed by <a href="https://migzdndd.github.io/web-portfolio/" target="_blank" rel="noopener noreferrer" style="color: inherit; font-weight: bold; text-decoration: none;">migz.dev</a>
+  </footer>
+
+  <div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
+  <script src="/js/loader.js"></script>
+  <script src="/js/member.js"></script>
+</body>
+
+</html>

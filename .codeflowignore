@@ -1,0 +1,9 @@
+# CodeFlow Ignore Patterns
+# Exclude AI agent workspace tooling, local skills, and internal dependencies
+
+.agent/
+.agents/
+.codex/
+Backend/node_modules/
+Frontend/node_modules/
+.vercel/
