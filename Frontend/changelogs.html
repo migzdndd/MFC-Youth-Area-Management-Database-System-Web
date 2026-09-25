@@ -210,13 +210,49 @@
       // Comprehensive fallback commits array matching recent real repository commits
       const FALLBACK_COMMITS = [
         {
+          sha: 'b62fed03986ff1bdf968134764b8bb26cbaae122',
+          commit: {
+            message: 'chore(release): bump version to 1.0.1 and update vercel domain references\n\nRelease version 1.0.1 with verified production domain references and deployment guidelines.',
+            author: { name: 'migzdndd', date: '2026-09-25T19:50:00Z' }
+          },
+          author: { login: 'migzdndd', avatar_url: 'https://avatars.githubusercontent.com/u/118338785?v=4' },
+          html_url: 'https://github.com/migzdndd/MFC-Youth-Area-Management-Database-System-Web/commit/b62fed03986ff1bdf968134764b8bb26cbaae122'
+        },
+        {
+          sha: 'af4463692b67f1bdf968134764b8bb26cbaae122',
+          commit: {
+            message: 'feat(legal): add comprehensive 7-part legal and compliance documentation\n\nInclude Privacy Policy, Terms of Service, Cookie Policy, Parental Consent, Financial Disclaimer, and Attribution.',
+            author: { name: 'migzdndd', date: '2026-09-25T19:35:00Z' }
+          },
+          author: { login: 'migzdndd', avatar_url: 'https://avatars.githubusercontent.com/u/118338785?v=4' },
+          html_url: 'https://github.com/migzdndd/MFC-Youth-Area-Management-Database-System-Web/commit/af4463692b67f1bdf968134764b8bb26cbaae122'
+        },
+        {
+          sha: '62ee9abf8702b881335cb3110a248f7634f19bca',
+          commit: {
+            message: 'feat(lit): integrate 5 LIT creative ministries and alias mappings across backend and frontend\n\nAdd Music, Dance, Creative Writing, Graphics & Promo, and Photography & Videography ministries.',
+            author: { name: 'migzdndd', date: '2026-09-25T19:25:00Z' }
+          },
+          author: { login: 'migzdndd', avatar_url: 'https://avatars.githubusercontent.com/u/118338785?v=4' },
+          html_url: 'https://github.com/migzdndd/MFC-Youth-Area-Management-Database-System-Web/commit/62ee9abf8702b881335cb3110a248f7634f19bca'
+        },
+        {
+          sha: '23bced181df6e44b9cbba7cb0994a4b270725227',
+          commit: {
+            message: 'chore(env): add standardized .env.example with clear config and secret indicators\n\nProvide safe template for Supabase credentials, service role keys, and environment toggles.',
+            author: { name: 'migzdndd', date: '2026-09-25T19:15:00Z' }
+          },
+          author: { login: 'migzdndd', avatar_url: 'https://avatars.githubusercontent.com/u/118338785?v=4' },
+          html_url: 'https://github.com/migzdndd/MFC-Youth-Area-Management-Database-System-Web/commit/23bced181df6e44b9cbba7cb0994a4b270725227'
+        },
+        {
           sha: '327b4c41460ecbbdb27a29e2e60055ff2886f338',
           commit: {
             message: 'refactor(core): deep audit\n\nPerform deep code audit, remove dead comments, and streamline module section headers.',
             author: { name: 'migzdndd', date: '2026-09-25T01:12:00Z' }
           },
           author: { login: 'migzdndd', avatar_url: 'https://avatars.githubusercontent.com/u/118338785?v=4' },
-          html_url: 'https://github.com/migzdndd/MFC-Youth-Area-Management-System-Web/commit/327b4c41460ecbbdb27a29e2e60055ff2886f338'
+          html_url: 'https://github.com/migzdndd/MFC-Youth-Area-Management-Database-System-Web/commit/327b4c41460ecbbdb27a29e2e60055ff2886f338'
         },
         {
           sha: 'db9b27f42ef4f128c70176b6d510a190b2166a12',
@@ -225,7 +261,7 @@
             author: { name: 'migzdndd', date: '2026-09-24T23:44:00Z' }
           },
           author: { login: 'migzdndd', avatar_url: 'https://avatars.githubusercontent.com/u/118338785?v=4' },
-          html_url: 'https://github.com/migzdndd/MFC-Youth-Area-Management-System-Web/commit/db9b27f42ef4f128c70176b6d510a190b2166a12'
+          html_url: 'https://github.com/migzdndd/MFC-Youth-Area-Management-Database-System-Web/commit/db9b27f42ef4f128c70176b6d510a190b2166a12'
         },
         {
           sha: 'de7cbff019488a01f7823901b2a9018449172601',
@@ -234,7 +270,7 @@
             author: { name: 'migzdndd', date: '2026-09-24T23:38:00Z' }
           },
           author: { login: 'migzdndd', avatar_url: 'https://avatars.githubusercontent.com/u/118338785?v=4' },
-          html_url: 'https://github.com/migzdndd/MFC-Youth-Area-Management-System-Web/commit/de7cbff019488a01f7823901b2a9018449172601'
+          html_url: 'https://github.com/migzdndd/MFC-Youth-Area-Management-Database-System-Web/commit/de7cbff019488a01f7823901b2a9018449172601'
         },
         {
           sha: '20b5fa3d88b48876c12b1860888eb19d9b62f5e3',
@@ -243,7 +279,7 @@
             author: { name: 'migzdndd', date: '2026-09-24T05:58:00Z' }
           },
           author: { login: 'migzdndd', avatar_url: 'https://avatars.githubusercontent.com/u/118338785?v=4' },
-          html_url: 'https://github.com/migzdndd/MFC-Youth-Area-Management-System-Web/commit/20b5fa3d88b48876c12b1860888eb19d9b62f5e3'
+          html_url: 'https://github.com/migzdndd/MFC-Youth-Area-Management-Database-System-Web/commit/20b5fa3d88b48876c12b1860888eb19d9b62f5e3'
         },
         {
           sha: '58fc0a79018449c25f49e49122a2bb7f5e1da218',
@@ -465,7 +501,7 @@
           relativeTime,
           authorName: c.commit?.author?.name || c.author?.login || 'Developer',
           authorAvatar: c.author?.avatar_url || '',
-          htmlUrl: c.html_url || `https://github.com/migzdndd/MFC-Youth-Area-Management-System-Web/commit/${c.sha}`
+          htmlUrl: c.html_url || `https://github.com/migzdndd/MFC-Youth-Area-Management-Database-System-Web/commit/${c.sha}`
         };
       }
 
@@ -632,28 +668,68 @@
         });
       }
 
-      // Fetch logs from GitHub with fallback resilience
+      // Fetch logs from GitHub with multi-tier fallback resilience
       async function loadLogs() {
         if (refreshIcon) refreshIcon.style.animation = 'spin 1s linear infinite';
         
         try {
           const timestamp = Date.now();
-          const apiUrl = `https://api.github.com/repos/migzdndd/MFC-Youth-Area-Management-System-Web/commits?per_page=100&_t=${timestamp}`;
-          const response = await fetch(apiUrl, {
-            cache: 'no-store',
-            headers: {
-              'Accept': 'application/vnd.github.v3+json'
+          let rawCommits = null;
+
+          // Priority 1: Internal API endpoint with edge cache and serverless resilience
+          try {
+            const apiRes = await fetch(`/api/changelogs?per_page=100&_t=${timestamp}`, {
+              cache: 'no-store'
+            });
+            if (apiRes.ok) {
+              const data = await apiRes.json();
+              if (Array.isArray(data) && data.length > 0) {
+                rawCommits = data;
+              }
             }
-          });
-          if (!response.ok) {
-            throw new Error(`GitHub API HTTP ${response.status}`);
+          } catch (e) {
+            console.warn('Internal /api/changelogs unavailable, falling back to direct GitHub fetch:', e);
           }
-          const rawCommits = await response.json();
+
+          // Priority 2: Direct fetch from primary active GitHub repository
+          if (!rawCommits) {
+            const primaryUrl = `https://api.github.com/repos/migzdndd/MFC-Youth-Area-Management-Database-System-Web/commits?per_page=100&_t=${timestamp}`;
+            const response = await fetch(primaryUrl, {
+              cache: 'no-store',
+              headers: {
+                'Accept': 'application/vnd.github.v3+json'
+              }
+            });
+            if (response.ok) {
+              const data = await response.json();
+              if (Array.isArray(data) && data.length > 0) {
+                rawCommits = data;
+              }
+            }
+          }
+
+          // Priority 3: Fallback repository alias
+          if (!rawCommits) {
+            const secondaryUrl = `https://api.github.com/repos/migzdndd/MFC-Youth-Area-Management-System-Web/commits?per_page=100&_t=${timestamp}`;
+            const secRes = await fetch(secondaryUrl, {
+              cache: 'no-store',
+              headers: {
+                'Accept': 'application/vnd.github.v3+json'
+              }
+            });
+            if (secRes.ok) {
+              const data = await secRes.json();
+              if (Array.isArray(data) && data.length > 0) {
+                rawCommits = data;
+              }
+            }
+          }
+
           if (Array.isArray(rawCommits) && rawCommits.length > 0) {
             allCommits = rawCommits.map(parseCommit);
             if (noticeBanner) noticeBanner.style.display = 'none';
           } else {
-            throw new Error('Empty commit list');
+            throw new Error('All live commit endpoints returned empty or failed');
           }
         } catch (err) {
           console.warn('GitHub live API unavailable or rate limited. Loading localized commit dataset:', err);

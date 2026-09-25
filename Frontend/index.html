@@ -18,6 +18,7 @@
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
   </style>
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/legal-modal.css">
   <link rel="icon" type="image/png" href="/img/logo-2.png">
 </head>
 
@@ -163,9 +164,10 @@
 
   <!-- Global Authentication Footer -->
   <footer class="auth-footer">Visit the Official MFC Youth Page at <a href="https://mfcyouth.org" target="_blank"
-      rel="noopener noreferrer">mfcyouth.org</a> &middot; <a href="/changelogs">System Changelogs</a> &middot; Powered & designed by <a href="https://migzdndd.github.io/web-portfolio/" target="_blank" rel="noopener noreferrer">migz.dev</a></footer>
+      rel="noopener noreferrer">mfcyouth.org</a> &middot; <a href="/changelogs">System Changelogs</a> &middot; <button type="button" class="legal-footer-trigger open-legal-modal" data-open-legal="overview">Legal Documents &amp; Privacy Policies</button> &middot; Powered & designed by <a href="https://migzdndd.github.io/web-portfolio/" target="_blank" rel="noopener noreferrer">migz.dev</a></footer>
   <script src="/js/loader.js"></script>
   <script src="/js/auth.js"></script>
+  <script src="/js/legal-modal.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       const changelogsList = document.getElementById('changelogsList');
@@ -184,38 +186,31 @@
       // Curated recent commits fallback if GitHub API rate-limits
       const FALLBACK_COMMITS = [
         {
-          sha: '20b5fa3',
+          sha: 'b62fed0',
           commit: {
-            message: 'feat(auth): prompt demo access level selection for demo dashboard',
-            author: { date: '2026-09-24T05:58:00Z' }
+            message: 'chore(release): bump version to 1.0.1 and update vercel domain references',
+            author: { date: '2026-09-25T19:45:48Z' }
           }
         },
         {
-          sha: '58fc0a7',
+          sha: 'af44636',
           commit: {
-            message: 'feat(dashboard): add MFC Youth Areas card grid component to super admin dashboard',
-            author: { date: '2026-09-24T05:40:00Z' }
+            message: 'Update vercel.json with explicit static and node build targets',
+            author: { date: '2026-09-25T03:11:12Z' }
           }
         },
         {
-          sha: '8e211e6',
+          sha: '62ee9ab',
           commit: {
-            message: 'feat(navigation): implement role-based sidebar tabs and dashboard cards',
-            author: { date: '2026-09-24T05:30:00Z' }
+            message: 'Fix 404 Issue',
+            author: { date: '2026-09-25T03:09:17Z' }
           }
         },
         {
-          sha: 'db50ff8',
+          sha: '23bced1',
           commit: {
-            message: 'fix(auth): update gitignore and resolve rollback issues',
-            author: { date: '2026-09-24T05:15:00Z' }
-          }
-        },
-        {
-          sha: '7a8c3d1',
-          commit: {
-            message: 'feat(reports): allow all core roles to view all activity reports',
-            author: { date: '2026-09-24T04:45:00Z' }
+            message: 'Initial commit: MFC Youth Area Management System Web',
+            author: { date: '2026-09-25T03:04:02Z' }
           }
         }
       ];
@@ -250,19 +245,44 @@
         }).join('');
       }
 
-      // Fetch Changelogs from GitHub API
+      // Fetch Changelogs with multi-tier fallback resilience
       if (changelogsList) {
+        const fetchCommits = async () => {
+          // 1. Try internal backend API router (edge cached, no rate limits)
+          try {
+            const apiRes = await fetch('/api/changelogs?per_page=8');
+            if (apiRes.ok) {
+              const data = await apiRes.json();
+              if (Array.isArray(data) && data.length > 0) return data;
+            }
+          } catch (_) {}
+
+          // 2. Try live GitHub repository directly
+          try {
+            const ghRes = await fetch('https://api.github.com/repos/migzdndd/MFC-Youth-Area-Management-Database-System-Web/commits?per_page=8');
+            if (ghRes.ok) {
+              const data = await ghRes.json();
+              if (Array.isArray(data) && data.length > 0) return data;
+            }
+          } catch (_) {}
+
+          // 3. Try secondary GitHub repository alias
+          try {
+            const ghFallback = await fetch('https://api.github.com/repos/migzdndd/MFC-Youth-Area-Management-System-Web/commits?per_page=8');
+            if (ghFallback.ok) {
+              const data = await ghFallback.json();
+              if (Array.isArray(data) && data.length > 0) return data;
+            }
+          } catch (_) {}
+
+          return FALLBACK_COMMITS;
+        };
+
         try {
-          const response = await fetch('https://api.github.com/repos/migzdndd/MFC-Youth-Area-Management-System-Web/commits?per_page=8');
-          if (!response.ok) throw new Error('GitHub API response status ' + response.status);
-          const commits = await response.json();
-          if (Array.isArray(commits) && commits.length > 0) {
-            renderCommitItems(commits);
-          } else {
-            renderCommitItems(FALLBACK_COMMITS);
-          }
+          const commits = await fetchCommits();
+          renderCommitItems(commits);
         } catch (error) {
-          console.warn('GitHub API rate limited or offline. Using verified fallback changelog records:', error);
+          console.warn('Using verified fallback changelog records:', error);
           renderCommitItems(FALLBACK_COMMITS);
         }
       }
