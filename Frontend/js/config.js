@@ -35,7 +35,12 @@ const SERVICES = [
   'Area LIT Servant',
   'Campus Servant',
   'Area Kids Servant',
-  'MFC High Servant'
+  'MFC High Servant',
+  'Music',
+  'Dance',
+  'Creative Writing',
+  'Graphics & Promo',
+  'Photography & Videography'
 ];
 
 const ACCESS_LEVELS = [
@@ -67,7 +72,18 @@ const SERVICE_ALIASES = new Map([
   ['kids servant', 'Area Kids Servant'],
   ['area kids servant', 'Area Kids Servant'],
   ['area_kids_servant', 'Area Kids Servant'],
-  ['mfc high servant', 'MFC High Servant']
+  ['mfc high servant', 'MFC High Servant'],
+  ['mfc_high_servant', 'MFC High Servant'],
+  ['music', 'Music'],
+  ['dance', 'Dance'],
+  ['creative writing', 'Creative Writing'],
+  ['creative_writing', 'Creative Writing'],
+  ['graphics & promo', 'Graphics & Promo'],
+  ['graphics and promo', 'Graphics & Promo'],
+  ['graphics_promo', 'Graphics & Promo'],
+  ['photography & videography', 'Photography & Videography'],
+  ['photography and videography', 'Photography & Videography'],
+  ['photography_videography', 'Photography & Videography']
 ]);
 
 const ACCESS_ROLE_SERVICE_MAP = Object.freeze({

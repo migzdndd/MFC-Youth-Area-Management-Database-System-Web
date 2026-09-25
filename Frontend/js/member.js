@@ -24,7 +24,12 @@ const STANDARD_SERVICES = [
   'Area LIT Servant',
   'Campus Servant',
   'Area Kids Servant',
-  'MFC High Servant'
+  'MFC High Servant',
+  'Music',
+  'Dance',
+  'Creative Writing',
+  'Graphics & Promo',
+  'Photography & Videography'
 ];
 
 /** Mapping of access level roles to default community services */
