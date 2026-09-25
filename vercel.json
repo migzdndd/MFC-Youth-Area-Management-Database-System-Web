@@ -40,5 +40,19 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/Backend/api/router.js?route=:path*"
+    },
+    {
+      "source": "/",
+      "destination": "/Frontend/index.html"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/Frontend/:path*"
+    }
   ]
 }
