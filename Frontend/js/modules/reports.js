@@ -443,7 +443,7 @@ function reportScopeText() {
  * Render Reports Management Page
  *
  * What it does:
- * Builds the activity reports dashboard, monthly activity bar chart, report type breakdowns, filter toolbar, and full reports data table with buttons to view, edit, or delete records.
+ * Builds the activity reports dashboard, filter toolbar, primary reports data table with record management actions, and secondary monthly activity analytics chart.
  *
  * Backup plan if it breaks:
  * If the current leader is a Chapter Servant, it automatically locks the chapter filter and preparer information to their chapter scope.
@@ -518,10 +518,6 @@ function renderReports() {
       1
     );
 
-  const typeGroups =
-    groupActivitiesByType(
-      list
-    );
 
   content.innerHTML =
     pageHeader(
@@ -759,120 +755,21 @@ function renderReports() {
       )}
     </div>
 
-    <div class="grid-2">
-
-      <section class="card panel">
-        <h3>
-          Monthly Activity
-        </h3>
-
-        <div class="chart-bars">
-
-          ${months
-      .map(
-        month => `
-                <div
-                  class="chart-bar-wrap"
-                >
-
-                  <div
-                    class="chart-value"
-                  >
-                    ${month.count}
-                  </div>
-
-                  <div
-                    class="chart-bar"
-                    style="
-                      height:
-                      ${month.count === 0
-          ? 0
-          : Math.max(
-            8,
-            (month.count /
-              max) *
-            125
-          )}px
-                    "
-                  ></div>
-
-                  <span>
-                    ${month.label}
-                  </span>
-
-                </div>
-              `
-      )
-      .join('')}
-
+    <!-- Primary Card: Activity Records Table -->
+    <section class="card panel report-primary-card" aria-label="Activity Records">
+      <div class="report-primary-header">
+        <div class="report-primary-title-group">
+          <div class="report-primary-badge-row">
+            <span class="metric-badge-primary">Primary</span>
+            <span class="scope-chip">${list.length} ${list.length === 1 ? 'Report' : 'Reports'} Found</span>
+          </div>
+          <h3>Activity Records</h3>
+          <p class="muted">Detailed log of activities, attendance turnout, and filed submissions</p>
         </div>
-      </section>
+      </div>
 
-      <section class="card panel">
-
-        <h3>
-          Report Type Mix
-        </h3>
-
-        ${typeGroups.length
-      ? `
-              <div class="bar-list">
-
-                ${typeGroups
-        .map(
-          group => `
-                      <div class="bar-row">
-
-                        <span>
-                          ${esc(
-            group.type
-          )}
-                        </span>
-
-                        <div
-                          class="bar-track"
-                        >
-                          <div
-                            class="bar-fill"
-                            style="
-                              width:
-                              ${(group.count /
-              Math.max(
-                list.length,
-                1
-              )) *
-            100
-            }%
-                            "
-                          ></div>
-                        </div>
-
-                        <strong>
-                          ${group.count}
-                        </strong>
-
-                      </div>
-                    `
-        )
-        .join('')}
-
-              </div>
-            `
-      : emptyState(
-        'No analytics yet',
-        'Add or adjust report filters to see activity totals.'
-      )
-    }
-
-      </section>
-
-    </div>
-
-    <section
-      class="card table-wrap report-table"
-    >
-
-      ${list.length
+      <div class="table-wrap report-table-wrap">
+        ${list.length
       ? `
             <table class="data-table">
 
@@ -995,7 +892,62 @@ function renderReports() {
           : 'Add a report to start your analytics.'
       )
     }
+      </div>
+    </section>
 
+    <!-- Secondary Card: Monthly Activity Trend -->
+    <section class="card panel report-secondary-card" aria-label="Monthly Activity Trend">
+      <div class="report-secondary-header">
+        <div class="report-secondary-title-group">
+          <div class="report-secondary-badge-row">
+            <span class="metric-badge-secondary">Secondary</span>
+            <span class="scope-chip">Past 6 Months</span>
+          </div>
+          <h3>Monthly Activity</h3>
+          <p class="muted">Activity count distribution and monthly turnout trends</p>
+        </div>
+      </div>
+
+      <div class="chart-bars report-chart-bars">
+
+        ${months
+      .map(
+        month => `
+              <div
+                class="chart-bar-wrap"
+              >
+
+                <div
+                  class="chart-value"
+                >
+                  ${month.count}
+                </div>
+
+                <div
+                  class="chart-bar"
+                  style="
+                    height:
+                    ${month.count === 0
+          ? 0
+          : Math.max(
+            8,
+            (month.count /
+              max) *
+            125
+          )}px
+                  "
+                ></div>
+
+                <span>
+                  ${month.label}
+                </span>
+
+              </div>
+            `
+      )
+      .join('')}
+
+      </div>
     </section>
   `;
 

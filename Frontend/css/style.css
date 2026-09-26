@@ -1990,6 +1990,141 @@ button:disabled {
   margin-top: 18px;
 }
 
+/* Reports Page: Primary Activity Records Card */
+.report-primary-card {
+  margin-top: 18px;
+  margin-bottom: 22px;
+  border-radius: 18px;
+  padding: 22px 24px;
+  background: #ffffff;
+  border: 1px solid rgba(8, 120, 189, 0.14);
+  box-shadow: 0 10px 28px rgba(8, 44, 71, 0.07);
+  position: relative;
+  overflow: hidden;
+}
+
+.report-primary-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: #0284c7;
+  border-radius: 4px 0 0 4px;
+}
+
+.report-primary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eef2f6;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.report-primary-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.report-primary-title-group h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #002847;
+  margin: 0 0 4px;
+}
+
+.report-primary-title-group p {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.report-table-wrap {
+  border-radius: 12px;
+  border: 1px solid #edf2f7;
+  overflow-x: auto;
+}
+
+.report-table-wrap .data-table {
+  margin: 0;
+}
+
+/* Reports Page: Secondary Monthly Activity Card */
+.report-secondary-card {
+  margin-top: 0;
+  margin-bottom: 24px;
+  border-radius: 16px;
+  padding: 20px 24px;
+  background: linear-gradient(180deg, #ffffff 0%, #f9fbfd 100%);
+  border: 1px solid rgba(8, 120, 189, 0.12);
+  box-shadow: 0 6px 18px rgba(8, 44, 71, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.report-secondary-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  border-radius: 4px 0 0 4px;
+  background: #10b981;
+}
+
+.report-secondary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #eef2f6;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.report-secondary-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.report-secondary-title-group h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #002847;
+  margin: 0 0 3px;
+}
+
+.report-secondary-title-group p {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.report-chart-bars {
+  max-width: 680px;
+  margin: 0 auto;
+  padding-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .report-primary-card {
+    padding: 16px 14px;
+  }
+  .report-secondary-card {
+    padding: 16px 14px;
+  }
+}
+
 .chart-bars {
   align-items: flex-end;
   padding-bottom: 24px;
