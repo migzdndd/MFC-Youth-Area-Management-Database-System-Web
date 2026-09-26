@@ -347,6 +347,7 @@
         role="dialog"
         aria-modal="true"
         aria-labelledby="legalModalTitle"
+        style="display: none;"
         x-data="{
           open: false,
           activeTab: 'overview',
@@ -363,7 +364,6 @@
         x-show="open"
         :class="{ 'is-active': open }"
         x-transition.opacity
-        x-cloak
         @keydown.escape.window="if (open) closeLegalModal()"
         @click.self="closeLegalModal()"
       >
@@ -395,7 +395,7 @@
 
           <div id="legalDocBody" class="legal-doc-body" tabindex="0">
             ${Object.keys(LEGAL_DOCUMENTS).map(key => `
-              <div x-show="activeTab === '${key}'" x-cloak>
+              <div x-show="activeTab === '${key}'">
                 ${LEGAL_DOCUMENTS[key].html}
               </div>
             `).join('')}
@@ -407,7 +407,7 @@
             </div>
             <div class="legal-footer-actions">
               <button type="button" id="legalCloseSecondaryBtn" class="legal-btn legal-btn-secondary" @click="closeLegalModal()">Close</button>
-              <button type="button" id="legalAcknowledgeBtn" class="legal-btn legal-btn-primary" @click="closeLegalModal()">Acknowledge &amp; Continue</button>
+              <button type="button" id="legalAcknowledgeBtn" class="legal-btn legal-btn-primary" @click="acknowledgeLegal()">Acknowledge &amp; Continue</button>
             </div>
           </footer>
         </div>
@@ -452,13 +452,17 @@
       document.body.appendChild(container.firstElementChild);
       modalBackdropEl = document.getElementById('legalModalBackdrop');
 
+      if (window.Alpine) {
+        window.Alpine.initTree(modalBackdropEl);
+      }
+
       const closeBtn = document.getElementById('closeLegalModalBtn');
       const cancelBtn = document.getElementById('legalCloseSecondaryBtn');
       const ackBtn = document.getElementById('legalAcknowledgeBtn');
 
       if (closeBtn) closeBtn.addEventListener('click', closeLegalModal);
       if (cancelBtn) cancelBtn.addEventListener('click', closeLegalModal);
-      if (ackBtn) ackBtn.addEventListener('click', closeLegalModal);
+      if (ackBtn) ackBtn.addEventListener('click', acknowledgeLegal);
 
       modalBackdropEl.addEventListener('click', (e) => {
         if (e.target === modalBackdropEl) {
@@ -478,13 +482,16 @@
 
   function openLegalModal(targetTab = 'overview') {
     ensureModalInDom();
+    if (modalBackdropEl) {
+      modalBackdropEl.style.display = 'flex';
+      modalBackdropEl.classList.add('is-active');
+    }
     const state = modalBackdropEl?._x_dataStack?.[0];
     if (state) {
       state.activeTab = targetTab;
       state.open = true;
     } else {
       renderDocument(targetTab);
-      modalBackdropEl?.classList.add('is-active');
     }
     document.body.style.overflow = 'hidden';
   }
@@ -493,17 +500,26 @@
     const state = modalBackdropEl?._x_dataStack?.[0];
     if (state) {
       state.open = false;
-    } else {
-      modalBackdropEl?.classList.remove('is-active');
+    }
+    if (modalBackdropEl) {
+      modalBackdropEl.classList.remove('is-active');
+      modalBackdropEl.style.display = 'none';
     }
     document.body.style.overflow = '';
+  }
+
+  function acknowledgeLegal() {
+    try {
+      localStorage.setItem('mfc_legal_acknowledged', 'true');
+    } catch (e) {}
+    closeLegalModal();
   }
 
   // Public APIs
   window.openLegalModal = openLegalModal;
   window.closeLegalModal = closeLegalModal;
+  window.acknowledgeLegal = acknowledgeLegal;
 
-  // Automatically pop up when entering the website
   document.addEventListener('DOMContentLoaded', () => {
     // Attach listener to any triggers
     document.querySelectorAll('.open-legal-modal, [data-open-legal]').forEach(el => {
@@ -514,9 +530,13 @@
       });
     });
 
-    // Automatic popup upon entering
-    setTimeout(() => {
-      openLegalModal('overview');
-    }, 400);
+    // Only prompt automatically once on the sign-in / welcome page if never acknowledged
+    const path = window.location.pathname;
+    const isRootOrAuth = path === '/' || path === '/index.html' || path === '';
+    if (isRootOrAuth && !localStorage.getItem('mfc_legal_acknowledged')) {
+      setTimeout(() => {
+        openLegalModal('overview');
+      }, 500);
+    }
   });
 })();

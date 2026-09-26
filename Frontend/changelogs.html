@@ -69,7 +69,7 @@
     <div id="noticeBanner" class="tech-notice-banner"
       x-data="{ show: false, text: 'Displaying verified local commit cache. Real-time search and filters are fully active.' }"
       x-show="show"
-      x-cloak
+      style="display: none;"
       role="status"
       @show-notice.window="text = $event.detail || text; show = true"
       @hide-notice.window="show = false">
@@ -156,7 +156,7 @@
             spellcheck="false"
             @input="hasQuery = !!$event.target.value"
           >
-          <button id="searchClearBtn" type="button" class="tech-search-clear" aria-label="Clear search input" x-show="hasQuery" x-cloak>&times;</button>
+          <button id="searchClearBtn" type="button" class="tech-search-clear" aria-label="Clear search input" x-show="hasQuery" style="display: none;">&times;</button>
         </div>
       </div>
 

@@ -168,7 +168,6 @@ function openDemoRoleSwitcher() {
   modal.setAttribute('x-data', '{ open: true, close() { this.open = false; setTimeout(() => modal.remove(), 220); } }');
   modal.setAttribute('x-show', 'open');
   modal.setAttribute('x-transition.opacity', '');
-  modal.setAttribute('x-cloak', '');
   modal.setAttribute('@keydown.escape.window', 'close()');
   modal.setAttribute('@click.self', 'close()');
 
@@ -218,6 +217,15 @@ function openDemoRoleSwitcher() {
       modal.remove();
     }
   };
+
+  const closeBtn = document.getElementById('closeDemoRoleModal');
+  if (closeBtn) closeBtn.onclick = close;
+  const cancelBtn = document.getElementById('cancelDemoRoleModal');
+  if (cancelBtn) cancelBtn.onclick = close;
+
+  if (window.Alpine) {
+    window.Alpine.initTree(modal);
+  }
 
   modal.querySelectorAll('.demo-role-option').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -318,7 +326,7 @@ if (logoutBtn) {
       deleteButton.className = 'sidebar-account-action delete-account-button';
       deleteButton.setAttribute('x-data', '{ loading: false }');
       deleteButton.setAttribute('x-bind:disabled', 'loading');
-      deleteButton.innerHTML = '<span x-show="!loading">Delete Account</span><span x-show="loading" x-cloak>Deleting Account…</span>';
+      deleteButton.innerHTML = '<span x-show="!loading">Delete Account</span><span x-show="loading" style="display: none;">Deleting Account…</span>';
       deleteButton.onclick = async () => {
         const warning = 'Permanently delete your account? This removes your Supabase login, profile, and linked member record. This cannot be undone.';
         if (!window.confirm(warning)) return;
@@ -353,12 +361,18 @@ if (logoutBtn) {
         }
       };
       logoutBtn.parentElement?.insertBefore(deleteButton, logoutBtn);
+      if (window.Alpine) {
+        window.Alpine.initTree(deleteButton);
+      }
     }
   }
 
   logoutBtn.setAttribute('x-data', '{ loading: false }');
   logoutBtn.setAttribute('x-bind:disabled', 'loading');
-  logoutBtn.innerHTML = '<span x-show="!loading">Logout</span><span x-show="loading" x-cloak>Signing Out…</span>';
+  logoutBtn.innerHTML = '<span x-show="!loading">Logout</span><span x-show="loading" style="display: none;">Signing Out…</span>';
+  if (window.Alpine) {
+    window.Alpine.initTree(logoutBtn);
+  }
 
   logoutBtn.onclick = async () => {
     const alpineData = logoutBtn._x_dataStack?.[0];

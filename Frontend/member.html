@@ -38,7 +38,7 @@
       <button class="btn" id="changePasswordBtn" type="button">Change Password</button>
       <button class="btn red" id="memberLogoutBtn" type="button" x-data="{ loading: false }" :disabled="loading">
         <span x-show="!loading">Logout</span>
-        <span x-show="loading" x-cloak>Signing Out…</span>
+        <span x-show="loading" style="display: none;">Signing Out…</span>
       </button>
     </div>
   </header>

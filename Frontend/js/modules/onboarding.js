@@ -43,7 +43,6 @@ async function showAreaOnboarding() {
       }"
       x-show="open"
       x-transition.opacity
-      x-cloak
     >
       <section class="modal area-onboarding-modal" role="dialog" aria-modal="true" aria-labelledby="areaOnboardingTitle" x-show="open" x-transition>
         <header class="modal-header area-onboarding-header">
@@ -56,7 +55,7 @@ async function showAreaOnboarding() {
           <p class="area-onboarding-intro">
             Your Servant Leader account was created successfully. Before entering the management system, connect it to the Area you serve.
           </p>
-          <div id="areaOnboardingMessage" class="message" role="status" x-show="message" :class="messageType" x-text="message" x-cloak></div>
+          <div id="areaOnboardingMessage" class="message" role="status" x-show="message" :class="messageType" x-text="message"></div>
 
           <div class="area-setup-panel" id="existingAreaPanel" x-show="!showCreate" x-transition>
             <label class="form-group" for="onboardingAreaSelect">
@@ -67,7 +66,7 @@ async function showAreaOnboarding() {
             </label>
             <button class="btn blue" id="confirmAreaButton" type="button" x-bind:disabled="!selectedArea || isConnecting" disabled>
               <span x-show="!isConnecting">Continue with Selected Area</span>
-              <span x-show="isConnecting" x-cloak>Connecting…</span>
+              <span x-show="isConnecting" style="display: none;">Connecting…</span>
             </button>
           </div>
 
@@ -75,7 +74,7 @@ async function showAreaOnboarding() {
 
           <button class="btn area-create-toggle" id="showCreateAreaButton" type="button" x-show="!showCreate" @click="showCreate = true">Create Area-Based Account</button>
 
-          <div class="area-setup-panel" id="createAreaPanel" x-show="showCreate" x-transition x-cloak>
+          <div class="area-setup-panel" id="createAreaPanel" x-show="showCreate" x-transition style="display: none;">
             <label class="form-group" for="newAreaName">
               <span>Area Name</span>
               <input class="text-input" id="newAreaName" type="text" maxlength="120" placeholder="e.g. MFC Youth NCR East" x-model="newArea">
@@ -85,7 +84,7 @@ async function showAreaOnboarding() {
               <button class="btn" id="cancelCreateAreaButton" type="button" @click="showCreate = false; newArea = '';">Cancel</button>
               <button class="btn blue" id="createAreaButton" type="button" x-bind:disabled="newArea.trim().length < 3 || isCreating">
                 <span x-show="!isCreating">Create Area-Based Account</span>
-                <span x-show="isCreating" x-cloak>Creating Area…</span>
+                <span x-show="isCreating" style="display: none;">Creating Area…</span>
               </button>
             </div>
           </div>
@@ -97,6 +96,10 @@ async function showAreaOnboarding() {
       </section>
     </div>
   `;
+
+  if (window.Alpine) {
+    window.Alpine.initTree(root);
+  }
 
   const backdrop = document.getElementById('areaOnboardingBackdrop');
   const select = document.getElementById('onboardingAreaSelect');
@@ -143,6 +146,7 @@ async function showAreaOnboarding() {
       ${areas.map(area => `<option value="${esc(area.id)}">${esc(area.name)}</option>`).join('')}
     `;
     select.disabled = false;
+    select.dispatchEvent(new Event('change'));
     confirmButton.disabled = false;
 
     if (!areas.length) {

@@ -179,22 +179,7 @@ function validEmail(value) {
   );
 }
 
-// Section 7: Toast Notifications (Alpine.js Toast Queue Component)
-
-const toastStore = {
-  items: [],
-  add(item) {
-    this.items.push(item);
-  },
-  remove(id) {
-    const item = this.items.find(t => t.id === id);
-    if (!item) return;
-    item.visible = false;
-    setTimeout(() => {
-      this.items = this.items.filter(t => t.id !== id);
-    }, 250);
-  }
-};
+// Section 7: Toast Notifications (Alpine.js Declarative Toast Queue)
 
 function ensureToastWrap() {
   let wrap = document.getElementById('toastWrap');
@@ -204,72 +189,15 @@ function ensureToastWrap() {
     wrap.className = 'toast-wrap';
     wrap.setAttribute('aria-live', 'polite');
     wrap.setAttribute('aria-atomic', 'true');
-    wrap.setAttribute('x-data', 'toastQueue');
-    wrap.setAttribute('x-cloak', '');
-    wrap.innerHTML = `
-      <template x-for="item in items" :key="item.id">
-        <div
-          class="toast card"
-          :class="[item.type, { 'toast-hide': !item.visible }]"
-          :role="item.type === 'error' ? 'alert' : 'status'"
-          x-show="item.visible"
-          x-transition:leave="toast-hide"
-          @mouseenter="item.pause()"
-          @mouseleave="item.resume()"
-        >
-          <svg class="wave" viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M0,256L48,261.3C96,267,192,277,288,266.7C384,256,480,224,576,186.7C672,149,768,107,864,112C960,117,1056,171,1152,181.3C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-          </svg>
-          <div class="icon-container">
-            <template x-if="item.type === 'success'">
-              <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true">
-                <path fill="currentColor" d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"></path>
-              </svg>
-            </template>
-            <template x-if="item.type !== 'success'">
-              <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true">
-                <path fill="currentColor" d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zm32 224a32 32 0 1 1 -64 0 32 32 0 1 1 64 0z"></path>
-              </svg>
-            </template>
-          </div>
-          <div class="message-text-container">
-            <p class="message-text" x-text="item.title"></p>
-            <p class="sub-text" x-text="item.message"></p>
-          </div>
-          <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 15" fill="none" role="button" tabindex="0" aria-label="Dismiss notification" @click="dismiss(item.id)" @keydown.enter="dismiss(item.id)" @keydown.space.prevent="dismiss(item.id)">
-            <path fill="currentColor" d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z" clip-rule="evenodd" fill-rule="evenodd"></path>
-          </svg>
-        </div>
-      </template>
-    `;
     document.body.appendChild(wrap);
   }
   return wrap;
 }
 
-function registerAlpineToast() {
-  if (window.Alpine && !window.Alpine._toastRegistered) {
-    window.Alpine._toastRegistered = true;
-    window.Alpine.data('toastQueue', () => ({
-      get items() {
-        return toastStore.items;
-      },
-      dismiss(id) {
-        toastStore.remove(id);
-      }
-    }));
-  }
-}
-
-document.addEventListener('alpine:init', registerAlpineToast);
-
 function toast(text, type = 'success', duration = 4000) {
-  ensureToastWrap();
-  registerAlpineToast();
-
+  const wrap = ensureToastWrap();
   const isSuccess = type === 'success';
-  const isError = type === 'error';
-  const defaultTitle = isSuccess ? 'Success' : (isError ? 'Error' : 'Notice');
+  const defaultTitle = isSuccess ? 'Success' : (type === 'error' ? 'Error' : 'Notice');
 
   let title = defaultTitle;
   let message = text;
@@ -279,26 +207,62 @@ function toast(text, type = 'success', duration = 4000) {
     message = text.message || text.text || '';
   }
 
-  const id = uid();
-  let timer = null;
+  const el = document.createElement('div');
+  el.className = `toast card ${type}`;
+  el.setAttribute('role', type === 'error' ? 'alert' : 'status');
+  el.setAttribute('x-data', `{ visible: true, pause() { clearTimeout(this._timer); }, resume() { this._timer = setTimeout(() => this.dismiss(), ${duration}); }, dismiss() { this.visible = false; setTimeout(() => el.remove(), 250); } }`);
+  el.setAttribute('x-show', 'visible');
+  el.setAttribute('x-transition:leave', 'toast-hide');
+  el.setAttribute('@mouseenter', 'pause()');
+  el.setAttribute('@mouseleave', 'resume()');
+  el.setAttribute('x-init', 'resume()');
+  el.innerHTML = `
+    <svg class="wave" viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M0,256L48,261.3C96,267,192,277,288,266.7C384,256,480,224,576,186.7C672,149,768,107,864,112C960,117,1056,171,1152,181.3C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+    </svg>
+    <div class="icon-container">
+      ${isSuccess
+        ? `<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"></path></svg>`
+        : `<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zm32 224a32 32 0 1 1 -64 0 32 32 0 1 1 64 0z"></path></svg>`
+      }
+    </div>
+    <div class="message-text-container">
+      <p class="message-text">${esc(title)}</p>
+      <p class="sub-text">${esc(message)}</p>
+    </div>
+    <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 15" fill="none" role="button" tabindex="0" aria-label="Dismiss notification" @click="dismiss()">
+      <path fill="currentColor" d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z" clip-rule="evenodd" fill-rule="evenodd"></path>
+    </svg>
+  `;
 
-  const item = {
-    id,
-    title,
-    message,
-    type,
-    visible: true,
-    pause() {
-      if (timer) clearTimeout(timer);
-    },
-    resume() {
-      timer = setTimeout(() => toastStore.remove(id), duration);
-    }
-  };
+  // Fallback direct listeners for resilient execution
+  let timer = setTimeout(() => {
+    el.classList.add('toast-hide');
+    setTimeout(() => el.remove(), 250);
+  }, duration);
 
-  item.resume();
-  toastStore.add(item);
-  return item;
+  el.addEventListener('mouseenter', () => clearTimeout(timer));
+  el.addEventListener('mouseleave', () => {
+    timer = setTimeout(() => {
+      el.classList.add('toast-hide');
+      setTimeout(() => el.remove(), 250);
+    }, duration);
+  });
+
+  const closeIcon = el.querySelector('.cross-icon');
+  if (closeIcon) {
+    closeIcon.addEventListener('click', () => {
+      clearTimeout(timer);
+      el.classList.add('toast-hide');
+      setTimeout(() => el.remove(), 250);
+    });
+  }
+
+  wrap.appendChild(el);
+  if (window.Alpine) {
+    window.Alpine.initTree(el);
+  }
+  return el;
 }
 
 window.toast = toast;
@@ -307,109 +271,12 @@ window.toast = toast;
 
 let activeModalCleanup = null;
 
-const modalState = {
-  open: false,
-  title: '',
-  hasSave: false,
-  saveText: 'Save',
-  onSaveCallback: null,
-  close() {
-    this.open = false;
-    if (activeModalCleanup) {
-      const cleanup = activeModalCleanup;
-      activeModalCleanup = null;
-      cleanup();
-    }
-  }
-};
-
-function registerAlpineModal() {
-  if (window.Alpine && !window.Alpine._modalRegistered) {
-    window.Alpine._modalRegistered = true;
-    window.Alpine.data('modalDialog', () => ({
-      get open() { return modalState.open; },
-      get title() { return modalState.title; },
-      get hasSave() { return modalState.hasSave; },
-      get saveText() { return modalState.saveText; },
-      close() { modalState.close(); },
-      handleSave() {
-        if (modalState.onSaveCallback) {
-          modalState.onSaveCallback(() => modalState.close());
-        }
-      }
-    }));
-  }
-}
-
-document.addEventListener('alpine:init', registerAlpineModal);
-
-function ensureModalRootTemplate() {
-  const root = document.getElementById('modalRoot');
-  if (root && !root.querySelector('.modal-backdrop')) {
-    root.setAttribute('x-data', 'modalDialog');
-    root.setAttribute('x-cloak', '');
-    root.innerHTML = `
-      <div
-        class="modal-backdrop"
-        id="modalBackdrop"
-        x-show="open"
-        x-transition.opacity
-        @click.self="close()"
-        @keydown.escape.window="if (open) close()"
-      >
-        <section
-          class="modal"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="modalTitle"
-          x-show="open"
-          x-transition
-        >
-          <header class="modal-header">
-            <h2 id="modalTitle" x-text="title"></h2>
-            <button
-              class="icon-btn"
-              id="closeModal"
-              type="button"
-              aria-label="Close dialog"
-              @click="close()"
-            >×</button>
-          </header>
-
-          <div class="modal-body" id="modalBody"></div>
-
-          <footer class="modal-footer">
-            <button
-              class="btn"
-              id="cancelModal"
-              type="button"
-              @click="close()"
-              x-text="hasSave ? 'Cancel' : 'Close'"
-            ></button>
-            <button
-              class="btn blue"
-              id="saveModal"
-              type="button"
-              x-show="hasSave"
-              x-text="saveText"
-              @click="handleSave()"
-            ></button>
-          </footer>
-        </section>
-      </div>
-    `;
-  }
-}
-
 function openModal(
   title,
   body,
   onSave = null,
   saveText = 'Save'
 ) {
-  ensureModalRootTemplate();
-  registerAlpineModal();
-
   const root = document.getElementById('modalRoot');
   if (!root) return;
 
@@ -417,22 +284,95 @@ function openModal(
     activeModalCleanup();
   }
 
-  modalState.title = title;
-  modalState.hasSave = Boolean(onSave);
-  modalState.saveText = saveText;
-  modalState.onSaveCallback = onSave;
+  const hasSave = Boolean(onSave);
 
-  const bodyEl = document.getElementById('modalBody');
-  if (bodyEl) {
-    bodyEl.innerHTML = body;
+  root.innerHTML = `
+    <div
+      class="modal-backdrop"
+      id="modalBackdrop"
+      x-data="{
+        open: true,
+        close() {
+          this.open = false;
+          setTimeout(() => {
+            if (!this.open && root.innerHTML !== '') {
+              root.innerHTML = '';
+            }
+          }, 200);
+        }
+      }"
+      x-show="open"
+      x-transition.opacity
+      @click.self="close()"
+      @keydown.escape.window="if (open) close()"
+    >
+      <section
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+        x-show="open"
+        x-transition
+      >
+        <header class="modal-header">
+          <h2 id="modalTitle">${esc(title)}</h2>
+          <button
+            class="icon-btn"
+            id="closeModal"
+            type="button"
+            aria-label="Close dialog"
+            @click="close()"
+          >×</button>
+        </header>
+
+        <div class="modal-body" id="modalBody">${body}</div>
+
+        <footer class="modal-footer">
+          <button
+            class="btn"
+            id="cancelModal"
+            type="button"
+            @click="close()"
+          >${hasSave ? 'Cancel' : 'Close'}</button>
+          ${hasSave ? `
+            <button
+              class="btn blue"
+              id="saveModal"
+              type="button"
+            >${esc(saveText)}</button>
+          ` : ''}
+        </footer>
+      </section>
+    </div>
+  `;
+
+  if (window.Alpine) {
+    window.Alpine.initTree(root);
   }
 
-  const close = () => {
-    modalState.close();
+  const closeFn = () => {
+    const backdrop = document.getElementById('modalBackdrop');
+    if (backdrop?._x_dataStack?.[0]?.close) {
+      backdrop._x_dataStack[0].close();
+    } else if (root) {
+      root.innerHTML = '';
+    }
+    activeModalCleanup = null;
   };
 
-  activeModalCleanup = close;
-  modalState.open = true;
+  activeModalCleanup = closeFn;
+
+  const closeBtn = document.getElementById('closeModal');
+  if (closeBtn) closeBtn.onclick = closeFn;
+  const cancelBtn = document.getElementById('cancelModal');
+  if (cancelBtn) cancelBtn.onclick = closeFn;
+
+  if (hasSave) {
+    const saveBtn = document.getElementById('saveModal');
+    if (saveBtn) {
+      saveBtn.onclick = () => onSave(closeFn);
+    }
+  }
 
   requestAnimationFrame(() =>
     root.querySelector('input, select, textarea, button')?.focus()
@@ -440,7 +380,17 @@ function openModal(
 }
 
 function closeModal() {
-  modalState.close();
+  if (activeModalCleanup) {
+    activeModalCleanup();
+    return;
+  }
+  const root = document.getElementById('modalRoot');
+  const backdrop = document.getElementById('modalBackdrop');
+  if (backdrop?._x_dataStack?.[0]?.close) {
+    backdrop._x_dataStack[0].close();
+  } else if (root) {
+    root.innerHTML = '';
+  }
 }
 
 window.openModal = openModal;
@@ -566,7 +516,6 @@ function registerAlpineSidebar() {
 document.addEventListener('alpine:init', registerAlpineSidebar);
 
 document.addEventListener('DOMContentLoaded', () => {
-  ensureModalRootTemplate();
   ensureToastWrap();
   registerAlpineSidebar();
 
