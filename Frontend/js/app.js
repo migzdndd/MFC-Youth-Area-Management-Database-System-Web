@@ -269,10 +269,16 @@ if (logoutBtn) {
     </small>
   `;
 
-  logoutBtn.parentElement?.insertBefore(
-    user,
-    logoutBtn
-  );
+  const sidebar = document.querySelector('.sidebar');
+  const sidebarNav = document.querySelector('.sidebar-nav');
+  if (sidebar && sidebarNav) {
+    sidebar.insertBefore(user, sidebarNav);
+  } else {
+    logoutBtn.parentElement?.insertBefore(
+      user,
+      logoutBtn
+    );
+  }
 
   if (session?.role !== 'member') {
     if (session?.role === 'national_coordinator' && session?.areaId) {

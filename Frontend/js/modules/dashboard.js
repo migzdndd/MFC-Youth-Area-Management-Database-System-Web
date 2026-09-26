@@ -121,6 +121,41 @@ window.closeNcAreaModalAndVisit = (areaId, areaName) => {
 };
 
 async function renderNationalCoordinatorDashboard(data) {
+  let areasCount = 4;
+  try {
+    const response = await fetchCachedAreas();
+    const apiAreas = Array.isArray(response?.areas) && response.areas.length > 0 ? response.areas : null;
+    if (apiAreas) areasCount = apiAreas.length;
+  } catch (err) {
+    console.warn('Loaded canonical area count for National Coordinator:', err);
+  }
+
+  const membersCount = data.members?.length || 0;
+  const activeMembers = data.members.filter(m => m.status === 'Active').length;
+  const servicesCount = 5;
+  const reportsCount = data.reports?.length || 0;
+  const eventsCount = data.events?.length || 0;
+  const registrationsCount = data.participants?.length || 0;
+  const attendedCount = data.participants?.filter(p => p.attended).length || 0;
+
+  const chapterCounts = (data.chapters || [])
+    .map(chapter => ({
+      name: chapter.name,
+      count: (data.members || []).filter(m => String(m.chapterId) === String(chapter.id)).length
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  const now = Date.now();
+  const upcomingEvents = [...(data.events || [])]
+    .filter(event => event.date && parseEventTimestamp(event.date) >= now)
+    .sort((a, b) => parseEventTimestamp(a.date) - parseEventTimestamp(b.date))
+    .slice(0, 5);
+
+  const recentEvents = [...(data.events || [])]
+    .filter(event => event.date && parseEventTimestamp(event.date) < now)
+    .sort((a, b) => parseEventTimestamp(b.date) - parseEventTimestamp(a.date))
+    .slice(0, 5);
+
   content.innerHTML = `
     <section class="dashboard-hero animate-in is-visible">
       <div class="dashboard-hero-copy">
@@ -139,45 +174,212 @@ async function renderNationalCoordinatorDashboard(data) {
       </div>
     </section>
 
-    <section>
-      <div class="section-heading">
-        <h2>National Overview</h2>
-        <p>Key records across all Areas</p>
-        <div class="section-line"></div>
+    <!-- Metrics: Primary (Member Count) & Secondary (Services, Reports) -->
+    <section class="dashboard-metrics-section" aria-label="National Metrics">
+      <div class="dashboard-metrics-layout">
+        <!-- Primary: Member Count Card (Big Card) -->
+        <a class="metric-card-primary" href="/members" title="View National Members Directory">
+          <div class="metric-primary-header">
+            <span class="metric-primary-label">National Members</span>
+            <span class="metric-badge-primary">Primary</span>
+          </div>
+
+          <div>
+            <div class="metric-primary-number">${membersCount}</div>
+            <p class="metric-primary-caption">Total members registered across all regional areas</p>
+          </div>
+
+          <div class="metric-primary-footer">
+            <div class="metric-pill-group">
+              <span class="metric-pill active">
+                <span style="width: 7px; height: 7px; background: #16a34a; border-radius: 50%; display: inline-block;"></span>
+                ${activeMembers} Active
+              </span>
+              <button
+                type="button"
+                class="metric-pill"
+                onclick="event.preventDefault(); openAreaSelectionModal();"
+                style="cursor: pointer; border: none;"
+                title="Browse Registered Areas"
+              >
+                <strong>${areasCount}</strong> Active Areas &rarr;
+              </button>
+            </div>
+            <span class="metric-action-hint">Open Directory &rarr;</span>
+          </div>
+        </a>
+
+        <!-- Secondary Stack: Services & Activity Reports -->
+        <div class="metric-secondary-stack">
+          <a class="metric-card-secondary services" href="/services" title="View Ministry Services">
+            <div class="metric-secondary-header">
+              <span class="metric-secondary-label">Services</span>
+              <span class="metric-badge-secondary">Secondary</span>
+            </div>
+            <div class="metric-secondary-body">
+              <span class="metric-secondary-number">${servicesCount}</span>
+              <p class="metric-secondary-caption">Core ministry services</p>
+            </div>
+            <div class="metric-secondary-footer">
+              <span class="summary-link-hint" style="font-size: 0.76rem; color: #2563eb; font-weight: 600;">Manage services &rarr;</span>
+            </div>
+          </a>
+
+          <a class="metric-card-secondary reports" href="/reports" title="View National Activity Reports">
+            <div class="metric-secondary-header">
+              <span class="metric-secondary-label">Activity Reports</span>
+              <span class="metric-badge-secondary">Secondary</span>
+            </div>
+            <div class="metric-secondary-body">
+              <span class="metric-secondary-number">${reportsCount}</span>
+              <p class="metric-secondary-caption">Reports filed across all areas</p>
+            </div>
+            <div class="metric-secondary-footer">
+              <span class="summary-link-hint" style="font-size: 0.76rem; color: #059669; font-weight: 600;">View reports &rarr;</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Members by Chapter (Above the events card) -->
+    <section class="card panel members-by-chapter-panel" aria-label="National Chapter Distribution">
+      <div class="panel-header-flex">
+        <div>
+          <h3>Members by Chapter</h3>
+          <p class="muted" style="font-size: 0.8rem; margin: 2px 0 0;">Distribution of registered members across chapters</p>
+        </div>
+        <div class="panel-header-badges">
+          <span class="scope-chip" style="font-size: 0.76rem;">${chapterCounts.length} Chapter${chapterCounts.length === 1 ? '' : 's'}</span>
+          <a href="/chapters" class="btn" style="padding: 4px 10px; font-size: 0.76rem;">View Chapters &rarr;</a>
+        </div>
       </div>
 
-      <div class="summary-card card">
-        <div class="summary-item" role="button" tabindex="0" onclick="openAreaSelectionModal()" onkeydown="if(event.key==='Enter'||event.key===' '){openAreaSelectionModal(); event.preventDefault();}" style="cursor: pointer; display: flex; flex-direction: column;" title="Browse Registered Areas">
-          <div class="summary-label">Areas</div>
-          <div class="summary-value" id="nc-areas-count">4</div>
-          <p class="summary-caption">Active regional areas</p>
-          <span class="summary-link-hint">Browse Areas &rarr;</span>
+      ${chapterCounts.length
+        ? `
+            <div class="bar-list">
+              ${chapterCounts
+                .slice(0, 7)
+                .map(item => {
+                  const max = Math.max(...chapterCounts.map(row => row.count), 1);
+                  return `
+                    <div class="bar-row">
+                      <span>${esc(item.name)}</span>
+                      <div class="bar-track">
+                        <div class="bar-fill" style="width: ${(item.count / max) * 100}%"></div>
+                      </div>
+                      <strong>${item.count}</strong>
+                    </div>
+                  `;
+                })
+                .join('')}
+            </div>
+          `
+        : emptyState(
+            'No chapter data yet',
+            'Registered chapters and member totals will appear here.'
+          )
+      }
+    </section>
+
+    <!-- Big Events Card (Bottom, fitting both Upcoming & Recent events) -->
+    <section class="card panel dashboard-events-big-card" aria-label="National Events Overview">
+      <div class="events-big-card-header">
+        <div class="events-big-card-title-group">
+          <h3>Events Overview</h3>
+          <p>Scheduled activities, recent gatherings, and participation tracking</p>
         </div>
-        <a class="summary-item reports" href="/reports" style="text-decoration: none; color: inherit; display: flex; flex-direction: column;" title="View Activity Reports">
-          <div class="summary-label">Activity Reports</div>
-          <div class="summary-value">${data.reports?.length || 0}</div>
-          <p class="summary-caption">Reports filed across areas</p>
-          <span class="summary-link-hint">View Reports &rarr;</span>
-        </a>
-        <a class="summary-item events" href="/events" style="text-decoration: none; color: inherit; display: flex; flex-direction: column;" title="View Events">
-          <div class="summary-label">Events</div>
-          <div class="summary-value">${data.events?.length || 0}</div>
-          <p class="summary-caption">Events recorded in system</p>
-          <span class="summary-link-hint">View Events &rarr;</span>
-        </a>
+        <div class="events-big-card-pills">
+          <span class="metric-pill"><strong>${eventsCount}</strong> Total Events</span>
+          <span class="metric-pill"><strong>${registrationsCount}</strong> Registrations</span>
+          <span class="metric-pill"><strong>${attendedCount}</strong> Attended</span>
+          <a class="btn blue" href="/events" style="padding: 6px 12px; font-size: 0.8rem;">Manage Events</a>
+        </div>
+      </div>
+
+      <div class="dashboard-events-split">
+        <!-- Upcoming Events Column -->
+        <div class="events-column">
+          <div class="events-column-header">
+            <span class="badge active">UPCOMING</span>
+            <h4>Upcoming Activities</h4>
+            <span class="muted" style="margin-left: auto; font-size: 0.76rem;">${upcomingEvents.length} scheduled</span>
+          </div>
+
+          ${upcomingEvents.length
+            ? `
+                <div class="mini-list">
+                  ${upcomingEvents
+                    .map(
+                      event => `
+                        <div class="mini-row">
+                          <div>
+                            <strong>${esc(event.name)}</strong>
+                            <div class="muted">${esc(event.venue || 'No venue')}</div>
+                          </div>
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 0.78rem; color: #64748b;">${fmtDateTime(event.date)}</span>
+                            <button
+                              class="btn"
+                              type="button"
+                              onclick='viewEvent(${inlineJsArg(event.id)})'
+                              style="padding: 3px 8px; font-size: 0.76rem;"
+                            >
+                              View
+                            </button>
+                          </div>
+                        </div>
+                      `
+                    )
+                    .join('')}
+                </div>
+              `
+            : emptyState('No upcoming events', 'Future events you add will appear here.')
+          }
+        </div>
+
+        <!-- Recent Events Column -->
+        <div class="events-column">
+          <div class="events-column-header">
+            <span class="badge" style="background: #e2e8f0; color: #475569;">RECENT</span>
+            <h4>Recent Gatherings</h4>
+            <span class="muted" style="margin-left: auto; font-size: 0.76rem;">${recentEvents.length} recorded</span>
+          </div>
+
+          ${recentEvents.length
+            ? `
+                <div class="mini-list">
+                  ${recentEvents
+                    .map(
+                      event => `
+                        <div class="mini-row">
+                          <div>
+                            <strong>${esc(event.name)}</strong>
+                            <div class="muted">${esc(event.venue || 'No venue')}</div>
+                          </div>
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 0.78rem; color: #64748b;">${fmtDate(event.date)}</span>
+                            <button
+                              class="btn"
+                              type="button"
+                              onclick='viewEvent(${inlineJsArg(event.id)})'
+                              style="padding: 3px 8px; font-size: 0.76rem;"
+                            >
+                              View
+                            </button>
+                          </div>
+                        </div>
+                      `
+                    )
+                    .join('')}
+                </div>
+              `
+            : emptyState('No past events yet', 'Completed events will appear here automatically.')
+          }
+        </div>
       </div>
     </section>
   `;
-
-  try {
-    const response = await fetchCachedAreas();
-    const apiAreas = Array.isArray(response?.areas) && response.areas.length > 0 ? response.areas : null;
-    const count = apiAreas ? apiAreas.length : 4;
-    const countElem = document.getElementById('nc-areas-count');
-    if (countElem) countElem.textContent = String(count);
-  } catch (err) {
-    console.warn('Loaded canonical area count for National Coordinator:', err);
-  }
 }
 
 window.visitArea = async (areaId, areaName) => {
@@ -342,6 +544,21 @@ function renderDashboard() {
   const dashboardAreaName = session?.areaName || 'Your Area';
   const dashboardRole = accessRoleLabel(session?.role);
 
+  const membersCount = (session?.role === 'campus_servant' || session?.role === 'mfc_high_servant' || isChapterServantSession())
+    ? getVisibleMembers(data).length
+    : (cloudSummary?.members ?? data.members.length);
+
+  const servicesCard = allCardDefs.services;
+  const servicesCount = servicesCard[2];
+  const servicesTitle = servicesCard[1];
+  const servicesCaption = servicesCard[3];
+
+  const hasReports = cardKeys.includes('reports');
+  const reportsCount = cloudSummary?.reports ?? data.reports.length;
+
+  const totalEventsCount = cloudSummary?.events ?? data.events.length;
+  const registrationsCount = cloudSummary?.registrations ?? data.participants.length;
+
   content.innerHTML = `
     <section class="dashboard-hero animate-in is-visible">
       <div class="dashboard-hero-copy">
@@ -362,260 +579,204 @@ function renderDashboard() {
       </div>
     </section>
 
-    <section>
-      <div class="section-heading">
-        <h2>Area Summary</h2>
+    <!-- Metrics: Primary (Member Count) & Secondary (Services, Reports) -->
+    <section class="dashboard-metrics-section" aria-label="Dashboard Metrics">
+      <div class="dashboard-metrics-layout">
+        <!-- Primary: Member Count Card (Big Card) -->
+        <a class="metric-card-primary" href="${isChapterServantSession() ? '/chapters' : '/members'}" title="View Members Directory">
+          <div class="metric-primary-header">
+            <span class="metric-primary-label">${isChapterServantSession() ? 'Chapter Members' : 'Total Members'}</span>
+            <span class="metric-badge-primary">Primary</span>
+          </div>
 
-        <p>
-          Current totals from your Area cloud database
-        </p>
+          <div>
+            <div class="metric-primary-number">${membersCount}</div>
+            <p class="metric-primary-caption">${isChapterServantSession() ? 'Members in your assigned chapter' : `People currently on record in ${esc(dashboardAreaName)}`}</p>
+          </div>
 
-        <div class="section-line"></div>
-      </div>
+          <div class="metric-primary-footer">
+            <div class="metric-pill-group">
+              <span class="metric-pill active">
+                <span style="width: 7px; height: 7px; background: #16a34a; border-radius: 50%; display: inline-block;"></span>
+                ${activeMembers} Active
+              </span>
+              ${(membersCount - activeMembers) > 0 ? `<span class="metric-pill">${membersCount - activeMembers} Inactive</span>` : ''}
+            </div>
+            <span class="metric-action-hint">Open Directory &rarr;</span>
+          </div>
+        </a>
 
-      <div class="summary-card card">
-        ${cards
-      .map(
-        card => `
-              <a
-                class="summary-item ${card[0]}"
-                href="${card[4] || `/${card[0]}`}"
-                style="text-decoration: none; color: inherit; display: flex; flex-direction: column;"
-                title="View ${esc(card[1])}"
-              >
-                <div class="summary-label">
-                  ${card[1]}
+        <!-- Secondary Stack: Services & Activity Reports -->
+        <div class="metric-secondary-stack">
+          <a class="metric-card-secondary services" href="/services" title="View Services">
+            <div class="metric-secondary-header">
+              <span class="metric-secondary-label">${esc(servicesTitle)}</span>
+              <span class="metric-badge-secondary">Secondary</span>
+            </div>
+            <div class="metric-secondary-body">
+              <span class="metric-secondary-number">${servicesCount}</span>
+              <p class="metric-secondary-caption">${esc(servicesCaption)}</p>
+            </div>
+            <div class="metric-secondary-footer">
+              <span class="summary-link-hint" style="font-size: 0.76rem; color: #2563eb; font-weight: 600;">Manage services &rarr;</span>
+            </div>
+          </a>
 
-                  <div
-                    class="label-line"
-                  ></div>
-                </div>
-
-                <strong
-                  class="summary-number"
-                >
-                  ${card[2]}
-                </strong>
-
-                <p>
-                  ${card[3]}
-                </p>
-                <span class="summary-link-hint" style="font-size: 0.76rem; color: var(--blue); font-weight: 600; margin-top: auto; padding-top: 6px; display: inline-flex; align-items: center; gap: 4px;">
-                  Open module &rarr;
-                </span>
-              </a>
-            `
-      )
-      .join('')}
+          ${hasReports ? `
+          <a class="metric-card-secondary reports" href="/reports" title="View Activity Reports">
+            <div class="metric-secondary-header">
+              <span class="metric-secondary-label">Activity Reports</span>
+              <span class="metric-badge-secondary">Secondary</span>
+            </div>
+            <div class="metric-secondary-body">
+              <span class="metric-secondary-number">${reportsCount}</span>
+              <p class="metric-secondary-caption">Reports filed in system</p>
+            </div>
+            <div class="metric-secondary-footer">
+              <span class="summary-link-hint" style="font-size: 0.76rem; color: #059669; font-weight: 600;">View reports &rarr;</span>
+            </div>
+          </a>
+          ` : ''}
+        </div>
       </div>
     </section>
 
-    <div class="quick-stat-row">
-      <span>
-        <strong>
-          ${activeMembers}
-        </strong>
-        Active Members
-      </span>
+    <!-- Members by Chapter (Above the events card) -->
+    <section class="card panel members-by-chapter-panel" aria-label="Members by Chapter Distribution">
+      <div class="panel-header-flex">
+        <div>
+          <h3>Members by Chapter</h3>
+          <p class="muted" style="font-size: 0.8rem; margin: 2px 0 0;">Distribution of registered members across chapters</p>
+        </div>
+        <div class="panel-header-badges">
+          <span class="scope-chip" style="font-size: 0.76rem;">${chapterCounts.length} Chapter${chapterCounts.length === 1 ? '' : 's'}</span>
+          <a href="/chapters" class="btn" style="padding: 4px 10px; font-size: 0.76rem;">View Chapters &rarr;</a>
+        </div>
+      </div>
 
-      <span>
-        <strong>
-          ${cloudSummary?.registrations ?? data.participants.length}
-        </strong>
-        Event Registrations
-      </span>
-
-      <span>
-        <strong>
-          ${attended}
-        </strong>
-        Recorded Attendances
-      </span>
-    </div>
-
-    <div class="grid-2">
-
-      <section class="card panel">
-        <h3>
-          Members by Chapter
-        </h3>
-
-        ${chapterCounts.length
-      ? `
-              <div class="bar-list">
-                ${chapterCounts
-        .slice(0, 7)
-        .map(item => {
-          const max =
-            Math.max(
-              ...chapterCounts.map(
-                row => row.count
-              ),
-              1
-            );
-
-          return `
-                      <div class="bar-row">
-                        <span>
-                          ${esc(
-            item.name
-          )}
-                        </span>
-
-                        <div
-                          class="bar-track"
-                        >
-                          <div
-                            class="bar-fill"
-                            style="
-                              width:
-                              ${(item.count /
-              max) *
-            100
-            }%
-                            "
-                          ></div>
-                        </div>
-
-                        <strong>
-                          ${item.count}
-                        </strong>
+      ${chapterCounts.length
+        ? `
+            <div class="bar-list">
+              ${chapterCounts
+                .slice(0, 7)
+                .map(item => {
+                  const max = Math.max(...chapterCounts.map(row => row.count), 1);
+                  return `
+                    <div class="bar-row">
+                      <span>${esc(item.name)}</span>
+                      <div class="bar-track">
+                        <div class="bar-fill" style="width: ${(item.count / max) * 100}%"></div>
                       </div>
-                    `;
-        })
-        .join('')}
-              </div>
-            `
-      : emptyState(
-        'No chapter data yet',
-        'Add chapters and members to see distribution.'
-      )
-    }
-      </section>
+                      <strong>${item.count}</strong>
+                    </div>
+                  `;
+                })
+                .join('')}
+            </div>
+          `
+        : emptyState(
+            'No chapter data yet',
+            'Add chapters and members to see distribution.'
+          )
+      }
+    </section>
 
-      <section class="card panel">
-        <h3>
-          Upcoming Events
-        </h3>
+    <!-- Big Events Card (Bottom, fitting both Upcoming & Recent events) -->
+    <section class="card panel dashboard-events-big-card" aria-label="Events Overview">
+      <div class="events-big-card-header">
+        <div class="events-big-card-title-group">
+          <h3>Events Overview</h3>
+          <p>Scheduled activities, recent gatherings, and participation tracking</p>
+        </div>
+        <div class="events-big-card-pills">
+          <span class="metric-pill"><strong>${totalEventsCount}</strong> Total Events</span>
+          <span class="metric-pill"><strong>${registrationsCount}</strong> Registrations</span>
+          <span class="metric-pill"><strong>${attended}</strong> Attended</span>
+          <a class="btn blue" href="/events" style="padding: 6px 12px; font-size: 0.8rem;">Manage Events</a>
+        </div>
+      </div>
 
-        ${upcomingEvents.length
-      ? `
-              <div class="mini-list">
-                ${upcomingEvents
-        .map(
-          event => `
-                      <div class="mini-row">
+      <div class="dashboard-events-split">
+        <!-- Upcoming Events Column -->
+        <div class="events-column">
+          <div class="events-column-header">
+            <span class="badge active">UPCOMING</span>
+            <h4>Upcoming Activities</h4>
+            <span class="muted" style="margin-left: auto; font-size: 0.76rem;">${upcomingEvents.length} scheduled</span>
+          </div>
 
-                        <div>
-                          <strong>
-                            ${esc(
-            event.name
-          )}
-                          </strong>
-
-                          <div
-                            class="muted"
-                          >
-                            ${esc(
-            event.venue ||
-            'No venue'
-          )}
+          ${upcomingEvents.length
+            ? `
+                <div class="mini-list">
+                  ${upcomingEvents
+                    .map(
+                      event => `
+                        <div class="mini-row">
+                          <div>
+                            <strong>${esc(event.name)}</strong>
+                            <div class="muted">${esc(event.venue || 'No venue')}</div>
+                          </div>
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 0.78rem; color: #64748b;">${fmtDateTime(event.date)}</span>
+                            <button
+                              class="btn"
+                              type="button"
+                              onclick='viewEvent(${inlineJsArg(event.id)})'
+                              style="padding: 3px 8px; font-size: 0.76rem;"
+                            >
+                              View
+                            </button>
                           </div>
                         </div>
+                      `
+                    )
+                    .join('')}
+                </div>
+              `
+            : emptyState('No upcoming events', 'Future events you add will appear here.')
+          }
+        </div>
 
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                          <span>
-                            ${fmtDateTime(
-            event.date
-          )}
-                          </span>
-                          <button
-                            class="btn"
-                            type="button"
-                            onclick='viewEvent(${inlineJsArg(event.id)})'
-                            style="padding: 3px 8px; font-size: 0.76rem;"
-                          >
-                            View
-                          </button>
-                        </div>
+        <!-- Recent Events Column -->
+        <div class="events-column">
+          <div class="events-column-header">
+            <span class="badge" style="background: #e2e8f0; color: #475569;">RECENT</span>
+            <h4>Recent Gatherings</h4>
+            <span class="muted" style="margin-left: auto; font-size: 0.76rem;">${recentEvents.length} recorded</span>
+          </div>
 
-                      </div>
-                    `
-        )
-        .join('')}
-              </div>
-            `
-      : emptyState(
-        'No upcoming events',
-        'Future events you add will appear here.'
-      )
-    }
-      </section>
-
-    </div>
-
-    <div class="grid-2">
-
-      <section class="card panel">
-        <h3>
-          Recent Events
-        </h3>
-
-        ${recentEvents.length
-      ? `
-              <div class="mini-list">
-                ${recentEvents
-        .map(
-          event => `
-                      <div class="mini-row">
-
-                        <div>
-                          <strong>
-                            ${esc(
-            event.name
-          )}
-                          </strong>
-
-                          <div
-                            class="muted"
-                          >
-                            ${esc(
-            event.venue ||
-            'No venue'
-          )}
+          ${recentEvents.length
+            ? `
+                <div class="mini-list">
+                  ${recentEvents
+                    .map(
+                      event => `
+                        <div class="mini-row">
+                          <div>
+                            <strong>${esc(event.name)}</strong>
+                            <div class="muted">${esc(event.venue || 'No venue')}</div>
+                          </div>
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 0.78rem; color: #64748b;">${fmtDate(event.date)}</span>
+                            <button
+                              class="btn"
+                              type="button"
+                              onclick='viewEvent(${inlineJsArg(event.id)})'
+                              style="padding: 3px 8px; font-size: 0.76rem;"
+                            >
+                              View
+                            </button>
                           </div>
                         </div>
-
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                          <span>
-                            ${fmtDate(
-            event.date
-          )}
-                          </span>
-                          <button
-                            class="btn"
-                            type="button"
-                            onclick='viewEvent(${inlineJsArg(event.id)})'
-                            style="padding: 3px 8px; font-size: 0.76rem;"
-                          >
-                            View
-                          </button>
-                        </div>
-
-                      </div>
-                    `
-        )
-        .join('')}
-              </div>
-            `
-      : emptyState(
-        'No past events yet',
-        'Completed events will appear here automatically.'
-      )
-    }
-      </section>
-
-
-    </div>
+                      `
+                    )
+                    .join('')}
+                </div>
+              `
+            : emptyState('No past events yet', 'Completed events will appear here automatically.')
+          }
+        </div>
+      </div>
+    </section>
   `;
 }
