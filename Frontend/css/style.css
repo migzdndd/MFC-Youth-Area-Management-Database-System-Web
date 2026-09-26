@@ -12,6 +12,34 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+
+/* Global Custom Modern Scrollbars (WebKit/Blink) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.35);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(8, 120, 189, 0.65);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 [x-cloak] {
@@ -2034,10 +2062,11 @@ button:disabled {
 }
 
 .sidebar-footer {
-  font-size: 0.75rem;
-  opacity: 0.6;
+  font-size: 0.68rem;
+  opacity: 0.68;
   text-align: center;
-  margin-top: 1rem;
+  margin-top: 8px;
+  line-height: 1.35;
 }
 .sidebar-footer a {
   color: var(--primary-color);
@@ -3912,7 +3941,7 @@ html.page-is-loading body {
 
 .sidebar {
   width: 268px;
-  padding: 24px 16px 18px;
+  padding: 16px 14px 12px;
   background:
     radial-gradient(circle at 30% 0%, rgba(30, 137, 205, .22), transparent 20rem),
     linear-gradient(180deg, #032d49 0%, #00243c 56%, #001a2c 100%);
@@ -3920,41 +3949,66 @@ html.page-is-loading body {
   box-shadow: 18px 0 45px rgba(0, 28, 48, .08);
   overflow-y: auto;
   overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+}
+
+/* Sidebar Custom Modern Scrollbar */
+.sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.35);
 }
 
 .sidebar-brand {
-  padding: 2px 8px 27px;
-  gap: 12px;
+  padding: 2px 6px 14px;
+  gap: 10px;
 }
 
 .sidebar-logo {
-  width: 52px;
+  width: 44px;
   filter: drop-shadow(0 8px 16px rgba(0, 0, 0, .2));
 }
 
 .sidebar-brand h2 {
-  font-size: 1rem;
+  font-size: 0.95rem;
   letter-spacing: .025em;
 }
 
 .sidebar-brand p {
-  max-width: 118px;
+  max-width: 120px;
+  font-size: .56rem;
   line-height: 1.25;
   letter-spacing: .055em;
 }
 
 .sidebar-nav {
-  gap: 9px;
+  gap: 5px;
 }
 
 .sidebar-nav a {
   --button-accent: #ffffff;
-  min-height: 48px;
-  padding: .78rem .95rem;
-  border: 2px solid rgba(255, 255, 255, .18);
-  border-radius: 12px;
+  min-height: 40px;
+  padding: .5rem .85rem;
+  border: 1.5px solid rgba(255, 255, 255, .16);
+  border-radius: 10px;
   background: rgba(255, 255, 255, .045);
   color: #edf7ff;
+  font-size: 0.84rem;
   box-shadow: none;
 }
 
@@ -3981,6 +4035,10 @@ html.page-is-loading body {
 }
 
 .nav-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
   transition: filter .25s ease, transform .25s ease;
 }
 
@@ -3996,21 +4054,56 @@ html.page-is-loading body {
 }
 
 .signed-in-user {
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.06);
-  padding: 11px 12px;
-  margin-bottom: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(255, 255, 255, .06);
+  padding: 8px 10px;
+  margin-bottom: 8px;
+}
+
+.signed-in-user span {
+  display: block;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.75;
+  margin-bottom: 2px;
+}
+
+.signed-in-user strong {
+  display: block;
+  font-size: 0.88rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.signed-in-user .signed-in-role {
+  display: block;
+  font-size: 0.72rem;
+  color: #93c5fd;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding-top: 8px;
 }
 
 .sidebar-account-action {
   --button-accent: #fff;
-  padding: .72rem .9rem;
-  margin-bottom: 8px;
-  border: 2px solid rgba(255,255,255,.28);
-  border-radius: 11px;
+  min-height: 36px;
+  padding: .44rem .75rem;
+  margin-bottom: 6px;
+  border: 1.5px solid rgba(255, 255, 255, .24);
+  border-radius: 10px;
   background: transparent;
   color: #fff;
+  font-size: 0.81rem;
   box-shadow: none;
 }
 
@@ -4037,11 +4130,13 @@ html.page-is-loading body {
 
 .logout-link {
   --button-accent: #cf252a;
-  min-height: 46px;
-  border: 2px solid #cf252a;
-  border-radius: 11px;
+  min-height: 36px;
+  padding: .44rem .75rem;
+  border: 1.5px solid #cf252a;
+  border-radius: 10px;
   background: transparent;
   color: #fff;
+  font-size: 0.81rem;
   box-shadow: none;
 }
 
