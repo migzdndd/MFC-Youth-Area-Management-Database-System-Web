@@ -2968,6 +2968,7 @@ button:disabled {
   line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -6500,5 +6501,207 @@ html.page-is-loading body {
     max-height: 55vh;
   }
 }
+
+/* =========================================================
+   REGISTRATION PAGE (MINIMALISTIC, COMPACT & NO-SCROLL)
+   ========================================================= */
+.auth-access-page {
+  min-height: calc(100vh - 46px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 2.5vh, 32px) clamp(16px, 3vw, 36px);
+}
+
+.auth-access-layout {
+  width: min(1040px, 100%);
+  display: grid;
+  grid-template-columns: minmax(310px, 420px) minmax(360px, 540px);
+  gap: clamp(16px, 2.5vw, 32px);
+  align-items: stretch;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.auth-card-modern {
+  background: linear-gradient(175deg, rgba(6, 26, 44, 0.90) 0%, rgba(3, 16, 28, 0.88) 100%);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 18px 22px 16px;
+  box-shadow:
+    0 20px 50px -10px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 8px 30px rgba(56, 189, 248, 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #f8fafc;
+  overflow: visible;
+  transition: border-color var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out);
+}
+
+.auth-card-modern:hover,
+.auth-card-modern:focus-within {
+  border-color: rgba(107, 196, 250, 0.35);
+  box-shadow:
+    0 24px 60px -10px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(107, 196, 250, 0.2),
+    0 10px 32px rgba(56, 189, 248, 0.1);
+}
+
+.auth-card-header {
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.auth-card-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.auth-mini-logo {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.auth-card-tag {
+  display: inline-block;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #38bdf8;
+}
+
+.auth-card-header h1 {
+  margin: 0 0 4px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #f8fafc;
+  line-height: 1.2;
+}
+
+.auth-card-header p {
+  margin: 0;
+  font-size: 0.76rem;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+
+.auth-compact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.auth-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.auth-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.auth-compact-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+  border-radius: 9px;
+  padding: 0 10px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  transition: border-color var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out);
+}
+
+.auth-compact-field:focus-within {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.15);
+}
+
+.auth-compact-input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: #fff;
+  font-size: 0.82rem;
+  padding: 6px 0;
+}
+
+.auth-compact-input::placeholder {
+  color: #64748b;
+  font-size: 0.80rem;
+}
+
+.auth-select {
+  cursor: pointer;
+  appearance: none;
+  background: transparent;
+  color: #fff;
+}
+
+.auth-select option {
+  background: #061a2c;
+  color: #fff;
+}
+
+.auth-actions-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.auth-card-footer {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  font-size: 0.70rem;
+  color: #94a3b8;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.auth-card-footer a {
+  color: #38bdf8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-card-footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 860px) {
+  .auth-access-layout {
+    grid-template-columns: 1fr;
+    max-width: 460px;
+  }
+}
+
+@media (max-width: 520px) {
+  .auth-form-grid,
+  .auth-actions-group {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 
