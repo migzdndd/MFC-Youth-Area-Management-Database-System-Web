@@ -150,50 +150,62 @@ function eventRegistration(participants, memberId, eventId) {
   ) || null;
 }
 
-/** Generates HTML markup for an event card (Upcoming or Past) */
-function eventCard(event, registration, timing) {
-  const status = registration
-    ? (
-        registration.attended
-          ? 'Attended'
-          : 'Registered'
-      )
-    : 'Not Registered';
+/** Generates an empty state card for community events */
+function memberEmptyState(title, subtitle) {
+  return `
+    <div class="member-empty-card">
+      <strong>${esc(title)}</strong>
+      <span>${esc(subtitle)}</span>
+    </div>
+  `;
+}
 
-  const badgeClass = registration?.attended
-    ? 'active'
-    : registration
-      ? 'pending'
-      : 'inactive';
+/** Generates a compact, balanced event row for the 2-column split Events card */
+function memberEventRow(event, registration, timing) {
+  const isUpcoming = timing === 'upcoming';
+  const isAttended = Boolean(registration?.attended);
+  const isRegistered = Boolean(registration);
+
+  const statusText = isUpcoming
+    ? (isRegistered ? 'Registered' : 'Not Registered')
+    : (isAttended ? 'Attended' : (isRegistered ? 'Registered (Missed)' : 'Did Not Attend'));
+
+  const statusStyle = isUpcoming
+    ? (isRegistered ? 'background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;' : 'background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0;')
+    : (isAttended ? 'background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;' : (isRegistered ? 'background: #fef3c7; color: #92400e; border: 1px solid #fde68a;' : 'background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0;'));
+
+  const dateObj = new Date(event.date);
+  const monthStr = Number.isNaN(dateObj.getTime())
+    ? 'EVENT'
+    : dateObj.toLocaleDateString('en-PH', { month: 'short' }).toUpperCase();
+  const dayStr = Number.isNaN(dateObj.getTime())
+    ? '—'
+    : dateObj.toLocaleDateString('en-PH', { day: '2-digit' });
+
+  const feeNum = Number(event.fee || 0);
 
   return `
-    <article class="member-event-card">
-      <div class="member-event-date">
-        <span>${esc(new Date(event.date).toLocaleDateString('en-PH', { month: 'short' }).toUpperCase())}</span>
-        <strong>${esc(new Date(event.date).toLocaleDateString('en-PH', { day: '2-digit' }))}</strong>
+    <div class="member-event-item">
+      <div class="member-event-date-badge">
+        <span>${esc(monthStr)}</span>
+        <strong>${esc(dayStr)}</strong>
       </div>
 
-      <div class="member-event-copy">
-        <div class="member-event-copy-head">
-          <div>
-            <span class="member-eyebrow">${timing === 'past' ? 'RECENT EVENT' : 'UPCOMING EVENT'}</span>
-            <h3>${esc(event.name || 'MFC Youth Event')}</h3>
-          </div>
-
-          <span class="badge ${badgeClass}">${esc(status)}</span>
+      <div class="member-event-info">
+        <div class="member-event-title-row">
+          <strong class="member-event-title">${esc(event.name || 'MFC Youth Gathering')}</strong>
+          <span class="badge" style="${statusStyle}">${esc(statusText)}</span>
         </div>
 
-        <p>
-          ${esc(fmtDateTime(event.date))}
-          ${event.venue ? ` · ${esc(event.venue)}` : ''}
-        </p>
+        <div class="member-event-meta">
+          <span>📅 ${esc(fmtDateTime(event.date))}</span>
+          ${event.venue ? `<span>📍 ${esc(event.venue)}</span>` : ''}
+          ${feeNum > 0 ? `<span class="event-fee-pill">₱${feeNum.toLocaleString()}</span>` : '<span class="event-fee-pill free">Free</span>'}
+        </div>
 
-        ${event.description
-          ? `<div class="member-event-description">${esc(event.description)}</div>`
-          : ''
-        }
+        ${event.description ? `<p class="member-event-snippet">${esc(event.description)}</p>` : ''}
       </div>
-    </article>
+    </div>
   `;
 }
 
@@ -484,79 +496,256 @@ async function bootstrapMemberPortal() {
           eventRegistration(participants, member.id, event.id)?.attended
         ).length;
 
-      // Render the complete member portal layout
+      // Render the revamped member portal layout
       document.getElementById('memberPortalContent').innerHTML = `
         ${previewMode ? `
-          <section class="member-preview-banner" role="status">
-            <strong>Member Portal Preview</strong>
-            <span>You are previewing the interface a regular Member sees. Your administrator session remains active.</span>
+          <section class="member-preview-banner animate-in" role="status">
+            <div class="preview-banner-text">
+              <strong>Member Portal Preview</strong>
+              <span>You are viewing the dashboard as seen by a regular member. Your administrator session is preserved.</span>
+            </div>
+            <button class="btn" id="exitMemberPreview" type="button">Return to Admin Dashboard</button>
           </section>
         ` : ''}
 
-        <section class="member-welcome-card" id="overview">
-          <div class="member-welcome-copy">
-            <span class="member-eyebrow">${previewMode ? 'MEMBER VIEW PREVIEW' : 'MEMBER ACCESS'}</span>
+        <!-- Member Hero Card (Aligned with Dashboard Hero) -->
+        <section class="dashboard-hero member-hero animate-in is-visible" id="overview">
+          <div class="dashboard-hero-copy">
+            <div class="dashboard-kicker">
+              <span class="dashboard-live-dot"></span>
+              ${previewMode ? 'Member Preview Mode' : 'MFC Youth Member Portal'}
+            </div>
             <h1>Welcome, ${esc(member.firstName || fullName(member))}!</h1>
             <p>
-              ${esc(member.chapterName || 'No Chapter Assigned')}
-              ${member.services?.length ? ` · ${esc(member.services.join(', '))}` : ''}
+              Your personal MFC Youth portal. Track upcoming gatherings, view your attendance history, and stay connected with ${esc(member.chapterName || 'your chapter')}.
             </p>
+            <div class="dashboard-identity-row">
+              <span>Chapter: ${esc(member.chapterName || 'Unassigned')}</span>
+              <span>Role: ${esc((member.services || []).join(', ') || 'Youth Member')}</span>
+              <span>Status: Active</span>
+              <span>${previewMode ? 'Simulated View' : 'Cloud Synced'}</span>
+            </div>
           </div>
-
-          <div class="member-hero-badge">
-            <span>Account</span>
-            <strong>${previewMode ? 'Preview' : 'Member'}</strong>
-          </div>
-        </section>
-
-        <section class="member-quick-grid" aria-label="Member dashboard summary">
-          <article><span>Upcoming Events</span><strong>${allUpcomingEvents.length}</strong></article>
-          <article><span>My Registrations</span><strong>${registeredUpcoming}</strong></article>
-          <article><span>Recently Attended</span><strong>${attendedRecent}</strong></article>
-          <article><span>Total Event Records</span><strong>${myRegistrations.length}</strong></article>
-        </section>
-
-        <section class="member-dashboard-section" id="upcoming">
-          <div class="member-section-heading">
-            <div><span class="member-eyebrow">WHAT'S NEXT</span><h2>Upcoming Events</h2></div>
-            <p>Recent announcements and upcoming MFC Youth activities.</p>
-          </div>
-          <div class="member-event-stack">
-            ${upcomingEvents.length
-              ? upcomingEvents.map(event => eventCard(event, eventRegistration(participants, member.id, event.id), 'upcoming')).join('')
-              : `<div class="member-empty-card"><strong>No upcoming events yet.</strong><span>New events will appear here once they are added by your Area.</span></div>`
-            }
+          <div class="dashboard-hero-actions">
+            <a class="btn blue" href="#events">View Events &rarr;</a>
+            <a class="btn" href="#profile">My Profile</a>
           </div>
         </section>
 
-        <section class="member-dashboard-section" id="recent">
-          <div class="member-section-heading">
-            <div><span class="member-eyebrow">LOOKING BACK</span><h2>Recent Events</h2></div>
-            <p>See recently completed activities and your participation status.</p>
-          </div>
-          <div class="member-event-stack">
-            ${recentEvents.length
-              ? recentEvents.map(event => eventCard(event, eventRegistration(participants, member.id, event.id), 'past')).join('')
-              : `<div class="member-empty-card"><strong>No recent events yet.</strong><span>Completed Area events will appear here.</span></div>`
-            }
+        <!-- Metrics: Primary Big Card & Secondary Stack -->
+        <section class="dashboard-metrics-section member-metrics-section animate-in is-visible" aria-label="Member Activity Metrics">
+          <div class="dashboard-metrics-layout">
+            <!-- Primary: Event Participation & Registration (Big Card) -->
+            <a class="metric-card-primary member-metric-primary" href="#events" title="Jump to Community Gatherings">
+              <div class="metric-primary-header">
+                <span class="metric-primary-label">Event Participation & Attendance</span>
+                <span class="metric-badge-primary">Primary Record</span>
+              </div>
+
+              <div>
+                <div class="metric-primary-number">${registeredUpcoming}</div>
+                <p class="metric-primary-caption">
+                  ${registeredUpcoming === 1
+                    ? `You are registered for 1 upcoming event out of ${allUpcomingEvents.length} scheduled.`
+                    : `You are registered for ${registeredUpcoming} upcoming events out of ${allUpcomingEvents.length} scheduled.`}
+                </p>
+              </div>
+
+              <div class="metric-primary-footer">
+                <div class="metric-pill-group">
+                  <span class="metric-pill active">
+                    <span style="width: 7px; height: 7px; background: #16a34a; border-radius: 50%; display: inline-block;"></span>
+                    ${registeredUpcoming} Registered
+                  </span>
+                  <span class="metric-pill">
+                    ✓ ${attendedRecent} Attended recently
+                  </span>
+                  <span class="metric-pill">
+                    ${myRegistrations.length} Total records
+                  </span>
+                </div>
+                <span class="metric-action-hint">Browse Schedule &rarr;</span>
+              </div>
+            </a>
+
+            <!-- Secondary Stack: Community Chapter & Profile Status -->
+            <div class="metric-secondary-stack">
+              <a class="metric-card-secondary services" href="#profile" title="View Community Affiliation">
+                <div class="metric-secondary-header">
+                  <span class="metric-secondary-label">Assigned Chapter</span>
+                  <span class="metric-badge-secondary">Community</span>
+                </div>
+                <div class="metric-secondary-body">
+                  <span class="metric-secondary-number" style="font-size: 1.35rem; line-height: 1.25;">
+                    ${esc(member.chapterName || 'No Chapter Assigned')}
+                  </span>
+                  <p class="metric-secondary-caption">
+                    Service: ${esc((member.services || []).join(', ') || 'Youth Member')}
+                  </p>
+                </div>
+                <div class="metric-secondary-footer">
+                  <span class="summary-link-hint" style="font-size: 0.76rem; color: #2563eb; font-weight: 600;">View community details &rarr;</span>
+                </div>
+              </a>
+
+              <a class="metric-card-secondary reports" href="#profile" title="View Member Profile">
+                <div class="metric-secondary-header">
+                  <span class="metric-secondary-label">Official Record Status</span>
+                  <span class="metric-badge-secondary">Verified</span>
+                </div>
+                <div class="metric-secondary-body">
+                  <span class="metric-secondary-number" style="font-size: 1.35rem; color: #059669; line-height: 1.25;">
+                    ${esc(member.status || 'Active Member')}
+                  </span>
+                  <p class="metric-secondary-caption">Connected to official Area records database</p>
+                </div>
+                <div class="metric-secondary-footer">
+                  <span class="summary-link-hint" style="font-size: 0.76rem; color: #059669; font-weight: 600;">Check profile info &rarr;</span>
+                </div>
+              </a>
+            </div>
           </div>
         </section>
 
-        <section class="member-dashboard-section" id="profile">
-          <div class="member-section-heading">
-            <div><span class="member-eyebrow">MY ACCOUNT</span><h2>Member Profile</h2></div>
-            <p>${previewMode ? 'Preview of the profile section visible to a Member.' : 'Your profile is linked to the official Area Members database.'}</p>
+        <!-- Big Events Card: 2-Column Split Layout (Matches Dashboard Big Events Card!) -->
+        <section class="dashboard-events-big-card member-events-card animate-in is-visible" id="events">
+          <div class="events-big-card-header">
+            <div class="events-big-card-title-group">
+              <h3>Community Gatherings & Events</h3>
+              <p>Upcoming MFC Youth activities, household meetings, and your personal attendance log.</p>
+            </div>
+            <div class="events-big-card-pills">
+              <span class="badge" style="background: #e0f2fe; color: #0369a1; font-weight: 700;">
+                ${allUpcomingEvents.length} Upcoming
+              </span>
+              <span class="badge" style="background: #dcfce7; color: #15803d; font-weight: 700;">
+                ${registeredUpcoming} Registered
+              </span>
+              <span class="badge" style="background: #f1f5f9; color: #475569; font-weight: 700;">
+                ${allRecentEvents.length} Past Gatherings
+              </span>
+            </div>
           </div>
-          <article class="member-portal-card">
-            <dl class="member-profile-list member-profile-wide">
-              <div><dt>Name</dt><dd>${esc(fullName(member) || '—')}</dd></div>
-              <div><dt>Email</dt><dd>${esc(member.email || '—')}</dd></div>
-              <div><dt>Chapter</dt><dd>${esc(member.chapterName || 'No Chapter Assigned')}</dd></div>
-              <div><dt>Contact</dt><dd>${esc(member.contact || '—')}</dd></div>
-              <div><dt>First Attended Youth Camp</dt><dd>${esc(fmtDate(member.firstAttendedYouthCamp))}</dd></div>
-              <div><dt>Services</dt><dd>${esc((member.services || []).join(', ') || 'No Service Assigned')}</dd></div>
-            </dl>
-          </article>
+
+          <div class="dashboard-events-split">
+            <!-- Left Column: Upcoming Gatherings -->
+            <div class="events-column" id="upcoming">
+              <div class="events-column-header">
+                <span class="badge" style="background: #0284c7; color: #ffffff;">UPCOMING</span>
+                <h4>What's Next</h4>
+                <span class="muted" style="margin-left: auto; font-size: 0.76rem;">${upcomingEvents.length} shown</span>
+              </div>
+
+              ${upcomingEvents.length
+                ? `
+                  <div class="member-event-list">
+                    ${upcomingEvents.map(event => memberEventRow(event, eventRegistration(participants, member.id, event.id), 'upcoming')).join('')}
+                  </div>
+                `
+                : memberEmptyState('No upcoming events scheduled yet', 'New activities will appear here when posted by your Area leaders.')
+              }
+            </div>
+
+            <!-- Right Column: Recent Gatherings & Attendance History -->
+            <div class="events-column" id="recent">
+              <div class="events-column-header">
+                <span class="badge" style="background: #e2e8f0; color: #475569;">RECENT</span>
+                <h4>Attendance History</h4>
+                <span class="muted" style="margin-left: auto; font-size: 0.76rem;">${recentEvents.length} recorded</span>
+              </div>
+
+              ${recentEvents.length
+                ? `
+                  <div class="member-event-list">
+                    ${recentEvents.map(event => memberEventRow(event, eventRegistration(participants, member.id, event.id), 'past')).join('')}
+                  </div>
+                `
+                : memberEmptyState('No recent gatherings on record', 'Your participation history will build up as activities conclude.')
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- Member Profile Section (Revamped Non-Stretched Grid) -->
+        <section class="member-profile-section animate-in is-visible" id="profile">
+          <div class="card member-profile-card">
+            <div class="member-profile-header">
+              <div class="profile-header-avatar">
+                ${esc((member.firstName?.[0] || 'M') + (member.lastName?.[0] || 'Y'))}
+              </div>
+              <div>
+                <h2>${esc(fullName(member) || 'MFC Youth Member')}</h2>
+                <p>Official Area Member Record & Account Affiliation</p>
+              </div>
+              <div class="profile-header-status">
+                <span class="badge active" style="font-size: 0.78rem; padding: 5px 12px;">Active Member</span>
+              </div>
+            </div>
+
+            <div class="member-profile-grid">
+              <!-- Column 1: Personal Contact Info -->
+              <div class="profile-group-box">
+                <span class="profile-group-title">Personal Information</span>
+                <dl class="profile-field-list">
+                  <div>
+                    <dt>Full Name</dt>
+                    <dd>${esc(fullName(member) || '—')}</dd>
+                  </div>
+                  <div>
+                    <dt>Email Address</dt>
+                    <dd>${esc(member.email || '—')}</dd>
+                  </div>
+                  <div>
+                    <dt>Contact Number</dt>
+                    <dd>${esc(member.contact || 'None provided')}</dd>
+                  </div>
+                </dl>
+              </div>
+
+              <!-- Column 2: Affiliation & Ministries -->
+              <div class="profile-group-box">
+                <span class="profile-group-title">MFC Youth Affiliation</span>
+                <dl class="profile-field-list">
+                  <div>
+                    <dt>Assigned Chapter</dt>
+                    <dd><strong>${esc(member.chapterName || 'No Chapter Assigned')}</strong></dd>
+                  </div>
+                  <div>
+                    <dt>Service / Ministry</dt>
+                    <dd>${esc((member.services || []).join(', ') || 'Youth Member')}</dd>
+                  </div>
+                  <div>
+                    <dt>First Youth Camp</dt>
+                    <dd>${esc(fmtDate(member.firstAttendedYouthCamp))}</dd>
+                  </div>
+                </dl>
+              </div>
+
+              <!-- Column 3: Membership Status & Access -->
+              <div class="profile-group-box">
+                <span class="profile-group-title">Account & Security</span>
+                <dl class="profile-field-list">
+                  <div>
+                    <dt>Access Level</dt>
+                    <dd>${esc(accessRoleLabel(member.accessLevel || 'member'))}</dd>
+                  </div>
+                  <div>
+                    <dt>Database Record</dt>
+                    <dd><span class="badge" style="background: #e0f2fe; color: #0284c7;">Supabase Connected</span></dd>
+                  </div>
+                  <div>
+                    <dt>Account Security</dt>
+                    <dd>
+                      ${!previewMode
+                        ? '<button class="btn" id="inlineChangePasswordBtn" type="button" style="padding: 4px 10px; font-size: 0.78rem; margin-top: 4px;">Update Password</button>'
+                        : '<span style="color: #64748b;">Preview Protected</span>'
+                      }
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            </div>
+          </div>
         </section>
       `;
 
@@ -565,6 +754,11 @@ async function bootstrapMemberPortal() {
       // Return to admin button for preview mode
       document.getElementById('exitMemberPreview')?.addEventListener('click', () => {
         navigateWithLoader('/dashboard');
+      });
+
+      // Inline change password button
+      document.getElementById('inlineChangePasswordBtn')?.addEventListener('click', () => {
+        navigateWithLoader('/change-password');
       });
     }
   }

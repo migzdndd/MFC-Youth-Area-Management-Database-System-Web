@@ -16,9 +16,9 @@
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
-<body class="layout-body member-portal-layout">
+<body class="layout-body member-portal-body">
   <!-- Top Navigation Header -->
-  <header class="top-header member-portal-header">
+  <header class="top-header member-portal-topbar" aria-label="Member portal navigation header">
     <div class="member-portal-brand">
       <img src="/img/logo-2.png" alt="MFC Youth Logo">
       <div>
@@ -28,9 +28,8 @@
     </div>
 
     <nav class="member-portal-nav" aria-label="Member portal navigation">
-      <a href="#overview">Home</a>
-      <a href="#upcoming">Upcoming</a>
-      <a href="#recent">Recent</a>
+      <a href="#overview">Overview</a>
+      <a href="#events">Gatherings</a>
       <a href="#profile">My Profile</a>
     </nav>
 
@@ -44,7 +43,7 @@
   </header>
 
   <!-- Main Portal Content -->
-  <main class="main-content member-portal-content" id="memberPortalContent"></main>
+  <main class="main-content member-portal-main member-portal-content" id="memberPortalContent"></main>
 
   <footer class="auth-footer" style="padding: 2rem; text-align: center; margin-top: auto;">
     Powered & designed by <a href="https://migzdndd.github.io/web-portfolio/" target="_blank" rel="noopener noreferrer" style="color: inherit; font-weight: bold; text-decoration: none;">migz.dev</a>
