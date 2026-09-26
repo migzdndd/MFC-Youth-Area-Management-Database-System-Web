@@ -539,7 +539,7 @@ function renderDashboard() {
     )
     .slice(0, 5);
 
-  const activeMembers = (session.role === 'campus_servant' || session.role === 'mfc_high_servant') 
+  const activeMembers = (session?.role === 'campus_servant' || session?.role === 'mfc_high_servant') 
     ? getVisibleMembers(data).filter(member => member.status === 'Active').length 
     : (cloudSummary?.activeMembers ?? data.members.filter(
     member => member.status === 'Active'

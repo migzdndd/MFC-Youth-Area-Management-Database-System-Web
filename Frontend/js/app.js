@@ -446,9 +446,10 @@ function renderPageFailure(error) {
  */
 function renderPageSafely() {
   try {
+    const target = content || document.getElementById('pageContent');
     const renderer = renderers[page] || renderDashboard;
     renderer();
-    content?.removeAttribute('aria-busy');
+    target?.removeAttribute('aria-busy');
     window.MFCPageSkeleton?.clear?.();
     return true;
   } catch (error) {
@@ -516,6 +517,8 @@ window.addEventListener('unhandledrejection', event => {
   }
 });
 
-bootstrapApplication().catch(error => {
-  renderPageFailure(error);
-});
+if (session && !session.mustChangePassword && session.role !== 'member') {
+  bootstrapApplication().catch(error => {
+    renderPageFailure(error);
+  });
+}

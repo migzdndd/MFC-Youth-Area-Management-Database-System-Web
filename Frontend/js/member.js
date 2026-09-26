@@ -560,6 +560,8 @@ async function bootstrapMemberPortal() {
         </section>
       `;
 
+      window.MFCPageSkeleton?.clear?.();
+
       // Return to admin button for preview mode
       document.getElementById('exitMemberPreview')?.addEventListener('click', () => {
         navigateWithLoader('/dashboard');

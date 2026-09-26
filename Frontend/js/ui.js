@@ -268,8 +268,7 @@ function toast(text, type = 'success', duration = 4000) {
 window.toast = toast;
 
 // Section 8: Modal Dialogs (Alpine.js Declarative x-show Modal Component)
-
-let activeModalCleanup = null;
+// Note: activeModalCleanup is declared in config.js for area administration pages
 
 function openModal(
   title,

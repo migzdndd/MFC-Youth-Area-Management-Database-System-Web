@@ -186,6 +186,7 @@
 
       roots.forEach(root => {
         root.removeAttribute('aria-busy');
+        delete root.dataset.skeletonReady;
         root.querySelector('[data-page-skeleton]')?.remove();
       });
     } catch (error) {
@@ -395,8 +396,14 @@
   // Handle browser back/forward history cache restores
   window.addEventListener('pageshow', () => {
     hide();
-    showPageSkeleton();
   });
+
+  if (document.readyState === 'complete') {
+    hide();
+  } else {
+    window.addEventListener('DOMContentLoaded', hide);
+    window.addEventListener('load', hide);
+  }
 
   // --------------------------------------------------------------------------
   // 9. Global Access Guide Modal
