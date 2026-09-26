@@ -30,16 +30,22 @@ async function openAreaSelectionModal() {
   const modal = document.createElement('div');
   modal.id = 'ncAreaSelectModal';
   modal.className = 'modal-backdrop active';
+  modal.setAttribute('x-data', '{ open: true, close() { this.open = false; setTimeout(() => modal.remove(), 220); } }');
+  modal.setAttribute('x-show', 'open');
+  modal.setAttribute('x-transition.opacity', '');
+  modal.setAttribute('x-cloak', '');
+  modal.setAttribute('@keydown.escape.window', 'close()');
+  modal.setAttribute('@click.self', 'close()');
   modal.style.cssText = 'position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 16px;';
 
   modal.innerHTML = `
-    <div class="card" style="background: #ffffff; border-radius: 20px; max-width: 600px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; animation: modalFadeIn 0.2s ease-out;">
+    <div class="card" x-show="open" x-transition style="background: #ffffff; border-radius: 20px; max-width: 600px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; animation: modalFadeIn 0.2s ease-out;">
       <div style="padding: 24px 28px 16px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between;">
         <div>
           <h2 style="margin: 0; font-size: 1.3rem; font-weight: 700; color: #0f172a;">Select Registered Area</h2>
           <p style="margin: 4px 0 0 0; font-size: 0.86rem; color: #64748b;">Choose an area to access its records and database metrics.</p>
         </div>
-        <button type="button" id="closeNcAreaModal" style="background: transparent; border: none; font-size: 1.5rem; color: #64748b; cursor: pointer; padding: 4px 8px; border-radius: 6px; line-height: 1;" aria-label="Close modal">&times;</button>
+        <button type="button" id="closeNcAreaModal" @click="close()" style="background: transparent; border: none; font-size: 1.5rem; color: #64748b; cursor: pointer; padding: 4px 8px; border-radius: 6px; line-height: 1;" aria-label="Close modal">&times;</button>
       </div>
 
       <div style="padding: 24px; max-height: 70vh; overflow-y: auto;">
@@ -72,12 +78,6 @@ async function openAreaSelectionModal() {
   `;
 
   document.body.appendChild(modal);
-
-  const closeModal = () => modal.remove();
-  document.getElementById('closeNcAreaModal')?.addEventListener('click', closeModal);
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
-  });
 
   try {
     const response = await fetchCachedAreas();

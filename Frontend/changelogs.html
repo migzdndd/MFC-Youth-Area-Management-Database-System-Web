@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/changelogs.css">
   <link rel="icon" type="image/png" href="/img/logo-2.png">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
 <body class="tech-changelogs-body">
@@ -50,8 +51,13 @@
         <a href="/dashboard" class="tech-nav-btn tech-nav-btn-secondary" title="Access leader dashboard">
           Dashboard &rarr;
         </a>
-        <button id="refreshLogsBtn" type="button" class="tech-nav-btn tech-nav-btn-primary" title="Refresh commit feed from GitHub">
-          <span id="refreshIcon" aria-hidden="true">&#8635;</span> Sync Logs
+        <button id="refreshLogsBtn" type="button" class="tech-nav-btn tech-nav-btn-primary" title="Refresh commit feed from GitHub"
+          x-data="{ syncing: false }"
+          :disabled="syncing"
+          @sync-start.window="syncing = true"
+          @sync-end.window="syncing = false">
+          <span id="refreshIcon" aria-hidden="true">&#8635;</span>
+          <span x-text="syncing ? 'Syncing...' : 'Sync Logs'">Sync Logs</span>
         </button>
       </nav>
     </div>
@@ -60,11 +66,17 @@
   <!-- Main Tech Content Container -->
   <main class="tech-container" role="main">
     <!-- Notice Banner (shows if offline or rate limited) -->
-    <div id="noticeBanner" class="tech-notice-banner" style="display: none;" role="status">
+    <div id="noticeBanner" class="tech-notice-banner"
+      x-data="{ show: false, text: 'Displaying verified local commit cache. Real-time search and filters are fully active.' }"
+      x-show="show"
+      x-cloak
+      role="status"
+      @show-notice.window="text = $event.detail || text; show = true"
+      @hide-notice.window="show = false">
       <div>
-        <strong>System Notice:</strong> <span id="noticeBannerText">Displaying verified local commit cache. Real-time search and filters are fully active.</span>
+        <strong>System Notice:</strong> <span id="noticeBannerText" x-text="text">Displaying verified local commit cache. Real-time search and filters are fully active.</span>
       </div>
-      <button id="dismissNoticeBtn" type="button" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 1rem; padding: 4px;" aria-label="Dismiss notice">&times;</button>
+      <button id="dismissNoticeBtn" type="button" @click="show = false" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 1rem; padding: 4px;" aria-label="Dismiss notice">&times;</button>
     </div>
 
     <!-- Hero Section -->
@@ -129,7 +141,7 @@
     <!-- Control Deck: Search & Filtering -->
     <section class="tech-control-deck" aria-label="Log search and filter controls">
       <div class="tech-search-row">
-        <div class="tech-search-wrapper">
+        <div class="tech-search-wrapper" x-data="{ hasQuery: false }">
           <svg class="tech-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -142,8 +154,9 @@
             aria-label="Search commit logs"
             autocomplete="off"
             spellcheck="false"
+            @input="hasQuery = !!$event.target.value"
           >
-          <button id="searchClearBtn" type="button" class="tech-search-clear" aria-label="Clear search input">&times;</button>
+          <button id="searchClearBtn" type="button" class="tech-search-clear" aria-label="Clear search input" x-show="hasQuery" x-cloak>&times;</button>
         </div>
       </div>
 
@@ -200,7 +213,11 @@
   </main>
 
   <!-- Toast Notification Feedback -->
-  <div id="techToast" class="tech-toast" role="alert" aria-live="polite"></div>
+  <div id="techToast" class="tech-toast" role="alert" aria-live="polite"
+    x-data="{ show: false, message: '' }"
+    :class="{ 'visible': show }"
+    x-text="message"
+    @show-toast.window="message = $event.detail; show = true; clearTimeout($data._t); $data._t = setTimeout(() => { show = false; }, 3200)"></div>
 
   <!-- Client JavaScript -->
   <script>
@@ -430,12 +447,14 @@
 
       // Show toast message
       function showToast(msg) {
-        if (!techToast) return;
-        techToast.textContent = msg;
-        techToast.classList.add('visible');
-        setTimeout(() => {
-          techToast.classList.remove('visible');
-        }, 3200);
+        window.dispatchEvent(new CustomEvent('show-toast', { detail: msg }));
+        if (techToast) {
+          techToast.textContent = msg;
+          techToast.classList.add('visible');
+          setTimeout(() => {
+            techToast.classList.remove('visible');
+          }, 3200);
+        }
       }
 
       // Parse commit details into structured metadata
@@ -671,6 +690,7 @@
       // Fetch logs from GitHub with multi-tier fallback resilience
       async function loadLogs() {
         if (refreshIcon) refreshIcon.style.animation = 'spin 1s linear infinite';
+        window.dispatchEvent(new CustomEvent('sync-start'));
         
         try {
           const timestamp = Date.now();
@@ -727,6 +747,7 @@
 
           if (Array.isArray(rawCommits) && rawCommits.length > 0) {
             allCommits = rawCommits.map(parseCommit);
+            window.dispatchEvent(new CustomEvent('hide-notice'));
             if (noticeBanner) noticeBanner.style.display = 'none';
           } else {
             throw new Error('All live commit endpoints returned empty or failed');
@@ -734,12 +755,15 @@
         } catch (err) {
           console.warn('GitHub live API unavailable or rate limited. Loading localized commit dataset:', err);
           allCommits = FALLBACK_COMMITS.map(parseCommit);
+          const noticeMsg = 'Displaying verified local commit cache (GitHub API rate limit or offline). All search and filter functions remain 100% active.';
+          window.dispatchEvent(new CustomEvent('show-notice', { detail: noticeMsg }));
           if (noticeBanner && noticeBannerText) {
-            noticeBannerText.textContent = 'Displaying verified local commit cache (GitHub API rate limit or offline). All search and filter functions remain 100% active.';
+            noticeBannerText.textContent = noticeMsg;
             noticeBanner.style.display = 'flex';
           }
         } finally {
           if (refreshIcon) refreshIcon.style.animation = '';
+          window.dispatchEvent(new CustomEvent('sync-end'));
           updateMetrics(allCommits);
           renderFeed();
         }
@@ -760,6 +784,7 @@
         searchClearBtn.addEventListener('click', () => {
           searchInput.value = '';
           searchQuery = '';
+          searchInput.dispatchEvent(new Event('input'));
           searchClearBtn.style.display = 'none';
           searchInput.focus();
           renderFeed();

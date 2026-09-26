@@ -340,33 +340,65 @@
   let modalBackdropEl = null;
 
   function createModalHtml() {
-    const tabsHtml = Object.keys(LEGAL_DOCUMENTS).map(key => {
-      const doc = LEGAL_DOCUMENTS[key];
-      const isActive = key === activeTabId ? 'is-active' : '';
-      return `<button type="button" class="legal-tab-btn ${isActive}" data-legal-tab="${key}">${doc.title}</button>`;
-    }).join('');
-
     return `
-      <div id="legalModalBackdrop" class="legal-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="legalModalTitle">
-        <div class="legal-modal-dialog">
+      <div
+        id="legalModalBackdrop"
+        class="legal-modal-backdrop"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="legalModalTitle"
+        x-data="{
+          open: false,
+          activeTab: 'overview',
+          badges: {
+            overview: 'Suite Index',
+            privacy: 'RA 10173',
+            terms: 'User Agreement',
+            cookies: 'Zero Tracking',
+            parental: 'Minor Protection',
+            financial: 'Administrative',
+            ip: 'Attribution'
+          }
+        }"
+        x-show="open"
+        :class="{ 'is-active': open }"
+        x-transition.opacity
+        x-cloak
+        @keydown.escape.window="if (open) closeLegalModal()"
+        @click.self="closeLegalModal()"
+      >
+        <div class="legal-modal-dialog" x-show="open" x-transition>
           <header class="legal-modal-header">
             <div class="legal-header-titles">
               <span class="legal-badge-pill">
                 <span class="legal-badge-dot"></span>
-                <span id="legalModalBadge">Compliance Suite</span>
+                <span id="legalModalBadge" x-text="badges[activeTab] || 'Compliance Suite'">Compliance Suite</span>
               </span>
               <h2 id="legalModalTitle" class="legal-modal-title">MFC Youth Compliance &amp; Legal Policies</h2>
               <p class="legal-modal-subtitle">Republic Act No. 10173 (Philippine Data Privacy Act of 2012) &amp; Operational Notices</p>
             </div>
-            <button type="button" id="closeLegalModalBtn" class="legal-close-btn" aria-label="Close legal documents">&times;</button>
+            <button type="button" id="closeLegalModalBtn" class="legal-close-btn" aria-label="Close legal documents" @click="closeLegalModal()">&times;</button>
           </header>
 
           <nav class="legal-tabs-bar" aria-label="Legal documents selector">
-            ${tabsHtml}
+            ${Object.keys(LEGAL_DOCUMENTS).map(key => `
+              <button
+                type="button"
+                class="legal-tab-btn"
+                :class="{ 'is-active': activeTab === '${key}' }"
+                :aria-selected="activeTab === '${key}' ? 'true' : 'false'"
+                @click="activeTab = '${key}'"
+                data-legal-tab="${key}"
+              >${LEGAL_DOCUMENTS[key].title}</button>
+            `).join('')}
           </nav>
 
           <div id="legalDocBody" class="legal-doc-body" tabindex="0">
-            ${LEGAL_DOCUMENTS[activeTabId].html}
+            ${Object.keys(LEGAL_DOCUMENTS).map(key => `
+              <div x-show="activeTab === '${key}'" x-cloak>
+                ${LEGAL_DOCUMENTS[key].html}
+              </div>
+            `).join('')}
           </div>
 
           <footer class="legal-modal-footer">
@@ -374,8 +406,8 @@
               <span>Official pastoral governance notice &bull; MFC Youth NCR Central</span>
             </div>
             <div class="legal-footer-actions">
-              <button type="button" id="legalCloseSecondaryBtn" class="legal-btn legal-btn-secondary">Close</button>
-              <button type="button" id="legalAcknowledgeBtn" class="legal-btn legal-btn-primary">Acknowledge &amp; Continue</button>
+              <button type="button" id="legalCloseSecondaryBtn" class="legal-btn legal-btn-secondary" @click="closeLegalModal()">Close</button>
+              <button type="button" id="legalAcknowledgeBtn" class="legal-btn legal-btn-primary" @click="closeLegalModal()">Acknowledge &amp; Continue</button>
             </div>
           </footer>
         </div>
@@ -386,6 +418,12 @@
   function renderDocument(tabId) {
     if (!LEGAL_DOCUMENTS[tabId]) return;
     activeTabId = tabId;
+
+    const state = modalBackdropEl?._x_dataStack?.[0];
+    if (state) {
+      state.activeTab = tabId;
+      return;
+    }
 
     const doc = LEGAL_DOCUMENTS[tabId];
     const bodyEl = document.getElementById('legalDocBody');
@@ -399,7 +437,6 @@
       badgeEl.textContent = doc.badge || 'Compliance';
     }
 
-    // Update active tab buttons
     const tabBtns = document.querySelectorAll('[data-legal-tab]');
     tabBtns.forEach(btn => {
       const isTarget = btn.getAttribute('data-legal-tab') === tabId;
@@ -415,14 +452,6 @@
       document.body.appendChild(container.firstElementChild);
       modalBackdropEl = document.getElementById('legalModalBackdrop');
 
-      // Bind tabs
-      modalBackdropEl.querySelectorAll('[data-legal-tab]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          renderDocument(btn.getAttribute('data-legal-tab'));
-        });
-      });
-
-      // Bind close buttons
       const closeBtn = document.getElementById('closeLegalModalBtn');
       const cancelBtn = document.getElementById('legalCloseSecondaryBtn');
       const ackBtn = document.getElementById('legalAcknowledgeBtn');
@@ -431,16 +460,14 @@
       if (cancelBtn) cancelBtn.addEventListener('click', closeLegalModal);
       if (ackBtn) ackBtn.addEventListener('click', closeLegalModal);
 
-      // Click outside dialog to dismiss
       modalBackdropEl.addEventListener('click', (e) => {
         if (e.target === modalBackdropEl) {
           closeLegalModal();
         }
       });
 
-      // Escape key to dismiss
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modalBackdropEl && modalBackdropEl.classList.contains('is-active')) {
+        if (e.key === 'Escape' && modalBackdropEl && (modalBackdropEl.classList.contains('is-active') || modalBackdropEl._x_dataStack?.[0]?.open)) {
           closeLegalModal();
         }
       });
@@ -451,20 +478,25 @@
 
   function openLegalModal(targetTab = 'overview') {
     ensureModalInDom();
-    renderDocument(targetTab);
-    requestAnimationFrame(() => {
-      if (modalBackdropEl) {
-        modalBackdropEl.classList.add('is-active');
-        document.body.style.overflow = 'hidden';
-      }
-    });
+    const state = modalBackdropEl?._x_dataStack?.[0];
+    if (state) {
+      state.activeTab = targetTab;
+      state.open = true;
+    } else {
+      renderDocument(targetTab);
+      modalBackdropEl?.classList.add('is-active');
+    }
+    document.body.style.overflow = 'hidden';
   }
 
   function closeLegalModal() {
-    if (modalBackdropEl) {
-      modalBackdropEl.classList.remove('is-active');
-      document.body.style.overflow = '';
+    const state = modalBackdropEl?._x_dataStack?.[0];
+    if (state) {
+      state.open = false;
+    } else {
+      modalBackdropEl?.classList.remove('is-active');
     }
+    document.body.style.overflow = '';
   }
 
   // Public APIs

@@ -27,8 +27,25 @@ async function showAreaOnboarding() {
   if (!root) return;
 
   root.innerHTML = `
-    <div class="modal-backdrop area-onboarding-backdrop" id="areaOnboardingBackdrop">
-      <section class="modal area-onboarding-modal" role="dialog" aria-modal="true" aria-labelledby="areaOnboardingTitle">
+    <div
+      class="modal-backdrop area-onboarding-backdrop"
+      id="areaOnboardingBackdrop"
+      x-data="{
+        open: true,
+        showCreate: false,
+        isConnecting: false,
+        isCreating: false,
+        message: '',
+        messageType: 'error',
+        selectedArea: '',
+        newArea: '',
+        close() { this.open = false; }
+      }"
+      x-show="open"
+      x-transition.opacity
+      x-cloak
+    >
+      <section class="modal area-onboarding-modal" role="dialog" aria-modal="true" aria-labelledby="areaOnboardingTitle" x-show="open" x-transition>
         <header class="modal-header area-onboarding-header">
           <div>
             <span class="area-onboarding-kicker">Account Setup</span>
@@ -39,31 +56,37 @@ async function showAreaOnboarding() {
           <p class="area-onboarding-intro">
             Your Servant Leader account was created successfully. Before entering the management system, connect it to the Area you serve.
           </p>
-          <div id="areaOnboardingMessage"></div>
+          <div id="areaOnboardingMessage" class="message" role="status" x-show="message" :class="messageType" x-text="message" x-cloak></div>
 
-          <div class="area-setup-panel" id="existingAreaPanel">
+          <div class="area-setup-panel" id="existingAreaPanel" x-show="!showCreate" x-transition>
             <label class="form-group" for="onboardingAreaSelect">
               <span>Existing Area</span>
-              <select class="text-input" id="onboardingAreaSelect" disabled>
+              <select class="text-input" id="onboardingAreaSelect" x-model="selectedArea" disabled>
                 <option value="">Loading Areas…</option>
               </select>
             </label>
-            <button class="btn blue" id="confirmAreaButton" type="button" disabled>Continue with Selected Area</button>
+            <button class="btn blue" id="confirmAreaButton" type="button" x-bind:disabled="!selectedArea || isConnecting" disabled>
+              <span x-show="!isConnecting">Continue with Selected Area</span>
+              <span x-show="isConnecting" x-cloak>Connecting…</span>
+            </button>
           </div>
 
-          <div class="area-onboarding-divider"><span>or</span></div>
+          <div class="area-onboarding-divider" x-show="!showCreate"><span>or</span></div>
 
-          <button class="btn area-create-toggle" id="showCreateAreaButton" type="button">Create Area-Based Account</button>
+          <button class="btn area-create-toggle" id="showCreateAreaButton" type="button" x-show="!showCreate" @click="showCreate = true">Create Area-Based Account</button>
 
-          <div class="area-setup-panel hidden" id="createAreaPanel">
+          <div class="area-setup-panel" id="createAreaPanel" x-show="showCreate" x-transition x-cloak>
             <label class="form-group" for="newAreaName">
               <span>Area Name</span>
-              <input class="text-input" id="newAreaName" type="text" maxlength="120" placeholder="e.g. MFC Youth NCR East">
+              <input class="text-input" id="newAreaName" type="text" maxlength="120" placeholder="e.g. MFC Youth NCR East" x-model="newArea">
             </label>
             <p class="field-help">The backend will create the Area in Supabase and connect this account to it. Standard service records will also be prepared for the new Area.</p>
             <div class="area-create-actions">
-              <button class="btn" id="cancelCreateAreaButton" type="button">Cancel</button>
-              <button class="btn blue" id="createAreaButton" type="button">Create Area-Based Account</button>
+              <button class="btn" id="cancelCreateAreaButton" type="button" @click="showCreate = false; newArea = '';">Cancel</button>
+              <button class="btn blue" id="createAreaButton" type="button" x-bind:disabled="newArea.trim().length < 3 || isCreating">
+                <span x-show="!isCreating">Create Area-Based Account</span>
+                <span x-show="isCreating" x-cloak>Creating Area…</span>
+              </button>
             </div>
           </div>
 
@@ -75,19 +98,27 @@ async function showAreaOnboarding() {
     </div>
   `;
 
-  const message = document.getElementById('areaOnboardingMessage');
+  const backdrop = document.getElementById('areaOnboardingBackdrop');
   const select = document.getElementById('onboardingAreaSelect');
   const confirmButton = document.getElementById('confirmAreaButton');
-  const showCreateButton = document.getElementById('showCreateAreaButton');
-  const createPanel = document.getElementById('createAreaPanel');
-  const existingPanel = document.getElementById('existingAreaPanel');
   const createButton = document.getElementById('createAreaButton');
-  const cancelCreateButton = document.getElementById('cancelCreateAreaButton');
   const newAreaName = document.getElementById('newAreaName');
 
+  const getAlpineState = () => backdrop?._x_dataStack?.[0] || null;
+
   const showAreaMessage = (text, type = 'error') => {
-    if (!message) return;
-    message.innerHTML = `<div class="message ${type}" role="status">${esc(text)}</div>`;
+    const state = getAlpineState();
+    if (state) {
+      state.message = text;
+      state.messageType = type;
+    } else {
+      const msgEl = document.getElementById('areaOnboardingMessage');
+      if (msgEl) {
+        msgEl.textContent = text;
+        msgEl.className = `message ${type}`;
+        msgEl.style.display = 'block';
+      }
+    }
   };
 
   const finishAreaSetup = (area, profile = null, member = null) => {
@@ -129,9 +160,10 @@ async function showAreaOnboarding() {
       return;
     }
 
-    const original = confirmButton.textContent;
-    confirmButton.disabled = true;
-    confirmButton.textContent = 'Connecting…';
+    const state = getAlpineState();
+    if (state) state.isConnecting = true;
+    else { confirmButton.disabled = true; confirmButton.textContent = 'Connecting…'; }
+
     try {
       const payload = await backendApi('/api/areas/select', {
         method: 'POST',
@@ -140,24 +172,10 @@ async function showAreaOnboarding() {
       showAreaMessage(`Connected to ${payload.area.name}.`, 'success');
       setTimeout(() => finishAreaSetup(payload.area, payload.profile, payload.member), 350);
     } catch (error) {
-      confirmButton.disabled = false;
-      confirmButton.textContent = original;
+      if (state) state.isConnecting = false;
+      else { confirmButton.disabled = false; confirmButton.textContent = 'Continue with Selected Area'; }
       showAreaMessage(error?.message || 'Unable to connect this account to the selected Area.');
     }
-  });
-
-  showCreateButton?.addEventListener('click', () => {
-    createPanel?.classList.remove('hidden');
-    existingPanel?.classList.add('area-setup-muted');
-    showCreateButton.classList.add('hidden');
-    newAreaName?.focus();
-  });
-
-  cancelCreateButton?.addEventListener('click', () => {
-    createPanel?.classList.add('hidden');
-    existingPanel?.classList.remove('area-setup-muted');
-    showCreateButton?.classList.remove('hidden');
-    if (newAreaName) newAreaName.value = '';
   });
 
   createButton?.addEventListener('click', async () => {
@@ -167,9 +185,10 @@ async function showAreaOnboarding() {
       return;
     }
 
-    const original = createButton.textContent;
-    createButton.disabled = true;
-    createButton.textContent = 'Creating Area…';
+    const state = getAlpineState();
+    if (state) state.isCreating = true;
+    else { createButton.disabled = true; createButton.textContent = 'Creating Area…'; }
+
     try {
       const payload = await backendApi('/api/areas', {
         method: 'POST',
@@ -178,8 +197,8 @@ async function showAreaOnboarding() {
       showAreaMessage(`${payload.area.name} was created and linked to your account.`, 'success');
       setTimeout(() => finishAreaSetup(payload.area, payload.profile, payload.member), 400);
     } catch (error) {
-      createButton.disabled = false;
-      createButton.textContent = original;
+      if (state) state.isCreating = false;
+      else { createButton.disabled = false; createButton.textContent = 'Create Area-Based Account'; }
       const existing = error?.body?.existingArea;
       if (existing?.id) {
         showAreaMessage('That Area already exists. Select it from the Existing Area list instead.');

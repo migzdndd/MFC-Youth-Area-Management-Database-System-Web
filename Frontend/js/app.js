@@ -165,14 +165,21 @@ function openDemoRoleSwitcher() {
     animation: fadeIn 0.2s ease;
   `;
 
+  modal.setAttribute('x-data', '{ open: true, close() { this.open = false; setTimeout(() => modal.remove(), 220); } }');
+  modal.setAttribute('x-show', 'open');
+  modal.setAttribute('x-transition.opacity', '');
+  modal.setAttribute('x-cloak', '');
+  modal.setAttribute('@keydown.escape.window', 'close()');
+  modal.setAttribute('@click.self', 'close()');
+
   modal.innerHTML = `
-    <div style="background: var(--surface, #ffffff); border-radius: 16px; max-width: 580px; width: 100%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); border: 1px solid var(--border, #e2e8f0); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;">
+    <div x-show="open" x-transition style="background: var(--surface, #ffffff); border-radius: 16px; max-width: 580px; width: 100%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); border: 1px solid var(--border, #e2e8f0); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;">
       <div style="padding: 20px 24px; border-bottom: 1px solid var(--border, #e2e8f0); display: flex; justify-content: space-between; align-items: center; background: #fafafa;">
         <div>
           <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #0f172a;">Switch Demo Access Level</h2>
           <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #64748b;">Select another leadership role to test in this session.</p>
         </div>
-        <button type="button" id="closeDemoRoleModal" style="background: none; border: none; font-size: 1.5rem; line-height: 1; color: #64748b; cursor: pointer; padding: 4px 8px; border-radius: 6px;">&times;</button>
+        <button type="button" id="closeDemoRoleModal" @click="close()" style="background: none; border: none; font-size: 1.5rem; line-height: 1; color: #64748b; cursor: pointer; padding: 4px 8px; border-radius: 6px;">&times;</button>
       </div>
 
       <div style="padding: 16px 20px; overflow-y: auto; display: grid; grid-template-columns: 1fr; gap: 10px;">
@@ -197,7 +204,7 @@ function openDemoRoleSwitcher() {
       </div>
 
       <div style="padding: 12px 20px; border-top: 1px solid var(--border, #e2e8f0); background: #f8fafc; text-align: right;">
-        <button type="button" id="cancelDemoRoleModal" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 500; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 6px; cursor: pointer; color: #475569;">Close</button>
+        <button type="button" id="cancelDemoRoleModal" @click="close()" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 500; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 6px; cursor: pointer; color: #475569;">Close</button>
       </div>
     </div>
   `;
@@ -205,20 +212,12 @@ function openDemoRoleSwitcher() {
   document.body.appendChild(modal);
 
   const close = () => {
-    modal.remove();
-    document.removeEventListener('keydown', onKeyDown);
+    if (modal._x_dataStack?.[0]?.close) {
+      modal._x_dataStack[0].close();
+    } else {
+      modal.remove();
+    }
   };
-
-  const onKeyDown = (e) => {
-    if (e.key === 'Escape') close();
-  };
-  document.addEventListener('keydown', onKeyDown);
-
-  document.getElementById('closeDemoRoleModal')?.addEventListener('click', close);
-  document.getElementById('cancelDemoRoleModal')?.addEventListener('click', close);
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) close();
-  });
 
   modal.querySelectorAll('.demo-role-option').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -246,15 +245,15 @@ function openDemoRoleSwitcher() {
 }
 
 if (logoutBtn) {
-  const user = document.createElement('div');
-  user.className = 'signed-in-user';
+  const profileCard = document.createElement('div');
+  profileCard.className = 'signed-in-user profile-card';
 
   const scopeData = db();
   const chapter = isChapterServantSession()
     ? scopedChapter(scopeData)
     : null;
 
-  user.innerHTML = `
+  profileCard.innerHTML = `
     <span>Signed in as</span>
     <strong>
       ${esc(
@@ -272,10 +271,10 @@ if (logoutBtn) {
   const sidebar = document.querySelector('.sidebar');
   const sidebarNav = document.querySelector('.sidebar-nav');
   if (sidebar && sidebarNav) {
-    sidebar.insertBefore(user, sidebarNav);
+    sidebar.insertBefore(profileCard, sidebarNav);
   } else {
     logoutBtn.parentElement?.insertBefore(
-      user,
+      profileCard,
       logoutBtn
     );
   }
@@ -317,7 +316,9 @@ if (logoutBtn) {
       const deleteButton = document.createElement('button');
       deleteButton.type = 'button';
       deleteButton.className = 'sidebar-account-action delete-account-button';
-      deleteButton.textContent = 'Delete Account';
+      deleteButton.setAttribute('x-data', '{ loading: false }');
+      deleteButton.setAttribute('x-bind:disabled', 'loading');
+      deleteButton.innerHTML = '<span x-show="!loading">Delete Account</span><span x-show="loading" x-cloak>Deleting Account…</span>';
       deleteButton.onclick = async () => {
         const warning = 'Permanently delete your account? This removes your Supabase login, profile, and linked member record. This cannot be undone.';
         if (!window.confirm(warning)) return;
@@ -328,9 +329,9 @@ if (logoutBtn) {
           return;
         }
 
-        const originalText = deleteButton.textContent;
-        deleteButton.disabled = true;
-        deleteButton.textContent = 'Deleting Account…';
+        const alpineData = deleteButton._x_dataStack?.[0];
+        if (alpineData) alpineData.loading = true;
+        else { deleteButton.disabled = true; deleteButton.textContent = 'Deleting Account…'; }
 
         try {
           await backendApi('/api/auth/account', { method: 'DELETE' });
@@ -346,8 +347,8 @@ if (logoutBtn) {
           sessionStorage.removeItem(SESSION_KEY);
           navigateWithLoader('/', true);
         } catch (error) {
-          deleteButton.disabled = false;
-          deleteButton.textContent = originalText;
+          if (alpineData) alpineData.loading = false;
+          else { deleteButton.disabled = false; deleteButton.textContent = 'Delete Account'; }
           toast(error?.message || 'Unable to delete the account.', 'error');
         }
       };
@@ -355,10 +356,14 @@ if (logoutBtn) {
     }
   }
 
+  logoutBtn.setAttribute('x-data', '{ loading: false }');
+  logoutBtn.setAttribute('x-bind:disabled', 'loading');
+  logoutBtn.innerHTML = '<span x-show="!loading">Logout</span><span x-show="loading" x-cloak>Signing Out…</span>';
+
   logoutBtn.onclick = async () => {
-    const originalText = logoutBtn.textContent;
-    logoutBtn.disabled = true;
-    logoutBtn.textContent = 'Signing Out…';
+    const alpineData = logoutBtn._x_dataStack?.[0];
+    if (alpineData) alpineData.loading = true;
+    else { logoutBtn.disabled = true; logoutBtn.textContent = 'Signing Out…'; }
 
     if (session?.backendAuth && !session?.demo && session?.accessToken) {
       try {
@@ -373,7 +378,8 @@ if (logoutBtn) {
 
     localStorage.removeItem(SESSION_KEY);
     sessionStorage.removeItem(SESSION_KEY);
-    logoutBtn.textContent = originalText;
+    if (alpineData) alpineData.loading = false;
+    else { logoutBtn.disabled = false; logoutBtn.textContent = 'Logout'; }
     navigateWithLoader('/');
   };
 }

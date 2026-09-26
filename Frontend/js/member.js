@@ -572,7 +572,10 @@ async function bootstrapMemberPortal() {
     document.getElementById('memberLogoutBtn')?.addEventListener('click', async (event) => {
       const button = event.currentTarget;
       const originalText = button?.textContent || 'Logout';
-      if (button) {
+      const alpineData = button?._x_dataStack?.[0];
+      if (alpineData) {
+        alpineData.loading = true;
+      } else if (button) {
         button.disabled = true;
         button.textContent = 'Signing Out…';
       }
@@ -596,7 +599,11 @@ async function bootstrapMemberPortal() {
 
       localStorage.removeItem(SESSION_KEY);
       sessionStorage.removeItem(SESSION_KEY);
-      if (button) button.textContent = originalText;
+      if (alpineData) {
+        alpineData.loading = false;
+      } else if (button) {
+        button.textContent = originalText;
+      }
       navigateWithLoader('/');
     });
 

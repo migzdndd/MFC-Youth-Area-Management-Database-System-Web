@@ -13,6 +13,7 @@
   </style>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" type="image/png" href="/img/logo-2.png">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
 <body class="layout-body member-portal-layout">
@@ -35,7 +36,10 @@
 
     <div class="member-portal-actions">
       <button class="btn" id="changePasswordBtn" type="button">Change Password</button>
-      <button class="btn red" id="memberLogoutBtn" type="button">Logout</button>
+      <button class="btn red" id="memberLogoutBtn" type="button" x-data="{ loading: false }" :disabled="loading">
+        <span x-show="!loading">Logout</span>
+        <span x-show="loading" x-cloak>Signing Out…</span>
+      </button>
     </div>
   </header>
 
