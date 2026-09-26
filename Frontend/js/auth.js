@@ -467,67 +467,160 @@ function startDemoLogin(roleKey = 'area_servant', remember = false) {
   navigateWithLoader('/dashboard');
 }
 
-/** Displays modal prompt to select demo access level */
+/** Displays modal prompt to select demo access level (compact, transparent glass, draggable) */
 function openDemoRoleModal(remember = false) {
   const existing = document.getElementById('demoRoleModal');
   if (existing) existing.remove();
 
   const modal = document.createElement('div');
   modal.id = 'demoRoleModal';
-  modal.className = 'modal is-open';
-  modal.style.cssText = `
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(15, 23, 42, 0.65);
-    backdrop-filter: blur(4px);
-    padding: 16px;
-    animation: fadeIn 0.2s ease;
-  `;
+  modal.className = 'demo-role-modal-overlay is-open';
 
   modal.innerHTML = `
-    <div style="background: var(--surface, #ffffff); border-radius: 16px; max-width: 580px; width: 100%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); border: 1px solid var(--border, #e2e8f0); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;">
-      <div style="padding: 20px 24px; border-bottom: 1px solid var(--border, #e2e8f0); display: flex; justify-content: space-between; align-items: center; background: #fafafa;">
-        <div>
-          <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #0f172a;">Select Demo Access Level</h2>
-          <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #64748b;">Choose which leadership role to test in this demo session.</p>
+    <div class="demo-role-modal-dialog" role="dialog" aria-labelledby="demoRoleModalTitle" aria-modal="true">
+      <div class="demo-role-modal-header">
+        <div class="demo-role-title-group">
+          <span class="demo-role-drag-grip" title="Drag to reposition">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <circle cx="5" cy="4" r="1.5"/>
+              <circle cx="11" cy="4" r="1.5"/>
+              <circle cx="5" cy="8" r="1.5"/>
+              <circle cx="11" cy="8" r="1.5"/>
+              <circle cx="5" cy="12" r="1.5"/>
+              <circle cx="11" cy="12" r="1.5"/>
+            </svg>
+          </span>
+          <div>
+            <h2 id="demoRoleModalTitle">Select Demo Access Level</h2>
+            <p>Choose a leadership role to test in this session.</p>
+          </div>
         </div>
-        <button type="button" id="closeDemoRoleModal" style="background: none; border: none; font-size: 1.5rem; line-height: 1; color: #64748b; cursor: pointer; padding: 4px 8px; border-radius: 6px;">&times;</button>
+        <button type="button" id="closeDemoRoleModal" class="demo-role-close-btn" aria-label="Close demo prompt">&times;</button>
       </div>
 
-      <div style="padding: 16px 20px; overflow-y: auto; display: grid; grid-template-columns: 1fr; gap: 10px;">
+      <div class="demo-role-modal-body">
         ${DEMO_ROLES.map(r => `
           <button
             type="button"
-            class="demo-role-option"
+            class="demo-role-card demo-role-option"
             data-role="${r.role}"
-            style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; text-align: left; cursor: pointer; transition: all 0.15s ease; display: flex; flex-direction: column; gap: 4px;"
-            onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#f8fafc'; this.style.transform='translateY(-1px)';"
-            onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='#ffffff'; this.style.transform='none';"
           >
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <strong style="font-size: 1rem; color: #0f172a;">${r.label}</strong>
-              <span style="font-size: 0.72rem; font-weight: 600; background: #eff6ff; color: #2563eb; padding: 2px 8px; border-radius: 12px; border: 1px solid #bfdbfe;">${r.badge}</span>
+            <div class="demo-role-card-top">
+              <strong>${r.label}</strong>
+              <span class="demo-role-badge">${r.badge}</span>
             </div>
-            <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.35;">${r.description}</p>
+            <p>${r.description}</p>
           </button>
         `).join('')}
       </div>
 
-      <div style="padding: 12px 20px; border-top: 1px solid var(--border, #e2e8f0); background: #f8fafc; text-align: right;">
-        <button type="button" id="cancelDemoRoleModal" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 500; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 6px; cursor: pointer; color: #475569;">Cancel</button>
+      <div class="demo-role-modal-footer">
+        <span class="demo-role-modal-hint">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M7 2a1 1 0 0 1 2 0v2.586l1.293-1.293a1 1 0 1 1 1.414 1.414L9.414 7H12a1 1 0 1 1 0 2H9.414l2.293 2.293a1 1 0 0 1-1.414 1.414L9 10.414V13a1 1 0 1 1-2 0v-2.586l-1.293 1.293a1 1 0 0 1-1.414-1.414L6.586 8H4a1 1 0 0 1 0-2h2.586L4.293 4.707a1 1 0 0 1 1.414-1.414L7 4.586V2z"/>
+          </svg>
+          Drag header to move
+        </span>
+        <button type="button" id="cancelDemoRoleModal" class="demo-role-cancel-btn">Cancel</button>
       </div>
     </div>
   `;
 
   document.body.appendChild(modal);
 
+  const dialog = modal.querySelector('.demo-role-modal-dialog');
+  const header = modal.querySelector('.demo-role-modal-header');
+
+  let isDragging = false;
+  let hasMoved = false;
+  let startX = 0;
+  let startY = 0;
+  let initialLeft = 0;
+  let initialTop = 0;
+
+  const onPointerDown = (e) => {
+    // Only drag with primary mouse button / touch
+    if (e.button !== undefined && e.button !== 0) return;
+    if (e.target.closest('#closeDemoRoleModal')) return;
+
+    isDragging = true;
+    hasMoved = false;
+    startX = e.clientX;
+    startY = e.clientY;
+
+    const rect = dialog.getBoundingClientRect();
+    initialLeft = rect.left;
+    initialTop = rect.top;
+
+    // Convert centered transform to fixed left/top coords
+    dialog.style.left = `${rect.left}px`;
+    dialog.style.top = `${rect.top}px`;
+    dialog.style.transform = 'none';
+    dialog.style.margin = '0';
+    dialog.classList.add('is-dragging');
+
+    if (header.setPointerCapture && e.pointerId !== undefined) {
+      try { header.setPointerCapture(e.pointerId); } catch (_) {}
+    }
+
+    window.addEventListener('pointermove', onPointerMove, { passive: false });
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+  };
+
+  const onPointerMove = (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+      hasMoved = true;
+    }
+
+    const rect = dialog.getBoundingClientRect();
+    const minX = 8;
+    const maxX = window.innerWidth - rect.width - 8;
+    const minY = 8;
+    const maxY = window.innerHeight - rect.height - 8;
+
+    let targetLeft = initialLeft + dx;
+    let targetTop = initialTop + dy;
+
+    if (maxX > minX) {
+      targetLeft = Math.max(minX, Math.min(targetLeft, maxX));
+    }
+    if (maxY > minY) {
+      targetTop = Math.max(minY, Math.min(targetTop, maxY));
+    }
+
+    dialog.style.left = `${targetLeft}px`;
+    dialog.style.top = `${targetTop}px`;
+  };
+
+  const onPointerUp = (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    dialog.classList.remove('is-dragging');
+
+    if (header.releasePointerCapture && e.pointerId !== undefined) {
+      try { header.releasePointerCapture(e.pointerId); } catch (_) {}
+    }
+
+    window.removeEventListener('pointermove', onPointerMove);
+    window.removeEventListener('pointerup', onPointerUp);
+    window.removeEventListener('pointercancel', onPointerUp);
+  };
+
+  header.addEventListener('pointerdown', onPointerDown);
+
   const close = () => {
-    modal.remove();
+    window.removeEventListener('pointermove', onPointerMove);
+    window.removeEventListener('pointerup', onPointerUp);
+    window.removeEventListener('pointercancel', onPointerUp);
     document.removeEventListener('keydown', onKeyDown);
+    header.removeEventListener('pointerdown', onPointerDown);
+    modal.remove();
   };
 
   const onKeyDown = (e) => {
@@ -537,15 +630,24 @@ function openDemoRoleModal(remember = false) {
 
   document.getElementById('closeDemoRoleModal')?.addEventListener('click', close);
   document.getElementById('cancelDemoRoleModal')?.addEventListener('click', close);
+
+  // Close only if clicking directly on overlay without dragging
+  let overlayDown = false;
+  modal.addEventListener('pointerdown', (e) => {
+    overlayDown = e.target === modal;
+  });
   modal.addEventListener('click', (e) => {
-    if (e.target === modal) close();
+    if (e.target === modal && overlayDown && !hasMoved) {
+      close();
+    }
   });
 
   modal.querySelectorAll('.demo-role-option').forEach(btn => {
     btn.addEventListener('click', () => {
       const selectedRole = btn.getAttribute('data-role');
       btn.style.opacity = '0.7';
-      btn.textContent = 'Launching…';
+      const badge = btn.querySelector('.demo-role-badge');
+      if (badge) badge.textContent = 'Launching…';
       startDemoLogin(selectedRole, remember);
     });
   });
