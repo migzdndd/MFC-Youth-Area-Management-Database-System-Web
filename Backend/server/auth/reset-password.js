@@ -1,5 +1,6 @@
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { createSupabaseAuthClient } from '../_lib/supabase.js';
+import { checkRateLimit } from '../_lib/rate-limit.js';
 
 function validatePassword(password) {
   if (String(password).length < 8) return 'Password must be at least 8 characters long.';
@@ -11,6 +12,8 @@ function validatePassword(password) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
+
+  if (!await checkRateLimit(req, res, 'reset-password')) return;
 
   const authClient = createSupabaseAuthClient();
   let recoverySessionEstablished = false;

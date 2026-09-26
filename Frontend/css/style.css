@@ -1363,34 +1363,228 @@ button:active,
   font-size: .82rem
 }
 
-/* TOAST */
+/* ============================================================================
+   GLOBAL ERROR AND SUCCESS MESSAGES (TOAST & ALERTS)
+   Adapted from Uiverse.io by akshat-patel28
+   ============================================================================ */
 .toast-wrap {
   position: fixed;
   right: 18px;
   bottom: 18px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  z-index: 200
+  gap: 12px;
+  z-index: 10000;
+  pointer-events: none;
 }
 
-.toast {
-  min-width: 230px;
-  max-width: 340px;
-  padding: 12px 14px;
-  border-radius: 9px;
-  background: #15253b;
-  color: #fff;
-  box-shadow: var(--shadow);
-  font-size: .84rem
+/* From Uiverse.io by akshat-patel28 */ 
+.toast-wrap .card,
+.toast.card,
+.toast,
+.message-card {
+  width: 330px;
+  max-width: min(330px, calc(100vw - 36px));
+  min-height: 80px;
+  height: auto;
+  border-radius: 8px;
+  box-sizing: border-box;
+  padding: 10px 15px;
+  background-color: #ffffff;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 15px;
+  pointer-events: auto;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  animation: toastSlideIn 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 200ms ease, transform 200ms ease, box-shadow 180ms ease;
 }
 
-.toast.success {
-  background: #26734c
+/* Neutralize global card pseudo-element overlays for message cards */
+.toast-wrap .card::before,
+.toast.card::before,
+.toast::before,
+.message-card::before {
+  display: none !important;
+  content: none !important;
 }
 
-.toast.error {
-  background: #a5373e
+.toast-wrap .card:hover,
+.toast.card:hover,
+.toast:hover,
+.message-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: rgba(149, 157, 165, 0.32) 0px 10px 28px;
+}
+
+.wave {
+  position: absolute;
+  transform: rotate(90deg);
+  left: -31px;
+  top: 32px;
+  width: 80px;
+  fill: #04e4003a;
+  pointer-events: none;
+}
+
+.icon-container {
+  width: 35px;
+  height: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #04e40048;
+  border-radius: 50%;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.icon {
+  width: 17px;
+  height: 17px;
+  color: #269b24;
+}
+
+.message-text-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.message-text,
+.sub-text {
+  margin: 0;
+  cursor: default;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.message-text {
+  color: #269b24;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.sub-text {
+  font-size: 14px;
+  color: #555;
+  margin-top: 2px;
+}
+
+.cross-icon {
+  width: 18px;
+  height: 18px;
+  color: #555;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 150ms ease, color 150ms ease;
+}
+
+.cross-icon:hover,
+.cross-icon:focus-visible {
+  color: #111;
+  transform: scale(1.15);
+  outline: none;
+}
+
+/* ERROR STATE (Uiverse error theme) */
+.toast.error .wave,
+.message-card.error .wave,
+.card.error .wave {
+  fill: #fc0c0c3a;
+}
+
+.toast.error .icon-container,
+.message-card.error .icon-container,
+.card.error .icon-container {
+  background-color: #fc0c0c48;
+}
+
+.toast.error .icon,
+.message-card.error .icon,
+.card.error .icon {
+  color: #fc0c0c;
+}
+
+.toast.error .message-text,
+.message-card.error .message-text,
+.card.error .message-text {
+  color: #fc0c0c;
+}
+
+/* SUCCESS STATE (Uiverse success theme) */
+.toast.success .wave,
+.message-card.success .wave,
+.card.success .wave {
+  fill: #04e4003a;
+}
+
+.toast.success .icon-container,
+.message-card.success .icon-container,
+.card.success .icon-container {
+  background-color: #04e40048;
+}
+
+.toast.success .icon,
+.message-card.success .icon,
+.card.success .icon {
+  color: #269b24;
+}
+
+.toast.success .message-text,
+.message-card.success .message-text,
+.card.success .message-text {
+  color: #269b24;
+}
+
+/* In-form alert styling for auth screens */
+.login-form .message-card,
+.auth-recovery-form .message-card {
+  width: 100%;
+  max-width: 100%;
+  margin: 10px 0 14px;
+}
+
+/* Toast Animations */
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.toast-hide {
+  opacity: 0 !important;
+  transform: translateY(10px) scale(0.96) !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 480px) {
+  .toast-wrap {
+    right: 12px;
+    left: 12px;
+    bottom: 14px;
+    align-items: center;
+  }
+
+  .toast-wrap .card,
+  .toast.card,
+  .toast {
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 /* MOBILE */

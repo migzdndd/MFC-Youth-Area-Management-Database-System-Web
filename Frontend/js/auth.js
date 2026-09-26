@@ -1,17 +1,10 @@
 /**
- * ============================================================================
  * MFC Youth Area Management System - Frontend Authentication
- * ============================================================================
- * Purpose:
+ *
  * Manages client authentication, session storage, and account provisioning.
- * - Handles sign-in (Cloud Supabase API with local demo fallback).
- * - Routes authenticated users according to role (Dashboard, Chapters, Member Portal).
- * - Handles servant leader registration and member self-service account claiming.
- * - Handles password changes and email update workflows.
- * ============================================================================
  */
 
-// Section 1: Storage Keys & Access Level Configuration
+// Storage Keys & Access Level Configuration
 const USER_KEY = 'mfc_demo_users';
 const SESSION_KEY = 'mfc_demo_session';
 const DB_KEY = 'mfc_web_database_v1';
@@ -258,11 +251,54 @@ function backendSessionFromResponse(payload, remember = false) {
 
 // Section 5: UI Helpers: Alerts, Validation & Motion Effects
 
-/** Displays an alert box message in the specified container element */
+/** Displays an alert box message in the specified container element using the global message card design */
 function showMessage(id, text, type = 'error') {
   const box = document.getElementById(id);
   if (!box) return;
-  box.innerHTML = `<div class="message ${type}" role="status">${escapeHtml(text)}</div>`;
+
+  if (!text) {
+    box.innerHTML = '';
+    return;
+  }
+
+  const isSuccess = type === 'success';
+  const title = isSuccess ? 'Success' : 'Error';
+
+  box.innerHTML = `
+    <div class="card message-card ${type}" role="${isSuccess ? 'status' : 'alert'}">
+      <svg class="wave" viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M0,256L48,261.3C96,267,192,277,288,266.7C384,256,480,224,576,186.7C672,149,768,107,864,112C960,117,1056,171,1152,181.3C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+      </svg>
+      <div class="icon-container">
+        ${isSuccess
+          ? `<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true">
+              <path fill="currentColor" d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"></path>
+            </svg>`
+          : `<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true">
+              <path fill="currentColor" d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zm32 224a32 32 0 1 1 -64 0 32 32 0 1 1 64 0z"></path>
+            </svg>`
+        }
+      </div>
+      <div class="message-text-container">
+        <p class="message-text">${title}</p>
+        <p class="sub-text">${escapeHtml(text)}</p>
+      </div>
+      <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 15" fill="none" role="button" tabindex="0" aria-label="Dismiss message">
+        <path fill="currentColor" d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z" clip-rule="evenodd" fill-rule="evenodd"></path>
+      </svg>
+    </div>
+  `;
+
+  const cross = box.querySelector('.cross-icon');
+  if (cross) {
+    cross.addEventListener('click', () => { box.innerHTML = ''; });
+    cross.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        box.innerHTML = '';
+      }
+    });
+  }
 }
 
 /** Escapes special HTML characters */
@@ -530,6 +566,18 @@ if (loginForm) {
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
+
+      if (payload?.mfaRequired) {
+        sessionStorage.setItem('mfa_pending', JSON.stringify({
+          factorId: payload.factorId,
+          tempSession: payload.tempSession,
+          user: payload.user,
+          remember
+        }));
+        navigateWithLoader('/mfa-verify.html');
+        return;
+      }
+
       const session = backendSessionFromResponse(payload, remember);
       navigateWithLoader(destinationFor(session));
       return;

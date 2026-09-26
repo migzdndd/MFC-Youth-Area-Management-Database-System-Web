@@ -24,6 +24,12 @@ import services from '../server/services/index.js';
 import sync from '../server/sync/index.js';
 import dailyReadings from '../server/daily-readings/index.js';
 import changelogs from '../server/changelogs/index.js';
+import mfaEnroll from '../server/auth/mfa/enroll.js';
+import mfaVerifyEnroll from '../server/auth/mfa/verify-enroll.js';
+import mfaChallenge from '../server/auth/mfa/challenge.js';
+import mfaVerify from '../server/auth/mfa/verify.js';
+import mfaFactors from '../server/auth/mfa/factors.js';
+import mfaUnenroll from '../server/auth/mfa/unenroll.js';
 
 const ROUTES = new Map([
   ['health', health],
@@ -40,6 +46,18 @@ const ROUTES = new Map([
   ['admin/members/change-email', adminChangeEmail],
   ['auth/me', authMe],
   ['auth/member-claim', authMemberClaim],
+  ['mfa/enroll', mfaEnroll],
+  ['auth/mfa/enroll', mfaEnroll],
+  ['mfa/verify-enroll', mfaVerifyEnroll],
+  ['auth/mfa/verify-enroll', mfaVerifyEnroll],
+  ['mfa/challenge', mfaChallenge],
+  ['auth/mfa/challenge', mfaChallenge],
+  ['mfa/verify', mfaVerify],
+  ['auth/mfa/verify', mfaVerify],
+  ['mfa/factors', mfaFactors],
+  ['auth/mfa/factors', mfaFactors],
+  ['mfa/unenroll', mfaUnenroll],
+  ['auth/mfa/unenroll', mfaUnenroll],
   ['chapters', chapters],
   ['chapters/assign-members', chapterAssignMembers],
   ['events', events],

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<!-- MFC Youth Area Management System: Two-Factor Authentication (TOTP) setup -->
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Manage Two-Factor Authentication for your MFC Youth Area Management System account.">
+  <meta name="theme-color" content="#002847">
+  <title>Two-Factor Authentication Setup - MFC Youth Area Management System</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  </style>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/img/logo-2.png">
+</head>
+
+<body class="auth-body auth-recovery-body" data-allow-authenticated="true">
+  <main class="auth-page auth-page-modern">
+    <section class="login-card login-card-modern animate-in" aria-labelledby="mfaSetupTitle" style="max-width: 520px; margin: 0 auto;">
+      <div class="login-header auth-recovery-header">
+        <img class="logo-mark" src="/img/logo.png" alt="MFC Youth Logo">
+        <h1 id="mfaSetupTitle" style="font-size: 1.85rem; margin-top: 8px;">Two-Factor Authentication</h1>
+        <p>Protect your servant account with time-based one-time password (TOTP) verification.</p>
+      </div>
+
+      <div class="verification-badge auth-security-account" style="margin-bottom: 20px;">
+        <span>Signed in as</span>
+        <strong id="mfaAccountEmail">-</strong>
+      </div>
+
+      <div id="mfaGlobalMessage"></div>
+
+      <!-- State 1: Loading Status -->
+      <div id="mfaLoadingSection" style="text-align: center; padding: 30px 10px;">
+        <p style="color: #afbdd0; font-size: 0.95rem;">Checking security factor status…</p>
+      </div>
+
+      <!-- State 2: Enrolled / Active Status -->
+      <div id="mfaActiveSection" style="display: none;">
+        <div style="background: rgba(4, 38, 20, 0.45); border: 1px solid rgba(74, 222, 128, 0.3); border-radius: 16px; padding: 20px; margin-bottom: 20px; text-align: center;">
+          <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(38, 155, 36, 0.2); border: 2px solid #22c55e; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+            <svg style="width: 26px; height: 26px; color: #4ade80;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 style="font-size: 1.25rem; font-weight: 700; color: #f0fdf4; margin-bottom: 6px;">2FA is Active</h2>
+          <p style="font-size: 0.88rem; color: #bbf7d0; line-height: 1.5; margin: 0;">
+            Your account requires a code from your authenticator app each time you sign in.
+          </p>
+        </div>
+
+        <div class="login-buttons auth-recovery-actions auth-security-actions" style="flex-direction: column; gap: 10px;">
+          <button class="btn-auth btn-dark auth-action-secondary" id="unenrollBtn" type="button" style="color: #fca5a5; border-color: rgba(248, 113, 113, 0.3);">
+            Disable Two-Factor Authentication
+          </button>
+          <a href="/change-password.html" class="btn-auth auth-action-secondary" style="text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+            &larr; Back to Account Security
+          </a>
+        </div>
+      </div>
+
+      <!-- State 3: Not Enrolled / Setup Wizard -->
+      <div id="mfaSetupSection" style="display: none;">
+        <div style="margin-bottom: 20px; background: rgba(0, 24, 45, 0.4); border: 1px solid rgba(118, 184, 240, 0.16); border-radius: 16px; padding: 20px;">
+          <h3 style="font-size: 1.05rem; font-weight: 700; color: #f5faff; margin-bottom: 8px;">Step 1: Scan the QR Code</h3>
+          <p style="font-size: 0.86rem; color: #afbdd0; line-height: 1.5; margin-bottom: 16px;">
+            Scan this code with Google Authenticator, Microsoft Authenticator, or Authy on your mobile device.
+          </p>
+
+          <div id="qrCodeWrapper" style="display: flex; justify-content: center; align-items: center; margin: 16px 0; min-height: 180px;">
+            <div id="qrCodeContainer" style="background: #ffffff; padding: 14px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);">
+              <!-- Injected QR SVG/image -->
+            </div>
+          </div>
+
+          <div style="margin-top: 14px; background: rgba(0, 16, 30, 0.5); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 10px 14px;">
+            <span style="display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #8fa1ae; margin-bottom: 4px;">Or enter code manually:</span>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+              <code id="mfaSecretText" style="font-family: var(--font-mono, monospace); font-weight: 700; color: #7dd3fc; font-size: 0.88rem; letter-spacing: 0.08em; word-break: break-all;"></code>
+              <button id="copySecretBtn" type="button" style="background: rgba(125, 211, 252, 0.15); border: 1px solid rgba(125, 211, 252, 0.3); color: #7dd3fc; border-radius: 6px; padding: 4px 10px; font-size: 0.76rem; font-weight: 700; cursor: pointer; flex-shrink: 0;">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <form class="login-form login-form-modern" id="confirmEnrollForm" novalidate style="background: transparent; border: none; padding: 0; box-shadow: none;">
+          <h3 style="font-size: 1.05rem; font-weight: 700; color: #f5faff; margin-bottom: 8px;">Step 2: Confirm 6-Digit Code</h3>
+          <p style="font-size: 0.86rem; color: #afbdd0; line-height: 1.5; margin-bottom: 14px;">
+            Enter the 6-digit code currently shown in your authenticator app to activate.
+          </p>
+
+          <div class="form-group auth-recovery-field">
+            <div class="login-field" style="justify-content: center; padding: 0.6em 1em; background: rgba(0, 20, 36, 0.4); border: 1px solid rgba(118, 184, 240, 0.2);">
+              <input
+                class="login-input"
+                id="enrollCode"
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                maxlength="6"
+                placeholder="000000"
+                autocomplete="one-time-code"
+                required
+                style="text-align: center; font-size: 1.7rem; font-weight: 800; letter-spacing: 0.25em; color: #f5faff; font-family: var(--font-mono, monospace);"
+              >
+            </div>
+          </div>
+
+          <div class="login-buttons auth-recovery-actions auth-security-actions" style="margin-top: 18px; flex-direction: column; gap: 10px;">
+            <button class="btn-auth btn-primary auth-action-primary" id="activateBtn" type="submit" style="width: 100%;">
+              Verify &amp; Activate 2FA
+            </button>
+            <a href="/change-password.html" class="btn-auth auth-action-secondary" style="text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+              Cancel &amp; Back to Security
+            </a>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="auth-footer" style="padding: 2rem; text-align: center; margin-top: auto;">
+    Powered &amp; designed by <a href="https://migzdndd.github.io/web-portfolio/" target="_blank" rel="noopener noreferrer" style="color: inherit; font-weight: bold; text-decoration: none;">migz.dev</a>
+  </footer>
+
+  <div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
+
+  <script src="/js/loader.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    (() => {
+      const session = getSession();
+      if (!session) {
+        window.location.replace('/');
+        return;
+      }
+
+      const emailEl = document.getElementById('mfaAccountEmail');
+      if (emailEl) emailEl.textContent = session.email || '-';
+
+      const loadingSection = document.getElementById('mfaLoadingSection');
+      const activeSection = document.getElementById('mfaActiveSection');
+      const setupSection = document.getElementById('mfaSetupSection');
+      const unenrollBtn = document.getElementById('unenrollBtn');
+      const qrCodeContainer = document.getElementById('qrCodeContainer');
+      const mfaSecretText = document.getElementById('mfaSecretText');
+      const copySecretBtn = document.getElementById('copySecretBtn');
+      const confirmEnrollForm = document.getElementById('confirmEnrollForm');
+      const enrollCodeInput = document.getElementById('enrollCode');
+      const activateBtn = document.getElementById('activateBtn');
+
+      let currentFactorId = null;
+      const token = session.accessToken || '';
+
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      };
+
+      async function checkCurrentStatus() {
+        loadingSection.style.display = 'block';
+        activeSection.style.display = 'none';
+        setupSection.style.display = 'none';
+
+        try {
+          const res = await fetch('/api/mfa/factors', { method: 'GET', headers });
+          const data = await res.json().catch(() => ({ ok: false }));
+
+          if (res.ok && data.ok) {
+            const verified = (data.factors || []).filter(f => f.status === 'verified');
+            if (verified.length > 0) {
+              currentFactorId = verified[0].id;
+              loadingSection.style.display = 'none';
+              activeSection.style.display = 'block';
+              return;
+            }
+          }
+
+          // Not verified or no factor: start enrollment
+          startEnrollment();
+        } catch {
+          startEnrollment();
+        }
+      }
+
+      async function startEnrollment() {
+        loadingSection.style.display = 'block';
+        activeSection.style.display = 'none';
+        setupSection.style.display = 'none';
+
+        try {
+          const res = await fetch('/api/mfa/enroll', { method: 'POST', headers });
+          const data = await res.json().catch(() => ({ ok: false }));
+
+          if (!res.ok || !data.ok) {
+            loadingSection.style.display = 'none';
+            if (typeof showMessage === 'function') {
+              showMessage('mfaGlobalMessage', data.error || 'Failed to start MFA setup.', 'error');
+            }
+            return;
+          }
+
+          currentFactorId = data.factorId;
+          mfaSecretText.textContent = data.secret || '';
+
+          // Render QR code
+          qrCodeContainer.innerHTML = '';
+          if (data.qrCode) {
+            if (data.qrCode.startsWith('<svg')) {
+              qrCodeContainer.innerHTML = data.qrCode;
+              const svgEl = qrCodeContainer.querySelector('svg');
+              if (svgEl) {
+                svgEl.style.width = '160px';
+                svgEl.style.height = '160px';
+                svgEl.style.display = 'block';
+              }
+            } else if (data.qrCode.startsWith('data:image')) {
+              const img = document.createElement('img');
+              img.src = data.qrCode;
+              img.alt = '2FA QR Code';
+              img.style.width = '160px';
+              img.style.height = '160px';
+              img.style.display = 'block';
+              qrCodeContainer.appendChild(img);
+            }
+          }
+
+          loadingSection.style.display = 'none';
+          setupSection.style.display = 'block';
+          enrollCodeInput.focus();
+        } catch (err) {
+          loadingSection.style.display = 'none';
+          if (typeof showMessage === 'function') {
+            showMessage('mfaGlobalMessage', err?.message || 'Error generating QR code.', 'error');
+          }
+        }
+      }
+
+      copySecretBtn.addEventListener('click', async () => {
+        const text = mfaSecretText.textContent.trim();
+        if (!text) return;
+        try {
+          await navigator.clipboard.writeText(text);
+          copySecretBtn.textContent = 'Copied!';
+          setTimeout(() => { copySecretBtn.textContent = 'Copy'; }, 2000);
+        } catch {
+          copySecretBtn.textContent = 'Failed';
+        }
+      });
+
+      enrollCodeInput.addEventListener('input', () => {
+        enrollCodeInput.value = enrollCodeInput.value.replace(/[^0-9]/g, '').slice(0, 6);
+      });
+
+      confirmEnrollForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const code = enrollCodeInput.value.trim();
+
+        if (code.length !== 6) {
+          if (typeof showMessage === 'function') {
+            showMessage('mfaGlobalMessage', 'Enter the full 6-digit code from your authenticator app.', 'error');
+          }
+          enrollCodeInput.focus();
+          return;
+        }
+
+        setButtonBusy(activateBtn, true, 'Activating…');
+
+        try {
+          const res = await fetch('/api/mfa/verify-enroll', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              factorId: currentFactorId,
+              code
+            })
+          });
+
+          const data = await res.json().catch(() => ({ ok: false }));
+
+          if (!res.ok || !data.ok) {
+            setButtonBusy(activateBtn, false, 'Verify & Activate 2FA');
+            if (typeof showMessage === 'function') {
+              showMessage('mfaGlobalMessage', data.error || 'Invalid code. Please try again.', 'error');
+            }
+            enrollCodeInput.value = '';
+            enrollCodeInput.focus();
+            return;
+          }
+
+          setButtonBusy(activateBtn, false, 'Verify & Activate 2FA');
+          if (typeof toast === 'function') {
+            toast('Two-factor authentication successfully enabled!', 'success');
+          }
+
+          checkCurrentStatus();
+        } catch (err) {
+          setButtonBusy(activateBtn, false, 'Verify & Activate 2FA');
+          if (typeof showMessage === 'function') {
+            showMessage('mfaGlobalMessage', err?.message || 'Verification error.', 'error');
+          }
+        }
+      });
+
+      unenrollBtn.addEventListener('click', async () => {
+        if (!confirm('Are you sure you want to disable Two-Factor Authentication? Your account will only be protected by your password.')) {
+          return;
+        }
+
+        setButtonBusy(unenrollBtn, true, 'Disabling…');
+
+        try {
+          const res = await fetch('/api/mfa/unenroll', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ factorId: currentFactorId })
+          });
+
+          const data = await res.json().catch(() => ({ ok: false }));
+
+          if (!res.ok || !data.ok) {
+            setButtonBusy(unenrollBtn, false, 'Disable Two-Factor Authentication');
+            if (typeof showMessage === 'function') {
+              showMessage('mfaGlobalMessage', data.error || 'Failed to disable 2FA.', 'error');
+            }
+            return;
+          }
+
+          if (typeof toast === 'function') {
+            toast('Two-factor authentication has been disabled.', 'success');
+          }
+
+          currentFactorId = null;
+          startEnrollment();
+        } catch (err) {
+          setButtonBusy(unenrollBtn, false, 'Disable Two-Factor Authentication');
+          if (typeof showMessage === 'function') {
+            showMessage('mfaGlobalMessage', err?.message || 'Network error.', 'error');
+          }
+        }
+      });
+
+      checkCurrentStatus();
+    })();
+  </script>
+</body>
+
+</html>

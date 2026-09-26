@@ -1,8 +1,11 @@
 import { sendJson, methodNotAllowed, isValidEmail, normalizeEmail } from '../_lib/http.js';
 import { createSupabaseAuthClient } from '../_lib/supabase.js';
+import { checkRateLimit } from '../_lib/rate-limit.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
+
+  if (!await checkRateLimit(req, res, 'forgot-password')) return;
 
   const genericResponse = () => sendJson(res, 200, { ok: true, message: 'If an account exists, a reset link was sent.' });
 

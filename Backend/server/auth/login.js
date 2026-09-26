@@ -1,6 +1,8 @@
 import { createSupabaseAuthClient, createSupabaseAdmin } from '../_lib/supabase.js';
 import { sendJson, methodNotAllowed, normalizeEmail, isValidEmail, apiError } from '../_lib/http.js';
 import { claimMemberRecord } from '../_lib/member-claim.js';
+import { checkRateLimit } from '../_lib/rate-limit.js';
+import { checkBruteForce, recordLoginFailure, clearLoginFailures } from '../_lib/brute-force.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
@@ -13,12 +15,26 @@ export default async function handler(req, res) {
       return sendJson(res, 400, { ok: false, error: 'A valid email and password are required.' });
     }
 
+    if (!await checkRateLimit(req, res, 'login')) return;
+    if (!await checkBruteForce(req, res, email)) return;
+
     const authClient = createSupabaseAuthClient();
     const { data, error } = await authClient.auth.signInWithPassword({ email, password });
 
     if (error || !data?.session || !data?.user) {
+      const lockout = await recordLoginFailure(email);
+      if (lockout?.locked) {
+        const remainingMinutes = Math.max(1, Math.ceil((new Date(lockout.lockedUntil).getTime() - Date.now()) / 60000));
+        return sendJson(res, 423, {
+          ok: false,
+          error: `Account temporarily locked due to multiple failed login attempts. Please try again in ${remainingMinutes} minute${remainingMinutes === 1 ? '' : 's'}.`,
+          lockedUntil: lockout.lockedUntil
+        });
+      }
       return sendJson(res, 401, { ok: false, error: 'Invalid email or password.' });
     }
+
+    await clearLoginFailures(email);
 
     const admin = createSupabaseAdmin();
     const { data: profile, error: profileError } = await admin
@@ -37,6 +53,35 @@ export default async function handler(req, res) {
     }
     if (linkedProfile.is_active === false) {
       return sendJson(res, 403, { ok: false, error: 'This account is not active.' });
+    }
+
+    let verifiedFactors = (data.user?.factors || []).filter(f => f.factor_type === 'totp' && f.status === 'verified');
+    if (!verifiedFactors.length) {
+      try {
+        const { data: factorData } = await admin.auth.admin.mfa.listFactors({ userId: data.user.id });
+        verifiedFactors = (factorData?.factors || []).filter(f => f.factor_type === 'totp' && f.status === 'verified');
+      } catch (factorErr) {
+        console.warn('MFA factor listing skipped:', factorErr?.message || factorErr);
+      }
+    }
+
+    if (verifiedFactors.length > 0) {
+      const factor = verifiedFactors[0];
+      return sendJson(res, 200, {
+        ok: true,
+        mfaRequired: true,
+        factorId: factor.id,
+        tempSession: {
+          accessToken: data.session.access_token,
+          refreshToken: data.session.refresh_token,
+          expiresAt: data.session.expires_at
+        },
+        user: {
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.user_metadata?.display_name || data.user.email
+        }
+      });
     }
 
     const authEmail = String(data.user.email || '').trim().toLowerCase();

@@ -2,6 +2,7 @@ import { timingSafeEqual } from 'node:crypto';
 import { createSupabaseAdmin, createSupabaseAuthClient } from '../_lib/supabase.js';
 import { assertAdminRegistrationConfigured } from '../_lib/env.js';
 import { sendJson, methodNotAllowed, normalizeEmail, isValidEmail, apiError } from '../_lib/http.js';
+import { checkRateLimit } from '../_lib/rate-limit.js';
 
 const ADMIN_ROLES = new Set([
   'national_coordinator',
@@ -42,6 +43,8 @@ function stageError(error, stage, code) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
+
+  if (!await checkRateLimit(req, res, 'admin-register')) return;
 
   try {
     const { adminRegistrationCode } = assertAdminRegistrationConfigured();

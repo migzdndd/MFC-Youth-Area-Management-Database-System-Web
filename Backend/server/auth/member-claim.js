@@ -2,6 +2,7 @@ import { createSupabaseAdmin, createSupabaseAuthClient } from '../_lib/supabase.
 import { requireAuthenticatedUser } from '../_lib/access.js';
 import { claimMemberRecord } from '../_lib/member-claim.js';
 import { sendJson, methodNotAllowed, normalizeEmail, isValidEmail, apiError } from '../_lib/http.js';
+import { checkRateLimit } from '../_lib/rate-limit.js';
 
 function passwordError(password) {
   if (password.length < 8) return 'Password must be at least 8 characters long.';
@@ -15,6 +16,8 @@ function escapeLikePattern(value) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
+
+  if (!await checkRateLimit(req, res, 'member-claim')) return;
 
   try {
     const token = String(req.headers?.authorization || '').replace(/^Bearer\s+/i, '').trim();
