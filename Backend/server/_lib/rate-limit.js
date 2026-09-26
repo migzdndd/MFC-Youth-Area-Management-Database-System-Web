@@ -1,6 +1,15 @@
 import { createSupabaseAdmin } from './supabase.js';
 import { sendJson } from './http.js';
 
+/**
+ * Detect User's Internet Location Address
+ *
+ * What it does:
+ * Discovers the computer's network address (IP address) from proxy and web headers to protect against automated spam attacks.
+ *
+ * Backup plan if it breaks:
+ * If behind cloud proxies, it takes the first forwarded IP. If all headers are missing, it defaults to the local loopback address '127.0.0.1'.
+ */
 export function getClientIp(req) {
   const forwarded = req.headers?.['x-forwarded-for'];
   if (forwarded) {
@@ -23,13 +32,13 @@ const RATE_CONFIGS = {
 };
 
 /**
- * Validates request rate limits using Supabase sliding window counter.
- * Returns true if allowed, or sends a 429 response and returns false if exceeded.
+ * Throttle Rapid-Fire Network Requests
  *
- * @param {import('http').IncomingMessage} req
- * @param {import('http').ServerResponse} res
- * @param {string} endpoint
- * @returns {Promise<boolean>}
+ * What it does:
+ * Limits how many times a user can perform sensitive actions (like trying to guess passwords or sending password resets) within a few minutes.
+ *
+ * Backup plan if it breaks:
+ * If the rate-limiting database table is unreachable, it logs a warning and allows the request to pass through so real users are never locked out by database hiccups.
  */
 export async function checkRateLimit(req, res, endpoint) {
   const config = RATE_CONFIGS[endpoint] || RATE_CONFIGS.default;

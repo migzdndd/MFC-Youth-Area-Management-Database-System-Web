@@ -1,12 +1,18 @@
 /**
- * MFC Youth Area Management System - Page Loader & Skeleton Transitions
+ * MFC Youth Area Management System - Page Loader & Screen Transition Animations
  *
- * Provides smooth page transitions, skeleton screens, and navigation overlays.
+ * What this file does:
+ * Makes moving between pages feel smooth and instant. It shows a branded loading curtain
+ * and placeholder outlines (skeletons) while data is loading so the screen never flickers or jumps.
+ *
+ * Backup plan if it breaks:
+ * If an animation or prefetch fails, the system automatically falls back to standard browser
+ * page loading, and an emergency 5-second timer ensures the loading curtain is never stuck on screen.
  */
 
 (() => {
   // --------------------------------------------------------------------------
-  // 1. Constants & Navigation State
+  // Settings & Navigation State
   // --------------------------------------------------------------------------
   const LOADER_ID = 'mfcPageLoader';
   const PREFETCH_DELAY_MS = 40;
@@ -15,9 +21,19 @@
   let navigationTimer = null;
 
   // --------------------------------------------------------------------------
-  // 2. Destination Route Label Resolver
-  // Returns human-friendly text for the loader overlay based on destination URL.
+  // Friendly Page Title Finder
   // --------------------------------------------------------------------------
+
+  /**
+   * Get Friendly Page Name
+   *
+   * What it does:
+   * Looks at a web address and returns a friendly title (like "Dashboard", "Members", or "Reports")
+   * so the loading screen can say "Opening Dashboard" instead of showing a confusing web address.
+   *
+   * Backup plan if it breaks:
+   * If the address is unrecognized or cannot be read, it safely says "Your next page".
+   */
   function destinationLabel(url) {
     try {
       const path = new URL(url, window.location.href).pathname.replace(/\/$/, '');
@@ -45,11 +61,19 @@
   }
 
   // --------------------------------------------------------------------------
-  // 3. Skeleton UI Generators
-  // Builds placeholder UI elements to eliminate layout shift while fetching data.
+  // Placeholder Screen Outlines (Skeletons)
+  // Shows gray placeholder shapes while live information is being fetched
   // --------------------------------------------------------------------------
 
-  /** Generates header skeleton with optional right-aligned action button */
+  /**
+   * Build Header Placeholder
+   *
+   * What it does:
+   * Creates light gray placeholder bars for the page title and top buttons.
+   *
+   * Backup plan if it breaks:
+   * Renders simple placeholder shapes that will be automatically replaced as soon as the real page loads.
+   */
   function skeletonHeader(withAction = true) {
     return `
       <header class="page-header skeleton-page-header" aria-hidden="true">
@@ -62,7 +86,15 @@
     `;
   }
 
-  /** Generates table skeleton with simulated rows and columns */
+  /**
+   * Build Table Placeholder
+   *
+   * What it does:
+   * Draws a temporary gray grid showing rows and columns while member or chapter tables are loading.
+   *
+   * Backup plan if it breaks:
+   * Safely defaults to a standard 5-row outline if row counts are not specified.
+   */
   function tableSkeleton(rows = 5, columns = 6) {
     const header = Array.from({ length: columns }, () => '<span class="skeleton-line skeleton-table-head"></span>').join('');
     const body = Array.from({ length: rows }, () => `
@@ -79,7 +111,15 @@
     `;
   }
 
-  /** Generates a grid of placeholder metric/data cards */
+  /**
+   * Build Card Grid Placeholder
+   *
+   * What it does:
+   * Generates temporary empty card boxes for numbers and statistics.
+   *
+   * Backup plan if it breaks:
+   * Defaults to 4 placeholder card shapes.
+   */
   function cardsSkeleton(count = 4) {
     return `
       <div class="skeleton-card-grid" aria-hidden="true">
@@ -94,7 +134,15 @@
     `;
   }
 
-  /** Generates toolbar placeholder containing search and filter controls */
+  /**
+   * Build Toolbar Placeholder
+   *
+   * What it does:
+   * Draws gray outlines for the search box and filter dropdowns.
+   *
+   * Backup plan if it breaks:
+   * Generates standard placeholder blocks without throwing errors.
+   */
   function toolbarSkeleton() {
     return `
       <div class="toolbar skeleton-toolbar" aria-hidden="true">
@@ -105,7 +153,16 @@
     `;
   }
 
-  /** Maps current page identifier to appropriate skeleton layout */
+  /**
+   * Match Skeleton to Screen
+   *
+   * What it does:
+   * Checks which page you are on (like Members, Chapters, Events, or Dashboard)
+   * and draws the matching layout outlines.
+   *
+   * Backup plan if it breaks:
+   * If the page name is unknown or missing, it falls back to a clean 3-card placeholder design.
+   */
   function pageSkeleton(page) {
     switch (page) {
       case 'dashboard':
@@ -139,9 +196,18 @@
   }
 
   // --------------------------------------------------------------------------
-  // 4. Skeleton DOM Insertion & Lifecycle
-  // Mounts skeleton into target container before rendering actual application content.
+  // Showing & Clearing Placeholder Screens
   // --------------------------------------------------------------------------
+
+  /**
+   * Show Skeleton Screen
+   *
+   * What it does:
+   * Places the gray layout outlines onto the screen while data is loading so the page doesn't look blank.
+   *
+   * Backup plan if it breaks:
+   * Catches errors quietly and logs a warning so the live data can still appear without interruption.
+   */
   function showPageSkeleton() {
     try {
       const root = document.getElementById('pageContent') || document.getElementById('memberPortalContent');
@@ -176,7 +242,15 @@
     }
   }
 
-  /** Cleans up skeleton placeholders once live application data is rendered */
+  /**
+   * Remove Skeleton Screen
+   *
+   * What it does:
+   * Sweeps away the gray placeholder blocks once the real data arrives and is ready to view.
+   *
+   * Backup plan if it breaks:
+   * Safely ignores missing elements so the real content stays visible and interactive.
+   */
   function clearPageSkeleton() {
     try {
       const roots = [
@@ -195,9 +269,18 @@
   }
 
   // --------------------------------------------------------------------------
-  // 5. Fullscreen Animated Page Loader
-  // Creates and controls branded overlay during navigation.
+  // Full-Screen Loading Curtain
   // --------------------------------------------------------------------------
+
+  /**
+   * Build Loading Screen Curtain
+   *
+   * What it does:
+   * Creates the full-screen dark overlay with the official MFC Youth logo and spinning ring.
+   *
+   * Backup plan if it breaks:
+   * If the curtain already exists or the page body is not ready, it exits safely.
+   */
   function ensureLoader() {
     try {
       if (document.getElementById(LOADER_ID) || !document.body) return;
@@ -226,7 +309,15 @@
     }
   }
 
-  /** Activates the full-page loading animation overlay */
+  /**
+   * Turn On Loading Curtain
+   *
+   * What it does:
+   * Smoothly fades in the full-screen loading curtain so users know their request is in progress.
+   *
+   * Backup plan if it breaks:
+   * If the curtain element cannot be created, navigation proceeds immediately without animation.
+   */
   function show() {
     try {
       ensureLoader();
@@ -241,7 +332,15 @@
     }
   }
 
-  /** Dismisses the loading animation overlay */
+  /**
+   * Turn Off Loading Curtain
+   *
+   * What it does:
+   * Fades out and hides the loading curtain when the page has finished loading.
+   *
+   * Backup plan if it breaks:
+   * Automatically clears any active timers so the curtain is never left stuck over the screen.
+   */
   function hide() {
     try {
       const overlay = document.getElementById(LOADER_ID);
@@ -259,9 +358,19 @@
   }
 
   // --------------------------------------------------------------------------
-  // 6. Navigation Trigger
-  // Initiates navigation with loader overlay and fallback timeout.
+  // Moving Between Pages
   // --------------------------------------------------------------------------
+
+  /**
+   * Move to Next Screen
+   *
+   * What it does:
+   * Shows the loading screen with the page title and asks the browser to open the new page.
+   *
+   * Backup plan if it breaks:
+   * Features an automatic 5-second emergency safety timer. If the network or page stalls,
+   * the curtain disappears automatically so the user is never trapped, and standard navigation takes over.
+   */
   function navigate(url, options = {}) {
     try {
       if (!url || navigating) return;
@@ -272,14 +381,14 @@
       const destination = overlay?.querySelector('.page-loader__destination');
       if (destination) destination.textContent = `Opening ${destinationLabel(url)}`;
 
-      // Immediate browser navigation
+      // Open the new web page
       if (options.replace) {
         window.location.replace(url);
       } else {
         window.location.assign(url);
       }
 
-      // Safety timeout: ensure loader clears if navigation is interrupted
+      // 5-second emergency safety net
       navigationTimer = window.setTimeout(() => {
         if (navigating) hide();
       }, NAVIGATION_TIMEOUT_MS);
@@ -294,9 +403,19 @@
   }
 
   // --------------------------------------------------------------------------
-  // 7. Link Click & Prefetch Evaluation
-  // Determines if an anchor should be intercepted for enhanced SPA-like loading.
+  // Link Click & Instant Background Pre-Loading
   // --------------------------------------------------------------------------
+
+  /**
+   * Check If Link Can Be Pre-Loaded
+   *
+   * What it does:
+   * Checks if a clicked link points to an internal page of this website (not an outside website,
+   * email link, right-click, or file download).
+   *
+   * Backup plan if it breaks:
+   * Safely returns false so the browser performs its normal standard link click.
+   */
   function shouldHandleLink(anchor, event) {
     try {
       if (!anchor || event.defaultPrevented) return false;
@@ -322,7 +441,15 @@
 
   const prefetched = new Set();
 
-  /** Injects prefetch link tags for visited or hovered internal links */
+  /**
+   * Pre-Load Page in Background
+   *
+   * What it does:
+   * Quietly fetches upcoming pages when you hover over links so they open instantly without waiting.
+   *
+   * Backup plan if it breaks:
+   * Checks if the link was already fetched; if anything errors, it fails silently without slowing down the page.
+   */
   function prefetchUrl(rawUrl) {
     try {
       const target = new URL(rawUrl, window.location.href);
@@ -340,7 +467,15 @@
     } catch {}
   }
 
-  /** Preheats navigation for all visible in-viewport links during browser idle time */
+  /**
+   * Pre-Warm Visible Links
+   *
+   * What it does:
+   * When your computer is sitting idle, it quietly prepares the visible menu links in the background.
+   *
+   * Backup plan if it breaks:
+   * Limits pre-warming to 12 links so it never uses too much internet data, and catches any errors.
+   */
   function warmVisibleNavigation() {
     try {
       const links = [...document.querySelectorAll('a[href]')]
@@ -366,13 +501,13 @@
   }
 
   // --------------------------------------------------------------------------
-  // 8. Event Listeners & Initialization
+  // Setting Up Event Listeners
   // --------------------------------------------------------------------------
   ensureLoader();
   showPageSkeleton();
   warmVisibleNavigation();
 
-  // Prefetch page on hover / pointer-over
+  // Pre-load page when mouse hovers over link
   document.addEventListener('pointerover', event => {
     try {
       const anchor = event.target.closest?.('a[href]');
@@ -381,7 +516,7 @@
     } catch {}
   }, { passive: true });
 
-  // Intercept valid internal navigation clicks
+  // Intercept normal left-clicks on internal links
   document.addEventListener('click', event => {
     try {
       const anchor = event.target.closest?.('a[href]');
@@ -393,7 +528,7 @@
     }
   }, true);
 
-  // Handle browser back/forward history cache restores
+  // Hide curtain when using browser Back/Forward buttons
   window.addEventListener('pageshow', () => {
     hide();
   });
@@ -406,8 +541,20 @@
   }
 
   // --------------------------------------------------------------------------
-  // 9. Global Access Guide Modal
+  // Floating Help & Access Guide Button
   // --------------------------------------------------------------------------
+
+  /**
+   * Build Floating Help Button & Guide
+   *
+   * What it does:
+   * Adds the floating question mark ('?') button in the corner and creates the guide popup window
+   * explaining how to sign in and what each leadership role can do.
+   *
+   * Backup plan if it breaks:
+   * Checks if the button already exists before adding it, and provides multiple easy ways to close it
+   * (clicking the 'X', clicking outside, or clicking the button again).
+   */
   function ensureAccessGuideUI() {
     if (document.getElementById('mfcGuideFab')) return;
 
@@ -491,13 +638,24 @@
   }
 
   // --------------------------------------------------------------------------
-  // 10. Global Exports
+  // System Tools & Popup Toast Messages
   // --------------------------------------------------------------------------
   window.MFCPageLoader = { show, hide, navigate };
   window.MFCPageSkeleton = { show: showPageSkeleton, clear: clearPageSkeleton };
   window.navigateWithLoader = (url, replace = false) => navigate(url, { replace });
 
   if (typeof window.toast !== 'function') {
+    /**
+     * Show Temporary Toast Notification
+     *
+     * What it does:
+     * Pops up a sleek message box (green for success, red for errors) in the corner of your screen
+     * that automatically disappears after a few seconds.
+     *
+     * Backup plan if it breaks:
+     * Creates the toast container dynamically if not present, pauses the countdown if you hover over it,
+     * and provides an 'X' button so you can dismiss it immediately.
+     */
     window.toast = function (text, type = 'success', duration = 4000) {
       let wrap = document.getElementById('toastWrap');
       if (!wrap) {

@@ -21,6 +21,15 @@ let reportFilters = {
   to: ''
 };
 
+/**
+ * List Available Report Activity Categories
+ *
+ * What it does:
+ * Gathers all standard activity types (Core Household, Household, Assembly, Fellowship) plus any custom types used in older reports, presenting them in order.
+ *
+ * Backup plan if it breaks:
+ * If no reports or custom types exist yet, it gracefully falls back to the default standard activity list.
+ */
 function reportTypes(data) {
   // Get all unique types from existing reports
   const allTypes = [
@@ -44,6 +53,15 @@ function reportTypes(data) {
   return [...standardTypes, ...legacyTypes];
 }
 
+/**
+ * Gather Active and Historical Chapters for Reports
+ *
+ * What it does:
+ * Compiles a list of currently active chapters alongside older chapters found in past reports, ensuring past activity data remains searchable.
+ *
+ * Backup plan if it breaks:
+ * If there are no past reports, it simply returns the current active chapters list without missing a beat.
+ */
 function reportChapters(data) {
   const current = data.chapters
     .map(chapter => chapter.name)
@@ -62,6 +80,15 @@ function reportChapters(data) {
   return { current, historical };
 }
 
+/**
+ * Filter and Sort Activity Reports
+ *
+ * What it does:
+ * Searches reports by keywords in title, activity, preparer, or location, and narrows them down by chapter, type, and date range, sorting newest first.
+ *
+ * Backup plan if it breaks:
+ * If any report fields are blank or missing, it safely treats them as empty text so search never throws an error.
+ */
 function filteredReports(data) {
   return data.reports
     .filter(report => {
@@ -125,6 +152,15 @@ function filteredReports(data) {
     );
 }
 
+/**
+ * Total Up Attendees Across Reports
+ *
+ * What it does:
+ * Adds together the participant counts of all selected activity reports to find total youth turnout.
+ *
+ * Backup plan if it breaks:
+ * If a report is missing an attendee number or has non-numeric text, it treats that report's count as 0 rather than breaking the sum.
+ */
 function calculateTotalParticipants(
   reports
 ) {
@@ -138,6 +174,15 @@ function calculateTotalParticipants(
   );
 }
 
+/**
+ * Group Activities by Activity Type
+ *
+ * What it does:
+ * Groups the filtered reports by their category (such as Assembly or Household) to calculate total count and attendance for each type.
+ *
+ * Backup plan if it breaks:
+ * If a report has no assigned type, it groups it into an 'Unspecified' bucket so it is still accounted for.
+ */
 function groupActivitiesByType(
   reports
 ) {
@@ -172,6 +217,15 @@ function groupActivitiesByType(
   );
 }
 
+/**
+ * Group Activities by Chapter
+ *
+ * What it does:
+ * Groups the filtered reports by chapter name to show which chapters hosted activities and how many youth attended in each.
+ *
+ * Backup plan if it breaks:
+ * If a report does not list a chapter, it falls back to a 'No Chapter' label.
+ */
 function groupActivitiesByChapter(
   reports
 ) {
@@ -206,6 +260,15 @@ function groupActivitiesByChapter(
   );
 }
 
+/**
+ * Calculate Overall Report Statistics
+ *
+ * What it does:
+ * Calculates total activities, total attendees, average turnout per activity, and counts of unique participating chapters and activity types.
+ *
+ * Backup plan if it breaks:
+ * If there are zero activities recorded, it sets average attendance safely to 0 to prevent division errors.
+ */
 function calculateReportSummary(
   reports
 ) {
@@ -252,6 +315,15 @@ function calculateReportSummary(
   };
 }
 
+/**
+ * Generate Written Highlights and Findings
+ *
+ * What it does:
+ * Analyzes the reports and writes natural summary sentences highlighting the most active chapter, the most common type of event, total youth attendance, and average turnout.
+ *
+ * Backup plan if it breaks:
+ * If no reports match the current filters, it returns an empty list so the report view shows an empty state rather than confusing text.
+ */
 function generateReportInsights(
   reports
 ) {
@@ -305,6 +377,15 @@ function generateReportInsights(
   return insights;
 }
 
+/**
+ * Format Active Filter Description for Exports
+ *
+ * What it does:
+ * Creates a clear text line explaining what filters were applied (such as "Chapter: Alpha | Date: Jan 1 to Mar 1") for printed headers and PDF exports.
+ *
+ * Backup plan if it breaks:
+ * If no filters are active, it simply returns "All Recorded Activities".
+ */
 function reportScopeText() {
   const parts = [];
 
@@ -358,6 +439,15 @@ function reportScopeText() {
     : 'All Recorded Activities';
 }
 
+/**
+ * Render Reports Management Page
+ *
+ * What it does:
+ * Builds the activity reports dashboard, monthly activity bar chart, report type breakdowns, filter toolbar, and full reports data table with buttons to view, edit, or delete records.
+ *
+ * Backup plan if it breaks:
+ * If the current leader is a Chapter Servant, it automatically locks the chapter filter and preparer information to their chapter scope.
+ */
 function renderReports() {
   const data = db();
 
@@ -1004,6 +1094,15 @@ function renderReports() {
   };
 }
 
+/**
+ * View Activity Report Details Modal
+ *
+ * What it does:
+ * Opens a modal showing full details of a specific activity report, including event name, chapter, date, venue, attendance, and descriptive narrative highlights.
+ *
+ * Backup plan if it breaks:
+ * If the report does not exist in the database, it exits immediately. Only authorized leaders of that chapter or area coordinators are allowed to see the "Edit Report" button.
+ */
 window.viewReport = function (id) {
   const data = db();
   const report = data.reports.find(item => String(item.id) === String(id));
@@ -1085,6 +1184,15 @@ window.viewReport = function (id) {
   );
 };
 
+/**
+ * Add or Edit Activity Report Form Modal
+ *
+ * What it does:
+ * Opens a modal dialog with form fields to create a new activity report or edit an existing one, auto-populating chapter, date, attendees, and linked event details.
+ *
+ * Backup plan if it breaks:
+ * If required inputs (such as title, chapter, or date) are empty, a warning notification alerts the leader and keeps the modal open so entered text is preserved.
+ */
 window.reportModal = function (
   id = null
 ) {
@@ -1509,6 +1617,15 @@ window.reportModal = function (
   );
 };
 
+/**
+ * Delete Activity Report
+ *
+ * What it does:
+ * Permanently removes an activity report record from the database after asking the user for confirmation.
+ *
+ * Backup plan if it breaks:
+ * Restricts chapter servants so they can only delete reports belonging to their own chapter. If the server fails to delete the record, an error toast displays and the report remains in the list.
+ */
 window.deleteReport = async id => {
   const data = db();
 
@@ -1542,6 +1659,15 @@ window.deleteReport = async id => {
 
 // Section 16: Report Summary, Printing & PDF Export
 
+/**
+ * Open Printable Report Summary Window
+ *
+ * What it does:
+ * Formats all filtered reports into a clean, printer-friendly summary document with statistics, tables, and narrative insights, then opens the browser's print dialog.
+ *
+ * Backup plan if it breaks:
+ * If no reports match the current filters, or if the browser blocks pop-ups, it displays a helpful notification rather than failing silently.
+ */
 function printReportSummary(
   data
 ) {
@@ -1982,6 +2108,15 @@ function printReportSummary(
 // EXPORT PDF
 // =========================================================
 
+/**
+ * Generate and Download Activity Reports PDF File
+ *
+ * What it does:
+ * Generates an official, publication-ready PDF document containing header information, executive statistics, type and chapter breakdowns, an itemized table, and insights.
+ *
+ * Backup plan if it breaks:
+ * Checks if the PDF generating library is available in the browser. If it failed to load due to connection problems, it alerts the user to check their internet connection instead of crashing.
+ */
 function exportReportsPdf(
   data
 ) {

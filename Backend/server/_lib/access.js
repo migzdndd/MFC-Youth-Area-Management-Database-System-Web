@@ -12,30 +12,39 @@ export const AREA_ADMIN_ROLES = new Set([
 ]);
 
 /**
- * Checks if the given role is considered an Area Admin role.
+ * Check If Leadership Role Has Area-Wide Authority
  *
- * @param {string} role - The user's role string.
- * @returns {boolean} True if the role has Area Admin privileges.
+ * What it does:
+ * Tests whether a leader's role belongs to the high-level Area leadership team (such as National, Area, or Ministry servants).
+ *
+ * Backup plan if it breaks:
+ * If a role name has irregular spacing or uppercase letters, it cleans and trims it first. If the role is missing or not in the authorized list, it safely returns false.
  */
 export function isAreaAdminRole(role) {
   return AREA_ADMIN_ROLES.has(String(role || '').trim().toLowerCase());
 }
 
 /**
- * Checks if the given role is a Chapter Servant.
+ * Check If User is a Chapter Servant
  *
- * @param {string} role - The user's role string.
- * @returns {boolean} True if the role is a chapter servant.
+ * What it does:
+ * Determines if the current user is a local chapter leader rather than an area-wide administrator.
+ *
+ * Backup plan if it breaks:
+ * Cleans the input text and safely returns false if the role is missing or invalid.
  */
 export function isChapterServantRole(role) {
   return String(role || '').trim().toLowerCase() === 'chapter_servant';
 }
 
 /**
- * Safely decodes base64url JSON payload from a JWT token.
+ * Read Encoded Login Token Data
  *
- * @param {string} jwtToken
- * @returns {Object|null}
+ * What it does:
+ * Unpacks the digital security token sent by the browser so the server can inspect the user's login level and security session details.
+ *
+ * Backup plan if it breaks:
+ * If the security token is malformed, corrupted, or tampered with, it catches the error and safely returns null rather than throwing an unhandled exception.
  */
 export function parseJwtPayload(jwtToken) {
   try {
@@ -50,15 +59,13 @@ export function parseJwtPayload(jwtToken) {
 }
 
 /**
- * Authenticates a user based on the request's Bearer token or auth cookie.
- * Enforces native Supabase AAL (Authentication Assurance Level):
- * Rejects aal1 sessions on non-MFA endpoints if TOTP is enrolled on the account.
+ * Verify Logged-In User and Multi-Factor Security
  *
- * @param {import('http').IncomingMessage} req - The request object.
- * @param {Object} [options={}] - Authentication options.
- * @param {boolean} [options.allowAal1=false] - Whether to allow aal1 sessions on MFA enrollment/verification routes.
- * @returns {Promise<{ supabase: import('@supabase/supabase-js').SupabaseClient, user: import('@supabase/supabase-js').User, token: string }>} 
- * @throws {Error} 401 Unauthorized if token missing/invalid, 403 Forbidden if MFA required.
+ * What it does:
+ * Validates the user's digital login pass with the database and confirms whether their two-factor verification code has been entered if two-factor is enabled.
+ *
+ * Backup plan if it breaks:
+ * If the login token is missing or expired, it halts with an "Authentication required" 401 alert. If two-factor is active but the user has not completed their code check, it stops with a 403 "Two-factor authentication required" message.
  */
 export async function requireAuthenticatedUser(req, options = {}) {
   const token = readBearerToken(req);
@@ -101,11 +108,13 @@ export async function requireAuthenticatedUser(req, options = {}) {
 }
 
 /**
- * Authenticates a user and retrieves their active profile.
+ * Verify User Profile and Active Account Status
  *
- * @param {import('http').IncomingMessage} req - The request object.
- * @returns {Promise<{ supabase: import('@supabase/supabase-js').SupabaseClient, user: import('@supabase/supabase-js').User, profile: Object, token: string }>}
- * @throws {Error} 403 Forbidden if the profile is inactive.
+ * What it does:
+ * Confirms that the user is logged in and verifies that their account profile has not been deactivated or banned.
+ *
+ * Backup plan if it breaks:
+ * If the profile does not exist or has been disabled, it stops the request and returns an "Account is not active" error.
  */
 export async function requireAuthenticatedProfile(req) {
   const { supabase, user, token } = await requireAuthenticatedUser(req);

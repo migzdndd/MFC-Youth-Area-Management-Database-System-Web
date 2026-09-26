@@ -1,10 +1,15 @@
 /**
- * ============================================================================
- * MFC Youth Area Management System - Members Module & GIG Tracker
- * ============================================================================
+ * MFC Youth Area Management System - Member Records & GIG Contributions
+ *
+ * What this file does:
+ * Manages youth member profiles, chapter assignments, leadership roles,
+ * and tracks GIG (God Is Good) tithes and voluntary offerings.
+ *
+ * Backup plan if it breaks:
+ * If an internet sync fails or you are offline, all changes are safely saved to your
+ * browser's local memory. Role permissions are checked before any action to ensure leaders
+ * only modify records they are authorized to manage.
  */
-
-// Section 12: Members Module & GIG Contribution Management
 
 let memberFilters = {
   search: '',
@@ -12,6 +17,18 @@ let memberFilters = {
   chapter: 'All'
 };
 
+/**
+ * Filter Members by Leadership Role
+ *
+ * What it does:
+ * Limits which youth members you see on screen according to your role (for example, High School
+ * servants only see high school youth, Campus servants see college and senior high youth,
+ * and Chapter Servants see only their assigned chapter).
+ *
+ * Backup plan if it breaks:
+ * If your login session is missing or unverified, it safely returns an empty list so private
+ * member information is never exposed to unauthorized users.
+ */
 function getVisibleMembers(data) {
   if (!session) return [];
   
@@ -29,10 +46,21 @@ function getVisibleMembers(data) {
     return data.members.filter(m => String(m.chapterId) === String(chapter.id));
   }
   
-  // For other roles like Area Admin, Couple Coordinator, Area LIT Servant, etc.
+  // Area-level servants and coordinators have area-wide visibility
   return data.members;
 }
 
+/**
+ * Search and Filter Members List
+ *
+ * What it does:
+ * Filters the visible members using whatever search text, chapter name, or status (Active/Inactive)
+ * you selected in the filter toolbar.
+ *
+ * Backup plan if it breaks:
+ * Searches across name, contact, chapter, and services simultaneously, safely handling missing
+ * or blank details without crashing.
+ */
 function filteredMembers(data) {
   const visible = getVisibleMembers(data);
   return visible.filter(member => {
@@ -73,7 +101,15 @@ function filteredMembers(data) {
   });
 }
 
-
+/**
+ * Display Chapter Servant's Member List
+ *
+ * What it does:
+ * Shows the youth members belonging to the chapter servant's assigned chapter, with search, status filters, and an "+ Add Member" button.
+ *
+ * Backup plan if it breaks:
+ * If the user's account has no chapter assignment, it displays a friendly guidance screen prompting them to contact their area leader.
+ */
 function renderChapterServantMembers(data) {
   const chapter = scopedChapter(data);
 
@@ -221,6 +257,15 @@ function renderChapterServantMembers(data) {
   };
 }
 
+/**
+ * Display Area Members Directory
+ *
+ * What it does:
+ * Builds the complete members table for leaders, showing names, chapters, active status, ministry services, and contact info with filtering tools.
+ *
+ * Backup plan if it breaks:
+ * If the current leader is a Chapter Servant, it automatically redirects to their scoped chapter view instead.
+ */
 function renderMembers() {
   const data = db();
 
@@ -536,6 +581,15 @@ function renderMembers() {
   };
 }
 
+/**
+ * View Detailed Member Profile
+ *
+ * What it does:
+ * Opens a modal window displaying a youth member's complete details, including birthday, contact info, home chapter, ministry services, and GIG tithing history.
+ *
+ * Backup plan if it breaks:
+ * If the member cannot be found in the database, it simply exits without crashing. If a Chapter Servant attempts to view another chapter's member, an alert tells them they can only view their own chapter.
+ */
 window.viewMember = function(id) {
   const data = db();
 
@@ -699,6 +753,15 @@ window.viewMember = function(id) {
   );
 };
 
+/**
+ * Add or Edit Youth Member Form Modal
+ *
+ * What it does:
+ * Opens an interactive pop-up form allowing leaders to register a new youth member or edit an existing member's personal information, chapter assignment, leadership role, and account credentials.
+ *
+ * Backup plan if it breaks:
+ * If an unauthorized user attempts to edit or add a member, it stops immediately and alerts them. If network syncing fails during cloud save, an error alert informs the user without losing their input.
+ */
 function memberModal(id = null) {
   if (id) {
     if (denyUnlessAreaAdmin()) return;
@@ -1248,6 +1311,15 @@ window.editMember = memberModal;
 window.manageAccount = memberModal;
 window.assignChapter = memberModal;
 
+/**
+ * Remove Youth Member Record
+ *
+ * What it does:
+ * Permanently deletes a youth member's record along with their GIG contributions and event attendance from the database after leader confirmation.
+ *
+ * Backup plan if it breaks:
+ * Leaders cannot delete their own active logged-in profile from here. If online database deletion encounters an issue, an error notification is shown and local records remain untouched.
+ */
 window.deleteMember = async id => {
   if (denyUnlessAreaAdmin()) return;
 
@@ -1288,6 +1360,15 @@ window.deleteMember = async id => {
   renderMembers();
 };
 
+/**
+ * Assign Ministry Service to Member
+ *
+ * What it does:
+ * Opens a modal window allowing area leadership to assign or reassign a specific ministry service (such as Music, Liturgy, or Production) to a member.
+ *
+ * Backup plan if it breaks:
+ * If cloud updating fails, the error message from the server is displayed in an alert toast and the modal can be retried without losing selection.
+ */
 window.serviceMember = id => {
   if (denyUnlessAreaAdmin()) return;
 
@@ -1371,6 +1452,15 @@ window.serviceMember = id => {
   );
 };
 
+/**
+ * Manage Member GIG (God Is Good) Contributions
+ *
+ * What it does:
+ * Opens a modal showing a member's history of monetary contributions, and provides a quick form to log a new contribution amount, date, and note.
+ *
+ * Backup plan if it breaks:
+ * Validates that an amount and date are provided before saving. If cloud saving fails, an error message is displayed and the modal stays open so the leader does not lose their typed note.
+ */
 window.gigMember = id => {
   const data = db();
 
@@ -1546,6 +1636,15 @@ window.gigMember = id => {
   );
 };
 
+/**
+ * Delete a Single GIG Contribution Entry
+ *
+ * What it does:
+ * Removes an incorrect or duplicate monetary contribution entry from a youth member's giving history after leader confirmation.
+ *
+ * Backup plan if it breaks:
+ * Checks chapter permissions before allowing deletion. If the server fails to delete the record, an error toast alerts the leader and re-opens the history dialog.
+ */
 window.deleteGigContribution = async (memberId, contributionId) => {
   const accessData = db();
   const accessMember = accessData.members.find(member => String(member.id) === String(memberId));

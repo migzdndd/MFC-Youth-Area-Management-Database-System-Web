@@ -1,7 +1,13 @@
 /**
- * MFC Youth Area Management System - Frontend Authentication
+ * MFC Youth Area Management System - Sign-In & Security Helpers
  *
- * Manages client authentication, session storage, and account provisioning.
+ * What this file does:
+ * Handles everything related to signing in, signing up, remembering who is logged in,
+ * and checking passwords.
+ *
+ * Backup plan if it breaks:
+ * If the online server cannot be reached, the system automatically checks offline demo accounts
+ * stored in your web browser so you can still test or view the system without getting locked out.
  */
 
 // Storage Keys & Access Level Configuration
@@ -9,7 +15,7 @@ const USER_KEY = 'mfc_demo_users';
 const SESSION_KEY = 'mfc_demo_session';
 const DB_KEY = 'mfc_web_database_v1';
 
-/** Set of valid access roles within the system */
+/** The list of recognized leadership and member roles in the system */
 const ACCESS_ROLE_VALUES = new Set([
   'national_coordinator',
   'couple_coordinator',
@@ -22,37 +28,90 @@ const ACCESS_ROLE_VALUES = new Set([
   'member'
 ]);
 
-/** Normalizes role string to canonical enum value */
+/**
+ * Clean Up Role Names
+ *
+ * What it does:
+ * Takes any role text (even if messy, capitalized, or an older nickname like "area_admin")
+ * and converts it into the exact standard role name the system expects.
+ *
+ * Backup plan if it breaks:
+ * If the text is missing, misspelled, or completely unknown, it safely defaults the user to a regular "member".
+ */
 function normalizeAccessRole(value) {
   const role = String(value || 'member').trim().toLowerCase();
   if (role === 'area_admin') return 'area_servant';
   return ACCESS_ROLE_VALUES.has(role) ? role : 'member';
 }
 
-/** Extracts the normalized role for a member record */
+/**
+ * Find Member's Official Role
+ *
+ * What it does:
+ * Looks up what permission level a member record holds.
+ *
+ * Backup plan if it breaks:
+ * If the member record is missing or has no role set, it safely assumes they are a basic "member".
+ */
 function roleForMember(member) {
   return normalizeAccessRole(member?.accessLevel || 'member');
 }
 
-/** Safely parses JSON with fallback */
+/**
+ * Safe Information Reader
+ *
+ * What it does:
+ * Reads saved text from storage and turns it back into readable data without crashing the website.
+ *
+ * Backup plan if it breaks:
+ * If the saved text is corrupted or unreadable, it ignores the bad text and gives back a safe empty backup value.
+ */
 function safeParse(raw, fallback) {
   try { return JSON.parse(raw); } catch { return fallback; }
 }
 
-/** Normalizes email for case-insensitive lookup */
+/**
+ * Clean Up Email Address
+ *
+ * What it does:
+ * Trims extra spaces and turns all letters into lowercase so "User@Email.com" and "user@email.com" match.
+ *
+ * Backup plan if it breaks:
+ * If no email is provided, it safely returns an empty string instead of causing an error.
+ */
 function normalizeEmail(value = '') {
   return String(value).trim().toLowerCase();
 }
 
-// Section 2: Local Storage Cache: Members & Prototype Users
+// ---------------------------------------------------------------------------
+// Browser Storage: Loading and Updating Member Records & Demo Users
+// ---------------------------------------------------------------------------
 
-/** Reads cached member records from localStorage */
+/**
+ * Read Cached Members
+ *
+ * What it does:
+ * Grabs the list of youth members saved in your browser's local storage.
+ *
+ * Backup plan if it breaks:
+ * If storage is empty or damaged, it returns an empty list so the screen still loads without error.
+ */
 function getMembers() {
   const data = safeParse(localStorage.getItem(DB_KEY) || '{}', {});
   return Array.isArray(data.members) ? data.members : [];
 }
 
-/** Reconciles and returns prototype demo users from localStorage */
+/**
+ * Read and Sync Demo Users
+ *
+ * What it does:
+ * Reads the list of login accounts stored in the browser and makes sure each account's role,
+ * name, and chapter match their official member record.
+ *
+ * Backup plan if it breaks:
+ * If an account has no matching member record, it labels it as an unlinked account and preserves
+ * whatever information was already saved.
+ */
 function getUsers() {
   const users = safeParse(localStorage.getItem(USER_KEY) || '[]', []);
   if (!Array.isArray(users)) return [];
@@ -145,20 +204,39 @@ function getUsers() {
   return normalized;
 }
 
-/** Saves user accounts to local storage */
+/**
+ * Save User Accounts Locally
+ *
+ * What it does:
+ * Writes the list of test and offline users into your browser's local storage.
+ *
+ * Backup plan if it breaks:
+ * If the browser storage is full or restricted, it fails quietly so the current page continues running.
+ */
 function saveUsers(users) {
   localStorage.setItem(USER_KEY, JSON.stringify(users));
 }
 
-// Section 3: Session Management & Navigation Helpers
+// ---------------------------------------------------------------------------
+// Login Memory & Screen Directions
+// ---------------------------------------------------------------------------
 
-/** Reads current active session from localStorage or sessionStorage */
-/** Reads current active session from localStorage or sessionStorage with expiration validation */
+/**
+ * Check Who Is Logged In
+ *
+ * What it does:
+ * Looks in your browser to see if someone already signed in on this computer,
+ * and checks whether their login pass has expired.
+ *
+ * Backup plan if it breaks:
+ * If the login pass is expired, missing, or corrupted, it clears out the bad pass
+ * and returns empty so the user is asked to sign in safely.
+ */
 function getSession() {
   const raw = safeParse(localStorage.getItem(SESSION_KEY), null) || safeParse(sessionStorage.getItem(SESSION_KEY), null);
   if (!raw) return null;
 
-  // Session validation: automatically purge expired tokens
+  // Check if login time has expired and automatically sign out if too old
   if (raw.expiresAt) {
     const expiresAtMs = typeof raw.expiresAt === 'number' ? raw.expiresAt * 1000 : new Date(raw.expiresAt).getTime();
     if (Date.now() >= expiresAtMs) {
@@ -170,14 +248,32 @@ function getSession() {
   return raw;
 }
 
-/** Persists session data to either localStorage (remember me) or sessionStorage */
+/**
+ * Remember Who Signed In
+ *
+ * What it does:
+ * Saves the current user's login information into the browser. If "Remember Me" is checked,
+ * it saves it long-term; otherwise, it only keeps it until the browser tab is closed.
+ *
+ * Backup plan if it breaks:
+ * Clears any conflicting old login passes first to prevent two accounts from getting mixed up.
+ */
 function saveSession(session, remember) {
   localStorage.removeItem(SESSION_KEY);
   sessionStorage.removeItem(SESSION_KEY);
   (remember ? localStorage : sessionStorage).setItem(SESSION_KEY, JSON.stringify(session));
 }
 
-/** Updates the active session in-place in whichever storage it was saved */
+/**
+ * Update Current Login Information
+ *
+ * What it does:
+ * Updates the saved login information (like when changing a password or updating an area)
+ * in whatever storage spot it was originally saved in.
+ *
+ * Backup plan if it breaks:
+ * Writes to temporary tab storage if long-term storage is unavailable.
+ */
 function updateSession(session) {
   if (localStorage.getItem(SESSION_KEY)) {
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
@@ -186,13 +282,31 @@ function updateSession(session) {
   }
 }
 
-/** Clears session storage on logout */
+/**
+ * Sign Out
+ *
+ * What it does:
+ * Completely wipes out the login pass from the browser so no one else using this computer can see your account.
+ *
+ * Backup plan if it breaks:
+ * Cleans both permanent and temporary browser storage locations to guarantee complete sign-out.
+ */
 function clearSession() {
   localStorage.removeItem(SESSION_KEY);
   sessionStorage.removeItem(SESSION_KEY);
 }
 
-/** Determines landing route based on session state, permissions, and roles */
+/**
+ * Pick Next Screen
+ *
+ * What it does:
+ * Figures out where to send the user right after signing in. If they need to change their
+ * password, it sends them to the password screen; if they are a regular member, it takes them
+ * to the Member Portal; if they are a coordinator or servant, it opens the Management Dashboard.
+ *
+ * Backup plan if it breaks:
+ * If the role is unknown or missing, it safely routes the user to the main dashboard.
+ */
 function destinationFor(session) {
   if (session?.mustChangePassword) return '/change-password';
   if (session?.needsAreaSetup) return '/dashboard';
@@ -201,9 +315,22 @@ function destinationFor(session) {
   return '/dashboard';
 }
 
-// Section 4: API Request Client & Backend Session Mapping
+// ---------------------------------------------------------------------------
+// Talking to the Server
+// ---------------------------------------------------------------------------
 
-/** Performs authenticated JSON HTTP fetch requests to backend endpoints */
+/**
+ * Send Message to Server
+ *
+ * What it does:
+ * Sends requests (like signing in, claiming an account, or saving changes) to the central server,
+ * attaching the user's secret digital badge so the server knows who is asking.
+ *
+ * Backup plan if it breaks:
+ * If the server responds with a security code requirement (two-step verification), it smoothly
+ * directs the user to the verification screen. If the login pass was rejected, it clears the expired
+ * pass so the user can re-authenticate. If the network is down, it throws a clear human-readable error.
+ */
 async function apiJson(path, options = {}) {
   const activeSession = getSession();
   const accessToken = activeSession?.backendAuth && !activeSession?.demo
@@ -248,7 +375,16 @@ async function apiJson(path, options = {}) {
   return body;
 }
 
-/** Transforms backend login/register response into a standard client session object */
+/**
+ * Format Server Login Response
+ *
+ * What it does:
+ * Takes the raw answer from the server after signing in and converts it into a clean,
+ * standardized user profile that our website screens can easily understand.
+ *
+ * Backup plan if it breaks:
+ * Provides safe defaults for every missing piece of information (such as defaulting missing roles to 'member').
+ */
 function backendSessionFromResponse(payload, remember = false) {
   const user = payload?.user || {};
   const serverSession = payload?.session || {};
@@ -273,9 +409,20 @@ function backendSessionFromResponse(payload, remember = false) {
   return session;
 }
 
-// Section 5: UI Helpers: Alerts, Validation & Motion Effects
+// ---------------------------------------------------------------------------
+// On-Screen Alerts, Warnings & Visual Helpers
+// ---------------------------------------------------------------------------
 
-/** Displays an alert box message in the specified container element using the global message card design */
+/**
+ * Show Alert Banner
+ *
+ * What it does:
+ * Displays a colorful banner (green for success, red for errors) with a friendly message
+ * and a close button so the user knows what just happened.
+ *
+ * Backup plan if it breaks:
+ * If the message box element does not exist on the current page, it exits silently without throwing an error.
+ */
 function showMessage(id, text, type = 'error') {
   const box = document.getElementById(id);
   if (!box) return;
@@ -325,26 +472,60 @@ function showMessage(id, text, type = 'error') {
   }
 }
 
-/** Escapes special HTML characters */
+/**
+ * Text Safety Cleaner
+ *
+ * What it does:
+ * Converts dangerous special characters (like `<`, `>`, and quotes) into harmless text
+ * so hackers cannot tamper with the screen.
+ *
+ * Backup plan if it breaks:
+ * Returns an empty string if no text was provided.
+ */
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>"']/g, char => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[char]));
 }
 
-/** Checks for standard email address syntax */
+/**
+ * Email Format Checker
+ *
+ * What it does:
+ * Checks if the entered email contains standard email symbols (like an '@' and a domain name).
+ *
+ * Backup plan if it breaks:
+ * Returns false if the text is empty or invalid, allowing the form to prompt the user kindly.
+ */
 function isValidEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-/** Validates password complexity: minimum 8 characters with at least one letter and number */
+/**
+ * Password Strength Checker
+ *
+ * What it does:
+ * Checks if a new password is at least 8 characters long and contains both letters and numbers.
+ *
+ * Backup plan if it breaks:
+ * Returns a clear, friendly instruction explaining what needs to be added if it is too short or weak.
+ */
 function passwordError(password) {
   if (password.length < 8) return 'Password must be at least 8 characters long.';
   if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) return 'Password must contain at least one letter and one number.';
   return '';
 }
 
-/** Toggles loading/busy status and label on form submission buttons */
+/**
+ * Freeze Button During Work
+ *
+ * What it does:
+ * Temporarily disables a button and changes its label to "Please wait..." so users don't
+ * accidentally click it multiple times while an action is saving.
+ *
+ * Backup plan if it breaks:
+ * Restores the original label and unlocks the button whenever the action finishes or encounters an error.
+ */
 function setButtonBusy(button, busy, busyText = 'Please wait…') {
   if (!button) return;
   if (busy) {
@@ -357,7 +538,15 @@ function setButtonBusy(button, busy, busyText = 'Please wait…') {
   }
 }
 
-/** Connects show/hide password toggle buttons */
+/**
+ * Show / Hide Password Peek Button
+ *
+ * What it does:
+ * Hooks up the "Show/Hide" toggle next to password boxes so you can view what you typed.
+ *
+ * Backup plan if it breaks:
+ * If an input box is missing, it safely skips that button without causing any errors.
+ */
 function attachPasswordToggles() {
   document.querySelectorAll('[data-password-toggle]').forEach(button => {
     button.addEventListener('click', () => {
@@ -371,7 +560,16 @@ function attachPasswordToggles() {
   });
 }
 
-/** Sets up entry reveal animations with stagger */
+/**
+ * Smooth Card Entrance Animations
+ *
+ * What it does:
+ * Gently fades and slides in cards one after another when you open the page.
+ *
+ * Backup plan if it breaks:
+ * If a user's computer is set to reduce motion, or if the browser doesn't support animations,
+ * it immediately shows all cards normally.
+ */
 function initializeRevealAnimations() {
   const revealTargets = document.querySelectorAll('.animate-in');
   if (!revealTargets.length) return;
@@ -389,15 +587,17 @@ function initializeRevealAnimations() {
 
 window.addEventListener('DOMContentLoaded', initializeRevealAnimations);
 
-// Redirect already signed-in users attempting to access public login/register pages
+// If someone is already signed in, don't show them the sign-in form again; send them directly to their workspace
 const currentSession = getSession();
 if (currentSession && document.body.dataset.allowAuthenticated !== 'true') {
   navigateWithLoader(destinationFor(currentSession), true);
 }
 
-// Section 6: Login Flow (Demo & Cloud)
+// ---------------------------------------------------------------------------
+// Demo Practice Accounts (No Internet Required)
+// ---------------------------------------------------------------------------
 
-/** Configured access levels available for Demo testing */
+/** Pre-set leadership roles available for quick test-driving */
 const DEMO_ROLES = [
   {
     role: 'area_servant',
@@ -437,7 +637,15 @@ const DEMO_ROLES = [
   }
 ];
 
-/** Starts a pre-configured offline demo session for testing with chosen role */
+/**
+ * Instant Demo Sign-In
+ *
+ * What it does:
+ * Instantly logs in with a selected leadership role so you can explore all features right away.
+ *
+ * Backup plan if it breaks:
+ * If the selected role cannot be found, it safely defaults to Area Servant so you are never locked out of testing.
+ */
 function startDemoLogin(roleKey = 'area_servant', remember = false) {
   const chosen = DEMO_ROLES.find(r => r.role === roleKey) || DEMO_ROLES[0];
   
@@ -467,7 +675,16 @@ function startDemoLogin(roleKey = 'area_servant', remember = false) {
   navigateWithLoader('/dashboard');
 }
 
-/** Displays modal prompt to select demo access level (compact, transparent glass, draggable) */
+/**
+ * Open Demo Account Selection Window
+ *
+ * What it does:
+ * Shows a compact, draggable card window where you can pick which role you want to practice with.
+ *
+ * Backup plan if it breaks:
+ * The window can be closed at any time by pressing Escape, clicking Cancel, or clicking outside,
+ * and will never slide off the visible edges of your screen.
+ */
 function openDemoRoleModal(remember = false) {
   const existing = document.getElementById('demoRoleModal');
   if (existing) existing.remove();
@@ -539,7 +756,6 @@ function openDemoRoleModal(remember = false) {
   let initialTop = 0;
 
   const onPointerDown = (e) => {
-    // Only drag with primary mouse button / touch
     if (e.button !== undefined && e.button !== 0) return;
     if (e.target.closest('#closeDemoRoleModal')) return;
 
@@ -552,7 +768,6 @@ function openDemoRoleModal(remember = false) {
     initialLeft = rect.left;
     initialTop = rect.top;
 
-    // Convert centered transform to fixed left/top coords
     dialog.style.left = `${rect.left}px`;
     dialog.style.top = `${rect.top}px`;
     dialog.style.transform = 'none';
@@ -631,7 +846,6 @@ function openDemoRoleModal(remember = false) {
   document.getElementById('closeDemoRoleModal')?.addEventListener('click', close);
   document.getElementById('cancelDemoRoleModal')?.addEventListener('click', close);
 
-  // Close only if clicking directly on overlay without dragging
   let overlayDown = false;
   modal.addEventListener('pointerdown', (e) => {
     overlayDown = e.target === modal;
@@ -653,7 +867,7 @@ function openDemoRoleModal(remember = false) {
   });
 }
 
-// One-click demo login button
+// Demo button listener
 const demoLoginButton = document.getElementById('demoLoginButton');
 if (demoLoginButton) {
   demoLoginButton.addEventListener('click', () => {
@@ -661,7 +875,9 @@ if (demoLoginButton) {
   });
 }
 
-// Main sign-in form handler
+// ---------------------------------------------------------------------------
+// Main Login Form Submission
+// ---------------------------------------------------------------------------
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
   loginForm.addEventListener('submit', async event => {
@@ -678,7 +894,7 @@ if (loginForm) {
 
     setButtonBusy(submit, true, 'Signing In…');
 
-    // Built-in demo credentials check
+    // Quick shortcut for built-in demo administrator
     const demoOk = email === 'admin@mfcyouth.local' && password === 'admin123';
     if (demoOk) {
       setButtonBusy(submit, false, 'Sign In');
@@ -686,7 +902,7 @@ if (loginForm) {
       return;
     }
 
-    // Authenticate via cloud backend with prototype fallback
+    // Try signing in through the online cloud server first, falling back to local storage if offline
     try {
       const payload = await apiJson('/api/auth/login', {
         method: 'POST',
@@ -748,7 +964,9 @@ if (loginForm) {
   });
 }
 
-// Section 7: Servant Leader Registration Flow
+// ---------------------------------------------------------------------------
+// Servant Leader & Coordinator Sign-Up Form
+// ---------------------------------------------------------------------------
 const adminRegistrationForm = document.getElementById('adminRegistrationForm');
 if (adminRegistrationForm) {
   adminRegistrationForm.addEventListener('submit', async event => {
@@ -816,7 +1034,9 @@ if (adminRegistrationForm) {
   });
 }
 
-// Section 8: Member Portal Account Claim Flow
+// ---------------------------------------------------------------------------
+// Member Portal Account Activation (Claim Account)
+// ---------------------------------------------------------------------------
 const memberClaimForm = document.getElementById('memberClaimForm');
 if (memberClaimForm) {
   memberClaimForm.addEventListener('submit', async event => {
@@ -864,7 +1084,9 @@ if (memberClaimForm) {
   });
 }
 
-// Section 9: Password Update & Force Change Flow
+// ---------------------------------------------------------------------------
+// Password Change and Mandatory Account Update Form
+// ---------------------------------------------------------------------------
 const backToLoginButton = document.getElementById('backToLoginButton');
 if (backToLoginButton) {
   backToLoginButton.addEventListener('click', async () => {
@@ -879,7 +1101,7 @@ if (backToLoginButton) {
           body: JSON.stringify({ scope: 'local' })
         });
       } catch {
-        // Local browser state is still cleared so the user is not left signed in on this device.
+        // Even if server call fails, local browser login is always cleared so user is logged out on this device
       }
     }
 
@@ -932,7 +1154,7 @@ if (forcePasswordForm) {
         return;
       }
 
-      // Backend-authenticated users: call the Supabase change-password API
+      // Online server accounts: update password via cloud endpoint
       if (session.backendAuth && !session.demo) {
         setButtonBusy(submit, true, 'Updating…');
         try {
@@ -952,7 +1174,7 @@ if (forcePasswordForm) {
         return;
       }
 
-      // Local prototype fallback for browser-only demo accounts
+      // Offline demo accounts fallback: update password directly in browser memory
       const users = getUsers();
       const user = users.find(item => String(item.id) === String(session.userId)) || users.find(item => item.email === session.email);
       if (!user || user.password !== currentPassword) {
@@ -973,9 +1195,9 @@ if (forcePasswordForm) {
   }
 }
 
-// ----------------------------------------------------------------------------
-// 10. Email Address Change Flow
-// ----------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Email Address Change Request Form
+// ---------------------------------------------------------------------------
 const changeEmailForm = document.getElementById('changeEmailForm');
 if (changeEmailForm) {
   const emailSession = getSession();
@@ -1023,5 +1245,6 @@ if (changeEmailForm) {
   }
 }
 
-// Initialize show/hide password toggle buttons
+// Initialize show/hide password toggle buttons across the page
 attachPasswordToggles();
+

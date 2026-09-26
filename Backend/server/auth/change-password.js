@@ -3,6 +3,15 @@ import { sendJson, methodNotAllowed, apiError, readBearerToken } from '../_lib/h
 import { assertBackendConfigured } from '../_lib/env.js';
 import { createSupabaseAuthClient } from '../_lib/supabase.js';
 
+/**
+ * Validate Password Security Strength
+ *
+ * What it does:
+ * Ensures the new password meets security standards (at least 8 characters with both letters and numbers).
+ *
+ * Backup plan if it breaks:
+ * Returns an explanatory message if too weak, or an empty string if valid.
+ */
 function passwordError(password) {
   if (String(password).length < 8) return 'Password must be at least 8 characters long.';
   if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) {
@@ -11,6 +20,15 @@ function passwordError(password) {
   return '';
 }
 
+/**
+ * Destroy Temporary Verification Session
+ *
+ * What it does:
+ * Immediately cancels the temporary login session used to verify the user's current password so no lingering tokens remain in memory.
+ *
+ * Backup plan if it breaks:
+ * Tries the client library logout first; if that encounters an issue, it sends a direct logout network request as a fallback.
+ */
 async function revokeTemporarySession({ client, session, supabaseUrl, supabaseAnonKey }) {
   const { error: signOutError } = await client.auth.signOut({ scope: 'local' });
   if (!signOutError) return true;
@@ -29,6 +47,15 @@ async function revokeTemporarySession({ client, session, supabaseUrl, supabaseAn
   }
 }
 
+/**
+ * Update User Password Handler
+ *
+ * What it does:
+ * Confirms the user's current password, verifies the strength of their new password, updates credentials with the database, and clears any forced password change flags.
+ *
+ * Backup plan if it breaks:
+ * If the current password is wrong, it returns a 401 unauthorized error. If temporary session destruction fails, it halts with a 503 error before changing the password to prevent security loopholes.
+ */
 export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
 

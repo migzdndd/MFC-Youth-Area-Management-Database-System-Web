@@ -7,13 +7,13 @@ const LOCKOUT_DURATION_MS = LOCKOUT_MINUTES * 60 * 1000;
 const FAILURE_WINDOW_MS = LOCKOUT_DURATION_MS;
 
 /**
- * Checks if the given email account is currently locked out due to brute-force attempts.
- * Returns true if allowed, or sends a 423 response and returns false if locked.
+ * Check If Account is Temporarily Locked for Protection
  *
- * @param {import('http').IncomingMessage} req
- * @param {import('http').ServerResponse} res
- * @param {string} email
- * @returns {Promise<boolean>}
+ * What it does:
+ * Looks up whether someone entered the wrong password 5 or more times in a row for this email, locking out further attempts for 15 minutes.
+ *
+ * Backup plan if it breaks:
+ * If the database connection drops during this check, it logs a warning and allows the login attempt to continue rather than locking legitimate users out completely.
  */
 export async function checkBruteForce(req, res, email) {
   const normalized = normalizeEmail(email);
@@ -51,11 +51,13 @@ export async function checkBruteForce(req, res, email) {
 }
 
 /**
- * Records a failed login attempt for the given email address.
- * Increments attempt count, locks account if threshold reached, and returns status.
+ * Record a Failed Login Attempt
  *
- * @param {string} email
- * @returns {Promise<{ locked: boolean, attempts: number, lockedUntil: string|null }>}
+ * What it does:
+ * Counts every bad password attempt for an email address, and if it reaches 5 consecutive failures, activates the 15-minute lock timer.
+ *
+ * Backup plan if it breaks:
+ * If logging the failure to the database fails, it prints a warning to server logs and returns an unlocked status so the system does not crash.
  */
 export async function recordLoginFailure(email) {
   const normalized = normalizeEmail(email);
@@ -116,10 +118,13 @@ export async function recordLoginFailure(email) {
 }
 
 /**
- * Clears consecutive login failures for the given email upon successful authentication.
+ * Clear Failed Login History on Successful Login
  *
- * @param {string} email
- * @returns {Promise<void>}
+ * What it does:
+ * Resets the failed attempt counter back to zero once the user successfully signs in with their correct password.
+ *
+ * Backup plan if it breaks:
+ * Catches any database reset errors and logs a warning in the background, allowing the user's successful sign-in to finish uninterrupted.
  */
 export async function clearLoginFailures(email) {
   const normalized = normalizeEmail(email);

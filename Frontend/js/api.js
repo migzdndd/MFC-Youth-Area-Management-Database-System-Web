@@ -1,27 +1,42 @@
 /**
  * ============================================================================
- * MFC Youth Area Management System - API Client & Cloud Synchronization
+ * MFC Youth Area Management System - Server Communicator & Data Sync
+ * ============================================================================
+ * What this file is:
+ * This script is the bridge between this web page and the online cloud server.
+ * It downloads the newest records (members, chapters, events, reports) and saves
+ * an offline copy on your device so everything loads fast.
+ *
+ * Backup plan if something breaks:
+ * If your internet drops or the server is slow, the script stops waiting,
+ * keeps your screen running smoothly, and uses the saved records on your device.
  * ============================================================================
  */
 
-// Section 2: Authenticated Backend API Client
+// Section 1: Active Requests Tracker
 
-// Request deduplication cache for concurrent in-flight GET requests
+// Keeps track of active questions asked to the server so we don't ask twice at once
 const activeApiRequests = new Map();
 
 /**
- * Authenticated Backend API Client with:
- * - Request deduplication for simultaneous GETs
- * - Capped exponential-backoff retries for transient 5xx/network errors (max 2 retries)
- * - Infinite loop & circular retry protections
- * - Automatic 403 MFA elevation & 401 session expiration handling
+ * Asks the Online Server for Information or Updates
+ *
+ * What it does:
+ * Sends a secure request to the cloud server to fetch or save area records.
+ *
+ * Backup plan if it breaks:
+ * - If the connection drops or the server is busy, it automatically waits and retries up to 2 times.
+ * - If the server takes longer than 8 seconds to answer, it cancels the wait so your page doesn't freeze.
+ * - If your login expired, it automatically signs you out so you can sign in again.
+ * - If two-factor security is needed, it forwards you to the verification page.
+ * - If the internet is completely unavailable, it reports a clean error so the app can fall back to offline data.
  */
 async function backendApi(path, options = {}) {
   const method = String(options.method || 'GET').toUpperCase();
   const maxRetries = method === 'GET' ? Math.min(Math.max(Number(options.maxRetries ?? 2), 0), 2) : 0;
   const timeoutMs = Number(options.timeoutMs || 8000);
 
-  // Deduplicate identical in-flight GET requests
+  // Avoid asking for the exact same data twice simultaneously
   const dedupeKey = method === 'GET' ? `${path}:${session?.accessToken || ''}:${session?.areaId || ''}` : null;
   if (dedupeKey && activeApiRequests.has(dedupeKey)) {
     return activeApiRequests.get(dedupeKey);
@@ -69,7 +84,7 @@ async function backendApi(path, options = {}) {
           if (typeof clearSession === 'function') clearSession();
         }
 
-        // Only retry transient 502/503/504 errors on idempotent GET requests up to cap
+        // Retry temporary server glitches up to 2 times on viewing requests
         if (attempt < maxRetries && (response.status === 502 || response.status === 503 || response.status === 504)) {
           const delay = Math.min(1000 * Math.pow(2, attempt) + Math.random() * 200, 3000);
           await new Promise(r => setTimeout(r, delay));
@@ -89,7 +104,7 @@ async function backendApi(path, options = {}) {
         throw new Error('The server took too long to respond. Please try again.');
       }
 
-      // Retry network drops on GET requests up to cap
+      // Retry temporary connection drops on viewing requests
       if (error instanceof TypeError && attempt < maxRetries) {
         const delay = Math.min(1000 * Math.pow(2, attempt) + Math.random() * 200, 3000);
         await new Promise(r => setTimeout(r, delay));
@@ -115,8 +130,19 @@ async function backendApi(path, options = {}) {
   return promise;
 }
 
-// Section 3: Cloud Synchronization & Entity Mappers
+// Section 2: Online Record Converters (Server to Device)
 
+/**
+ * Formats Server Member into Standard Member Profile
+ *
+ * What it does:
+ * Takes member details from the online database and arranges them into standard
+ * member profiles that this app understands.
+ *
+ * Backup plan if it breaks:
+ * If any detail (like phone number, youth camp date, or middle name) is missing
+ * from the server, it preserves previous saved values or sets safe blank text.
+ */
 function cloudMemberToLocal(member, previous = {}) {
   const local = {
     ...previous,
@@ -146,6 +172,17 @@ function cloudMemberToLocal(member, previous = {}) {
   return local;
 }
 
+/**
+ * Syncs Member Roster from Server to Device Storage
+ *
+ * What it does:
+ * Downloads the newest list of youth members for your Area and saves a local copy
+ * in browser storage so the Members page loads instantly.
+ *
+ * Backup plan if it breaks:
+ * - If you have no internet or are testing in demo mode, it exits safely.
+ * - The Members page continues to run smoothly using your saved offline records.
+ */
 async function syncBackendMembersIntoLocalDb() {
   if (!session?.backendAuth || session?.demo || !session?.areaId) return false;
 
@@ -154,9 +191,6 @@ async function syncBackendMembersIntoLocalDb() {
   const data = db();
   const previousMembers = Array.isArray(data.members) ? data.members : [];
 
-  // In authenticated cloud mode, Supabase is the source of truth. localStorage
-  // only keeps a fast render cache so deleted/stale prototype records cannot
-  // reappear after a refresh.
   data.members = cloudMembers.map(cloudMember => {
     const email = String(cloudMember.email || '').trim().toLowerCase();
     const previous = previousMembers.find(localMember =>
@@ -170,6 +204,17 @@ async function syncBackendMembersIntoLocalDb() {
   return true;
 }
 
+/**
+ * Formats Server Event into Standard Gathering
+ *
+ * What it does:
+ * Converts raw event data from the server into a standard gathering object
+ * with Philippine local date, time, venue, and fee.
+ *
+ * Backup plan if it breaks:
+ * If the start date is invalid or missing, it sets an empty date string.
+ * If the fee is missing, it sets 0 (Free) so the gathering card displays cleanly.
+ */
 function cloudEventToLocal(row) {
   let localDateTime = '';
   if (row.starts_at) {
@@ -193,6 +238,17 @@ function cloudEventToLocal(row) {
   };
 }
 
+/**
+ * Formats Server Participant into Standard Registration
+ *
+ * What it does:
+ * Converts raw attendance and sign-up records from the cloud into standard
+ * event registration records.
+ *
+ * Backup plan if it breaks:
+ * If payment or attendance info is missing, it defaults safely to "Cash",
+ * "Unpaid", and attended to false.
+ */
 function cloudParticipantToLocal(row) {
   return {
     id: row.id,
@@ -205,6 +261,16 @@ function cloudParticipantToLocal(row) {
   };
 }
 
+/**
+ * Formats Server Contribution into Standard Record
+ *
+ * What it does:
+ * Converts GIG (God Is Good) youth community contributions from the cloud
+ * into standard contribution records.
+ *
+ * Backup plan if it breaks:
+ * If the amount or note is blank, it safely sets 0 and a blank note.
+ */
 function cloudGigToLocal(row) {
   return {
     id: row.id,
@@ -217,6 +283,17 @@ function cloudGigToLocal(row) {
   };
 }
 
+/**
+ * Syncs All Activity Modules from Server to Device Storage
+ *
+ * What it does:
+ * Downloads chapters, ministries, gatherings, attendance, reports, and financial
+ * contributions from the server in one batch, then saves an offline copy.
+ *
+ * Backup plan if it breaks:
+ * If you are offline, demo-mode, or the server takes more than 10 seconds, it cancels
+ * gracefully and allows the dashboard to keep displaying your saved offline records.
+ */
 async function syncCloudModulesIntoLocalDb() {
   if (!session?.backendAuth || session?.demo || !session?.areaId) return false;
 
@@ -286,6 +363,17 @@ async function syncCloudModulesIntoLocalDb() {
   return true;
 }
 
+/**
+ * Refreshes All Online Records and Updates the Screen
+ *
+ * What it does:
+ * Downloads the newest member rosters and activity modules together, then
+ * updates the visible page so leaders see the latest changes immediately.
+ *
+ * Backup plan if it breaks:
+ * If offline or in demo mode, it exits safely. If downloading encounters an error,
+ * the existing page stays visible with its current records without flashing or breaking.
+ */
 async function refreshAllCloudData({ render = true } = {}) {
   if (!session?.backendAuth || session?.demo || !session?.areaId) return false;
   await Promise.all([

@@ -50,20 +50,42 @@ const ROLE_SERVICE_MAP = Object.freeze({
   chapter_servant: 'Chapter Servant'
 });
 
+/**
+ * Standardize Ministry Service Name
+ *
+ * What it does:
+ * Converts various abbreviations, spelling differences, and casing (like "graphics and promo" or "lit_servant") into official standard titles.
+ *
+ * Backup plan if it breaks:
+ * If a custom service name is not recognized in the alias list, it returns the trimmed original text without altering it.
+ */
 export function normalizeServiceName(value) {
   const service = String(value || '').trim().replace(/\s+/g, ' ');
   if (!service) return '';
   return SERVICE_ALIASES.get(service.toLowerCase()) || service;
 }
 
+/**
+ * Find Service Title Corresponding to Leadership Role
+ *
+ * What it does:
+ * Matches a leadership role (like 'lit_servant') to its official ministry service name ('Area LIT Servant').
+ *
+ * Backup plan if it breaks:
+ * If the role does not map to a standard ministry, it safely returns an empty string.
+ */
 export function serviceForAccessRole(role) {
   return ROLE_SERVICE_MAP[String(role || '').trim().toLowerCase()] || '';
 }
 
 /**
- * Keeps every Area on the canonical built-in service catalog. This is a
- * runtime safety net for Areas created before newer service roles were added.
- * SQL migrations remain the preferred permanent database upgrade path.
+ * Ensure Area Has Complete Official Ministry Catalog
+ *
+ * What it does:
+ * Checks an Area's database and automatically adds any missing standard ministry services (Music, Dance, Liturgy, etc.) so new areas have all features ready.
+ *
+ * Backup plan if it breaks:
+ * If an Area ID is missing, it exits safely. If standard services were marked inactive, it reactivates them automatically.
  */
 export async function ensureStandardServices(supabase, areaId) {
   const targetAreaId = String(areaId || '').trim();
@@ -114,9 +136,13 @@ export async function ensureStandardServices(supabase, areaId) {
 }
 
 /**
- * Servant Leader access levels that directly correspond to a service are
- * automatically represented in member_services when the Member has no
- * explicit service yet. Existing manual assignments are preserved.
+ * Automatically Assign Initial Ministry Service to Leader
+ *
+ * What it does:
+ * When a servant leader joins an Area without an assigned ministry, this automatically links them to their corresponding ministry service in the database.
+ *
+ * Backup plan if it breaks:
+ * If the leader already has ministry assignments chosen, it leaves their existing choices untouched to avoid overwriting manual changes.
  */
 export async function ensureRoleServiceAssignment(supabase, { memberId, areaId, role }) {
   const targetMemberId = String(memberId || '').trim();

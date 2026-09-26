@@ -1,59 +1,53 @@
 /**
- * ============================================================================
- * MFC Youth Area Management System - Events Module & Participant Attendance
- * ============================================================================
+ * MFC Youth Area Management System - Events & Participant Attendance
+ *
+ * What this file does:
+ * Manages Area assemblies, camps, youth conferences, and fellowship events.
+ * It lets leaders create events, track participant registrations, verify fee payments,
+ * and mark actual attendance.
+ *
+ * Backup plan if it breaks:
+ * If participant records are missing, the system uses the manual attendance estimate entered
+ * on the event. If an online save fails, it alerts you with a clear error toast and preserves
+ * existing registration data.
  */
-
-// Section 17: Events & Attendance Tracking Module
 
 let eventFilters = {
   search: '',
   timing: 'All'
 };
 
+/**
+ * Filter and Sort Events
+ *
+ * What it does:
+ * Filters events by keyword (name, venue, description) and timing (All, Upcoming, or Past),
+ * placing upcoming events nearest in time first.
+ *
+ * Backup plan if it breaks:
+ * Safely includes events with missing venue or description text without causing errors.
+ */
 function filteredEvents(data) {
-  const now =
-    Date.now();
+  const now = Date.now();
 
-  const filtered = data.events
-    .filter(event => {
-      const match = `
-        ${event.name || ''}
-        ${event.venue || ''}
-        ${event.description || ''}
-      `
-        .toLowerCase()
-        .includes(
-          eventFilters.search.toLowerCase()
-        );
+  const filtered = data.events.filter(event => {
+    const match = `
+      ${event.name || ''}
+      ${event.venue || ''}
+      ${event.description || ''}
+    `
+      .toLowerCase()
+      .includes(eventFilters.search.toLowerCase());
 
-      if (!match) {
-        return false;
-      }
+    if (!match) return false;
 
-      const time =
-        new Date(
-          event.date
-        ).getTime();
+    const time = new Date(event.date).getTime();
 
-      if (
-        eventFilters.timing ===
-        'Upcoming' &&
-        time < now
-      ) {
-        return false;
-      }
+    if (eventFilters.timing === 'Upcoming' && time < now) return false;
+    if (eventFilters.timing === 'Past' && time >= now) return false;
 
-      if (
-        eventFilters.timing ===
-        'Past' &&
-        time >= now
-      ) {
-        return false;
-      }
-
-      return true;
-    });
+    return true;
+  });
 
   return filtered.sort((a, b) => {
     const aTime = parseEventTimestamp(a.date);
@@ -65,41 +59,46 @@ function filteredEvents(data) {
   });
 }
 
-function eventAttendance(
-  data,
-  event
-) {
-  const participants =
-    data.participants.filter(
-      participant =>
-        String(participant.eventId) ===
-        String(event.id)
-    );
+/**
+ * Count Total Event Attendees
+ *
+ * What it does:
+ * Counts how many registered participants were marked as "Attended" for this event.
+ *
+ * Backup plan if it breaks:
+ * If the event has no individual participant records, it safely falls back to the manual
+ * attendance headcount entered when the event was created.
+ */
+function eventAttendance(data, event) {
+  const participants = data.participants.filter(
+    participant => String(participant.eventId) === String(event.id)
+  );
 
-  const attended =
-    participants.filter(
-      participant =>
-        participant.attended
-    ).length;
+  const attended = participants.filter(
+    participant => participant.attended
+  ).length;
 
   return participants.length
     ? attended
-    : Number(
-      event.peopleAttended ||
-      0
-    );
+    : Number(event.peopleAttended || 0);
 }
 
+/**
+ * Display Events Management Screen
+ *
+ * What it does:
+ * Renders the table of events showing date, venue, fee, status (Upcoming/Completed),
+ * registered count, attended count, and management buttons.
+ *
+ * Backup plan if it breaks:
+ * Restricts editing to Area-level leaders while letting Chapter Servants view events in read-only mode,
+ * and displays an empty state if no events match your search.
+ */
 function renderEvents() {
   const data = db();
-
   const canManage = isAreaAdminSession();
-
-  const list =
-    filteredEvents(data);
-
-  const now =
-    Date.now();
+  const list = filteredEvents(data);
+  const now = Date.now();
 
   content.innerHTML =
     pageHeader(
@@ -120,15 +119,12 @@ function renderEvents() {
     ) +
     `
     <div class="toolbar">
-
       <div class="grow">
         <input
           class="search-input"
           id="eventSearch"
           placeholder="Search events or venues..."
-          value="${esc(
-      eventFilters.search
-    )}"
+          value="${esc(eventFilters.search)}"
         >
       </div>
 
@@ -136,29 +132,9 @@ function renderEvents() {
         class="select-input compact-filter"
         id="eventTiming"
       >
-        <option>
-          All
-        </option>
-
-        <option
-          ${eventFilters.timing ===
-      'Upcoming'
-      ? 'selected'
-      : ''
-    }
-        >
-          Upcoming
-        </option>
-
-        <option
-          ${eventFilters.timing ===
-      'Past'
-      ? 'selected'
-      : ''
-    }
-        >
-          Past
-        </option>
+        <option>All</option>
+        <option ${eventFilters.timing === 'Upcoming' ? 'selected' : ''}>Upcoming</option>
+        <option ${eventFilters.timing === 'Past' ? 'selected' : ''}>Past</option>
       </select>
 
       <button
@@ -167,300 +143,133 @@ function renderEvents() {
       >
         Clear
       </button>
-
     </div>
 
     <div class="result-count">
-      Showing
-      ${list.length}
-      of
-      ${data.events.length}
-      event${data.events.length === 1
-      ? ''
-      : 's'
-    }
+      Showing ${list.length} of ${data.events.length} event${data.events.length === 1 ? '' : 's'}
     </div>
 
-    <section
-      class="card table-wrap"
-    >
-
+    <section class="card table-wrap">
       ${list.length
-      ? `
-            <table class="data-table">
+        ? `
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Event</th>
+                <th>Venue</th>
+                <th>Status</th>
+                <th>Fee</th>
+                <th>Registered</th>
+                <th>Attended</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${list.map(event => {
+                const participants = data.participants.filter(
+                  participant => String(participant.eventId) === String(event.id)
+                );
+                const upcoming = new Date(event.date).getTime() >= now;
 
-              <thead>
-                <tr>
-                  <th>Date & Time</th>
-                  <th>Event</th>
-                  <th>Venue</th>
-                  <th>Status</th>
-                  <th>Fee</th>
-                  <th>Registered</th>
-                  <th>Attended</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-
-              <tbody>
-
-                ${list
-        .map(
-          event => {
-            const participants =
-              data.participants.filter(
-                participant =>
-                  String(participant.eventId) ===
-                  String(event.id)
-              );
-
-            const upcoming =
-              new Date(
-                event.date
-              ).getTime() >=
-              now;
-
-            return `
-                        <tr>
-
-                          <td>
-                            ${fmtDateTime(
-              event.date
-            )}
-                          </td>
-
-                          <td>
-                            <strong>
-                              ${esc(
-              event.name
-            )}
-                            </strong>
-                          </td>
-
-                          <td>
-                            ${esc(
-              event.venue ||
-              '—'
-            )}
-                          </td>
-
-                          <td>
-                            <span
-                              class="badge ${upcoming
-                ? 'pending'
-                : 'active'
-              }"
-                            >
-                              ${upcoming
-                ? 'Upcoming'
-                : 'Completed'
-              }
-                            </span>
-                          </td>
-
-                          <td>
-                            ${Number(
-                event.fee
-              ) > 0
-                ? money(
-                  event.fee
-                )
-                : 'Free'
-              }
-                          </td>
-
-                          <td>
-                            ${participants.length}
-                          </td>
-
-                          <td>
-                            ${eventAttendance(
-                data,
-                event
-              )}
-                          </td>
-
-                          <td
-                            class="actions-cell"
-                          >
-                            <button
-                              class="btn"
-                              onclick='viewEvent(${inlineJsArg(event.id)})'
-                            >
-                              View
-                            </button>
-
-                            ${canManage
-                              ? `
-                                <button
-                                  class="btn"
-                                  onclick='eventModal(${inlineJsArg(event.id)})'
-                                >
-                                  Edit
-                                </button>
-
-                                <button
-                                  class="btn red"
-                                  onclick='deleteEvent(${inlineJsArg(event.id)})'
-                                >
-                                  Delete
-                                </button>
-                              `
-                              : ''
-                            }
-                          </td>
-
-                        </tr>
-                      `;
-          }
-        )
-        .join('')}
-
-              </tbody>
-
-            </table>
-          `
-      : emptyState(
-        'No matching events',
-        data.events.length
-          ? 'Change or clear the event filters.'
-          : 'Add your first Area event.'
-      )
-    }
-
+                return `
+                  <tr>
+                    <td>${fmtDateTime(event.date)}</td>
+                    <td><strong>${esc(event.name)}</strong></td>
+                    <td>${esc(event.venue || '—')}</td>
+                    <td>
+                      <span class="badge ${upcoming ? 'pending' : 'active'}">
+                        ${upcoming ? 'Upcoming' : 'Completed'}
+                      </span>
+                    </td>
+                    <td>${Number(event.fee) > 0 ? money(event.fee) : 'Free'}</td>
+                    <td>${participants.length}</td>
+                    <td>${eventAttendance(data, event)}</td>
+                    <td class="actions-cell">
+                      <button class="btn" onclick='viewEvent(${inlineJsArg(event.id)})'>View</button>
+                      ${canManage
+                        ? `
+                          <button class="btn" onclick='eventModal(${inlineJsArg(event.id)})'>Edit</button>
+                          <button class="btn red" onclick='deleteEvent(${inlineJsArg(event.id)})'>Delete</button>
+                        `
+                        : ''
+                      }
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        `
+        : emptyState(
+            'No matching events',
+            data.events.length
+              ? 'Change or clear the event filters.'
+              : 'Add your first Area event.'
+          )
+      }
     </section>
   `;
 
-  const addEventButton =
-    document.getElementById(
-      'addEvent'
-    );
-
+  const addEventButton = document.getElementById('addEvent');
   if (addEventButton) {
-    addEventButton.onclick = () =>
-      eventModal();
+    addEventButton.onclick = () => eventModal();
   }
 
-  document.getElementById(
-    'eventSearch'
-  ).oninput = event => {
-    eventFilters.search =
-      event.target.value;
-
+  document.getElementById('eventSearch').oninput = event => {
+    eventFilters.search = event.target.value;
     renderEvents();
   };
 
-  document.getElementById(
-    'eventTiming'
-  ).onchange = event => {
-    eventFilters.timing =
-      event.target.value;
-
+  document.getElementById('eventTiming').onchange = event => {
+    eventFilters.timing = event.target.value;
     renderEvents();
   };
 
-  document.getElementById(
-    'clearEventFilters'
-  ).onclick = () => {
-    eventFilters = {
-      search: '',
-      timing: 'All'
-    };
-
+  document.getElementById('clearEventFilters').onclick = () => {
+    eventFilters = { search: '', timing: 'All' };
     renderEvents();
   };
 }
 
-window.eventModal = function (
-  id = null
-) {
+/**
+ * Add or Edit Event Form
+ *
+ * What it does:
+ * Opens a popup form where leaders can enter event details (Name, Date & Time, Registration Fee,
+ * Venue, and Description).
+ *
+ * Backup plan if it breaks:
+ * Checks that name, date, and positive attendance numbers are entered before saving. If the cloud
+ * server cannot be reached, displays an error toast and keeps the form open so work is not lost.
+ */
+window.eventModal = function (id = null) {
   if (denyUnlessAreaAdmin('Only Area-level servant accounts can create or edit Area events.')) return;
 
   const data = db();
-
   const event = id
-    ? data.events.find(
-      item => String(item.id) === String(id)
-    )
+    ? data.events.find(item => String(item.id) === String(id))
     : {};
 
   const body = `
     <div class="form-grid">
-
-      ${field(
-    'Event Name',
-    'eName',
-    'text',
-    event?.name || '',
-    'required maxlength="120"'
-  )}
-
-      ${field(
-    'Date & Time',
-    'eDate',
-    'datetime-local',
-    event?.date || '',
-    'required'
-  )}
-
-      ${field(
-    'Registration Fee',
-    'eFee',
-    'number',
-    event?.fee || 0,
-    'min="0" step="0.01"'
-  )}
-
-      ${field(
-    'Venue',
-    'eVenue',
-    'text',
-    event?.venue || '',
-    'maxlength="150"'
-  )}
-
-      ${field(
-    'Manual Attendance (fallback)',
-    'eAttended',
-    'number',
-    event?.peopleAttended ||
-    0,
-    'min="0" step="1"'
-  )}
+      ${field('Event Name', 'eName', 'text', event?.name || '', 'required maxlength="120"')}
+      ${field('Date & Time', 'eDate', 'datetime-local', event?.date || '', 'required')}
+      ${field('Registration Fee', 'eFee', 'number', event?.fee || 0, 'min="0" step="0.01"')}
+      ${field('Venue', 'eVenue', 'text', event?.venue || '', 'maxlength="150"')}
+      ${field('Manual Attendance (fallback)', 'eAttended', 'number', event?.peopleAttended || 0, 'min="0" step="1"')}
 
       <div class="form-group">
-
-        <label for="eDescription">
-          Event Description
-        </label>
-
-        <textarea
-          class="textarea-input"
-          id="eDescription"
-          maxlength="1000"
-        >${esc(
-    event?.description ||
-    ''
-  )}</textarea>
-
-        <small
-          class="field-help"
-        >
-          Manual attendance is used only when the event has no registered participant records.
-        </small>
-
+        <label for="eDescription">Event Description</label>
+        <textarea class="textarea-input" id="eDescription" maxlength="1000">${esc(event?.description || '')}</textarea>
+        <small class="field-help">Manual attendance is used only when the event has no registered participant records.</small>
       </div>
-
     </div>
   `;
 
   openModal(
-    id
-      ? 'Edit Event'
-      : 'Add Event',
-
+    id ? 'Edit Event' : 'Add Event',
     body,
-
     async close => {
       const name = document.getElementById('eName').value.trim();
       const date = document.getElementById('eDate').value;
@@ -511,6 +320,16 @@ window.eventModal = function (
   );
 };
 
+/**
+ * Delete Event
+ *
+ * What it does:
+ * Deletes an event along with its associated participant signups after asking for confirmation.
+ *
+ * Backup plan if it breaks:
+ * Asks for confirmation first, checks permissions, and unlinks reports rather than deleting reports
+ * so historical activity documentation is never lost.
+ */
 window.deleteEvent = async id => {
   if (denyUnlessAreaAdmin('Only Area-level servant accounts can delete Area events.')) return;
   if (!confirm('Delete this event and all of its participant records?')) return;
@@ -535,300 +354,138 @@ window.deleteEvent = async id => {
   }
 };
 
+/**
+ * View Event Details & Participants Roster
+ *
+ * What it does:
+ * Opens a modal window showing a summary of the event (Venue, Fee, Total Registered,
+ * Paid, and Attended) along with a table of all registered participants.
+ *
+ * Backup plan if it breaks:
+ * If the event cannot be found, it exits quietly without error. Shows an empty state
+ * if no participants have registered yet.
+ */
 window.viewEvent = id => {
   const data = db();
   const canManage = isAreaAdminSession();
 
-  const event =
-    data.events.find(
-      item => String(item.id) === String(id)
-    );
-
+  const event = data.events.find(item => String(item.id) === String(id));
   if (!event) return;
 
-  const participants =
-    data.participants.filter(
-      participant =>
-        String(participant.eventId) === String(id)
-    );
+  const participants = data.participants.filter(
+    participant => String(participant.eventId) === String(id)
+  );
 
-  const paid =
-    participants.filter(
-      participant =>
-        participant.paymentStatus ===
-        'Paid'
-    ).length;
+  const paid = participants.filter(
+    participant => participant.paymentStatus === 'Paid'
+  ).length;
 
-  const attended =
-    participants.filter(
-      participant =>
-        participant.attended
-    ).length;
+  const attended = participants.filter(
+    participant => participant.attended
+  ).length;
 
-  const participantTable =
-    participants.length
-      ? `
-        <div class="table-wrap">
+  const participantTable = participants.length
+    ? `
+      <div class="table-wrap">
+        <table class="data-table compact-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Age</th>
+              <th>Chapter</th>
+              <th>Service</th>
+              <th>Payment</th>
+              <th>Attendance</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${participants.map(participant => {
+              const member = participantMember(data, participant);
+              const age = member ? calculateAge(member.birthDate) : participant.age || null;
+              const chapter = member ? member.chapterName : participant.chapter;
+              const services = member ? (member.services || []).join(', ') : participant.service;
 
-          <table
-            class="data-table compact-table"
-          >
-
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Age</th>
-                <th>Chapter</th>
-                <th>Service</th>
-                <th>Payment</th>
-                <th>Attendance</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-
-              ${participants
-        .map(
-          participant => {
-            const member = participantMember(data, participant);
-            const age = member
-              ? calculateAge(member.birthDate)
-              : participant.age || null;
-            const chapter = member
-              ? member.chapterName
-              : participant.chapter;
-            const services = member
-              ? (member.services || []).join(', ')
-              : participant.service;
-
-            return `
-                    <tr>
-
-                      <td>
-                        ${esc(participantName(data, participant) || '—')}
-                      </td>
-
-                      <td>
-                        ${age === null || age === undefined || age === ''
-              ? '—'
-              : esc(String(age))}
-                      </td>
-
-                      <td>
-                        ${esc(chapter || '—')}
-                      </td>
-
-                      <td>
-                        ${esc(services || '—')}
-                      </td>
-
-                      <td>
-                        <span class="badge ${participant.paymentStatus ===
-              'Paid'
-              ? 'paid'
-              : 'unpaid'
-            }">
-                          ${esc(
-              participant.paymentStatus || 'Unpaid'
-            )}
-                        </span>
-                      </td>
-
-                      <td>
-                        <span class="badge ${participant.attended
-              ? 'attended'
-              : 'pending'
-            }">
-                          ${participant.attended
-              ? 'Attended'
-              : 'Not Yet'
-            }
-                        </span>
-                      </td>
-
-                      <td
-                        class="actions-cell"
-                      >
-                        ${canManage
-                          ? `
-                            <button
-                              class="btn"
-                              onclick='participantModal(${inlineJsArg(id)}, ${inlineJsArg(participant.id)})'
-                            >
-                              Edit
-                            </button>
-
-                            <button
-                              class="btn red"
-                              onclick='deleteParticipant(${inlineJsArg(id)}, ${inlineJsArg(participant.id)})'
-                            >
-                              Delete
-                            </button>
-                          `
-                          : '<span class="muted">View only</span>'
-                        }
-                      </td>
-
-                    </tr>
-                  `;
-          }
-        )
-        .join('')}
-
-            </tbody>
-
-          </table>
-
-        </div>
-      `
-      : emptyState(
+              return `
+                <tr>
+                  <td>${esc(participantName(data, participant) || '—')}</td>
+                  <td>${age === null || age === undefined || age === '' ? '—' : esc(String(age))}</td>
+                  <td>${esc(chapter || '—')}</td>
+                  <td>${esc(services || '—')}</td>
+                  <td>
+                    <span class="badge ${participant.paymentStatus === 'Paid' ? 'paid' : 'unpaid'}">
+                      ${esc(participant.paymentStatus || 'Unpaid')}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge ${participant.attended ? 'attended' : 'pending'}">
+                      ${participant.attended ? 'Attended' : 'Not Yet'}
+                    </span>
+                  </td>
+                  <td class="actions-cell">
+                    ${canManage
+                      ? `
+                        <button class="btn" onclick='participantModal(${inlineJsArg(id)}, ${inlineJsArg(participant.id)})'>Edit</button>
+                        <button class="btn red" onclick='deleteParticipant(${inlineJsArg(id)}, ${inlineJsArg(participant.id)})'>Delete</button>
+                      `
+                      : '<span class="muted">View only</span>'
+                    }
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    `
+    : emptyState(
         'No participants yet',
         'Register the first participant for this event.'
       );
 
   const body = `
     <div class="event-summary">
-
-      <div>
-        <span>
-          Date & Time
-        </span>
-
-        <strong>
-          ${fmtDateTime(
-    event.date
-  )}
-        </strong>
-      </div>
-
-      <div>
-        <span>
-          Venue
-        </span>
-
-        <strong>
-          ${esc(
-    event.venue ||
-    '—'
-  )}
-        </strong>
-      </div>
-
-      <div>
-        <span>
-          Registration Fee
-        </span>
-
-        <strong>
-          ${Number(
-    event.fee
-  ) > 0
-      ? money(
-        event.fee
-      )
-      : 'Free'
-    }
-        </strong>
-      </div>
-
-      <div>
-        <span>
-          Registered
-        </span>
-
-        <strong>
-          ${participants.length}
-        </strong>
-      </div>
-
-      <div>
-        <span>
-          Paid
-        </span>
-
-        <strong>
-          ${paid}
-        </strong>
-      </div>
-
-      <div>
-        <span>
-          Attended
-        </span>
-
-        <strong>
-          ${participants.length
-      ? attended
-      : Number(
-        event.peopleAttended ||
-        0
-      )
-    }
-        </strong>
-      </div>
-
+      <div><span>Date & Time</span><strong>${fmtDateTime(event.date)}</strong></div>
+      <div><span>Venue</span><strong>${esc(event.venue || '—')}</strong></div>
+      <div><span>Registration Fee</span><strong>${Number(event.fee) > 0 ? money(event.fee) : 'Free'}</strong></div>
+      <div><span>Registered</span><strong>${participants.length}</strong></div>
+      <div><span>Paid</span><strong>${paid}</strong></div>
+      <div><span>Attended</span><strong>${participants.length ? attended : Number(event.peopleAttended || 0)}</strong></div>
     </div>
 
-    ${event.description
-      ? `
-          <p class="event-description">
-            ${esc(
-        event.description
-      )}
-          </p>
-        `
-      : ''
-    }
+    ${event.description ? `<p class="event-description">${esc(event.description)}</p>` : ''}
 
     <div class="modal-section-heading">
-
-      <h3>
-        Participants
-        (${participants.length})
-      </h3>
-
+      <h3>Participants (${participants.length})</h3>
       ${canManage
-        ? `
-          <button
-            class="btn blue"
-            type="button"
-            onclick='participantModal(${inlineJsArg(id)})'
-          >
-            + Register Participant
-          </button>
-        `
+        ? `<button class="btn blue" type="button" onclick='participantModal(${inlineJsArg(id)})'>+ Register Participant</button>`
         : '<span class="scope-chip">View Only</span>'
       }
-
     </div>
 
     ${participantTable}
   `;
 
-  openModal(
-    esc(event.name),
-    body
-  );
+  openModal(esc(event.name), body);
 };
 
-window.participantModal = (
-  eventId,
-  id = null
-) => {
+/**
+ * Register or Edit Event Participant
+ *
+ * What it does:
+ * Opens a modal to register an official youth member for the event, record payment status
+ * (Paid/Unpaid), choose payment mode (Cash/GCash/Bank), and check whether they attended.
+ *
+ * Backup plan if it breaks:
+ * Prevents adding the same member twice to the same event. If editing an older record whose member
+ * was removed, it preserves historical participant data so financial records remain accurate.
+ */
+window.participantModal = (eventId, id = null) => {
   if (denyUnlessAreaAdmin('Only Area-level servant accounts can manage event participants.')) return;
 
   const data = db();
-
-  const participant = id
-    ? data.participants.find(
-      item => String(item.id) === String(id)
-    )
-    : null;
-
-  const linkedMember = participant
-    ? participantMember(data, participant)
-    : null;
+  const participant = id ? data.participants.find(item => String(item.id) === String(id)) : null;
+  const linkedMember = participant ? participantMember(data, participant) : null;
 
   const registeredMemberIds = new Set(
     data.participants
@@ -896,29 +553,21 @@ window.participantModal = (
         >
 
         <div class="participant-member-list" id="participantMemberList">
-          ${availableMembers
-            .map(
-              member => `
-                <label
-                  class="participant-member-option"
-                  data-participant-member-search="${esc(`
-                    ${fullName(member)}
-                    ${member.chapterName || ''}
-                    ${member.contact || ''}
-                    ${(member.services || []).join(' ')}
-                    ${member.status || ''}
-                  `.toLowerCase().replace(/\s+/g, ' ').trim())}"
-                >
-                  <input
-                    type="radio"
-                    name="pMember"
-                    value="${member.id}"
-                  >
-                  ${memberSummary(member)}
-                </label>
-              `
-            )
-            .join('')}
+          ${availableMembers.map(member => `
+            <label
+              class="participant-member-option"
+              data-participant-member-search="${esc(`
+                ${fullName(member)}
+                ${member.chapterName || ''}
+                ${member.contact || ''}
+                ${(member.services || []).join(' ')}
+                ${member.status || ''}
+              `.toLowerCase().replace(/\s+/g, ' ').trim())}"
+            >
+              <input type="radio" name="pMember" value="${member.id}">
+              ${memberSummary(member)}
+            </label>
+          `).join('')}
         </div>
 
         <p class="muted participant-member-empty hidden" id="participantMemberEmpty">
@@ -941,64 +590,22 @@ window.participantModal = (
 
   const body = `
     <div class="form-grid">
-
       ${memberSection}
+      ${selectField('Mode of Payment', 'pMode', ['Cash', 'GCash', 'Bank Transfer', 'Other'], participant?.paymentMode || 'Cash')}
+      ${selectField('Payment Status', 'pPay', ['Unpaid', 'Paid'], participant?.paymentStatus || 'Unpaid')}
 
-      ${selectField(
-        'Mode of Payment',
-        'pMode',
-        [
-          'Cash',
-          'GCash',
-          'Bank Transfer',
-          'Other'
-        ],
-        participant?.paymentMode ||
-        'Cash'
-      )}
-
-      ${selectField(
-        'Payment Status',
-        'pPay',
-        [
-          'Unpaid',
-          'Paid'
-        ],
-        participant?.paymentStatus ||
-        'Unpaid'
-      )}
-
-      <div
-        class="form-group full"
-      >
-
-        <label
-          class="check-row"
-        >
-          <input
-            type="checkbox"
-            id="pAttended"
-            ${participant?.attended
-      ? 'checked'
-      : ''
-    }
-          >
-
+      <div class="form-group full">
+        <label class="check-row">
+          <input type="checkbox" id="pAttended" ${participant?.attended ? 'checked' : ''}>
           Mark as attended
         </label>
-
       </div>
-
     </div>
   `;
 
   openModal(
-    id
-      ? 'Edit Participant'
-      : 'Register Participant',
-
+    id ? 'Edit Participant' : 'Register Participant',
     body,
-
     async close => {
       let member = linkedMember;
 
@@ -1072,18 +679,14 @@ window.participantModal = (
   if (!id) {
     const searchInput = document.getElementById('participantMemberSearch');
     const emptyMessage = document.getElementById('participantMemberEmpty');
-    const rows = [
-      ...document.querySelectorAll('[data-participant-member-search]')
-    ];
+    const rows = [...document.querySelectorAll('[data-participant-member-search]')];
 
     searchInput?.addEventListener('input', () => {
       const query = searchInput.value.trim().toLowerCase();
       let visible = 0;
 
       rows.forEach(row => {
-        const matches = !query ||
-          (row.dataset.participantMemberSearch || '').includes(query);
-
+        const matches = !query || (row.dataset.participantMemberSearch || '').includes(query);
         row.classList.toggle('hidden', !matches);
         if (matches) visible += 1;
       });
@@ -1093,6 +696,16 @@ window.participantModal = (
   }
 };
 
+/**
+ * Remove Participant from Event
+ *
+ * What it does:
+ * Deletes a participant registration record from an event after asking for confirmation.
+ *
+ * Backup plan if it breaks:
+ * Confirms with the user first, verifies leader permissions, and re-renders the event view
+ * safely even if the modal window was refreshed.
+ */
 window.deleteParticipant = async (eventId, id) => {
   if (denyUnlessAreaAdmin('Only Area-level servant accounts can manage event participants.')) return;
   if (!confirm('Delete this participant?')) return;

@@ -73,11 +73,29 @@ const ROUTES = new Map([
   ['changelogs', changelogs]
 ]);
 
+/**
+ * Clean and Standardize Requested URL Route
+ *
+ * What it does:
+ * Strips away accidental leading or trailing slashes and handles array inputs so the server can match the requested action to its handler.
+ *
+ * Backup plan if it breaks:
+ * If an unexpected or blank route format is passed, it converts it safely to an empty string to avoid crashes.
+ */
 function normalizeRoute(value) {
   const route = Array.isArray(value) ? value[0] : value;
   return String(route || '').replace(/^\/+|\/+$/g, '');
 }
 
+/**
+ * Main Central Server Route Dispatcher
+ *
+ * What it does:
+ * Applies web security shields to every incoming request, matches the web address path to the correct handler, and runs it.
+ *
+ * Backup plan if it breaks:
+ * If an unknown address is requested, it replies with a clear 404 "API route not found" message. If an unexpected server error occurs, it catches it and responds with a 500 error code instead of crashing the server.
+ */
 export default async function handler(req, res) {
   applySecurityHeaders(res);
   try {

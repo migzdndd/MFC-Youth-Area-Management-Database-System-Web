@@ -1,16 +1,46 @@
 /**
  * ============================================================================
- * MFC Youth Area Management System - UI Components & Helper Utilities
+ * MFC Youth Area Management System - User Interface & Visual Tools
+ * ============================================================================
+ * What this file is:
+ * This script handles popup alerts (toasts), dialog windows (modals),
+ * date/money formatters, and the mobile navigation menu.
+ *
+ * Backup plan if something breaks:
+ * If an alert or popup fails to close normally, this script includes built-in
+ * safety timers and keyboard escape keys to ensure you are never stuck on screen.
  * ============================================================================
  */
 
-// Section 6: Formatting, Validation & Helper Utilities
+// Section 1: Unique IDs, Text Safety, and Date/Money Formatters
 
+// Unique ID counter
 let uidSequence = 0;
+
+/**
+ * Generates a Unique ID Number
+ *
+ * What it does:
+ * Creates a unique number for every new member, event, or report so no two items clash.
+ *
+ * Backup plan if it breaks:
+ * Combines the exact current millisecond with a rotating number, guaranteeing that
+ * even items created in the same split second have different IDs.
+ */
 function uid() {
   return Date.now() * 1000 + (++uidSequence % 1000);
 }
 
+/**
+ * Text Safety Guard (Escapes Symbols)
+ *
+ * What it does:
+ * Cleans user-entered text before printing it on screen so characters like < or "
+ * cannot break the layout or run harmful scripts.
+ *
+ * Backup plan if it breaks:
+ * If given blank or missing text, it returns an empty string safely.
+ */
 function esc(value = '') {
   return String(value).replace(
     /[&<>"']/g,
@@ -25,6 +55,15 @@ function esc(value = '') {
   );
 }
 
+/**
+ * Currency Formatter (Philippine Pesos)
+ *
+ * What it does:
+ * Formats a number as Philippine Pesos (e.g. 150 becomes "₱150.00").
+ *
+ * Backup plan if it breaks:
+ * If the value is missing or not a number, it safely returns "₱0.00".
+ */
 function money(value) {
   return Number(value || 0).toLocaleString('en-PH', {
     style: 'currency',
@@ -32,6 +71,15 @@ function money(value) {
   });
 }
 
+/**
+ * Simple Date Formatter
+ *
+ * What it does:
+ * Turns computer dates into readable Philippine dates (e.g. "Sep 27, 2026").
+ *
+ * Backup plan if it breaks:
+ * If the date is missing or invalid, it cleanly shows a dash ("—").
+ */
 function fmtDate(value) {
   if (!value) return '—';
 
@@ -50,6 +98,15 @@ function fmtDate(value) {
     });
 }
 
+/**
+ * Date and Time Formatter
+ *
+ * What it does:
+ * Formats both the date and time for events (e.g. "Sep 27, 2026, 3:00 PM").
+ *
+ * Backup plan if it breaks:
+ * If either component is invalid, it returns a neat dash ("—").
+ */
 function fmtDateTime(value) {
   if (!value) return '—';
 
@@ -66,6 +123,16 @@ function fmtDateTime(value) {
     });
 }
 
+/**
+ * Date to Numeric Time (For Sorting)
+ *
+ * What it does:
+ * Converts any date into a number of milliseconds so gatherings can be sorted
+ * from earliest to latest.
+ *
+ * Backup plan if it breaks:
+ * If the date is invalid, it returns 0 so unreadable events move to the bottom.
+ */
 function parseEventTimestamp(val) {
   if (!val) return 0;
   const str = String(val);
@@ -73,6 +140,15 @@ function parseEventTimestamp(val) {
   return Number.isNaN(d.getTime()) ? 0 : d.getTime();
 }
 
+/**
+ * Today's Date String
+ *
+ * What it does:
+ * Returns today's date formatted as YYYY-MM-DD for form calendar inputs.
+ *
+ * Backup plan if it breaks:
+ * Reads from the user device's local clock.
+ */
 function todayISO() {
   const now = new Date();
   const year = now.getFullYear();
@@ -81,6 +157,15 @@ function todayISO() {
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * Member Full Name Builder
+ *
+ * What it does:
+ * Combines first, middle, and last names into a clean, complete name.
+ *
+ * Backup plan if it breaks:
+ * If any part is missing (like middle name), it skips it without leaving extra spaces.
+ */
 function fullName(member) {
   return [
     member.firstName,
@@ -91,6 +176,16 @@ function fullName(member) {
     .join(' ');
 }
 
+/**
+ * Calculates Age from Birth Date
+ *
+ * What it does:
+ * Calculates a youth member's age in years based on their birth date.
+ *
+ * Backup plan if it breaks:
+ * If the date is blank, in the future, or invalid, it returns null so the
+ * member profile does not display impossible negative numbers.
+ */
 function calculateAge(birthDate) {
   if (!birthDate) return null;
 
@@ -119,6 +214,16 @@ function calculateAge(birthDate) {
   return age >= 0 ? age : null;
 }
 
+/**
+ * Finds Member Profile for a Participant
+ *
+ * What it does:
+ * Connects an event attendee back to their full official Member profile.
+ *
+ * Backup plan if it breaks:
+ * Checks member ID first; if unlinked, it tries matching their contact phone number.
+ * If neither matches, it returns null.
+ */
 function participantMember(data, participant) {
   if (!participant || !data) return null;
 
@@ -141,6 +246,16 @@ function participantMember(data, participant) {
   return null;
 }
 
+/**
+ * Gets Participant Full Name
+ *
+ * What it does:
+ * Returns the readable name for an event attendee.
+ *
+ * Backup plan if it breaks:
+ * Uses their linked member profile name if found; otherwise glues together
+ * whatever manual name fields they typed when registering.
+ */
 function participantName(data, participant) {
   const member = participantMember(data, participant);
 
@@ -151,6 +266,15 @@ function participantName(data, participant) {
       .join(' ');
 }
 
+/**
+ * Checks if Member Has No Chapter
+ *
+ * What it does:
+ * Identifies youth members who have not yet been assigned to a Chapter community.
+ *
+ * Backup plan if it breaks:
+ * Checks both chapter ID and chapter name to make sure neither is set.
+ */
 function isUnassignedMember(member) {
   if (!member || typeof member !== 'object') {
     return false;
@@ -172,6 +296,15 @@ function isUnassignedMember(member) {
   return hasEmptyId && hasEmptyName;
 }
 
+/**
+ * Validates Email Format
+ *
+ * What it does:
+ * Checks if an email address is shaped properly (like user@example.com).
+ *
+ * Backup plan if it breaks:
+ * Allows empty values for optional fields, and returns false for broken emails.
+ */
 function validEmail(value) {
   return (
     !value ||
@@ -179,8 +312,17 @@ function validEmail(value) {
   );
 }
 
-// Section 7: Toast Notifications (Alpine.js Declarative Toast Queue)
+// Section 2: Popup Notifications (Toast Messages)
 
+/**
+ * Ensures Notification Container Exists
+ *
+ * What it does:
+ * Checks if the screen has an element to hold floating alert messages.
+ *
+ * Backup plan if it breaks:
+ * If missing from the page HTML, it creates one on the fly and attaches it.
+ */
 function ensureToastWrap() {
   let wrap = document.getElementById('toastWrap');
   if (!wrap) {
@@ -194,6 +336,18 @@ function ensureToastWrap() {
   return wrap;
 }
 
+/**
+ * Shows a Floating Alert Notification (Toast)
+ *
+ * What it does:
+ * Pops up a brief message in the corner of your screen (green for success,
+ * red for errors, or blue for notices). It pauses when you hover over it
+ * and closes automatically after a few seconds.
+ *
+ * Backup plan if it breaks:
+ * Includes a manual close button (x) and fallback timers so the notification
+ * will always close and clean itself up even if animations fail.
+ */
 function toast(text, type = 'success', duration = 4000) {
   const wrap = ensureToastWrap();
   const isSuccess = type === 'success';
@@ -235,7 +389,7 @@ function toast(text, type = 'success', duration = 4000) {
     </svg>
   `;
 
-  // Fallback direct listeners for resilient execution
+  // Fallback timer so the toast disappears even without script interactions
   let timer = setTimeout(() => {
     el.classList.add('toast-hide');
     setTimeout(() => el.remove(), 250);
@@ -267,9 +421,22 @@ function toast(text, type = 'success', duration = 4000) {
 
 window.toast = toast;
 
-// Section 8: Modal Dialogs (Alpine.js Declarative x-show Modal Component)
-// Note: activeModalCleanup is declared in config.js for area administration pages
+// Section 3: Popup Windows (Modal Dialogs)
 
+/**
+ * Opens a Dialog Window (Modal)
+ *
+ * What it does:
+ * Pops up a window in the center of the screen with a title, form fields,
+ * and buttons (like Add Member, Edit Chapter, or Register for Event).
+ *
+ * Backup plan if it breaks:
+ * - Automatically closes any previously stuck modal before opening.
+ * - Allows closing by pressing the Escape key, clicking outside the window,
+ *   or clicking Cancel.
+ * - Automatically places your typing cursor into the first input field so
+ *   you can start typing right away.
+ */
 function openModal(
   title,
   body,
@@ -378,6 +545,16 @@ function openModal(
   );
 }
 
+/**
+ * Closes the Active Dialog Window
+ *
+ * What it does:
+ * Dismisses whatever popup window is currently on screen.
+ *
+ * Backup plan if it breaks:
+ * If the normal animation doesn't finish, it directly clears the modal container
+ * so the backdrop veil is completely removed.
+ */
 function closeModal() {
   if (activeModalCleanup) {
     activeModalCleanup();
@@ -395,6 +572,17 @@ function closeModal() {
 window.openModal = openModal;
 window.closeModal = closeModal;
 
+// Section 4: Form Input Helpers
+
+/**
+ * Builds a Text Input Field
+ *
+ * What it does:
+ * Generates HTML for a labeled input box.
+ *
+ * Backup plan if it breaks:
+ * Cleans the value with esc() so quotes don't break the input tag.
+ */
 function field(
   label,
   id,
@@ -419,6 +607,15 @@ function field(
   `;
 }
 
+/**
+ * Builds a Dropdown Menu Field
+ *
+ * What it does:
+ * Generates HTML for a select dropdown with options.
+ *
+ * Backup plan if it breaks:
+ * Checks which option was previously chosen and marks it as selected automatically.
+ */
 function selectField(
   label,
   id,
@@ -451,6 +648,16 @@ function selectField(
   `;
 }
 
+/**
+ * Builds Page Top Header
+ *
+ * What it does:
+ * Creates the banner at the top of each admin page with a title, subtitle,
+ * and action buttons (like "Add Member").
+ *
+ * Backup plan if it breaks:
+ * Renders cleanly even if no subtitle or buttons are provided.
+ */
 function pageHeader(
   title,
   subtitle,
@@ -470,6 +677,15 @@ function pageHeader(
   `;
 }
 
+/**
+ * Builds Empty State Box
+ *
+ * What it does:
+ * Generates an informative placeholder card whenever a table or list is empty.
+ *
+ * Backup plan if it breaks:
+ * Cleans text to prevent symbols from breaking the card.
+ */
 function emptyState(title, text) {
   return `
     <div class="empty-state">
@@ -479,8 +695,19 @@ function emptyState(title, text) {
   `;
 }
 
-// Section 10: Mobile Sidebar & Navigation UI (Alpine.js Declarative Toggle)
+// Section 5: Mobile Sidebar Menu (For Phones & Tablets)
 
+/**
+ * Mobile Navigation Drawer Manager
+ *
+ * What it does:
+ * Opens and closes the slide-out navigation menu when tapping the hamburger button
+ * on mobile screens.
+ *
+ * Backup plan if it breaks:
+ * - Dims the background with a screen scrim.
+ * - Closes automatically if you tap the background, tap any menu link, or press Escape.
+ */
 const sidebarState = {
   open: false,
   toggle() {
@@ -501,6 +728,15 @@ const sidebarState = {
   }
 };
 
+/**
+ * Connects Sidebar to Alpine Library
+ *
+ * What it does:
+ * Registers the mobile menu state so click directives can control it smoothly.
+ *
+ * Backup plan if it breaks:
+ * Prevents double-registration if the page re-renders.
+ */
 function registerAlpineSidebar() {
   if (window.Alpine && !window.Alpine._sidebarRegistered) {
     window.Alpine._sidebarRegistered = true;
@@ -514,6 +750,7 @@ function registerAlpineSidebar() {
 
 document.addEventListener('alpine:init', registerAlpineSidebar);
 
+// Set up mobile menu and toast container once page HTML is loaded
 document.addEventListener('DOMContentLoaded', () => {
   ensureToastWrap();
   registerAlpineSidebar();

@@ -1,10 +1,13 @@
 /**
- * ============================================================================
- * MFC Youth Area Management System - Legal & Compliance Modal Component
- * ============================================================================
- * Automatically pops up all statutory compliance and legal documents upon
- * entering the platform. Provides interactive tabbed access across all 7 policies.
- * ============================================================================
+ * MFC Youth Area Management System - Legal & Community Guidelines Window
+ *
+ * What this file does:
+ * Displays official legal rules, youth privacy protections (RA 10173 Data Privacy Act),
+ * and community terms of service in an interactive tabbed popup window.
+ *
+ * Backup plan if it breaks:
+ * If the popup fails or is dismissed, users can still navigate the portal normally,
+ * and all documents can be reopened at any time from links in the footer.
  */
 
 (function () {
@@ -339,6 +342,17 @@
   let activeTabId = 'overview';
   let modalBackdropEl = null;
 
+  /**
+   * Build Legal Window HTML
+   *
+   * What it does:
+   * Assembles the full popup card containing the document title, tab selection buttons,
+   * scrollable text viewer, and agreement buttons.
+   *
+   * Backup plan if it breaks:
+   * Works smoothly with both Alpine.js interactive state and plain browser JavaScript
+   * so tabs always respond when clicked.
+   */
   function createModalHtml() {
     return `
       <div
@@ -415,6 +429,16 @@
     `;
   }
 
+  /**
+   * Switch Active Legal Document
+   *
+   * What it does:
+   * Changes the visible document text (for example, switching from Privacy Policy to Minor Protection)
+   * and scrolls the text box back to the top so you can read from the beginning.
+   *
+   * Backup plan if it breaks:
+   * If an unknown document tab is requested, it safely ignores the click and keeps your current reading spot.
+   */
   function renderDocument(tabId) {
     if (!LEGAL_DOCUMENTS[tabId]) return;
     activeTabId = tabId;
@@ -445,6 +469,16 @@
     });
   }
 
+  /**
+   * Make Sure Legal Window Exists
+   *
+   * What it does:
+   * Checks if the legal window HTML is already on the page; if not, it attaches it to the bottom
+   * of the webpage and connects the close and escape key buttons.
+   *
+   * Backup plan if it breaks:
+   * Hooks multiple close buttons ('X', Close, outside click, and Escape key) so you are never trapped.
+   */
   function ensureModalInDom() {
     if (!document.getElementById('legalModalBackdrop')) {
       const container = document.createElement('div');
@@ -480,6 +514,16 @@
     }
   }
 
+  /**
+   * Open Legal Window
+   *
+   * What it does:
+   * Pops up the legal terms window opened directly to the topic you asked for,
+   * and temporarily stops the background page from scrolling.
+   *
+   * Backup plan if it breaks:
+   * Creates the window on the fly if missing, and defaults to the Overview document if no specific tab is given.
+   */
   function openLegalModal(targetTab = 'overview') {
     ensureModalInDom();
     if (modalBackdropEl) {
@@ -496,6 +540,15 @@
     document.body.style.overflow = 'hidden';
   }
 
+  /**
+   * Close Legal Window
+   *
+   * What it does:
+   * Hides the legal window and unlocks page scrolling so you can continue using the site normally.
+   *
+   * Backup plan if it breaks:
+   * Clears both CSS display properties and animation classes so the window is guaranteed to disappear.
+   */
   function closeLegalModal() {
     const state = modalBackdropEl?._x_dataStack?.[0];
     if (state) {
@@ -508,6 +561,16 @@
     document.body.style.overflow = '';
   }
 
+  /**
+   * Remember Legal Agreement
+   *
+   * What it does:
+   * Saves a note in your browser that you acknowledged the community rules so it doesn't pop up again
+   * automatically on this device.
+   *
+   * Backup plan if it breaks:
+   * If browser storage is full or private, it still closes the window without throwing any errors.
+   */
   function acknowledgeLegal() {
     try {
       localStorage.setItem('mfc_legal_acknowledged', 'true');
@@ -515,13 +578,13 @@
     closeLegalModal();
   }
 
-  // Public APIs
+  // Make functions available across the website
   window.openLegalModal = openLegalModal;
   window.closeLegalModal = closeLegalModal;
   window.acknowledgeLegal = acknowledgeLegal;
 
   document.addEventListener('DOMContentLoaded', () => {
-    // Attach listener to any triggers
+    // Connect any "Terms of Service" or "Privacy Policy" links on the screen to this popup
     document.querySelectorAll('.open-legal-modal, [data-open-legal]').forEach(el => {
       el.addEventListener('click', (e) => {
         e.preventDefault();
@@ -530,7 +593,7 @@
       });
     });
 
-    // Only prompt automatically once on the sign-in / welcome page if never acknowledged
+    // On the very first visit to the welcome screen, open the overview once so visitors know their data rights
     const path = window.location.pathname;
     const isRootOrAuth = path === '/' || path === '/index.html' || path === '';
     if (isRootOrAuth && !localStorage.getItem('mfc_legal_acknowledged')) {

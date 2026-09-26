@@ -15,10 +15,28 @@ const ADMIN_ROLES = new Set([
   'chapter_servant'
 ]);
 
+/**
+ * Clean User Input Text
+ *
+ * What it does:
+ * Strips whitespace and caps string length to prevent oversized database entries.
+ *
+ * Backup plan if it breaks:
+ * Returns an empty string if given null or undefined.
+ */
 function cleanText(value, max = 160) {
   return String(value || '').trim().slice(0, max);
 }
 
+/**
+ * Validate Password Security Strength
+ *
+ * What it does:
+ * Checks that the chosen password is at least 8 characters long and includes both letters and numbers.
+ *
+ * Backup plan if it breaks:
+ * Returns a friendly explanation of the missing password requirements if too simple, or an empty string if valid.
+ */
 function passwordError(password) {
   if (password.length < 8) return 'Password must be at least 8 characters long.';
   if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) {
@@ -27,6 +45,15 @@ function passwordError(password) {
   return '';
 }
 
+/**
+ * Securely Verify Admin Registration Passcode
+ *
+ * What it does:
+ * Compares the entered administrative secret code against the system's expected code using constant-time comparison to prevent timing attacks.
+ *
+ * Backup plan if it breaks:
+ * If lengths differ or input is empty, safely returns false immediately.
+ */
 function registrationCodeMatches(input, expected) {
   const supplied = Buffer.from(String(input || ''), 'utf8');
   const target = Buffer.from(String(expected || ''), 'utf8');
@@ -34,6 +61,15 @@ function registrationCodeMatches(input, expected) {
   return timingSafeEqual(supplied, target);
 }
 
+/**
+ * Tag Registration Error with Specific Phase
+ *
+ * What it does:
+ * Labels an error with the exact phase of registration where it occurred (e.g. user creation vs. profile creation) to help diagnose issues.
+ *
+ * Backup plan if it breaks:
+ * Ensures the error is wrapped in a standard Error object so properties can be added safely.
+ */
 function stageError(error, stage, code) {
   const wrapped = error instanceof Error ? error : new Error(String(error || 'Unknown backend error.'));
   wrapped.stage = stage;
@@ -41,6 +77,15 @@ function stageError(error, stage, code) {
   return wrapped;
 }
 
+/**
+ * Register New Servant Leader Account
+ *
+ * What it does:
+ * Verifies the invitation passcode, validates password strength, creates the login credentials, initializes a leader profile, and signs the user in.
+ *
+ * Backup plan if it breaks:
+ * If an account with the email already exists, it stops with a 409 conflict message. If profile setup fails after creating the user, it immediately deletes the created user account to avoid half-finished records.
+ */
 export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
 

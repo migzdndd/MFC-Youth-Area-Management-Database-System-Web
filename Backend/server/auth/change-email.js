@@ -2,6 +2,15 @@ import { requireAuthenticatedProfile } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError, isValidEmail, normalizeEmail } from '../_lib/http.js';
 import { assertBackendConfigured } from '../_lib/env.js';
 
+/**
+ * Request Account Email Address Change
+ *
+ * What it does:
+ * Allows a signed-in user to change their account login email, initiating a verification email to the new address to confirm ownership.
+ *
+ * Backup plan if it breaks:
+ * Validates that the new email is valid and different from the current email. If the cloud auth provider rejects the change, it extracts the error explanation and returns a clear status message.
+ */
 export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
 

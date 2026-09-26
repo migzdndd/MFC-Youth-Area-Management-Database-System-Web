@@ -1,17 +1,44 @@
 /**
- * ============================================================================
- * MFC Youth Area Management System - Area Onboarding Wizard
- * ============================================================================
+ * MFC Youth Area Management System - First-Time Leader Area Connection Wizard
+ *
+ * What this file does:
+ * When a newly registered coordinator or servant leader logs in for the first time,
+ * this wizard guides them to choose which Area they serve (or create a new Area)
+ * before taking them into their management dashboard.
+ *
+ * Backup plan if it breaks:
+ * If area information fails to load from the server, the wizard displays a friendly message
+ * and allows leaders to create their area directly. If connection fails, it unlocks the buttons
+ * so they can try again without losing their place.
  */
 
-// Section 18: Area Onboarding Wizard
-
+/**
+ * Check If User Is a Servant Leader
+ *
+ * What it does:
+ * Verifies whether the logged-in person is an area leader (like an Area Servant, Coordinator,
+ * or Chapter Servant) who needs to be linked to a specific Area.
+ *
+ * Backup plan if it breaks:
+ * If the role is missing or unreadable, it safely returns false so regular members are never shown this setup prompt.
+ */
 function isLeadershipSession() {
   return ['couple_coordinator', 'area_servant', 'lit_servant', 'campus_servant', 'mfc_high_servant', 'area_kids_servant', 'chapter_servant'].includes(
     String(session?.role || '').trim().toLowerCase()
   );
 }
 
+/**
+ * Open Area Setup Wizard
+ *
+ * What it does:
+ * Pops up a setup window asking new leaders to choose their Area from a dropdown list,
+ * or type in the name of a new Area if their area hasn't been set up yet.
+ *
+ * Backup plan if it breaks:
+ * If the server cannot be reached, it updates the dropdown with "Unable to load Areas"
+ * and displays an easy-to-read explanation. Submit buttons automatically re-enable on failure.
+ */
 async function showAreaOnboarding() {
   if (
     page !== 'dashboard' ||
@@ -109,6 +136,7 @@ async function showAreaOnboarding() {
 
   const getAlpineState = () => backdrop?._x_dataStack?.[0] || null;
 
+  /** Shows status messages inside the setup card */
   const showAreaMessage = (text, type = 'error') => {
     const state = getAlpineState();
     if (state) {
@@ -124,6 +152,7 @@ async function showAreaOnboarding() {
     }
   };
 
+  /** Saves chosen area to session memory and redirects into the dashboard */
   const finishAreaSetup = (area, profile = null, member = null) => {
     const updated = {
       ...session,
@@ -138,6 +167,7 @@ async function showAreaOnboarding() {
     navigateWithLoader('/dashboard', true);
   };
 
+  // Load existing Area choices from the server
   try {
     const payload = await backendApi('/api/areas');
     const areas = Array.isArray(payload?.areas) ? payload.areas : [];
@@ -157,6 +187,7 @@ async function showAreaOnboarding() {
     showAreaMessage(error?.message || 'Unable to retrieve Areas from the backend.');
   }
 
+  // Handle selecting an existing area
   confirmButton?.addEventListener('click', async () => {
     const areaId = select?.value || '';
     if (!areaId) {
@@ -182,6 +213,7 @@ async function showAreaOnboarding() {
     }
   });
 
+  // Handle creating a new area
   createButton?.addEventListener('click', async () => {
     const name = String(newAreaName?.value || '').trim();
     if (name.length < 3) {

@@ -15,10 +15,28 @@ const LEADERSHIP_ROLES = new Set([
 ]);
 
 
+/**
+ * Clean and Format Area Name
+ *
+ * What it does:
+ * Trims extra spacing and limits length to 120 characters to ensure clean display on maps and certificates.
+ *
+ * Backup plan if it breaks:
+ * Handles null or undefined inputs safely and returns an empty string.
+ */
 function cleanAreaName(value) {
   return String(value || '').trim().replace(/\s+/g, ' ').slice(0, 120);
 }
 
+/**
+ * Generate Readable Area Code from Name
+ *
+ * What it does:
+ * Converts an Area name (like "Metro Manila South") into a URL-friendly uppercase code (like "METRO-MANILA-SOUTH").
+ *
+ * Backup plan if it breaks:
+ * If the resulting text is empty or contains only symbols, it generates a fallback code with a timestamp so it remains unique.
+ */
 function areaCodeFromName(name) {
   const base = String(name || '')
     .normalize('NFKD')
@@ -30,6 +48,15 @@ function areaCodeFromName(name) {
   return base || `AREA-${Date.now().toString(36).toUpperCase()}`;
 }
 
+/**
+ * List All Active Areas for Selection
+ *
+ * What it does:
+ * Fetches the list of all active MFC Youth areas so newly registered servant leaders can select and join their Area.
+ *
+ * Backup plan if it breaks:
+ * Restricts access to servant leader accounts. If no areas exist yet, it returns an empty list without error.
+ */
 async function listAreas(req, res) {
   const { supabase, profile } = await requireAuthenticatedProfile(req);
   if (!LEADERSHIP_ROLES.has(String(profile.role || '').toLowerCase())) {
@@ -46,6 +73,15 @@ async function listAreas(req, res) {
   return sendJson(res, 200, { ok: true, areas: data || [] });
 }
 
+/**
+ * Create New Area Community and Catalog
+ *
+ * What it does:
+ * Registers a brand-new Area, initializes all standard youth ministry services for it, and links the creating leader's account to it.
+ *
+ * Backup plan if it breaks:
+ * Checks for duplicate names before saving. If an error happens while setting up services or linking the leader, it deletes the partially-created area to avoid orphaned data.
+ */
 async function createArea(req, res) {
   const { supabase, profile, user } = await requireAuthenticatedProfile(req);
   if (!LEADERSHIP_ROLES.has(String(profile.role || '').toLowerCase())) {
@@ -125,6 +161,15 @@ async function createArea(req, res) {
   }
 }
 
+/**
+ * Area Management Endpoint Router
+ *
+ * What it does:
+ * Routes incoming web requests to either list existing areas (GET) or establish a new area (POST).
+ *
+ * Backup plan if it breaks:
+ * Rejects unsupported methods with 405 Method Not Allowed and captures errors in a standardized response.
+ */
 export default async function handler(req, res) {
   try {
     if (req.method === 'GET') return await listAreas(req, res);

@@ -1,14 +1,29 @@
 /**
- * ============================================================================
- * MFC Youth Area Management System - Chapters Module & Servant Scoping
- * ============================================================================
+ * MFC Youth Area Management System - Chapters & Local Communities
+ *
+ * What this file does:
+ * Manages local MFC Youth chapters, displays chapter rosters, handles member assignments,
+ * and provides Chapter Servants with their localized chapter management dashboard.
+ *
+ * Backup plan if it breaks:
+ * If a Chapter Servant is not linked to a chapter yet, the system shows a friendly notice
+ * asking an Area Servant to assign them, rather than crashing or showing unauthorized data.
+ * All edits and deletions verify safety rules (e.g., chapters with members cannot be deleted).
  */
-
-// Section 13: Chapters Module & Servant Scoping
 
 let chapterSearch = '';
 
-
+/**
+ * Display Chapter Servant Dashboard
+ *
+ * What it does:
+ * Builds the special home screen for a Chapter Servant, showing their chapter's total roster,
+ * active member count, total GIG offerings, and recent activity reports.
+ *
+ * Backup plan if it breaks:
+ * If the user's account is not assigned to a chapter yet, it displays an empty state guiding them
+ * to contact their Area Servant or Couple Coordinator.
+ */
 function renderChapterServantDashboard(data) {
   const chapter = scopedChapter(data);
 
@@ -194,6 +209,17 @@ function renderChapterServantDashboard(data) {
   });
 }
 
+/**
+ * Display All Chapters Screen
+ *
+ * What it does:
+ * Renders the chapters directory table with search, member count totals, and action buttons.
+ * If signed in as a Chapter Servant, it automatically shows your personal chapter dashboard instead.
+ *
+ * Backup plan if it breaks:
+ * If no chapters match the search keyword, it shows a friendly "No matching chapters" message
+ * with a quick button to clear the search filter.
+ */
 function renderChapters() {
   const data = db();
 
@@ -386,6 +412,16 @@ function renderChapters() {
   };
 }
 
+/**
+ * Add or Rename Chapter Form
+ *
+ * What it does:
+ * Opens a popup card to add a new chapter or rename an existing chapter.
+ *
+ * Backup plan if it breaks:
+ * Checks for duplicate names before saving to prevent confusion. If renamed, automatically
+ * updates corresponding member records and reports so data stays linked properly.
+ */
 function chapterModal(id = null) {
   if (denyUnlessAreaAdmin()) return;
 
@@ -454,9 +490,18 @@ function chapterModal(id = null) {
   );
 }
 
-window.editChapter =
-  chapterModal;
+window.editChapter = chapterModal;
 
+/**
+ * Delete Chapter
+ *
+ * What it does:
+ * Deletes an empty chapter record after asking for confirmation.
+ *
+ * Backup plan if it breaks:
+ * Safety check: Refuses to delete any chapter that still has youth members in it, protecting
+ * member records from accidentally being left orphaned without a chapter.
+ */
 window.deleteChapter = async id => {
   if (denyUnlessAreaAdmin()) return;
 
@@ -482,6 +527,16 @@ window.deleteChapter = async id => {
   }
 };
 
+/**
+ * View Chapter Members List
+ *
+ * What it does:
+ * Opens a modal window listing all youth members assigned to the clicked chapter.
+ *
+ * Backup plan if it breaks:
+ * Prevents unauthorized viewing (Chapter Servants can only view their own chapter) and displays
+ * an empty state message if the chapter has no members yet.
+ */
 window.viewChapter = id => {
   const data = db();
 
@@ -549,7 +604,17 @@ window.viewChapter = id => {
   );
 };
 
-
+/**
+ * Add Unassigned Members to Chapter
+ *
+ * What it does:
+ * Opens a checklist of registered youth members in the area who do not belong to any chapter yet,
+ * allowing you to select and enroll them into this chapter.
+ *
+ * Backup plan if it breaks:
+ * If all members are already assigned to a chapter, it informs you immediately with an empty state.
+ * If saving fails, it alerts you with a clear message and leaves existing chapter assignments unchanged.
+ */
 window.addMembersToChapter = async id => {
   const data = db();
 
@@ -578,9 +643,6 @@ window.addMembersToChapter = async id => {
 
   try {
     if (session?.backendAuth && !session?.demo) {
-      // Chapter Servants intentionally receive only their own chapter roster from
-      // /api/members. Fetch the Area's unassigned-member pool only when this
-      // assignment dialog is opened, through the scoped backend endpoint.
       const result = await backendApi(
         `/api/chapters/assign-members?chapterId=${encodeURIComponent(chapter.id)}`,
         { timeoutMs: 8000 }

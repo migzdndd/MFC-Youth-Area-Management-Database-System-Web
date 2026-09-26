@@ -1,12 +1,30 @@
 /**
- * ============================================================================
- * MFC Youth Area Management System - Dashboard Module
- * ============================================================================
+ * MFC Youth Area Management System - Area Leadership Dashboard
+ *
+ * What this file does:
+ * Renders the main dashboard for servant leaders and coordinators.
+ * It highlights your primary mission numbers (Total and Active Members), displays secondary
+ * summaries (Services and Activity Reports), shows members per chapter, and tracks both
+ * upcoming and recent events in a unified view.
+ *
+ * Backup plan if it breaks:
+ * If live cloud data cannot be reached, the dashboard immediately falls back to locally saved
+ * records in your browser, and gracefully handles missing data with helpful empty state notices.
  */
 
-// Section 11: Dashboard Module
-
 let cachedAreasPromise = null;
+
+/**
+ * Get Available Areas
+ *
+ * What it does:
+ * Requests the list of registered MFC Youth Areas from the server and remembers it
+ * so your computer doesn't need to ask the server again on every click.
+ *
+ * Backup plan if it breaks:
+ * Clears the temporary memory on error so the system will automatically retry fetching
+ * fresh areas on your next try.
+ */
 async function fetchCachedAreas() {
   if (!cachedAreasPromise) {
     cachedAreasPromise = backendApi('/api/areas').catch(err => {
@@ -17,6 +35,17 @@ async function fetchCachedAreas() {
   return cachedAreasPromise;
 }
 
+/**
+ * Open Area Selection Window
+ *
+ * What it does:
+ * Pops up a card window allowing National Coordinators to choose which regional Area
+ * (e.g. NCR Central, NCR East, NCR North, NCR South) they want to inspect.
+ *
+ * Backup plan if it breaks:
+ * If the online server is down, it displays standard canonical MFC Youth areas
+ * so coordinators are never locked out of viewing their records.
+ */
 async function openAreaSelectionModal() {
   const CANONICAL_AREAS = [
     { id: 'NCR-CENTRAL', name: 'NCR Central' },
@@ -123,11 +152,30 @@ async function openAreaSelectionModal() {
 
 window.openAreaSelectionModal = openAreaSelectionModal;
 
+/**
+ * Close Area Window and Switch Workspace
+ *
+ * What it does:
+ * Closes the area selection popup and smoothly switches to the chosen area.
+ *
+ * Backup plan if it breaks:
+ * Removes the modal cleanly from the screen even if animation fails.
+ */
 window.closeNcAreaModalAndVisit = (areaId, areaName) => {
   document.getElementById('ncAreaSelectModal')?.remove();
   visitArea(areaId, areaName);
 };
 
+/**
+ * Display National Coordinator Workspace
+ *
+ * What it does:
+ * Renders the nationwide master dashboard for National Coordinators, showing nationwide member
+ * totals, active regional areas, chapter distribution charts, and upcoming/recent events.
+ *
+ * Backup plan if it breaks:
+ * Safely defaults missing counts to zero and shows clean empty states for lists with no data yet.
+ */
 async function renderNationalCoordinatorDashboard(data) {
   let areasCount = 4;
   try {
@@ -390,6 +438,17 @@ async function renderNationalCoordinatorDashboard(data) {
   `;
 }
 
+/**
+ * Switch Active Area Workspace
+ *
+ * What it does:
+ * Changes your current working Area to another region, updates your browser session,
+ * and loads that area's database.
+ *
+ * Backup plan if it breaks:
+ * If cloud sync encounters an error, it warns you with a toast notification while
+ * keeping your local session intact and opening the members directory.
+ */
 window.visitArea = async (areaId, areaName) => {
   session.areaId = areaId;
   session.areaName = areaName;
@@ -410,6 +469,18 @@ window.visitArea = async (areaId, areaName) => {
   navigateWithLoader('/members', true);
 };
 
+/**
+ * Display Leadership Dashboard
+ *
+ * What it does:
+ * Builds the personalized home dashboard tailored to your leadership role. Shows the primary
+ * metric card (Members on Record), secondary metric cards (Services, Reports), a chapter distribution
+ * graph, and a side-by-side view of upcoming and recent events.
+ *
+ * Backup plan if it breaks:
+ * Automatically routes National Coordinators to their dedicated national view, scopes numbers
+ * to your specific chapter if you are a Chapter Servant, and handles empty counts with clean notices.
+ */
 function renderDashboard() {
   const data = db();
 
@@ -507,7 +578,7 @@ function renderDashboard() {
 
   const now = Date.now();
 
-  // FUTURE / CURRENT EVENTS ONLY
+  // Upcoming scheduled events
   const upcomingEvents = [
     ...data.events
   ]
@@ -523,7 +594,7 @@ function renderDashboard() {
     )
     .slice(0, 5);
 
-  // PAST EVENTS ONLY
+  // Past gatherings
   const recentEvents = [
     ...data.events
   ]

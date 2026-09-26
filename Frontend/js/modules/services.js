@@ -1,13 +1,29 @@
 /**
- * ============================================================================
- * MFC Youth Area Management System - Services Module & Assignments
- * ============================================================================
+ * MFC Youth Area Management System - Ministry Services & Assignments
+ *
+ * What this file does:
+ * Organizes and displays ministry service teams (such as Music, Dance, Media, Graphics,
+ * and high school or campus tracks). It allows leaders to view who is serving in each ministry
+ * and manage ministry assignments.
+ *
+ * Backup plan if it breaks:
+ * If service groups cannot be loaded or an unassigned chapter is encountered, the screen
+ * safely shows an empty state message and lets you navigate back to the dashboard without losing data.
  */
-
-// Section 14: Services Module & Assignments
 
 let currentServiceSections = [];
 
+/**
+ * Display Ministry Services Screen
+ *
+ * What it does:
+ * Checks your leadership role and builds cards showing how many youth are serving in each ministry
+ * (for example, Creative Ministries for LIT servants, or School Tracks for Campus and High School servants).
+ *
+ * Backup plan if it breaks:
+ * If your chapter or role is missing, it safely falls back to standard service lists or displays
+ * an unassigned chapter notice instead of failing.
+ */
 function renderServices() {
   const data = db();
   let pageTitle = 'Services';
@@ -148,6 +164,17 @@ function renderServices() {
   `;
 }
 
+/**
+ * Remove Member from Ministry
+ *
+ * What it does:
+ * Unassigns a youth member from a specific ministry role (like Music or Dance)
+ * after asking for your confirmation.
+ *
+ * Backup plan if it breaks:
+ * Checks for Area Administrator permissions first, asks for confirmation, and displays a friendly
+ * error toast if the server cannot be reached while keeping the existing assignment untouched.
+ */
 window.removeMemberService = async (memberId, serviceName) => {
   if (denyUnlessAreaAdmin()) return;
   const data = db();
@@ -176,6 +203,16 @@ window.removeMemberService = async (memberId, serviceName) => {
   }
 };
 
+/**
+ * View Members in Ministry
+ *
+ * What it does:
+ * Pops up a window listing all the youth currently assigned to the clicked ministry or leadership track.
+ *
+ * Backup plan if it breaks:
+ * If the category section is missing from memory, it searches member records on the fly,
+ * and shows a friendly "No assigned members" message if no one is assigned yet.
+ */
 window.viewService = serviceId => {
   const data = db();
   const canManage = isAreaAdminSession();

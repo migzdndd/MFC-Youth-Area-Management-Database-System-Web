@@ -3,6 +3,15 @@ import { createSupabaseAdmin } from './_lib/supabase.js';
 import { sendJson, methodNotAllowed } from './_lib/http.js';
 import { checkRateLimit } from './_lib/rate-limit.js';
 
+/**
+ * System Health and Database Diagnostic Check
+ *
+ * What it does:
+ * Tests whether the server is working and checks if the online Supabase cloud database is reachable, properly configured, and has all necessary tables.
+ *
+ * Backup plan if it breaks:
+ * If the database cannot be reached, the secret keys are missing, or tables are missing, it sends a clear 503 status code with a diagnostic message explaining the exact missing setting without crashing.
+ */
 export default async function handler(req, res) {
   if (req.method !== 'GET') return methodNotAllowed(res, ['GET']);
 

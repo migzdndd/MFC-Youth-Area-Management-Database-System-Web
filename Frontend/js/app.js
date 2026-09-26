@@ -1,17 +1,28 @@
 /**
  * ============================================================================
- * MFC Youth Area Management System - Main Application Orchestrator
+ * MFC Youth Area Management System - Main Coordinator Script
+ * ============================================================================
+ * What this file is:
+ * This is the conductor of the leader dashboard. It verifies who is logged in,
+ * shows or hides navigation buttons based on your role, draws the right page
+ * (Dashboard, Members, Chapters, Services, Reports, or Events), and keeps data synced.
+ *
+ * Backup plan if something breaks:
+ * If a page fails to draw or the server is slow, this script catches the problem,
+ * protects your saved data from being lost, and displays a friendly retry card.
  * ============================================================================
  */
 
-// Declare page and content global DOM variables at top-level
+// Global screen indicators
 let page = document.body.dataset.page || null;
 let content = document.getElementById('pageContent') || null;
 
-// Section 9: Application Bootstrap & Session Verification
+// Section 1: Initial Database Setup & Page Permissions by Role
 
+// Make sure a clean database template exists in storage
 seedDB();
 
+// List of allowed pages for each servant leader role
 const ROLE_ALLOWED_PAGES = {
   area_servant: new Set(['dashboard', 'members', 'chapters', 'services', 'reports', 'events']),
   couple_coordinator: new Set(['dashboard', 'members', 'chapters', 'services', 'reports', 'events']),
@@ -23,6 +34,7 @@ const ROLE_ALLOWED_PAGES = {
   national_coordinator: new Set(['dashboard', 'members', 'chapters', 'services', 'reports', 'events'])
 };
 
+// Which links appear in the sidebar menu for each role
 const ROLE_SIDEBAR_CONFIG = {
   area_servant: {
     paths: ['/dashboard', '/members', '/chapters', '/services', '/reports', '/events'],
@@ -58,8 +70,15 @@ const ROLE_SIDEBAR_CONFIG = {
   }
 };
 
+// Section 2: Login Verification & Screen Navigation Guards
+
 const session = getSession();
 
+// Check login credentials:
+// 1. If not logged in, go to sign in.
+// 2. If password must be changed, go to change-password.
+// 3. If regular youth member, go to the Member Portal.
+// 4. If trying to visit a page not allowed for your role, redirect to your dashboard.
 if (!session) {
   navigateWithLoader('/', true);
 } else if (session.mustChangePassword) {
@@ -75,6 +94,17 @@ if (!session) {
 
 const logoutBtn = document.getElementById('logoutBtn');
 
+/**
+ * Customizes Sidebar Menu for Your Role
+ *
+ * What it does:
+ * Shows the menu links you are allowed to see and hides the ones you are not
+ * (for example, Chapter Servants see their Chapter and Activities, but not all Area chapters).
+ *
+ * Backup plan if it breaks:
+ * If your role is unrecognized, it falls back to the Area Servant menu so you
+ * are not left with a broken, blank sidebar.
+ */
 function applySidebarRoleConfig() {
   const role = session?.role || 'member';
   const config = ROLE_SIDEBAR_CONFIG[role] || ROLE_SIDEBAR_CONFIG.area_servant;
@@ -105,6 +135,8 @@ function applySidebarRoleConfig() {
   });
 }
 applySidebarRoleConfig();
+
+// Section 3: Demo Role Switcher (For Presentation Mode)
 
 const DEMO_ROLES = [
   {
@@ -145,6 +177,17 @@ const DEMO_ROLES = [
   }
 ];
 
+/**
+ * Opens Demo Role Switcher Popup
+ *
+ * What it does:
+ * Allows people testing or presenting the demo to switch between leadership roles
+ * instantly without having to log out.
+ *
+ * Backup plan if it breaks:
+ * Can be closed by pressing Escape or clicking outside. If role switching fails,
+ * your current session stays intact.
+ */
 function openDemoRoleSwitcher() {
   const existing = document.getElementById('demoRoleModal');
   if (existing) existing.remove();
@@ -252,6 +295,8 @@ function openDemoRoleSwitcher() {
   });
 }
 
+// Section 4: Sidebar Profile Card, Preview Links, and Account Actions
+
 if (logoutBtn) {
   const profileCard = document.createElement('div');
   profileCard.className = 'signed-in-user profile-card';
@@ -261,6 +306,7 @@ if (logoutBtn) {
     ? scopedChapter(scopeData)
     : null;
 
+  // Builds the user badge card showing your name, title, and chapter
   profileCard.innerHTML = `
     <span>Signed in as</span>
     <strong>
@@ -288,6 +334,7 @@ if (logoutBtn) {
   }
 
   if (session?.role !== 'member') {
+    // Return button for National Coordinator managing specific areas
     if (session?.role === 'national_coordinator' && session?.areaId) {
       const returnButton = document.createElement('button');
       returnButton.type = 'button';
@@ -303,6 +350,7 @@ if (logoutBtn) {
       logoutBtn.parentElement?.insertBefore(returnButton, logoutBtn);
     }
 
+    // Role switcher button when in demo mode
     if (session?.demo) {
       const switchDemoBtn = document.createElement('button');
       switchDemoBtn.type = 'button';
@@ -313,6 +361,7 @@ if (logoutBtn) {
       logoutBtn.parentElement?.insertBefore(switchDemoBtn, logoutBtn);
     }
 
+    // Button to preview the Member Portal
     const previewButton = document.createElement('button');
     previewButton.type = 'button';
     previewButton.className = 'sidebar-account-action member-preview-button';
@@ -320,6 +369,7 @@ if (logoutBtn) {
     previewButton.onclick = () => navigateWithLoader('/member?preview=1');
     logoutBtn.parentElement?.insertBefore(previewButton, logoutBtn);
 
+    // Permanent Account Deletion (with safety double-confirmation)
     if (session?.backendAuth && !session?.demo) {
       const deleteButton = document.createElement('button');
       deleteButton.type = 'button';
@@ -367,6 +417,7 @@ if (logoutBtn) {
     }
   }
 
+  // Logout action handler
   logoutBtn.setAttribute('x-data', '{ loading: false }');
   logoutBtn.setAttribute('x-bind:disabled', 'loading');
   logoutBtn.innerHTML = '<span x-show="!loading">Logout</span><span x-show="loading" style="display: none;">Signing Out…</span>';
@@ -386,6 +437,7 @@ if (logoutBtn) {
           body: JSON.stringify({ scope: 'local' })
         });
       } catch (error) {
+        // Backup plan: Even if server cannot be reached, erase device login memory anyway
         console.warn('Backend logout could not be confirmed; clearing this browser session anyway.', error?.message || error);
       }
     }
@@ -398,8 +450,9 @@ if (logoutBtn) {
   };
 }
 
-// Section 19: Page Router, Error Boundary & Live Sync
+// Section 5: Page Router, Safety Nets & Background Sync
 
+// Maps page names to their visual builder functions
 const renderers = {
   dashboard: renderDashboard,
   members: renderMembers,
@@ -410,9 +463,14 @@ const renderers = {
 };
 
 /**
- * Renders a fallback UI when the main page rendering fails.
+ * Displays Friendly Recovery Card When Page Fails
  *
- * @param {Error|any} error - The caught error object.
+ * What it does:
+ * Catches any fatal error that happens while drawing a page and displays a clean,
+ * reassuring card informing you that your data is safe, with a "Try Again" reload button.
+ *
+ * Backup plan if it breaks:
+ * Protects your stored records and prevents you from ever seeing an unreadable blank screen.
  */
 function renderPageFailure(error) {
   console.error('Page render failed:', error);
@@ -440,9 +498,14 @@ function renderPageFailure(error) {
 }
 
 /**
- * Attempts to render the current page securely, falling back to an error state if it fails.
+ * Safely Draws Current Page
  *
- * @returns {boolean} True if rendered successfully, false otherwise.
+ * What it does:
+ * Calls the appropriate drawing function (Dashboard, Members, etc.) to show
+ * the current screen.
+ *
+ * Backup plan if it breaks:
+ * Catches any rendering failure and triggers the friendly recovery card.
  */
 function renderPageSafely() {
   try {
@@ -458,16 +521,35 @@ function renderPageSafely() {
   }
 }
 
+/**
+ * Downloads Latest Data in Background
+ *
+ * What it does:
+ * Silently contacts the server in the background to get the latest updates
+ * without interrupting whatever you are doing.
+ *
+ * Backup plan if it breaks:
+ * If there is no internet, it skips silently and lets you keep working with
+ * your saved offline data.
+ */
 async function refreshCloudDataInBackground() {
   try {
     await refreshAllCloudData({ render: true });
   } catch (error) {
-    // Cached data remains usable when the network is unavailable. Supabase is
-    // still the source of truth and will reconcile on the next successful sync.
     console.warn('Background cloud sync skipped:', error?.message || error);
   }
 }
 
+/**
+ * Schedules Background Downloads
+ *
+ * What it does:
+ * Waits until your computer or phone is not busy before syncing with the cloud,
+ * making sure buttons and typing remain fast and smooth.
+ *
+ * Backup plan if it breaks:
+ * If your browser does not support requestIdleCallback, it uses a short backup timer.
+ */
 function scheduleBackgroundSync() {
   const run = () => {
     refreshCloudDataInBackground().catch(error => {
@@ -482,10 +564,19 @@ function scheduleBackgroundSync() {
   }
 }
 
+/**
+ * Main System Startup
+ *
+ * What it does:
+ * 1. Draws the screen immediately using fast saved offline records.
+ * 2. Checks if your Area needs initial setup.
+ * 3. Schedules a background check with the server for any fresh updates.
+ *
+ * Backup plan if it breaks:
+ * Catches any startup error and triggers the safe recovery screen.
+ */
 async function bootstrapApplication() {
   try {
-    // Render immediately from cached/browser data so page switching never waits
-    // for Supabase/network synchronization.
     const rendered = renderPageSafely();
     if (!rendered) return;
 
@@ -501,22 +592,23 @@ async function bootstrapApplication() {
   }
 }
 
+// Global Safety Net: Alerts user if an unexpected script error occurs
 window.addEventListener('error', event => {
   console.error('Unhandled page error:', event?.error || event?.message || event);
-  // Contingency Fallback UI: Notify user of unhandled exception
   if (typeof window.toast === 'function') {
     window.toast('An unexpected error occurred. You may need to reload the page.', 'error');
   }
 });
 
+// Global Safety Net: Alerts user if a background operation drops
 window.addEventListener('unhandledrejection', event => {
   console.error('Unhandled async error:', event?.reason || event);
-  // Contingency Fallback UI: Notify user of async failure
   if (typeof window.toast === 'function') {
     window.toast('A background process failed. Please try your last action again.', 'error');
   }
 });
 
+// Start the application if signed in as a leader
 if (session && !session.mustChangePassword && session.role !== 'member') {
   bootstrapApplication().catch(error => {
     renderPageFailure(error);

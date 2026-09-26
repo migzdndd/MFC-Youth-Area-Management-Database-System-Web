@@ -1,6 +1,15 @@
 import { requireAuthenticatedProfile, isAreaAdminRole } from '../../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError, isValidEmail, normalizeEmail } from '../../_lib/http.js';
 
+/**
+ * Record Security Audit Log for Admin Email Change
+ *
+ * What it does:
+ * Logs an official security event record whenever an area leader updates a member's login email address, keeping a record of who made the change.
+ *
+ * Backup plan if it breaks:
+ * Writes error logs to the server console if the change fails or partially completes, ensuring an audit trail is never lost.
+ */
 function audit({ actorId, memberId, status, errorCode = null }) {
   const entry = {
     event: 'ADMIN_EMAIL_OVERRIDE',
@@ -16,6 +25,15 @@ function audit({ actorId, memberId, status, errorCode = null }) {
   else console.error(line);
 }
 
+/**
+ * Administrative Email Address Override Handler
+ *
+ * What it does:
+ * Allows Area leaders to change the login email address of a member in their Area (e.g. if the member lost access to their old email).
+ *
+ * Backup plan if it breaks:
+ * Prevents leaders from changing members outside their Area or overriding their own email here. If the login system updates but the member table fails to sync, it notifies the user that sync is pending and will resolve automatically.
+ */
 export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
 

@@ -2,9 +2,13 @@ import { requireAuthenticatedProfile, isAreaAdminRole, isChapterServantRole } fr
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 
 /**
- * Permanently deletes the currently authenticated account.
- * Supabase Auth is deleted first so the login can never remain usable if
- * database cleanup encounters an unexpected error afterward.
+ * Permanently Delete Authenticated Servant Account
+ *
+ * What it does:
+ * Completely removes the logged-in servant leader's login account, profile, and linked membership record from the database upon user request.
+ *
+ * Backup plan if it breaks:
+ * Restricts self-deletion to servant leaders. Deletes authentication credentials first so access is revoked immediately even if cleaning up member records runs into an issue.
  */
 export default async function handler(req, res) {
   if (req.method !== 'DELETE') return methodNotAllowed(res, ['DELETE']);

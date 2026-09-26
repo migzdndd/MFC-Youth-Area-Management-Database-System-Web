@@ -4,6 +4,15 @@ import { claimMemberRecord } from '../_lib/member-claim.js';
 import { checkRateLimit } from '../_lib/rate-limit.js';
 import { checkBruteForce, recordLoginFailure, clearLoginFailures } from '../_lib/brute-force.js';
 
+/**
+ * User Sign-In and Session Initialization
+ *
+ * What it does:
+ * Authenticates user credentials, applies brute-force lockout protections, verifies two-factor authentication requirements, synchronizes roster emails, and issues secure session cookies.
+ *
+ * Backup plan if it breaks:
+ * If 5 failed attempts occur, it temporarily locks the account for 15 minutes. If two-factor authentication is active on the account, it pauses the login and issues an MFA challenge code prompt before granting full access.
+ */
 export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
 

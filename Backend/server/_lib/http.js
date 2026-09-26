@@ -1,7 +1,11 @@
 /**
- * Applies strict HTTP security headers to server responses.
+ * Apply Web Security Shields to Browser Response
  *
- * @param {import('http').ServerResponse} res
+ * What it does:
+ * Adds strict security rules to web responses to prevent clickjacking, data snooping, cross-site leaks, and unauthorized browser feature access.
+ *
+ * Backup plan if it breaks:
+ * If the response has already been sent to the browser or is invalid, it safely exits without throwing an error.
  */
 export function applySecurityHeaders(res) {
   if (!res || res.headersSent) return;
@@ -16,10 +20,13 @@ export function applySecurityHeaders(res) {
 }
 
 /**
- * Parses raw Cookie header string into a key-value dictionary.
+ * Parse Browser Cookies into Read-Only Values
  *
- * @param {string} [cookieHeader='']
- * @returns {Record<string, string>}
+ * What it does:
+ * Takes the raw cookie header text sent by the browser and turns it into an easy-to-read dictionary of names and values.
+ *
+ * Backup plan if it breaks:
+ * If a cookie value has strange character encoding, it catches the decode failure and keeps the raw text instead of crashing.
  */
 export function parseCookies(cookieHeader = '') {
   const cookies = {};
@@ -40,12 +47,13 @@ export function parseCookies(cookieHeader = '') {
 }
 
 /**
- * Serializes a cookie name and value with security flags.
+ * Build Secure Browser Cookie String
  *
- * @param {string} name
- * @param {string} val
- * @param {Object} [options={}]
- * @returns {string}
+ * What it does:
+ * Formats a cookie with security protections including HttpOnly (hidden from malicious browser scripts), Secure (HTTPS only), and SameSite protections.
+ *
+ * Backup plan if it breaks:
+ * Automatically defaults to the website root path '/' and 'SameSite=Lax' if custom settings are omitted.
  */
 export function serializeCookie(name, val, options = {}) {
   let cookie = `${encodeURIComponent(name)}=${encodeURIComponent(val)}`;
@@ -68,11 +76,13 @@ export function serializeCookie(name, val, options = {}) {
 }
 
 /**
- * Sets secure, HttpOnly authentication cookies for access and refresh tokens.
+ * Store Protected Login Session Cookies
  *
- * @param {import('http').ServerResponse} res
- * @param {{ accessToken: string, refreshToken?: string }} tokens
- * @param {boolean} [remember=false]
+ * What it does:
+ * Gives the user's browser encrypted session cookies so they stay safely logged in between page visits without exposing tokens to web scripts.
+ *
+ * Backup plan if it breaks:
+ * If the login access token is missing, it exits silently without issuing blank or broken cookies.
  */
 export function setAuthCookies(res, tokens, remember = false) {
   if (!tokens?.accessToken) return;
@@ -102,9 +112,13 @@ export function setAuthCookies(res, tokens, remember = false) {
 }
 
 /**
- * Clears authentication cookies upon logout.
+ * Erase Login Cookies on Logout
  *
- * @param {import('http').ServerResponse} res
+ * What it does:
+ * Immediately instructs the user's browser to delete all active session tokens when they click Log Out.
+ *
+ * Backup plan if it breaks:
+ * Sets the expiration date to the year 1970 and max-age to 0, guaranteeing the browser purges them immediately.
  */
 export function clearAuthCookies(res) {
   res.setHeader('Set-Cookie', [
@@ -114,12 +128,13 @@ export function clearAuthCookies(res) {
 }
 
 /**
- * Sends a JSON response with security headers and no-cache controls.
+ * Send Clean JSON Data Response to Client
  *
- * @param {import('http').ServerResponse} res - The response object.
- * @param {number} status - HTTP status code.
- * @param {Object} body - The JSON payload to send.
- * @returns {void}
+ * What it does:
+ * Applies security headers, disables browser caching so data is always fresh, and sends structured data back to the user.
+ *
+ * Backup plan if it breaks:
+ * Ensures responses are consistently encoded in standard UTF-8 format so special characters and accents never display as gibberish.
  */
 export function sendJson(res, status, body) {
   applySecurityHeaders(res);
@@ -133,11 +148,13 @@ export function sendJson(res, status, body) {
 }
 
 /**
- * Sends a 405 Method Not Allowed response.
+ * Reject Unsupported HTTP Request Method
  *
- * @param {import('http').ServerResponse} res - The response object.
- * @param {string[]} [allowed=[]] - List of allowed HTTP methods.
- * @returns {void}
+ * What it does:
+ * Sends an error code 405 if a user tries an unsupported network action (such as trying to POST data to a read-only endpoint).
+ *
+ * Backup plan if it breaks:
+ * Attaches an 'Allow' header informing the client which actions are actually permitted.
  */
 export function methodNotAllowed(res, allowed = []) {
   if (allowed.length) res.setHeader('Allow', allowed.join(', '));
@@ -148,10 +165,13 @@ export function methodNotAllowed(res, allowed = []) {
 }
 
 /**
- * Extracts authentication token from Bearer header or fallback secure cookie.
+ * Extract Digital Security Pass from Request
  *
- * @param {import('http').IncomingMessage} req - The request object.
- * @returns {string} The extracted token or an empty string.
+ * What it does:
+ * Searches for the user's login pass either inside the standard Authorization header or within secure browser cookies.
+ *
+ * Backup plan if it breaks:
+ * If no valid security pass is present in either location, it returns an empty string so the authentication checker can reject the request cleanly.
  */
 export function readBearerToken(req) {
   const header = req.headers?.authorization || req.headers?.Authorization || '';
@@ -167,30 +187,39 @@ export function readBearerToken(req) {
 }
 
 /**
- * Normalizes an email address string.
+ * Clean and Standardize Email Address
  *
- * @param {string} [value=''] - The email address to normalize.
- * @returns {string} The normalized email address.
+ * What it does:
+ * Trims surrounding spaces and changes all letters to lowercase so login emails match reliably.
+ *
+ * Backup plan if it breaks:
+ * Handles null or non-string inputs safely by turning them into clean strings first.
  */
 export function normalizeEmail(value = '') {
   return String(value).trim().toLowerCase();
 }
 
 /**
- * Validates whether the given string is a basic valid email address.
+ * Verify Basic Email Address Pattern
  *
- * @param {string} [value=''] - The email address to check.
- * @returns {boolean} True if valid, false otherwise.
+ * What it does:
+ * Checks whether an entered email contains an @ symbol and a domain name (like user@example.com).
+ *
+ * Backup plan if it breaks:
+ * If the text is empty or lacks standard email components, it safely returns false.
  */
 export function isValidEmail(value = '') {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmail(value));
 }
 
 /**
- * Converts a raw backend error into a safe message to return to the client.
+ * Translate Technical Server Errors into Friendly Messages
  *
- * @param {Error|any} error - The caught error object.
- * @returns {string} Safe error message.
+ * What it does:
+ * Replaces cryptic database error codes with plain-English explanations so users understand what went wrong without seeing sensitive internal server details.
+ *
+ * Backup plan if it breaks:
+ * If an unfamiliar error occurs, it falls back to a safe generic "Backend request failed" message to prevent exposing internal secrets.
  */
 function safeBackendMessage(error) {
   const message = String(error?.message || '').trim();
@@ -220,11 +249,13 @@ function safeBackendMessage(error) {
 }
 
 /**
- * Sends a standardized API error response.
+ * Standardized API Error Dispatcher
  *
- * @param {import('http').ServerResponse} res - The response object.
- * @param {Error|any} error - The caught error object.
- * @returns {void}
+ * What it does:
+ * Formats any server or validation error into a clean JSON reply with an appropriate status code and user-readable explanation.
+ *
+ * Backup plan if it breaks:
+ * In development mode, includes detailed error diagnostic information to help developers troubleshoot quickly without exposing them in production.
  */
 export function apiError(res, error) {
   const status = Number(error?.statusCode) || 500;

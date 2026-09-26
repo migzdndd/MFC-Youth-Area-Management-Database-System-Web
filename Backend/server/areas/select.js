@@ -14,11 +14,13 @@ const LEADERSHIP_ROLES = new Set([
 ]);
 
 /**
- * API Route Handler: Allows a leadership profile to select and assign themselves to an Area.
+ * Select and Join Existing Area Community
  *
- * @param {import('http').IncomingMessage} req - The HTTP request object.
- * @param {import('http').ServerResponse} res - The HTTP response object.
- * @returns {Promise<void>}
+ * What it does:
+ * Associates a newly registered servant leader with an existing Area and links their profile to the official member roster.
+ *
+ * Backup plan if it breaks:
+ * Blocks leaders who already belong to an Area from changing areas without administrator permission. If the chosen Area is deactivated or invalid, it returns a 404 "Area not available" notice.
  */
 export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);

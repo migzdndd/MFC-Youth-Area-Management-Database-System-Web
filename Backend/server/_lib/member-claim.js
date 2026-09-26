@@ -1,5 +1,14 @@
 import { normalizeEmail } from './http.js';
 
+/**
+ * Create Custom Member Account Link Error
+ *
+ * What it does:
+ * Builds an error message with a specific status code when a youth member tries to link their account to a record.
+ *
+ * Backup plan if it breaks:
+ * Defaults to status code 409 (Conflict) and code 'MEMBER_CLAIM_FAILED' if specific codes are not supplied.
+ */
 function claimError(message, statusCode = 409, code = 'MEMBER_CLAIM_FAILED') {
   const error = new Error(message);
   error.statusCode = statusCode;
@@ -7,10 +16,28 @@ function claimError(message, statusCode = 409, code = 'MEMBER_CLAIM_FAILED') {
   return error;
 }
 
+/**
+ * Clean Search Text for Safe Database Matching
+ *
+ * What it does:
+ * Neutralizes database wildcard characters (% and _) so searching for an email matches literal characters accurately.
+ *
+ * Backup plan if it breaks:
+ * Safely converts input to a string before replacing characters.
+ */
 function escapeLikePattern(value) {
   return String(value).replace(/[\\%_]/g, character => `\\${character}`);
 }
 
+/**
+ * Link Registered Login Account to Member Profile Record
+ *
+ * What it does:
+ * Connects a newly registered youth member's login credentials to their pre-existing member record in the church database using their email address.
+ *
+ * Backup plan if it breaks:
+ * If no matching member record exists, it raises a 404 error. If the member record is already claimed by another login account, it raises a 409 conflict error to prevent identity theft.
+ */
 export async function claimMemberRecord({ supabase, user }) {
   const email = normalizeEmail(user?.email);
   if (!email) throw claimError('A verified email address is required.', 400, 'MEMBER_EMAIL_REQUIRED');
