@@ -1,9 +1,12 @@
 import { backendConfig, validateSupabaseUrl } from './_lib/env.js';
 import { createSupabaseAdmin } from './_lib/supabase.js';
 import { sendJson, methodNotAllowed } from './_lib/http.js';
+import { checkRateLimit } from './_lib/rate-limit.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return methodNotAllowed(res, ['GET']);
+
+  if (!await checkRateLimit(req, res, 'health')) return;
 
   const config = backendConfig();
   const urlCheck = validateSupabaseUrl(config.supabaseUrl);

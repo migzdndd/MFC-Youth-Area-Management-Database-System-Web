@@ -1,10 +1,13 @@
 import * as cheerio from 'cheerio';
 import { sendJson } from '../_lib/http.js';
+import { checkRateLimit } from '../_lib/rate-limit.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return sendJson(res, 405, { ok: false, error: 'Method Not Allowed' });
   }
+
+  if (!await checkRateLimit(req, res, 'daily-readings')) return;
 
   try {
     const userDate = req.query?.date;

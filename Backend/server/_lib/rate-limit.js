@@ -11,6 +11,14 @@ export function getClientIp(req) {
 
 const RATE_CONFIGS = {
   login: { maxAttempts: 10, windowMs: 5 * 60 * 1000, label: '5 minutes' },
+  'mfa-verify': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
+  'forgot-password': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
+  'reset-password': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
+  'admin-register': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
+  'member-claim': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
+  'daily-readings': { maxAttempts: 30, windowMs: 5 * 60 * 1000, label: '5 minutes' },
+  changelogs: { maxAttempts: 30, windowMs: 5 * 60 * 1000, label: '5 minutes' },
+  health: { maxAttempts: 60, windowMs: 5 * 60 * 1000, label: '5 minutes' },
   default: { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' }
 };
 

@@ -207,24 +207,72 @@ const previewMode = Boolean(
 
 // Section 5: Cloud Data Synchronization
 
-/** Makes an authenticated GET request to the backend with timeout */
-async function portalBackendApi(path) {
-  const token = session?.accessToken || '';
-  const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 8000);
-  try {
-    const response = await fetch(path, {
-      method: 'GET',
-      cache: 'no-store',
-      signal: controller.signal,
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    });
-    const body = await response.json().catch(() => ({ ok: false, error: 'Invalid server response.' }));
-    if (!response.ok) throw new Error(body?.error || 'Request failed.');
-    return body;
-  } finally {
-    window.clearTimeout(timeout);
+// In-flight GET request deduplication for Member Portal
+const activePortalRequests = new Map();
+
+/**
+ * Authenticated GET client for Member Portal with:
+ * - Request deduplication
+ * - Max 2 exponential backoff retries for transient 502/503/504 errors
+ * - Automatic 403 MFA elevation & 401 session expiration handling
+ */
+async function portalBackendApi(path, options = {}) {
+  const maxRetries = Math.min(Math.max(Number(options.maxRetries ?? 2), 0), 2);
+  const dedupeKey = `${path}:${session?.accessToken || ''}`;
+
+  if (activePortalRequests.has(dedupeKey)) {
+    return activePortalRequests.get(dedupeKey);
   }
+
+  const execute = async (attempt = 0) => {
+    const token = session?.accessToken || '';
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 8000);
+    try {
+      const response = await fetch(path, {
+        method: 'GET',
+        cache: 'no-store',
+        signal: controller.signal,
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      const body = await response.json().catch(() => ({ ok: false, error: 'Invalid server response.' }));
+
+      if (!response.ok) {
+        if (response.status === 403 && body?.code === 'MFA_REQUIRED') {
+          window.location.href = '/mfa-verify.html';
+          return;
+        }
+        if (response.status === 401 && (body?.code === 'INVALID_SESSION' || body?.code === 'AUTH_REQUIRED')) {
+          localStorage.removeItem(SESSION_KEY);
+          sessionStorage.removeItem(SESSION_KEY);
+        }
+
+        if (attempt < maxRetries && (response.status === 502 || response.status === 503 || response.status === 504)) {
+          const delay = Math.min(1000 * Math.pow(2, attempt) + Math.random() * 200, 3000);
+          await new Promise(r => setTimeout(r, delay));
+          return execute(attempt + 1);
+        }
+
+        throw new Error(body?.error || 'Request failed.');
+      }
+      return body;
+    } catch (err) {
+      if (err instanceof TypeError && attempt < maxRetries) {
+        const delay = Math.min(1000 * Math.pow(2, attempt) + Math.random() * 200, 3000);
+        await new Promise(r => setTimeout(r, delay));
+        return execute(attempt + 1);
+      }
+      throw err;
+    } finally {
+      window.clearTimeout(timeout);
+    }
+  };
+
+  const promise = execute().finally(() => {
+    activePortalRequests.delete(dedupeKey);
+  });
+  activePortalRequests.set(dedupeKey, promise);
+  return promise;
 }
 
 /** Maps a backend member database record to client schema format */

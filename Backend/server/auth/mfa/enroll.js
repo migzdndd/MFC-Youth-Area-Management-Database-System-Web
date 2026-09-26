@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
 
   try {
-    const { user, token } = await requireAuthenticatedUser(req);
+    const { user, token } = await requireAuthenticatedUser(req, { allowAal1: true });
     const { supabaseUrl, supabaseAnonKey } = assertBackendConfigured();
 
     const userClient = createClient(supabaseUrl, supabaseAnonKey, {

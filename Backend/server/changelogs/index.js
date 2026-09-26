@@ -1,4 +1,5 @@
 import { sendJson } from '../_lib/http.js';
+import { checkRateLimit } from '../_lib/rate-limit.js';
 
 const PRIMARY_REPO = 'migzdndd/MFC-Youth-Area-Management-Database-System-Web';
 const FALLBACK_REPO = 'migzdndd/MFC-Youth-Area-Management-System-Web';
@@ -46,6 +47,8 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return sendJson(res, 405, { ok: false, error: 'Method Not Allowed' });
   }
+
+  if (!await checkRateLimit(req, res, 'changelogs')) return;
 
   const perPage = Math.min(Math.max(parseInt(req.query?.per_page, 10) || 50, 1), 100);
 

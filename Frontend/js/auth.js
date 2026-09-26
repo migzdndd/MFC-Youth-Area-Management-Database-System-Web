@@ -153,8 +153,21 @@ function saveUsers(users) {
 // Section 3: Session Management & Navigation Helpers
 
 /** Reads current active session from localStorage or sessionStorage */
+/** Reads current active session from localStorage or sessionStorage with expiration validation */
 function getSession() {
-  return safeParse(localStorage.getItem(SESSION_KEY), null) || safeParse(sessionStorage.getItem(SESSION_KEY), null);
+  const raw = safeParse(localStorage.getItem(SESSION_KEY), null) || safeParse(sessionStorage.getItem(SESSION_KEY), null);
+  if (!raw) return null;
+
+  // Session validation: automatically purge expired tokens
+  if (raw.expiresAt) {
+    const expiresAtMs = typeof raw.expiresAt === 'number' ? raw.expiresAt * 1000 : new Date(raw.expiresAt).getTime();
+    if (Date.now() >= expiresAtMs) {
+      clearSession();
+      return null;
+    }
+  }
+
+  return raw;
 }
 
 /** Persists session data to either localStorage (remember me) or sessionStorage */
@@ -215,6 +228,17 @@ async function apiJson(path, options = {}) {
   }
 
   if (!response.ok) {
+    if (response.status === 403 && body?.code === 'MFA_REQUIRED') {
+      if (typeof navigateWithLoader === 'function') {
+        navigateWithLoader('/mfa-verify.html');
+      } else {
+        window.location.href = '/mfa-verify.html';
+      }
+    }
+    if (response.status === 401 && (body?.code === 'INVALID_SESSION' || body?.code === 'AUTH_REQUIRED')) {
+      clearSession();
+    }
+
     const error = new Error(body?.error || 'Request failed.');
     error.status = response.status;
     error.code = body?.code;

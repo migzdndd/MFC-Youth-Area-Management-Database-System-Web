@@ -30,6 +30,7 @@ import mfaChallenge from '../server/auth/mfa/challenge.js';
 import mfaVerify from '../server/auth/mfa/verify.js';
 import mfaFactors from '../server/auth/mfa/factors.js';
 import mfaUnenroll from '../server/auth/mfa/unenroll.js';
+import { applySecurityHeaders } from '../server/_lib/http.js';
 
 const ROUTES = new Map([
   ['health', health],
@@ -78,6 +79,7 @@ function normalizeRoute(value) {
 }
 
 export default async function handler(req, res) {
+  applySecurityHeaders(res);
   try {
     const route = normalizeRoute(req.query?.route);
     const routeHandler = ROUTES.get(route);

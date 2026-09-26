@@ -32,13 +32,35 @@ export function isChapterServantRole(role) {
 }
 
 /**
- * Authenticates a user based on the request's Bearer token.
+ * Safely decodes base64url JSON payload from a JWT token.
+ *
+ * @param {string} jwtToken
+ * @returns {Object|null}
+ */
+export function parseJwtPayload(jwtToken) {
+  try {
+    const parts = String(jwtToken || '').split('.');
+    if (parts.length !== 3) return null;
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const json = Buffer.from(base64, 'base64').toString('utf8');
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Authenticates a user based on the request's Bearer token or auth cookie.
+ * Enforces native Supabase AAL (Authentication Assurance Level):
+ * Rejects aal1 sessions on non-MFA endpoints if TOTP is enrolled on the account.
  *
  * @param {import('http').IncomingMessage} req - The request object.
+ * @param {Object} [options={}] - Authentication options.
+ * @param {boolean} [options.allowAal1=false] - Whether to allow aal1 sessions on MFA enrollment/verification routes.
  * @returns {Promise<{ supabase: import('@supabase/supabase-js').SupabaseClient, user: import('@supabase/supabase-js').User, token: string }>} 
- * @throws {Error} 401 Unauthorized if the token is missing or invalid.
+ * @throws {Error} 401 Unauthorized if token missing/invalid, 403 Forbidden if MFA required.
  */
-export async function requireAuthenticatedUser(req) {
+export async function requireAuthenticatedUser(req, options = {}) {
   const token = readBearerToken(req);
   if (!token) {
     const error = new Error('Authentication required.');
@@ -54,6 +76,25 @@ export async function requireAuthenticatedUser(req) {
     error.statusCode = 401;
     error.code = 'INVALID_SESSION';
     throw error;
+  }
+
+  // Native Supabase AAL (Authentication Assurance Level) Check:
+  // If the user has active verified TOTP factors enrolled, reject aal1 sessions on all
+  // non-MFA endpoints until the TOTP security challenge is completed and elevated to aal2.
+  if (!options.allowAal1) {
+    const payload = parseJwtPayload(token);
+    const currentAal = payload?.aal || 'aal1';
+    const hasVerifiedMfa = (userData.user.factors || []).some(
+      f => f.factor_type === 'totp' && f.status === 'verified'
+    );
+
+    if (hasVerifiedMfa && currentAal !== 'aal2') {
+      const error = new Error('Two-factor authentication required. Please verify your security code.');
+      error.statusCode = 403;
+      error.code = 'MFA_REQUIRED';
+      error.aal = currentAal;
+      throw error;
+    }
   }
 
   return { supabase, user: userData.user, token };

@@ -1,4 +1,4 @@
-import { sendJson, methodNotAllowed, apiError, readBearerToken } from '../_lib/http.js';
+import { sendJson, methodNotAllowed, apiError, readBearerToken, clearAuthCookies } from '../_lib/http.js';
 import { assertBackendConfigured } from '../_lib/env.js';
 
 export default async function handler(req, res) {
@@ -30,6 +30,7 @@ export default async function handler(req, res) {
       throw new Error(`Logout failed: ${response.status} ${errorText}`);
     }
 
+    clearAuthCookies(res);
     return sendJson(res, 200, {
       ok: true,
       message: 'Successfully logged out.'

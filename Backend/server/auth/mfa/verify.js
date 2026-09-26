@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { assertBackendConfigured } from '../../_lib/env.js';
 import { createSupabaseAdmin } from '../../_lib/supabase.js';
-import { readBearerToken, sendJson, methodNotAllowed, apiError } from '../../_lib/http.js';
+import { readBearerToken, sendJson, methodNotAllowed, apiError, setAuthCookies } from '../../_lib/http.js';
 import { checkRateLimit } from '../../_lib/rate-limit.js';
 
 export default async function handler(req, res) {
@@ -58,6 +58,11 @@ export default async function handler(req, res) {
     if (profile && profile.is_active === false) {
       return sendJson(res, 403, { ok: false, error: 'This account is not active.' });
     }
+
+    setAuthCookies(res, {
+      accessToken: verifyData.access_token,
+      refreshToken: verifyData.refresh_token
+    }, Boolean(req.body?.remember));
 
     return sendJson(res, 200, {
       ok: true,

@@ -6,58 +6,113 @@
 
 // Section 2: Authenticated Backend API Client
 
+// Request deduplication cache for concurrent in-flight GET requests
+const activeApiRequests = new Map();
+
+/**
+ * Authenticated Backend API Client with:
+ * - Request deduplication for simultaneous GETs
+ * - Capped exponential-backoff retries for transient 5xx/network errors (max 2 retries)
+ * - Infinite loop & circular retry protections
+ * - Automatic 403 MFA elevation & 401 session expiration handling
+ */
 async function backendApi(path, options = {}) {
-  const token = session?.accessToken || '';
+  const method = String(options.method || 'GET').toUpperCase();
+  const maxRetries = method === 'GET' ? Math.min(Math.max(Number(options.maxRetries ?? 2), 0), 2) : 0;
   const timeoutMs = Number(options.timeoutMs || 8000);
-  const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
 
-  try {
-    const headers = {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers || {})
-    };
-
-    if (session?.role === 'national_coordinator' && session?.areaId) {
-      headers['X-MFC-Area-ID'] = session.areaId;
-    }
-
-    const response = await fetch(path, {
-      ...options,
-      signal: controller.signal,
-      cache: 'no-store',
-      headers
-    });
-
-    let body = null;
-    try {
-      body = await response.json();
-    } catch {
-      body = { ok: false, error: 'The server returned an invalid response.' };
-    }
-
-    if (!response.ok) {
-      const error = new Error(body?.error || 'Request failed.');
-      error.status = response.status;
-      error.body = body;
-      throw error;
-    }
-
-    return body;
-  } catch (error) {
-    if (error?.name === 'AbortError') {
-      throw new Error('The server took too long to respond. Please try again.');
-    }
-
-    if (error instanceof TypeError) {
-      throw new Error('Unable to reach the server. Check your connection and try again.');
-    }
-
-    throw error;
-  } finally {
-    window.clearTimeout(timeout);
+  // Deduplicate identical in-flight GET requests
+  const dedupeKey = method === 'GET' ? `${path}:${session?.accessToken || ''}:${session?.areaId || ''}` : null;
+  if (dedupeKey && activeApiRequests.has(dedupeKey)) {
+    return activeApiRequests.get(dedupeKey);
   }
+
+  const executeRequest = async (attempt = 0) => {
+    const token = session?.accessToken || '';
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers || {})
+      };
+
+      if (session?.role === 'national_coordinator' && session?.areaId) {
+        headers['X-MFC-Area-ID'] = session.areaId;
+      }
+
+      const response = await fetch(path, {
+        ...options,
+        signal: controller.signal,
+        cache: 'no-store',
+        headers
+      });
+
+      let body = null;
+      try {
+        body = await response.json();
+      } catch {
+        body = { ok: false, error: 'The server returned an invalid response.' };
+      }
+
+      if (!response.ok) {
+        if (response.status === 403 && body?.code === 'MFA_REQUIRED') {
+          if (typeof navigateWithLoader === 'function') {
+            navigateWithLoader('/mfa-verify.html');
+          } else {
+            window.location.href = '/mfa-verify.html';
+          }
+        }
+        if (response.status === 401 && (body?.code === 'INVALID_SESSION' || body?.code === 'AUTH_REQUIRED')) {
+          if (typeof clearSession === 'function') clearSession();
+        }
+
+        // Only retry transient 502/503/504 errors on idempotent GET requests up to cap
+        if (attempt < maxRetries && (response.status === 502 || response.status === 503 || response.status === 504)) {
+          const delay = Math.min(1000 * Math.pow(2, attempt) + Math.random() * 200, 3000);
+          await new Promise(r => setTimeout(r, delay));
+          return executeRequest(attempt + 1);
+        }
+
+        const error = new Error(body?.error || 'Request failed.');
+        error.status = response.status;
+        error.code = body?.code;
+        error.body = body;
+        throw error;
+      }
+
+      return body;
+    } catch (error) {
+      if (error?.name === 'AbortError') {
+        throw new Error('The server took too long to respond. Please try again.');
+      }
+
+      // Retry network drops on GET requests up to cap
+      if (error instanceof TypeError && attempt < maxRetries) {
+        const delay = Math.min(1000 * Math.pow(2, attempt) + Math.random() * 200, 3000);
+        await new Promise(r => setTimeout(r, delay));
+        return executeRequest(attempt + 1);
+      }
+
+      if (error instanceof TypeError) {
+        throw new Error('Unable to reach the server. Check your connection and try again.');
+      }
+
+      throw error;
+    } finally {
+      window.clearTimeout(timeout);
+    }
+  };
+
+  if (!dedupeKey) return executeRequest();
+
+  const promise = executeRequest().finally(() => {
+    activeApiRequests.delete(dedupeKey);
+  });
+  activeApiRequests.set(dedupeKey, promise);
+  return promise;
 }
 
 // Section 3: Cloud Synchronization & Entity Mappers
@@ -233,8 +288,10 @@ async function syncCloudModulesIntoLocalDb() {
 
 async function refreshAllCloudData({ render = true } = {}) {
   if (!session?.backendAuth || session?.demo || !session?.areaId) return false;
-  await syncBackendMembersIntoLocalDb();
-  await syncCloudModulesIntoLocalDb();
+  await Promise.all([
+    syncBackendMembersIntoLocalDb(),
+    syncCloudModulesIntoLocalDb()
+  ]);
   if (render) renderPageSafely();
   return true;
 }

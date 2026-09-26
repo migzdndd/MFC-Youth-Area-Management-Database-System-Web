@@ -6,6 +6,17 @@
 
 // Section 11: Dashboard Module
 
+let cachedAreasPromise = null;
+async function fetchCachedAreas() {
+  if (!cachedAreasPromise) {
+    cachedAreasPromise = backendApi('/api/areas').catch(err => {
+      cachedAreasPromise = null;
+      throw err;
+    });
+  }
+  return cachedAreasPromise;
+}
+
 async function openAreaSelectionModal() {
   const CANONICAL_AREAS = [
     { id: 'NCR-CENTRAL', name: 'NCR Central' },
@@ -69,7 +80,7 @@ async function openAreaSelectionModal() {
   });
 
   try {
-    const response = await backendApi('/api/areas');
+    const response = await fetchCachedAreas();
     const apiAreas = Array.isArray(response?.areas) && response.areas.length > 0
       ? response.areas
       : CANONICAL_AREAS;
@@ -159,7 +170,7 @@ async function renderNationalCoordinatorDashboard(data) {
   `;
 
   try {
-    const response = await backendApi('/api/areas');
+    const response = await fetchCachedAreas();
     const apiAreas = Array.isArray(response?.areas) && response.areas.length > 0 ? response.areas : null;
     const count = apiAreas ? apiAreas.length : 4;
     const countElem = document.getElementById('nc-areas-count');

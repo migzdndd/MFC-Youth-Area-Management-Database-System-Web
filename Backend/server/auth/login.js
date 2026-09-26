@@ -1,5 +1,5 @@
 import { createSupabaseAuthClient, createSupabaseAdmin } from '../_lib/supabase.js';
-import { sendJson, methodNotAllowed, normalizeEmail, isValidEmail, apiError } from '../_lib/http.js';
+import { sendJson, methodNotAllowed, normalizeEmail, isValidEmail, apiError, setAuthCookies } from '../_lib/http.js';
 import { claimMemberRecord } from '../_lib/member-claim.js';
 import { checkRateLimit } from '../_lib/rate-limit.js';
 import { checkBruteForce, recordLoginFailure, clearLoginFailures } from '../_lib/brute-force.js';
@@ -113,6 +113,11 @@ export default async function handler(req, res) {
         }
       }
     }
+
+    setAuthCookies(res, {
+      accessToken: data.session.access_token,
+      refreshToken: data.session.refresh_token
+    }, Boolean(req.body?.remember));
 
     return sendJson(res, 200, {
       ok: true,
