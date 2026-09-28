@@ -36,6 +36,35 @@ async function backendApi(path, options = {}) {
   const maxRetries = method === 'GET' ? Math.min(Math.max(Number(options.maxRetries ?? 2), 0), 2) : 0;
   const timeoutMs = Number(options.timeoutMs || 8000);
 
+  // Check if target is an offline-supported mutation (/api/participants or /api/reports)
+  const isOfflineMutationTarget =
+    method !== 'GET' &&
+    ['/api/participants', '/api/reports'].some(prefix => path.startsWith(prefix));
+
+  // If browser is known to be offline, immediately queue supported mutations locally
+  if (typeof navigator !== 'undefined' && !navigator.onLine && isOfflineMutationTarget && window.offlineStore) {
+    let parsedPayload = null;
+    try {
+      parsedPayload = typeof options.body === 'string' ? JSON.parse(options.body) : options.body;
+    } catch {
+      parsedPayload = options.body;
+    }
+    const queued = await window.offlineStore.enqueueMutation({
+      endpoint: path,
+      method,
+      payload: parsedPayload,
+      headers: options.headers
+    });
+    return {
+      ok: true,
+      offline: true,
+      queued: true,
+      optimistic: true,
+      id: queued?.id,
+      message: 'Saved offline. Changes will sync automatically when back online.'
+    };
+  }
+
   // Avoid asking for the exact same data twice simultaneously
   const dedupeKey = method === 'GET' ? `${path}:${session?.accessToken || ''}:${session?.areaId || ''}` : null;
   if (dedupeKey && activeApiRequests.has(dedupeKey)) {
@@ -70,6 +99,11 @@ async function backendApi(path, options = {}) {
         body = await response.json();
       } catch {
         body = { ok: false, error: 'The server returned an invalid response.' };
+      }
+
+      // Check if Service Worker intercepted and returned an offline queued response (status 202)
+      if (response.status === 202 && body?.offline && body?.queued) {
+        return body;
       }
 
       if (!response.ok) {
@@ -109,6 +143,30 @@ async function backendApi(path, options = {}) {
         const delay = Math.min(1000 * Math.pow(2, attempt) + Math.random() * 200, 3000);
         await new Promise(r => setTimeout(r, delay));
         return executeRequest(attempt + 1);
+      }
+
+      // Intercept dropped connection on mutations and queue offline
+      if (error instanceof TypeError && isOfflineMutationTarget && window.offlineStore) {
+        let parsedPayload = null;
+        try {
+          parsedPayload = typeof options.body === 'string' ? JSON.parse(options.body) : options.body;
+        } catch {
+          parsedPayload = options.body;
+        }
+        const queued = await window.offlineStore.enqueueMutation({
+          endpoint: path,
+          method,
+          payload: parsedPayload,
+          headers: options.headers
+        });
+        return {
+          ok: true,
+          offline: true,
+          queued: true,
+          optimistic: true,
+          id: queued?.id,
+          message: 'Saved offline. Changes will sync automatically when back online.'
+        };
       }
 
       if (error instanceof TypeError) {
@@ -186,22 +244,27 @@ function cloudMemberToLocal(member, previous = {}) {
 async function syncBackendMembersIntoLocalDb() {
   if (!session?.backendAuth || session?.demo || !session?.areaId) return false;
 
-  const payload = await backendApi('/api/members');
-  const cloudMembers = Array.isArray(payload?.members) ? payload.members : [];
-  const data = db();
-  const previousMembers = Array.isArray(data.members) ? data.members : [];
+  try {
+    const payload = await backendApi('/api/members');
+    const cloudMembers = Array.isArray(payload?.members) ? payload.members : [];
+    const data = db();
+    const previousMembers = Array.isArray(data.members) ? data.members : [];
 
-  data.members = cloudMembers.map(cloudMember => {
-    const email = String(cloudMember.email || '').trim().toLowerCase();
-    const previous = previousMembers.find(localMember =>
-      String(localMember.id) === String(cloudMember.id) ||
-      (email && String(localMember.email || '').trim().toLowerCase() === email)
-    ) || {};
-    return cloudMemberToLocal(cloudMember, previous);
-  });
+    data.members = cloudMembers.map(cloudMember => {
+      const email = String(cloudMember.email || '').trim().toLowerCase();
+      const previous = previousMembers.find(localMember =>
+        String(localMember.id) === String(cloudMember.id) ||
+        (email && String(localMember.email || '').trim().toLowerCase() === email)
+      ) || {};
+      return cloudMemberToLocal(cloudMember, previous);
+    });
 
-  save(data);
-  return true;
+    save(data);
+    return true;
+  } catch (error) {
+    console.warn('Backend members sync skipped while offline:', error?.message || error);
+    return false;
+  }
 }
 
 /**
@@ -297,7 +360,26 @@ function cloudGigToLocal(row) {
 async function syncCloudModulesIntoLocalDb() {
   if (!session?.backendAuth || session?.demo || !session?.areaId) return false;
 
-  const payload = await backendApi('/api/sync', { timeoutMs: 10000 });
+  let payload = null;
+  try {
+    payload = await backendApi('/api/sync', { timeoutMs: 10000 });
+    if (payload && window.offlineStore) {
+      await window.offlineStore.cacheReadData('sync_data', payload, session.areaId);
+    }
+  } catch (error) {
+    if (window.offlineStore) {
+      const cached = await window.offlineStore.getReadData('sync_data');
+      if (cached?.data) {
+        payload = cached.data;
+        console.log('[api] Operating offline: loaded cached sync records from IndexedDB.');
+      }
+    }
+    if (!payload) {
+      console.warn('Modules sync skipped while offline with no cache:', error?.message || error);
+      return false;
+    }
+  }
+
   const data = db();
 
   const chapters = Array.isArray(payload?.chapters) ? payload.chapters : [];

@@ -1,0 +1,69 @@
+{
+  "name": "MFC Youth Area Management System",
+  "short_name": "MFC Youth AMS",
+  "description": "Area Management and Offline-First Operations System for MFC Youth servant leaders.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#002847",
+  "background_color": "#f4f7fb",
+  "lang": "en",
+  "categories": ["productivity", "management", "utilities"],
+  "icons": [
+    {
+      "src": "/img/logo-2.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/img/logo-2.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/img/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/img/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View Area overview and key statistics",
+      "url": "/dashboard",
+      "icons": [{ "src": "/Icons/dashboard.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Events & Attendance",
+      "short_name": "Events",
+      "description": "Manage gatherings, attendance, and fee payments",
+      "url": "/events",
+      "icons": [{ "src": "/Icons/events.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Activity Reports",
+      "short_name": "Reports",
+      "description": "Draft and review monthly activity reports",
+      "url": "/reports",
+      "icons": [{ "src": "/Icons/reports.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Members Directory",
+      "short_name": "Members",
+      "description": "Look up youth member profiles and ministries",
+      "url": "/members",
+      "icons": [{ "src": "/Icons/members.png", "sizes": "96x96" }]
+    }
+  ]
+}

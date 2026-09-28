@@ -1488,22 +1488,35 @@ window.reportModal = function (
 
       try {
         if (session?.backendAuth && !session?.demo) {
-          await backendApi('/api/reports', {
+          const apiRes = await backendApi('/api/reports', {
             method: id ? 'PATCH' : 'POST',
             body: JSON.stringify({ ...record, chapterName, id: id || undefined })
           });
-          await refreshAllCloudData({ render: false });
+          if (apiRes?.offline) {
+            if (id) {
+              const target = data.reports.find(item => String(item.id) === String(id));
+              if (target) Object.assign(target, { ...record, optimistic: true });
+            } else {
+              data.reports.push({ ...record, optimistic: true });
+            }
+            save(data);
+            toast(id ? 'Report updated offline. Will sync when connected.' : 'Report drafted offline. Will sync when connected.', 'info');
+          } else {
+            await refreshAllCloudData({ render: false });
+            toast(id ? 'Report updated.' : 'Report added.');
+          }
         } else if (id) {
           const target = data.reports.find(item => String(item.id) === String(id));
           if (target) Object.assign(target, record);
           save(data);
+          toast('Report updated.');
         } else {
           data.reports.push(record);
           save(data);
+          toast('Report added.');
         }
 
         close();
-        toast(id ? 'Report updated.' : 'Report added.');
         renderReports();
       } catch (error) {
         toast(error?.message || 'Unable to save the activity report.', 'error');
@@ -1596,13 +1609,20 @@ window.deleteReport = async id => {
 
   try {
     if (session?.backendAuth && !session?.demo) {
-      await backendApi(`/api/reports?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
-      await refreshAllCloudData({ render: false });
+      const apiRes = await backendApi(`/api/reports?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (apiRes?.offline) {
+        data.reports = data.reports.filter(report => String(report.id) !== String(id));
+        save(data);
+        toast('Report deleted offline. Will sync when connected.', 'info');
+      } else {
+        await refreshAllCloudData({ render: false });
+        toast('Report deleted.');
+      }
     } else {
       data.reports = data.reports.filter(report => String(report.id) !== String(id));
       save(data);
+      toast('Report deleted.');
     }
-    toast('Report deleted.');
     renderReports();
   } catch (error) {
     toast(error?.message || 'Unable to delete the activity report.', 'error');

@@ -514,6 +514,10 @@ function renderPageSafely() {
     renderer();
     target?.removeAttribute('aria-busy');
     window.MFCPageSkeleton?.clear?.();
+    ensureOfflineUIElements();
+    if (window.syncManager) {
+      window.syncManager.broadcastStatus();
+    }
     return true;
   } catch (error) {
     renderPageFailure(error);
@@ -614,3 +618,213 @@ if (session && !session.mustChangePassword && session.role !== 'member') {
     renderPageFailure(error);
   });
 }
+
+// Section 6: PWA Service Worker Registration & UI Offline State Indicators
+
+let syncedFadeTimeout = null;
+
+/**
+ * Creates or retrieves the top navigation offline status bar and mobile badge.
+ */
+function ensureOfflineUIElements() {
+  const contentEl = content || document.getElementById('pageContent');
+  if (!contentEl) return null;
+
+  let statusBar = document.getElementById('offlineStatusBar');
+  if (!statusBar) {
+    statusBar = document.createElement('aside');
+    statusBar.id = 'offlineStatusBar';
+    statusBar.className = 'offline-status-bar';
+    statusBar.setAttribute('role', 'status');
+    statusBar.setAttribute('aria-live', 'polite');
+    statusBar.hidden = true;
+    statusBar.innerHTML = `
+      <div class="offline-banner-content">
+        <span class="offline-status-indicator" id="offlineStatusDot"></span>
+        <span class="offline-status-text" id="offlineStatusText"></span>
+      </div>
+      <button class="offline-sync-btn" id="offlineSyncBtn" type="button" style="display:none;">Sync Now</button>
+    `;
+    contentEl.insertBefore(statusBar, contentEl.firstChild);
+
+    document.getElementById('offlineSyncBtn')?.addEventListener('click', () => {
+      if (window.syncManager) {
+        window.syncManager.processOutbox({ manual: true });
+      }
+    });
+  }
+
+  // Mobile topbar offline badge integration
+  const mobileTopbar = document.querySelector('.mobile-topbar');
+  if (mobileTopbar && !document.getElementById('mobileOfflineBadge')) {
+    const badge = document.createElement('span');
+    badge.id = 'mobileOfflineBadge';
+    badge.className = 'mobile-offline-badge';
+    badge.style.display = 'none';
+    const strong = mobileTopbar.querySelector('strong');
+    if (strong && strong.nextSibling) {
+      mobileTopbar.insertBefore(badge, strong.nextSibling);
+    } else {
+      mobileTopbar.appendChild(badge);
+    }
+  }
+
+  return statusBar;
+}
+
+/**
+ * Updates UI cues based on synchronization and network state.
+ */
+function updateOfflineUI(detail = {}) {
+  const statusBar = ensureOfflineUIElements();
+  const mobileBadge = document.getElementById('mobileOfflineBadge');
+  const dot = document.getElementById('offlineStatusDot');
+  const text = document.getElementById('offlineStatusText');
+  const syncBtn = document.getElementById('offlineSyncBtn');
+
+  if (!statusBar || !text) return;
+
+  const isOnline = typeof detail.isOnline === 'boolean' ? detail.isOnline : navigator.onLine;
+  const isSyncing = Boolean(detail.isSyncing);
+  const pendingCount = Number(detail.pendingCount ?? 0);
+
+  if (syncedFadeTimeout) {
+    clearTimeout(syncedFadeTimeout);
+    syncedFadeTimeout = null;
+  }
+
+  statusBar.classList.remove('is-offline', 'is-syncing', 'is-synced', 'is-conflict', 'is-pending');
+  if (mobileBadge) {
+    mobileBadge.classList.remove('is-syncing', 'is-synced');
+  }
+
+  if (!isOnline) {
+    // Device is offline
+    statusBar.hidden = false;
+    statusBar.classList.add('is-offline');
+    if (pendingCount > 0) {
+      text.textContent = `Offline Mode · ${pendingCount} ${pendingCount === 1 ? 'change' : 'changes'} pending sync`;
+    } else {
+      text.textContent = 'Offline Mode · Attendance checking and report drafts will save locally';
+    }
+    if (syncBtn) syncBtn.style.display = 'none';
+
+    if (mobileBadge) {
+      mobileBadge.style.display = 'inline-flex';
+      mobileBadge.textContent = pendingCount > 0 ? `Offline (${pendingCount})` : 'Offline';
+    }
+  } else if (isSyncing) {
+    // Replay outbox in progress
+    statusBar.hidden = false;
+    statusBar.classList.add('is-syncing');
+    text.textContent = detail.progressText || (pendingCount > 0 ? `Syncing changes (${pendingCount} pending)...` : 'Syncing changes...');
+    if (syncBtn) syncBtn.style.display = 'none';
+
+    if (mobileBadge) {
+      mobileBadge.style.display = 'inline-flex';
+      mobileBadge.classList.add('is-syncing');
+      mobileBadge.textContent = 'Syncing…';
+    }
+  } else if (pendingCount > 0) {
+    // Back online, outbox waiting for sync
+    statusBar.hidden = false;
+    statusBar.classList.add('is-pending');
+    text.textContent = `Connected · ${pendingCount} ${pendingCount === 1 ? 'change' : 'changes'} pending sync`;
+    if (syncBtn) {
+      syncBtn.style.display = 'inline-block';
+      syncBtn.textContent = 'Sync Now';
+    }
+
+    if (mobileBadge) {
+      mobileBadge.style.display = 'inline-flex';
+      mobileBadge.textContent = `${pendingCount} pending`;
+    }
+  } else {
+    // Fully synced online state
+    statusBar.hidden = true;
+    if (syncBtn) syncBtn.style.display = 'none';
+    if (mobileBadge) mobileBadge.style.display = 'none';
+  }
+}
+
+// Subscribe to Sync Manager Custom DOM Events
+window.addEventListener('sync:status-changed', event => {
+  updateOfflineUI(event.detail);
+});
+
+window.addEventListener('sync:started', event => {
+  const total = event.detail?.total || 1;
+  updateOfflineUI({
+    isOnline: true,
+    isSyncing: true,
+    pendingCount: total,
+    progressText: `Syncing ${total} pending ${total === 1 ? 'change' : 'changes'}…`
+  });
+});
+
+window.addEventListener('sync:progress', event => {
+  const { current, total } = event.detail || {};
+  updateOfflineUI({
+    isOnline: true,
+    isSyncing: true,
+    pendingCount: Math.max(0, (total || 1) - (current || 0)),
+    progressText: `Syncing changes (${current} of ${total})…`
+  });
+});
+
+window.addEventListener('sync:completed', event => {
+  const { syncedCount, remaining } = event.detail || {};
+  if (syncedCount > 0 && remaining === 0) {
+    const statusBar = ensureOfflineUIElements();
+    const text = document.getElementById('offlineStatusText');
+    const mobileBadge = document.getElementById('mobileOfflineBadge');
+    if (statusBar && text) {
+      statusBar.hidden = false;
+      statusBar.classList.remove('is-offline', 'is-syncing', 'is-pending', 'is-conflict');
+      statusBar.classList.add('is-synced');
+      text.textContent = `All changes synced (${syncedCount} ${syncedCount === 1 ? 'item' : 'items'})`;
+      if (mobileBadge) {
+        mobileBadge.style.display = 'inline-flex';
+        mobileBadge.classList.add('is-synced');
+        mobileBadge.textContent = 'Synced';
+      }
+      syncedFadeTimeout = setTimeout(() => {
+        statusBar.hidden = true;
+        if (mobileBadge) mobileBadge.style.display = 'none';
+      }, 3500);
+    }
+  } else {
+    updateOfflineUI({ isOnline: navigator.onLine, isSyncing: false, pendingCount: remaining });
+  }
+});
+
+window.addEventListener('sync:conflict', event => {
+  const statusBar = ensureOfflineUIElements();
+  const text = document.getElementById('offlineStatusText');
+  const syncBtn = document.getElementById('offlineSyncBtn');
+  if (statusBar && text) {
+    statusBar.hidden = false;
+    statusBar.classList.remove('is-offline', 'is-syncing', 'is-synced');
+    statusBar.classList.add('is-conflict');
+    text.textContent = `Sync notice: ${event.detail?.error || 'A record conflict occurred during sync.'}`;
+    if (syncBtn) {
+      syncBtn.style.display = 'inline-block';
+      syncBtn.textContent = 'Dismiss';
+      syncBtn.onclick = () => { statusBar.hidden = true; };
+    }
+  }
+});
+
+// PWA Service Worker Registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .then(reg => {
+        console.log('[PWA] Service Worker registered with scope:', reg.scope);
+      })
+      .catch(err => {
+        console.warn('[PWA] Service Worker registration skipped:', err?.message || err);
+      });
+  });
+}
+

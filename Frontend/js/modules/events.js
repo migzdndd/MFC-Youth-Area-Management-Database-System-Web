@@ -649,11 +649,23 @@ window.participantModal = (eventId, id = null) => {
 
       try {
         if (session?.backendAuth && !session?.demo) {
-          await backendApi('/api/participants', {
+          const apiRes = await backendApi('/api/participants', {
             method: id ? 'PATCH' : 'POST',
             body: JSON.stringify({ ...record, id: id || undefined })
           });
-          await refreshAllCloudData({ render: false });
+          if (apiRes?.offline) {
+            if (id) {
+              const target = data.participants.find(item => String(item.id) === String(id));
+              if (target) Object.assign(target, { ...record, optimistic: true });
+            } else {
+              data.participants.push({ ...record, optimistic: true });
+            }
+            save(data);
+            toast(id ? 'Updated offline. Will sync when connected.' : 'Registered offline. Will sync when connected.', 'info');
+          } else {
+            await refreshAllCloudData({ render: false });
+            toast(id ? 'Participant updated.' : 'Participant registered.');
+          }
         } else if (id) {
           const target = data.participants.find(item => String(item.id) === String(id));
           if (!target) {
@@ -662,13 +674,14 @@ window.participantModal = (eventId, id = null) => {
           }
           Object.assign(target, record);
           save(data);
+          toast('Participant updated.');
         } else {
           data.participants.push(record);
           save(data);
+          toast('Participant registered.');
         }
 
         close();
-        toast(id ? 'Participant updated.' : 'Participant registered.');
         window.viewEvent(eventId);
       } catch (error) {
         toast(error?.message || 'Unable to save the participant.', 'error');
@@ -712,14 +725,22 @@ window.deleteParticipant = async (eventId, id) => {
 
   try {
     if (session?.backendAuth && !session?.demo) {
-      await backendApi(`/api/participants?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
-      await refreshAllCloudData({ render: false });
+      const apiRes = await backendApi(`/api/participants?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (apiRes?.offline) {
+        const data = db();
+        data.participants = data.participants.filter(participant => String(participant.id) !== String(id));
+        save(data);
+        toast('Participant deleted offline. Will sync when connected.', 'info');
+      } else {
+        await refreshAllCloudData({ render: false });
+        toast('Participant deleted.');
+      }
     } else {
       const data = db();
       data.participants = data.participants.filter(participant => String(participant.id) !== String(id));
       save(data);
+      toast('Participant deleted.');
     }
-    toast('Participant deleted.');
     activeModalCleanup?.();
     window.viewEvent(eventId);
   } catch (error) {
