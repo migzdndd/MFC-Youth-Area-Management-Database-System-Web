@@ -453,6 +453,7 @@ function portalCloudMember(member, previous = {}) {
     status: member.status || 'Active',
     firstAttendedYouthCamp: member.first_attended_youth_camp || '',
     accessLevel: member.access_level || 'member',
+    avatarUrl: member.avatar_url || previous.avatarUrl || '',
     services: Array.isArray(previous.services) ? previous.services : [],
     chapterName: previous.chapterName || '',
     cloudBacked: true
@@ -569,6 +570,7 @@ function previewMemberFromSession(currentSession) {
     chapterName: 'Member View Preview',
     contact: '',
     firstAttendedYouthCamp: '',
+    avatarUrl: currentSession?.avatarUrl || '',
     services: []
   };
 }
@@ -682,271 +684,568 @@ async function bootstrapMemberPortal() {
           eventRegistration(participants, member.id, event.id)?.attended
         ).length;
 
-      // Draw the complete member portal screen
-      document.getElementById('memberPortalContent').innerHTML = `
-        ${previewMode ? `
-          <section class="member-preview-banner animate-in" role="status">
-            <div class="preview-banner-text">
-              <strong>Member Portal Preview</strong>
-              <span>You are viewing the dashboard as seen by a regular member. Your administrator session is preserved.</span>
-            </div>
-            <button class="btn" id="exitMemberPreview" type="button">Return to Admin Dashboard</button>
-          </section>
-        ` : ''}
+      // Section 7.1: Profile Customization & Avatar Utilities
+      function showPortalToast(text, type = 'success') {
+        if (typeof window.toast === 'function') {
+          window.toast(text, type);
+        } else {
+          alert(text);
+        }
+      }
 
-        <!-- Top Welcome Banner -->
-        <section class="dashboard-hero member-hero animate-in is-visible" id="overview">
-          <div class="dashboard-hero-copy">
-            <div class="dashboard-kicker">
-              <span class="dashboard-live-dot"></span>
-              ${previewMode ? 'Member Preview Mode' : 'MFC Youth Member Portal'}
-            </div>
-            <h1>Welcome, ${esc(member.firstName || fullName(member))}!</h1>
-            <p>
-              Your personal MFC Youth portal. Track upcoming gatherings, view your attendance history, and stay connected with ${esc(member.chapterName || 'your chapter')}.
-            </p>
-            <div class="dashboard-identity-row">
-              <span>Chapter: ${esc(member.chapterName || 'Unassigned')}</span>
-              <span>Role: ${esc((member.services || []).join(', ') || 'Youth Member')}</span>
-              <span>Status: Active</span>
-              <span>${previewMode ? 'Simulated View' : 'Cloud Synced'}</span>
-            </div>
-          </div>
-          <div class="dashboard-hero-actions">
-            <a class="btn blue" href="#events">View Events &rarr;</a>
-            <a class="btn" href="#profile">My Profile</a>
-          </div>
-        </section>
-
-        <!-- Quick Activity Stats Cards -->
-        <section class="dashboard-metrics-section member-metrics-section animate-in is-visible" aria-label="Member Activity Metrics">
-          <div class="dashboard-metrics-layout">
-            <!-- Event Participation Card -->
-            <a class="metric-card-primary member-metric-primary" href="#events" title="Jump to Community Gatherings">
-              <div class="metric-primary-header">
-                <span class="metric-primary-label">Event Participation & Attendance</span>
-                <span class="metric-badge-primary">Primary Record</span>
-              </div>
-
-              <div>
-                <div class="metric-primary-number">${registeredUpcoming}</div>
-                <p class="metric-primary-caption">
-                  ${registeredUpcoming === 1
-                    ? `You are registered for 1 upcoming event out of ${allUpcomingEvents.length} scheduled.`
-                    : `You are registered for ${registeredUpcoming} upcoming events out of ${allUpcomingEvents.length} scheduled.`}
-                </p>
-              </div>
-
-              <div class="metric-primary-footer">
-                <div class="metric-pill-group">
-                  <span class="metric-pill active">
-                    <span style="width: 7px; height: 7px; background: #16a34a; border-radius: 50%; display: inline-block;"></span>
-                    ${registeredUpcoming} Registered
-                  </span>
-                  <span class="metric-pill">
-                    ✓ ${attendedRecent} Attended recently
-                  </span>
-                  <span class="metric-pill">
-                    ${myRegistrations.length} Total records
-                  </span>
-                </div>
-                <span class="metric-action-hint">Browse Schedule &rarr;</span>
-              </div>
-            </a>
-
-            <!-- Chapter and Status Side Cards -->
-            <div class="metric-secondary-stack">
-              <a class="metric-card-secondary services" href="#profile" title="View Community Affiliation">
-                <div class="metric-secondary-header">
-                  <span class="metric-secondary-label">Assigned Chapter</span>
-                  <span class="metric-badge-secondary">Community</span>
-                </div>
-                <div class="metric-secondary-body">
-                  <span class="metric-secondary-number" style="font-size: 1.35rem; line-height: 1.25;">
-                    ${esc(member.chapterName || 'No Chapter Assigned')}
-                  </span>
-                  <p class="metric-secondary-caption">
-                    Service: ${esc((member.services || []).join(', ') || 'Youth Member')}
-                  </p>
-                </div>
-                <div class="metric-secondary-footer">
-                  <span class="summary-link-hint" style="font-size: 0.76rem; color: #2563eb; font-weight: 600;">View community details &rarr;</span>
-                </div>
-              </a>
-
-              <a class="metric-card-secondary reports" href="#profile" title="View Member Profile">
-                <div class="metric-secondary-header">
-                  <span class="metric-secondary-label">Official Record Status</span>
-                  <span class="metric-badge-secondary">Verified</span>
-                </div>
-                <div class="metric-secondary-body">
-                  <span class="metric-secondary-number" style="font-size: 1.35rem; color: #059669; line-height: 1.25;">
-                    ${esc(member.status || 'Active Member')}
-                  </span>
-                  <p class="metric-secondary-caption">Connected to official Area records database</p>
-                </div>
-                <div class="metric-secondary-footer">
-                  <span class="summary-link-hint" style="font-size: 0.76rem; color: #059669; font-weight: 600;">Check profile info &rarr;</span>
-                </div>
-              </a>
-            </div>
-          </div>
-        </section>
-
-        <!-- Events List: 2 Columns for Upcoming and Past Gatherings -->
-        <section class="dashboard-events-big-card member-events-card animate-in is-visible" id="events">
-          <div class="events-big-card-header">
-            <div class="events-big-card-title-group">
-              <h3>Community Gatherings & Events</h3>
-              <p>Upcoming MFC Youth activities, household meetings, and your personal attendance log.</p>
-            </div>
-            <div class="events-big-card-pills">
-              <span class="badge" style="background: #e0f2fe; color: #0369a1; font-weight: 700;">
-                ${allUpcomingEvents.length} Upcoming
-              </span>
-              <span class="badge" style="background: #dcfce7; color: #15803d; font-weight: 700;">
-                ${registeredUpcoming} Registered
-              </span>
-              <span class="badge" style="background: #f1f5f9; color: #475569; font-weight: 700;">
-                ${allRecentEvents.length} Past Gatherings
-              </span>
-            </div>
-          </div>
-
-          <div class="dashboard-events-split">
-            <!-- Left Column: Upcoming Gatherings -->
-            <div class="events-column" id="upcoming">
-              <div class="events-column-header">
-                <span class="badge" style="background: #0284c7; color: #ffffff;">UPCOMING</span>
-                <h4>What's Next</h4>
-                <span class="muted" style="margin-left: auto; font-size: 0.76rem;">${upcomingEvents.length} shown</span>
-              </div>
-
-              ${upcomingEvents.length
-                ? `
-                  <div class="member-event-list">
-                    ${upcomingEvents.map(event => memberEventRow(event, eventRegistration(participants, member.id, event.id), 'upcoming')).join('')}
-                  </div>
-                `
-                : memberEmptyState('No upcoming events scheduled yet', 'New activities will appear here when posted by your Area leaders.')
+      function processAvatarFile(file, callback) {
+        if (!file || !file.type.startsWith('image/')) {
+          showPortalToast('Please choose an image file (PNG, JPG, WebP, GIF).', 'error');
+          return;
+        }
+        if (file.size > 8 * 1024 * 1024) {
+          showPortalToast('Image file must be under 8MB.', 'error');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const maxDim = 320;
+            let width = img.width;
+            let height = img.height;
+            if (width > height) {
+              if (width > maxDim) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
               }
-            </div>
-
-            <!-- Right Column: Past Gatherings and Attendance History -->
-            <div class="events-column" id="recent">
-              <div class="events-column-header">
-                <span class="badge" style="background: #e2e8f0; color: #475569;">RECENT</span>
-                <h4>Attendance History</h4>
-                <span class="muted" style="margin-left: auto; font-size: 0.76rem;">${recentEvents.length} recorded</span>
-              </div>
-
-              ${recentEvents.length
-                ? `
-                  <div class="member-event-list">
-                    ${recentEvents.map(event => memberEventRow(event, eventRegistration(participants, member.id, event.id), 'past')).join('')}
-                  </div>
-                `
-                : memberEmptyState('No recent gatherings on record', 'Your participation history will build up as activities conclude.')
+            } else {
+              if (height > maxDim) {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
               }
-            </div>
-          </div>
-        </section>
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+            callback(dataUrl);
+          };
+          img.onerror = () => showPortalToast('Failed to parse image file.', 'error');
+          img.src = e.target.result;
+        };
+        reader.onerror = () => showPortalToast('Error reading file from disk.', 'error');
+        reader.readAsDataURL(file);
+      }
 
-        <!-- Member Profile Details Card -->
-        <section class="member-profile-section animate-in is-visible" id="profile">
-          <div class="card member-profile-card">
-            <div class="member-profile-header">
-              <div class="profile-header-avatar">
-                ${esc((member.firstName?.[0] || 'M') + (member.lastName?.[0] || 'Y'))}
-              </div>
-              <div>
-                <h2>${esc(fullName(member) || 'MFC Youth Member')}</h2>
-                <p>Official Area Member Record & Account Affiliation</p>
-              </div>
-              <div class="profile-header-status">
-                <span class="badge active" style="font-size: 0.78rem; padding: 5px 12px;">Active Member</span>
-              </div>
-            </div>
+      async function persistMemberProfileUpdate(targetMember, updatedFields, isPreview) {
+        Object.assign(targetMember, updatedFields);
 
-            <div class="member-profile-grid">
-              <!-- Column 1: Contact Information -->
-              <div class="profile-group-box">
-                <span class="profile-group-title">Personal Information</span>
-                <dl class="profile-field-list">
-                  <div>
-                    <dt>Full Name</dt>
-                    <dd>${esc(fullName(member) || '—')}</dd>
-                  </div>
-                  <div>
-                    <dt>Email Address</dt>
-                    <dd>${esc(member.email || '—')}</dd>
-                  </div>
-                  <div>
-                    <dt>Contact Number</dt>
-                    <dd>${esc(member.contact || 'None provided')}</dd>
-                  </div>
-                </dl>
-              </div>
+        if (isPreview) {
+          const s = safeParse(localStorage.getItem(SESSION_KEY), null);
+          if (s) {
+            s.name = fullName(targetMember);
+            if (updatedFields.avatarUrl !== undefined) s.avatarUrl = updatedFields.avatarUrl;
+            localStorage.setItem(SESSION_KEY, JSON.stringify(s));
+          }
+          showPortalToast('Profile updated in preview mode!');
+          return true;
+        }
 
-              <!-- Column 2: Chapter & Ministries -->
-              <div class="profile-group-box">
-                <span class="profile-group-title">MFC Youth Affiliation</span>
-                <dl class="profile-field-list">
-                  <div>
-                    <dt>Assigned Chapter</dt>
-                    <dd><strong>${esc(member.chapterName || 'No Chapter Assigned')}</strong></dd>
-                  </div>
-                  <div>
-                    <dt>Service / Ministry</dt>
-                    <dd>${esc((member.services || []).join(', ') || 'Youth Member')}</dd>
-                  </div>
-                  <div>
-                    <dt>First Youth Camp</dt>
-                    <dd>${esc(fmtDate(member.firstAttendedYouthCamp))}</dd>
-                  </div>
-                </dl>
-              </div>
+        const dbData = safeParse(localStorage.getItem(DB_KEY) || '{}', {});
+        const membersList = Array.isArray(dbData.members) ? dbData.members : [];
+        const idx = membersList.findIndex(m => String(m.id) === String(targetMember.id));
+        if (idx >= 0) {
+          membersList[idx] = { ...membersList[idx], ...updatedFields };
+          dbData.members = membersList;
+          localStorage.setItem(DB_KEY, JSON.stringify(dbData));
+        }
 
-              <!-- Column 3: Membership Status & Password Options -->
-              <div class="profile-group-box">
-                <span class="profile-group-title">Account & Security</span>
-                <dl class="profile-field-list">
-                  <div>
-                    <dt>Access Level</dt>
-                    <dd>${esc(accessRoleLabel(member.accessLevel || 'member'))}</dd>
-                  </div>
-                  <div>
-                    <dt>Database Record</dt>
-                    <dd><span class="badge" style="background: #e0f2fe; color: #0284c7;">Supabase Connected</span></dd>
-                  </div>
-                  <div>
-                    <dt>Account Security</dt>
-                    <dd>
-                      ${!previewMode
-                        ? '<button class="btn" id="inlineChangePasswordBtn" type="button" style="padding: 4px 10px; font-size: 0.78rem; margin-top: 4px;">Update Password</button>'
-                        : '<span style="color: #64748b;">Preview Protected</span>'
+        const s = safeParse(localStorage.getItem(SESSION_KEY), null);
+        if (s) {
+          s.name = fullName(targetMember);
+          if (updatedFields.avatarUrl !== undefined) s.avatarUrl = updatedFields.avatarUrl;
+          localStorage.setItem(SESSION_KEY, JSON.stringify(s));
+        }
+
+        if (session?.backendAuth && !session?.demo) {
+          try {
+            await portalBackendApi('/api/members', {
+              method: 'PUT',
+              body: JSON.stringify({
+                id: targetMember.id,
+                firstName: targetMember.firstName,
+                middleName: targetMember.middleName,
+                lastName: targetMember.lastName,
+                contactNumber: targetMember.contact,
+                firstAttendedYouthCamp: targetMember.firstAttendedYouthCamp || null,
+                address: targetMember.address,
+                avatarUrl: targetMember.avatarUrl || null
+              })
+            });
+          } catch (err) {
+            console.warn('Backend profile sync note:', err?.message || err);
+          }
+        }
+
+        showPortalToast('Profile updated successfully!');
+        return true;
+      }
+
+      function openEditProfileModal(targetMember, onSaved) {
+        const oldModal = document.getElementById('editProfileModalBackdrop');
+        if (oldModal) oldModal.remove();
+
+        let tempAvatarUrl = targetMember.avatarUrl || '';
+
+        const modalHtml = `
+          <div class="modal-backdrop" id="editProfileModalBackdrop" style="z-index: 1000;">
+            <div class="modal" style="width: min(560px, 100%);">
+              <div class="modal-header">
+                <h2>Edit Profile</h2>
+                <button class="icon-btn" id="closeEditProfileModalBtn" type="button" aria-label="Close modal">&times;</button>
+              </div>
+              <form id="editProfileForm">
+                <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
+                  <!-- Avatar Customizer Section -->
+                  <div style="display: flex; align-items: center; gap: 16px; padding: 14px; background: #f8fafc; border-radius: 14px; border: 1px solid #e2e8f0;">
+                    <div class="profile-header-avatar" id="modalAvatarPreview" style="width: 68px; height: 68px; font-size: 1.45rem; flex-shrink: 0;">
+                      ${tempAvatarUrl
+                        ? `<img src="${esc(tempAvatarUrl)}" alt="Avatar" class="profile-avatar-img">`
+                        : `<span class="profile-avatar-initials">${esc((targetMember.firstName?.[0] || 'M') + (targetMember.lastName?.[0] || 'Y'))}</span>`
                       }
-                    </dd>
+                    </div>
+                    <div style="flex: 1;">
+                      <strong style="display: block; font-size: 0.95rem; color: #002847; margin-bottom: 2px;">Profile Picture</strong>
+                      <span style="display: block; font-size: 0.78rem; color: #64748b; margin-bottom: 10px;">Customize your photo instead of displaying default letters.</span>
+                      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <label class="btn blue" style="cursor: pointer; padding: 5px 14px; font-size: 0.78rem;" for="modalAvatarFileInput">
+                          Upload Picture
+                        </label>
+                        <input type="file" id="modalAvatarFileInput" accept="image/*" style="display: none;">
+                        <button class="btn" id="modalRemoveAvatarBtn" type="button" style="padding: 5px 12px; font-size: 0.78rem; color: #dc2626; border-color: #fecaca;" ${!tempAvatarUrl ? 'disabled' : ''}>
+                          Reset to Letters
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </dl>
-              </div>
+
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label for="editProfileFirstName">First Name *</label>
+                      <input type="text" id="editProfileFirstName" class="form-input" required value="${esc(targetMember.firstName || '')}">
+                    </div>
+                    <div class="form-group">
+                      <label for="editProfileMiddleName">Middle Name</label>
+                      <input type="text" id="editProfileMiddleName" class="form-input" value="${esc(targetMember.middleName || '')}">
+                    </div>
+                  </div>
+
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label for="editProfileLastName">Last Name *</label>
+                      <input type="text" id="editProfileLastName" class="form-input" required value="${esc(targetMember.lastName || '')}">
+                    </div>
+                    <div class="form-group">
+                      <label for="editProfileContact">Contact Number</label>
+                      <input type="text" id="editProfileContact" class="form-input" placeholder="e.g. 09171234567" value="${esc(targetMember.contact || targetMember.contact_number || '')}">
+                    </div>
+                  </div>
+
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label for="editProfileYouthCamp">First Attended Youth Camp</label>
+                      <input type="date" id="editProfileYouthCamp" class="form-input" value="${esc(targetMember.firstAttendedYouthCamp ? String(targetMember.firstAttendedYouthCamp).slice(0, 10) : '')}">
+                    </div>
+                    <div class="form-group">
+                      <label for="editProfileEmail">Email Address (Read-only)</label>
+                      <input type="email" id="editProfileEmail" class="form-input" disabled value="${esc(targetMember.email || '')}" style="background: #f1f5f9; cursor: not-allowed;">
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="editProfileAddress">Address</label>
+                    <input type="text" id="editProfileAddress" class="form-input" placeholder="City / Municipality / Address" value="${esc(targetMember.address || '')}">
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn" id="cancelEditProfileBtn" type="button">Cancel</button>
+                  <button class="btn blue" type="submit" id="submitEditProfileBtn">Save Changes</button>
+                </div>
+              </form>
             </div>
           </div>
-        </section>
-      `;
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        const backdrop = document.getElementById('editProfileModalBackdrop');
+        const closeBtn = document.getElementById('closeEditProfileModalBtn');
+        const cancelBtn = document.getElementById('cancelEditProfileBtn');
+        const avatarInput = document.getElementById('modalAvatarFileInput');
+        const removeAvatarBtn = document.getElementById('modalRemoveAvatarBtn');
+        const avatarPreview = document.getElementById('modalAvatarPreview');
+        const form = document.getElementById('editProfileForm');
+
+        const closeModal = () => backdrop.remove();
+
+        closeBtn?.addEventListener('click', closeModal);
+        cancelBtn?.addEventListener('click', closeModal);
+        backdrop?.addEventListener('click', (e) => {
+          if (e.target === backdrop) closeModal();
+        });
+
+        avatarInput?.addEventListener('change', (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          processAvatarFile(file, (dataUrl) => {
+            tempAvatarUrl = dataUrl;
+            avatarPreview.innerHTML = `<img src="${esc(dataUrl)}" alt="Avatar" class="profile-avatar-img">`;
+            if (removeAvatarBtn) removeAvatarBtn.disabled = false;
+          });
+        });
+
+        removeAvatarBtn?.addEventListener('click', () => {
+          tempAvatarUrl = '';
+          const initials = esc((document.getElementById('editProfileFirstName')?.value?.[0] || targetMember.firstName?.[0] || 'M') +
+            (document.getElementById('editProfileLastName')?.value?.[0] || targetMember.lastName?.[0] || 'Y'));
+          avatarPreview.innerHTML = `<span class="profile-avatar-initials">${initials}</span>`;
+          removeAvatarBtn.disabled = true;
+        });
+
+        form?.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const firstName = document.getElementById('editProfileFirstName')?.value?.trim();
+          const middleName = document.getElementById('editProfileMiddleName')?.value?.trim() || '';
+          const lastName = document.getElementById('editProfileLastName')?.value?.trim();
+          const contact = document.getElementById('editProfileContact')?.value?.trim() || '';
+          const firstAttendedYouthCamp = document.getElementById('editProfileYouthCamp')?.value || '';
+          const address = document.getElementById('editProfileAddress')?.value?.trim() || '';
+
+          if (!firstName || !lastName) {
+            showPortalToast('First name and last name are required.', 'error');
+            return;
+          }
+
+          const saveBtn = document.getElementById('submitEditProfileBtn');
+          if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving…';
+          }
+
+          await onSaved({
+            firstName,
+            middleName,
+            lastName,
+            contact,
+            firstAttendedYouthCamp,
+            address,
+            avatarUrl: tempAvatarUrl
+          });
+
+          closeModal();
+        });
+      }
+
+      // Draw the complete member portal screen
+      function renderPortalScreen() {
+        document.getElementById('memberPortalContent').innerHTML = `
+          ${previewMode ? `
+            <section class="member-preview-banner animate-in" role="status">
+              <div class="preview-banner-text">
+                <strong>Member Portal Preview</strong>
+                <span>You are viewing the dashboard as seen by a regular member. Your administrator session is preserved.</span>
+              </div>
+              <button class="btn" id="exitMemberPreview" type="button">Return to Admin Dashboard</button>
+            </section>
+          ` : ''}
+
+          <!-- Top Welcome Banner -->
+          <section class="dashboard-hero member-hero animate-in is-visible" id="overview">
+            <div class="dashboard-hero-copy">
+              <div class="dashboard-kicker">
+                <span class="dashboard-live-dot"></span>
+                ${previewMode ? 'Member Preview Mode' : 'MFC Youth Member Portal'}
+              </div>
+              <h1>Welcome, ${esc(member.firstName || fullName(member))}!</h1>
+              <div class="dashboard-identity-row">
+                <span>Chapter: ${esc(member.chapterName || 'Unassigned')}</span>
+                <span>Role: ${esc((member.services || []).join(', ') || 'Youth Member')}</span>
+                <span>Status: Active</span>
+                <span>${previewMode ? 'Simulated View' : 'Cloud Synced'}</span>
+              </div>
+            </div>
+            <div class="dashboard-hero-actions">
+              <a class="btn blue" href="#events">View Events &rarr;</a>
+              <a class="btn" href="#profile">My Profile</a>
+            </div>
+          </section>
+
+          <!-- Quick Activity Stats Cards -->
+          <section class="dashboard-metrics-section member-metrics-section animate-in is-visible" aria-label="Member Activity Metrics">
+            <div class="dashboard-metrics-layout">
+              <!-- Event Participation Card -->
+              <a class="metric-card-primary member-metric-primary" href="#events" title="Jump to Community Gatherings">
+                <div class="metric-primary-header">
+                  <span class="metric-primary-label">Event Participation & Attendance</span>
+                  <span class="metric-badge-primary">Primary Record</span>
+                </div>
+
+                <div>
+                  <div class="metric-primary-number">${registeredUpcoming}</div>
+                </div>
+
+                <div class="metric-primary-footer">
+                  <div class="metric-pill-group">
+                    <span class="metric-pill active">
+                      <span style="width: 7px; height: 7px; background: #16a34a; border-radius: 50%; display: inline-block;"></span>
+                      ${registeredUpcoming} Registered
+                    </span>
+                    <span class="metric-pill">
+                      ✓ ${attendedRecent} Attended recently
+                    </span>
+                    <span class="metric-pill">
+                      ${myRegistrations.length} Total records
+                    </span>
+                  </div>
+                  <span class="metric-action-hint">Browse Schedule &rarr;</span>
+                </div>
+              </a>
+
+              <!-- Chapter and Status Side Cards -->
+              <div class="metric-secondary-stack">
+                <a class="metric-card-secondary services" href="#profile" title="View Community Affiliation">
+                  <div class="metric-secondary-header">
+                    <span class="metric-secondary-label">Assigned Chapter</span>
+                    <span class="metric-badge-secondary">Community</span>
+                  </div>
+                  <div class="metric-secondary-body">
+                    <span class="metric-secondary-number" style="font-size: 1.35rem; line-height: 1.25;">
+                      ${esc(member.chapterName || 'No Chapter Assigned')}
+                    </span>
+                  </div>
+                  <div class="metric-secondary-footer">
+                    <span class="summary-link-hint" style="font-size: 0.76rem; color: #2563eb; font-weight: 600;">View community details &rarr;</span>
+                  </div>
+                </a>
+
+                <a class="metric-card-secondary reports" href="#profile" title="View Member Profile">
+                  <div class="metric-secondary-header">
+                    <span class="metric-secondary-label">Official Record Status</span>
+                    <span class="metric-badge-secondary">Verified</span>
+                  </div>
+                  <div class="metric-secondary-body">
+                    <span class="metric-secondary-number" style="font-size: 1.35rem; color: #059669; line-height: 1.25;">
+                      ${esc(member.status || 'Active Member')}
+                    </span>
+                  </div>
+                  <div class="metric-secondary-footer">
+                    <span class="summary-link-hint" style="font-size: 0.76rem; color: #059669; font-weight: 600;">Check profile info &rarr;</span>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </section>
+
+          <!-- Events List: 2 Columns for Upcoming and Past Gatherings -->
+          <section class="dashboard-events-big-card member-events-card animate-in is-visible" id="events">
+            <div class="events-big-card-header">
+              <div class="events-big-card-title-group">
+                <h3>Community Gatherings & Events</h3>
+              </div>
+              <div class="events-big-card-pills">
+                <span class="badge" style="background: #e0f2fe; color: #0369a1; font-weight: 700;">
+                  ${allUpcomingEvents.length} Upcoming
+                </span>
+                <span class="badge" style="background: #dcfce7; color: #15803d; font-weight: 700;">
+                  ${registeredUpcoming} Registered
+                </span>
+                <span class="badge" style="background: #f1f5f9; color: #475569; font-weight: 700;">
+                  ${allRecentEvents.length} Past Gatherings
+                </span>
+              </div>
+            </div>
+
+            <div class="dashboard-events-split">
+              <!-- Left Column: Upcoming Gatherings -->
+              <div class="events-column" id="upcoming">
+                <div class="events-column-header">
+                  <span class="badge" style="background: #0284c7; color: #ffffff;">UPCOMING</span>
+                  <h4>What's Next</h4>
+                  <span class="muted" style="margin-left: auto; font-size: 0.76rem;">${upcomingEvents.length} shown</span>
+                </div>
+
+                ${upcomingEvents.length
+                  ? `
+                    <div class="member-event-list">
+                      ${upcomingEvents.map(event => memberEventRow(event, eventRegistration(participants, member.id, event.id), 'upcoming')).join('')}
+                    </div>
+                  `
+                  : memberEmptyState('No upcoming events scheduled yet', 'New activities will appear here when posted by your Area leaders.')
+                }
+              </div>
+
+              <!-- Right Column: Past Gatherings and Attendance History -->
+              <div class="events-column" id="recent">
+                <div class="events-column-header">
+                  <span class="badge" style="background: #e2e8f0; color: #475569;">RECENT</span>
+                  <h4>Attendance History</h4>
+                  <span class="muted" style="margin-left: auto; font-size: 0.76rem;">${recentEvents.length} recorded</span>
+                </div>
+
+                ${recentEvents.length
+                  ? `
+                    <div class="member-event-list">
+                      ${recentEvents.map(event => memberEventRow(event, eventRegistration(participants, member.id, event.id), 'past')).join('')}
+                    </div>
+                  `
+                  : memberEmptyState('No recent gatherings on record', 'Your participation history will build up as activities conclude.')
+                }
+              </div>
+            </div>
+          </section>
+
+          <!-- Member Profile Details Card -->
+          <section class="member-profile-section animate-in is-visible" id="profile">
+            <div class="card member-profile-card">
+              <div class="member-profile-header">
+                <div class="profile-header-avatar-wrap">
+                  <div class="profile-header-avatar" id="portalAvatarDisplay" title="Click to customize profile picture">
+                    ${member.avatarUrl
+                      ? `<img src="${esc(member.avatarUrl)}" alt="${esc(fullName(member))}" class="profile-avatar-img">`
+                      : `<span class="profile-avatar-initials">${esc((member.firstName?.[0] || 'M') + (member.lastName?.[0] || 'Y'))}</span>`
+                    }
+                    <label class="avatar-upload-overlay" for="quickAvatarInput" title="Upload new photo">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                      </svg>
+                    </label>
+                    <input type="file" id="quickAvatarInput" accept="image/*" style="display: none;">
+                  </div>
+                  <label class="avatar-edit-badge" for="quickAvatarInput" title="Change photo">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 20h9"></path>
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
+                  </label>
+                </div>
+                <div>
+                  <h2>${esc(fullName(member) || 'MFC Youth Member')}</h2>
+                </div>
+                <div class="profile-header-actions" style="margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                  <span class="badge active" style="font-size: 0.78rem; padding: 5px 12px;">Active Member</span>
+                  <button class="btn blue" id="editProfileBtn" type="button" style="padding: 6px 14px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px;">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    Edit Profile
+                  </button>
+                </div>
+              </div>
+
+              <div class="member-profile-grid">
+                <!-- Column 1: Contact Information -->
+                <div class="profile-group-box">
+                  <span class="profile-group-title">Personal Information</span>
+                  <dl class="profile-field-list">
+                    <div>
+                      <dt>Full Name</dt>
+                      <dd>${esc(fullName(member) || '—')}</dd>
+                    </div>
+                    <div>
+                      <dt>Email Address</dt>
+                      <dd>${esc(member.email || '—')}</dd>
+                    </div>
+                    <div>
+                      <dt>Contact Number</dt>
+                      <dd>${esc(member.contact || 'None provided')}</dd>
+                    </div>
+                  </dl>
+                </div>
+
+                <!-- Column 2: Chapter & Ministries -->
+                <div class="profile-group-box">
+                  <span class="profile-group-title">MFC Youth Affiliation</span>
+                  <dl class="profile-field-list">
+                    <div>
+                      <dt>Assigned Chapter</dt>
+                      <dd><strong>${esc(member.chapterName || 'No Chapter Assigned')}</strong></dd>
+                    </div>
+                    <div>
+                      <dt>Service / Ministry</dt>
+                      <dd>${esc((member.services || []).join(', ') || 'Youth Member')}</dd>
+                    </div>
+                    <div>
+                      <dt>First Youth Camp</dt>
+                      <dd>${esc(fmtDate(member.firstAttendedYouthCamp))}</dd>
+                    </div>
+                  </dl>
+                </div>
+
+                <!-- Column 3: Membership Status & Password Options -->
+                <div class="profile-group-box">
+                  <span class="profile-group-title">Account & Security</span>
+                  <dl class="profile-field-list">
+                    <div>
+                      <dt>Access Level</dt>
+                      <dd>${esc(accessRoleLabel(member.accessLevel || 'member'))}</dd>
+                    </div>
+                    <div>
+                      <dt>Database Record</dt>
+                      <dd><span class="badge" style="background: #e0f2fe; color: #0284c7;">Supabase Connected</span></dd>
+                    </div>
+                    <div>
+                      <dt>Account Security</dt>
+                      <dd>
+                        ${!previewMode
+                          ? '<button class="btn" id="inlineChangePasswordBtn" type="button" style="padding: 4px 10px; font-size: 0.78rem; margin-top: 4px;">Update Password</button>'
+                          : '<span style="color: #64748b;">Preview Protected</span>'
+                        }
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </section>
+        `;
+
+        // Wire up quick avatar uploader directly on avatar badge
+        document.getElementById('quickAvatarInput')?.addEventListener('change', (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          processAvatarFile(file, async (dataUrl) => {
+            await persistMemberProfileUpdate(member, { avatarUrl: dataUrl }, previewMode);
+            renderPortalScreen();
+          });
+        });
+
+        // Wire up Edit Profile button
+        const handleOpenEdit = () => {
+          openEditProfileModal(member, async (updatedFields) => {
+            await persistMemberProfileUpdate(member, updatedFields, previewMode);
+            renderPortalScreen();
+          });
+        };
+
+        document.getElementById('editProfileBtn')?.addEventListener('click', handleOpenEdit);
+        document.getElementById('editProfileNavBtn')?.addEventListener('click', handleOpenEdit);
+
+        // Return button when an administrator is in Preview Mode
+        document.getElementById('exitMemberPreview')?.addEventListener('click', () => {
+          navigateWithLoader('/dashboard');
+        });
+
+        // Quick button inside the profile card to change your password
+        document.getElementById('inlineChangePasswordBtn')?.addEventListener('click', () => {
+          navigateWithLoader('/change-password');
+        });
+      }
+
+      // Initial draw
+      renderPortalScreen();
 
       // Remove loading skeletons once the page content has finished drawing
       window.MFCPageSkeleton?.clear?.();
-
-      // Return button when an administrator is in Preview Mode
-      document.getElementById('exitMemberPreview')?.addEventListener('click', () => {
-        navigateWithLoader('/dashboard');
-      });
-
-      // Quick button inside the profile card to change your password
-      document.getElementById('inlineChangePasswordBtn')?.addEventListener('click', () => {
-        navigateWithLoader('/change-password');
-      });
     }
   }
 

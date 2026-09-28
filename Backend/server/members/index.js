@@ -62,7 +62,7 @@ async function listMembers(req, res) {
 
   let query = supabase
     .from('members')
-    .select('id, area_id, chapter_id, first_name, middle_name, last_name, birth_date, contact_number, email, address, status, first_attended_youth_camp, access_level, academic_track, grade_level, school, created_at, updated_at')
+    .select('id, area_id, chapter_id, first_name, middle_name, last_name, birth_date, contact_number, email, address, status, first_attended_youth_camp, access_level, academic_track, grade_level, school, avatar_url, created_at, updated_at')
     .order('last_name', { ascending: true })
     .order('first_name', { ascending: true });
 
@@ -176,7 +176,8 @@ async function createMember(req, res) {
 
 async function updateMember(req, res) {
   const { supabase, profile } = await requireAuthenticatedProfile(req);
-  if (!isAreaAdminRole(profile.role)) {
+  const isSelf = profile.member_id && String(profile.member_id) === String(memberId);
+  if (!isAreaAdminRole(profile.role) && !isSelf) {
     return sendJson(res, 403, { ok: false, error: 'Only Area-level servant accounts can edit member records.' });
   }
 
@@ -196,13 +197,20 @@ async function updateMember(req, res) {
   const address = cleanText(input.address ?? existing.address, 1000) || null;
   const birthDate = input.birthDate ?? existing.birth_date ?? null;
   const firstAttendedYouthCamp = input.firstAttendedYouthCamp ?? existing.first_attended_youth_camp ?? null;
-  const status = String(input.status ?? existing.status) === 'Inactive' ? 'Inactive' : 'Active';
+  const status = isAreaAdminRole(profile.role)
+    ? (String(input.status ?? existing.status) === 'Inactive' ? 'Inactive' : 'Active')
+    : existing.status;
   const academicTrack = cleanText(input.academicTrack ?? existing.academic_track, 100) || null;
   const gradeLevel = cleanText(input.gradeLevel ?? existing.grade_level, 50) || null;
   const school = cleanText(input.school ?? existing.school, 255) || null;
+  const avatarUrl = input.avatarUrl !== undefined ? input.avatarUrl : (existing.avatar_url || null);
   const requestedRole = String(input.accessLevel ?? existing.access_level ?? 'member').trim().toLowerCase();
-  const accessLevel = ACCESS_LEVELS.has(requestedRole) ? requestedRole : 'member';
-  const chapterId = input.chapterId || null;
+  const accessLevel = isAreaAdminRole(profile.role)
+    ? (ACCESS_LEVELS.has(requestedRole) ? requestedRole : 'member')
+    : existing.access_level;
+  const chapterId = isAreaAdminRole(profile.role)
+    ? (input.chapterId || null)
+    : existing.chapter_id;
 
   if (!firstName || !lastName) {
     return sendJson(res, 400, { ok: false, error: 'First name and last name are required.' });
@@ -241,7 +249,8 @@ async function updateMember(req, res) {
       access_level: accessLevel,
       academic_track: academicTrack,
       grade_level: gradeLevel,
-      school
+      school,
+      avatar_url: avatarUrl
     })
     .eq('id', memberId)
     .eq('area_id', areaId)
