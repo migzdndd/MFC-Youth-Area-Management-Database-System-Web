@@ -49,6 +49,9 @@ desktop.ini
 *.swp
 *~
 
+# Temporarily hidden legal backup files
+docs/legal-backup/
+
 # Supabase local files
 .supabase/
 Backend/supabase/.temp/
