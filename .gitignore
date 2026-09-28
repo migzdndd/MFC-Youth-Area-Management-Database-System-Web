@@ -2,73 +2,102 @@
 # MFC Youth Area Management System - Web
 # ==========================================
 
-# Backend
-Backend/node_modules/
-Backend/.vercel/
+# Dependencies
+node_modules/
+**/node_modules/
+.npm/
+.yarn/
+.pnpm-store/
 
-Backend/.env
-Backend/.env.*
-!Backend/.env.example
-
-# Frontend
-Frontend/node_modules/
-Frontend/.vercel/
-
-Frontend/.env
-Frontend/.env.*
-!Frontend/.env.example
-
-# Root-level environment files
+# Environment and secret files
 .env
 .env.*
-!.env.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+Backend/.env
+Backend/.env.*
+Backend/.env.local
+Backend/.env*.local
+Frontend/.env
+Frontend/.env.*
+Frontend/.env.local
+Frontend/.env*.local
+!**/.env.example
 
-# Logs
-*.log
-logs/
+# Scratch and temporary scripts/reports
+scratch/
+**/scratch/
 
-# Build output
+# Build and export outputs
 dist/
 build/
 out/
 .next/
+.turbo/
+.cache/
+.parcel-cache/
+*.tsbuildinfo
 
-# IDE / Editors
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE / Editors / System
 .vscode/
 .idea/
+.vs/
+*.suo
+*.user
+*.userossc
+*.sln.docstates
 
 # OS files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 desktop.ini
 
-# Temporary files
+# Temporary and backup files
 *.tmp
 *.temp
 *.bak
 *.swp
 *~
 
-# Temporarily hidden legal backup files
-docs/legal-backup/
+# Test coverage
+coverage/
+.nyc_output/
 
-# Supabase local files
+# Deployment & Service State
+.vercel/
+**/.vercel/
 .supabase/
 Backend/supabase/.temp/
-# Source packages / archives - do not commit generated ZIPs or credential-bearing backups
+docs/legal-backup/
+
+# Archives and backup packages
 *.zip
 Source Code*.zip
 Source-Code*.zip
-
-# Local Vercel / Supabase CLI state
-.vercel/
-**/.vercel/
 
 # AI Agents & Configuration
 .agent/
 .agents/
 .codex/
+.gemini/
+.claude/
 AGENTS.md
 GEMINI.md
 agents.md
 gemini.md
+
