@@ -13,7 +13,7 @@
  * ============================================================================
  */
 
-const SHELL_CACHE = 'mfc-ams-shell-v1';
+const SHELL_CACHE = 'mfc-ams-shell-v2';
 const API_CACHE = 'mfc-ams-api-v1';
 
 const APP_SHELL_URLS = [

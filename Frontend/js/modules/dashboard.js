@@ -113,7 +113,11 @@ async function openAreaSelectionModal() {
   }
 
   if (window.Alpine) {
-    window.Alpine.initTree(modal);
+    try {
+      window.Alpine.initTree(modal);
+    } catch (err) {
+      console.warn('Dashboard NC area modal Alpine init skipped:', err);
+    }
   }
 
   try {

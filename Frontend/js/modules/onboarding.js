@@ -125,7 +125,11 @@ async function showAreaOnboarding() {
   `;
 
   if (window.Alpine) {
-    window.Alpine.initTree(root);
+    try {
+      window.Alpine.initTree(root);
+    } catch (err) {
+      console.warn('Onboarding Alpine init skipped:', err);
+    }
   }
 
   const backdrop = document.getElementById('areaOnboardingBackdrop');

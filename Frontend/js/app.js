@@ -267,7 +267,11 @@ function openDemoRoleSwitcher() {
   if (cancelBtn) cancelBtn.onclick = close;
 
   if (window.Alpine) {
-    window.Alpine.initTree(modal);
+    try {
+      window.Alpine.initTree(modal);
+    } catch (initErr) {
+      console.warn('Alpine tree initialization skipped for demo role modal:', initErr);
+    }
   }
 
   modal.querySelectorAll('.demo-role-option').forEach(btn => {
@@ -412,7 +416,11 @@ if (logoutBtn) {
       };
       logoutBtn.parentElement?.insertBefore(deleteButton, logoutBtn);
       if (window.Alpine) {
-        window.Alpine.initTree(deleteButton);
+        try {
+          window.Alpine.initTree(deleteButton);
+        } catch (initErr) {
+          console.warn('Alpine tree initialization skipped for delete button:', initErr);
+        }
       }
     }
   }
@@ -422,7 +430,11 @@ if (logoutBtn) {
   logoutBtn.setAttribute('x-bind:disabled', 'loading');
   logoutBtn.innerHTML = '<span x-show="!loading">Logout</span><span x-show="loading" style="display: none;">Signing Out…</span>';
   if (window.Alpine) {
-    window.Alpine.initTree(logoutBtn);
+    try {
+      window.Alpine.initTree(logoutBtn);
+    } catch (initErr) {
+      console.warn('Alpine tree initialization skipped for logout button:', initErr);
+    }
   }
 
   logoutBtn.onclick = async () => {
@@ -597,16 +609,60 @@ async function bootstrapApplication() {
 }
 
 // Global Safety Net: Alerts user if an unexpected script error occurs
+let lastErrorToastTime = 0;
 window.addEventListener('error', event => {
-  console.error('Unhandled page error:', event?.error || event?.message || event);
+  // Ignore resource load errors (e.g. <img> or <script> 404s targeting DOM elements)
+  if (event.target && event.target !== window) {
+    return;
+  }
+
+  const rawError = event?.error || event?.message || event;
+  const errorMsg = String(event?.message || rawError?.message || rawError || '');
+
+  // Filter benign browser noise that doesn't break user operations
+  if (
+    errorMsg.includes('ResizeObserver') ||
+    errorMsg.includes('Script error.') ||
+    errorMsg.includes('AbortError') ||
+    errorMsg.includes('canceled')
+  ) {
+    console.warn('Suppressed benign browser error:', errorMsg);
+    return;
+  }
+
+  console.error('Unhandled page error:', rawError);
+
+  const now = Date.now();
+  // Deduplicate and throttle toast notifications (cooldown 3.5s to prevent toast stacking)
+  if (now - lastErrorToastTime < 3500) {
+    return;
+  }
+  lastErrorToastTime = now;
+
   if (typeof window.toast === 'function') {
     window.toast('An unexpected error occurred. You may need to reload the page.', 'error');
   }
 });
 
 // Global Safety Net: Alerts user if a background operation drops
+let lastRejectionToastTime = 0;
 window.addEventListener('unhandledrejection', event => {
-  console.error('Unhandled async error:', event?.reason || event);
+  const reason = event?.reason;
+  const reasonMsg = String(reason?.message || reason || '');
+
+  // Filter benign rejections (aborted fetches, navigation cancellations)
+  if (reason?.name === 'AbortError' || reasonMsg.includes('aborted') || reasonMsg.includes('canceled')) {
+    return;
+  }
+
+  console.error('Unhandled async error:', reason || event);
+
+  const now = Date.now();
+  if (now - lastRejectionToastTime < 3500) {
+    return;
+  }
+  lastRejectionToastTime = now;
+
   if (typeof window.toast === 'function') {
     window.toast('A background process failed. Please try your last action again.', 'error');
   }
