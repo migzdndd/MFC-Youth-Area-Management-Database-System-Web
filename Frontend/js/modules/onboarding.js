@@ -106,7 +106,7 @@ async function showAreaOnboarding() {
             </label>
             <p class="field-help">Creates the Area and connects your account.</p>
             <div class="area-create-actions">
-              <button class="btn" id="cancelCreateAreaButton" type="button" @click="showCreate = false; newArea = '';">Cancel</button>
+              <button class="btn" id="cancelCreateAreaButton" type="button" @click="showCreate = false; newArea = ''; message = '';">Cancel</button>
               <button class="btn blue" id="createAreaButton" type="button" x-bind:disabled="newArea.trim().length < 3 || isCreating">
                 <span x-show="!isCreating">Create Area-Based Account</span>
                 <span x-show="isCreating" style="display: none;">Creating Area…</span>

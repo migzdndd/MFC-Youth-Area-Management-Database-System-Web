@@ -1411,6 +1411,12 @@ button:active, .btn:active, .btn-auth:active {
   -webkit-backdrop-filter: blur(4px);
   padding: 18px;
   z-index: 100;
+  transition: opacity 0.15s ease;
+}
+
+.modal-backdrop.modal-backdrop-closing {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .modal {

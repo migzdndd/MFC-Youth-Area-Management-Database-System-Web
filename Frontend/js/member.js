@@ -884,7 +884,12 @@ async function bootstrapMemberPortal() {
         const avatarPreview = document.getElementById('modalAvatarPreview');
         const form = document.getElementById('editProfileForm');
 
-        const closeModal = () => backdrop.remove();
+        const closeModal = () => {
+          backdrop.remove();
+          if (typeof window.dismissErrorToasts === 'function') {
+            window.dismissErrorToasts();
+          }
+        };
 
         closeBtn?.addEventListener('click', closeModal);
         cancelBtn?.addEventListener('click', closeModal);

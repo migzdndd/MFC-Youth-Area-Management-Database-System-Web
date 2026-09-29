@@ -415,6 +415,25 @@ function toast(text, type = 'success', duration = 4000) {
 
 window.toast = toast;
 
+/**
+ * Dismisses any currently visible error toasts immediately.
+ * Called when the user cancels an add or edit dialog or form so
+ * validation error alerts do not persist unnecessarily.
+ */
+function dismissErrorToasts() {
+  const wrap = document.getElementById('toastWrap');
+  if (!wrap) return;
+  const errorToasts = wrap.querySelectorAll('.toast.card.error');
+  errorToasts.forEach(toastEl => {
+    if (toastEl._dismissed) return;
+    toastEl._dismissed = true;
+    toastEl.classList.add('toast-hide');
+    setTimeout(() => toastEl.remove(), 250);
+  });
+}
+
+window.dismissErrorToasts = dismissErrorToasts;
+
 // Section 3: Popup Windows (Modal Dialogs)
 
 /**
@@ -444,35 +463,21 @@ function openModal(
     activeModalCleanup();
   }
 
+  // Dismiss any existing error alerts when opening a new dialog
+  dismissErrorToasts();
+
   const hasSave = Boolean(onSave);
 
   root.innerHTML = `
     <div
       class="modal-backdrop"
       id="modalBackdrop"
-      x-data="{
-        open: true,
-        close() {
-          this.open = false;
-          setTimeout(() => {
-            if (!this.open && root.innerHTML !== '') {
-              root.innerHTML = '';
-            }
-          }, 200);
-        }
-      }"
-      x-show="open"
-      x-transition.opacity
-      @click.self="close()"
-      @keydown.escape.window="if (open) close()"
     >
       <section
         class="modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="modalTitle"
-        x-show="open"
-        x-transition
       >
         <header class="modal-header">
           <h2 id="modalTitle">${esc(title)}</h2>
@@ -481,7 +486,6 @@ function openModal(
             id="closeModal"
             type="button"
             aria-label="Close dialog"
-            @click="close()"
           >×</button>
         </header>
 
@@ -492,7 +496,6 @@ function openModal(
             class="btn"
             id="cancelModal"
             type="button"
-            @click="close()"
           >${hasSave ? 'Cancel' : 'Close'}</button>
           ${hasSave ? `
             <button
@@ -506,18 +509,21 @@ function openModal(
     </div>
   `;
 
-  if (window.Alpine) {
-    try {
-      window.Alpine.initTree(root);
-    } catch (err) {
-      console.warn('Modal Alpine init skipped:', err);
-    }
-  }
-
+  let isClosing = false;
   const closeFn = () => {
+    if (isClosing) return;
+    isClosing = true;
+
+    // Immediately dismiss any error toasts triggered during this modal
+    dismissErrorToasts();
+
+    window.removeEventListener('keydown', handleKeyDown);
     const backdrop = document.getElementById('modalBackdrop');
-    if (backdrop?._x_dataStack?.[0]?.close) {
-      backdrop._x_dataStack[0].close();
+    if (backdrop) {
+      backdrop.classList.add('modal-backdrop-closing');
+      setTimeout(() => {
+        if (root) root.innerHTML = '';
+      }, 150);
     } else if (root) {
       root.innerHTML = '';
     }
@@ -525,6 +531,22 @@ function openModal(
   };
 
   activeModalCleanup = closeFn;
+
+  const handleKeyDown = e => {
+    if (e.key === 'Escape') {
+      closeFn();
+    }
+  };
+  window.addEventListener('keydown', handleKeyDown);
+
+  const backdrop = document.getElementById('modalBackdrop');
+  if (backdrop) {
+    backdrop.addEventListener('click', e => {
+      if (e.target === backdrop) {
+        closeFn();
+      }
+    });
+  }
 
   const closeBtn = document.getElementById('closeModal');
   if (closeBtn) closeBtn.onclick = closeFn;
@@ -558,11 +580,9 @@ function closeModal() {
     activeModalCleanup();
     return;
   }
+  dismissErrorToasts();
   const root = document.getElementById('modalRoot');
-  const backdrop = document.getElementById('modalBackdrop');
-  if (backdrop?._x_dataStack?.[0]?.close) {
-    backdrop._x_dataStack[0].close();
-  } else if (root) {
+  if (root) {
     root.innerHTML = '';
   }
 }

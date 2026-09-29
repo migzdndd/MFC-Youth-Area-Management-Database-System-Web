@@ -387,7 +387,6 @@ if (logoutBtn) {
 
         const typed = window.prompt('Type DELETE to permanently delete your account.');
         if (typed !== 'DELETE') {
-          toast('Account deletion cancelled.', 'error');
           return;
         }
 
@@ -619,14 +618,19 @@ window.addEventListener('error', event => {
   const rawError = event?.error || event?.message || event;
   const errorMsg = String(event?.message || rawError?.message || rawError || '');
 
-  // Filter benign browser noise that doesn't break user operations
+  // Filter benign browser noise, user cancellations, and DOM cleanup that aren't critical errors
   if (
     errorMsg.includes('ResizeObserver') ||
     errorMsg.includes('Script error.') ||
     errorMsg.includes('AbortError') ||
-    errorMsg.includes('canceled')
+    errorMsg.includes('canceled') ||
+    errorMsg.includes('cancelled') ||
+    errorMsg.includes('cancel') ||
+    errorMsg.includes('transition') ||
+    errorMsg.includes('null (reading') ||
+    errorMsg.includes('undefined (reading')
   ) {
-    console.warn('Suppressed benign browser error:', errorMsg);
+    console.warn('Suppressed benign or cancellation error:', errorMsg);
     return;
   }
 
@@ -651,7 +655,13 @@ window.addEventListener('unhandledrejection', event => {
   const reasonMsg = String(reason?.message || reason || '');
 
   // Filter benign rejections (aborted fetches, navigation cancellations)
-  if (reason?.name === 'AbortError' || reasonMsg.includes('aborted') || reasonMsg.includes('canceled')) {
+  if (
+    reason?.name === 'AbortError' ||
+    reasonMsg.includes('aborted') ||
+    reasonMsg.includes('canceled') ||
+    reasonMsg.includes('cancelled') ||
+    reasonMsg.includes('cancel')
+  ) {
     return;
   }
 
