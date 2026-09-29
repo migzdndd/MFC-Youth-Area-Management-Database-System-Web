@@ -9,6 +9,7 @@
   <meta name="theme-color" content="#002847">
   <title>Two-Factor Authentication Setup - MFC Youth Area Management System</title>
   <style>
+    @import url('https://fonts.cdnfonts.com/css/visby-cf');
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   </style>
   <link rel="stylesheet" href="/css/style.css">
@@ -22,7 +23,7 @@
       <div class="login-header auth-recovery-header">
         <img class="logo-mark" src="/img/logo.png" alt="MFC Youth Logo">
         <h1 id="mfaSetupTitle" style="font-size: 1.85rem; margin-top: 8px;">Two-Factor Authentication</h1>
-        <p>Protect your servant account with time-based one-time password (TOTP) verification.</p>
+        <p>Two-factor security for your account.</p>
       </div>
 
       <div class="verification-badge auth-security-account" style="margin-bottom: 20px;">
@@ -65,9 +66,7 @@
       <div id="mfaSetupSection" style="display: none;">
         <div style="margin-bottom: 20px; background: rgba(0, 24, 45, 0.4); border: 1px solid rgba(118, 184, 240, 0.16); border-radius: 16px; padding: 20px;">
           <h3 style="font-size: 1.05rem; font-weight: 700; color: #f5faff; margin-bottom: 8px;">Step 1: Scan the QR Code</h3>
-          <p style="font-size: 0.86rem; color: #afbdd0; line-height: 1.5; margin-bottom: 16px;">
-            Scan this code with Google Authenticator, Microsoft Authenticator, or Authy on your mobile device.
-          </p>
+          <p style="font-size: 0.86rem; color: #afbdd0; line-height: 1.5; margin-bottom: 16px;">Scan this QR code with your authenticator app.</p>
 
           <div id="qrCodeWrapper" style="display: flex; justify-content: center; align-items: center; margin: 16px 0; min-height: 180px;">
             <div id="qrCodeContainer" style="background: #ffffff; padding: 14px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);">
@@ -86,9 +85,7 @@
 
         <form class="login-form login-form-modern" id="confirmEnrollForm" novalidate style="background: transparent; border: none; padding: 0; box-shadow: none;">
           <h3 style="font-size: 1.05rem; font-weight: 700; color: #f5faff; margin-bottom: 8px;">Step 2: Confirm 6-Digit Code</h3>
-          <p style="font-size: 0.86rem; color: #afbdd0; line-height: 1.5; margin-bottom: 14px;">
-            Enter the 6-digit code currently shown in your authenticator app to activate.
-          </p>
+          <p style="font-size: 0.86rem; color: #afbdd0; line-height: 1.5; margin-bottom: 14px;">Enter the 6-digit code from your app.</p>
 
           <div class="form-group auth-recovery-field">
             <div class="login-field" style="justify-content: center; padding: 0.6em 1em; background: rgba(0, 20, 36, 0.4); border: 1px solid rgba(118, 184, 240, 0.2);">

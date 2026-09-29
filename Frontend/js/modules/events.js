@@ -104,8 +104,8 @@ function renderEvents() {
     pageHeader(
       'Events',
       canManage
-        ? 'Manage Area events, participant registration, payment status, and attendance.'
-        : 'View Area events. Chapter Servants have read-only event access.',
+        ? 'Events, registrations, and attendance.'
+        : 'Upcoming and past events.',
       canManage
         ? `
           <button

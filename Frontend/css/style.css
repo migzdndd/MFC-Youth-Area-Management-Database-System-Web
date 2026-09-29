@@ -1,3 +1,6 @@
+@import url('https://fonts.cdnfonts.com/css/visby-cf');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 /* ============================================================================
    MFC Youth Area Management System - Highly Optimized Global Stylesheet
    ============================================================================
@@ -6,6 +9,9 @@
    ============================================================================ */
 
 :root {
+  --font-visby: 'Visby CF', 'Visby', 'Visby Round CF', 'Montserrat', 'Century Gothic', -apple-system, sans-serif;
+  --font-inter: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-base: var(--font-inter);
   --navy: #002847;
   --navy2: #001b30;
   --blue: #0878bd;
@@ -93,7 +99,9 @@ html {
 
 body {
   min-height: 100vh;
-  --font-base: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-visby: 'Visby CF', 'Visby', 'Visby Round CF', 'Montserrat', 'Century Gothic', -apple-system, sans-serif;
+  --font-inter: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-base: var(--font-inter);
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-family: var(--font-base);
   color: var(--text);
@@ -822,11 +830,13 @@ button:active, .btn:active, .btn-auth:active {
 }
 
 .sidebar-brand h2 {
+  font-family: var(--font-visby) !important;
   font-size: 0.95rem;
   letter-spacing: .025em;
 }
 
 .sidebar-brand p {
+  font-family: var(--font-inter) !important;
   font-size: .56rem;
   color: #b8cbd8;
   margin-top: 2px;
@@ -2900,9 +2910,12 @@ button:disabled {
   flex-wrap: wrap;
 }
 
-/* Ensure all Card headings use Sans Serif */
+/* ============================================================================
+   Typography: Sans Serif for Card Headings and Sub Headings
+   ============================================================================ */
 .card h1, .card h2, .card h3, .card h4, .card h5, .card h6,
-.card-header h1, .card-header h2, .card-header h3,
+.card-header h1, .card-header h2, .card-header h3, .card-header h4,
+.card-title, .card-hero-title,
 .events-big-card-title-group h3,
 .events-column-header h4,
 .profile-group-title,
@@ -2912,8 +2925,55 @@ button:disabled {
 .metric-card-primary h2, .metric-card-primary h3,
 .metric-card-secondary h2, .metric-card-secondary h3,
 .panel h1, .panel h2, .panel h3, .panel h4,
-.modal-header h2, .modal h2, .modal h3 {
-  font-family: var(--font-base, 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif) !important;
+.modal-header h2, .modal-header h3, .modal h2, .modal h3,
+.auth-card-header h1, .auth-card-header h2,
+.login-header h1, .login-header h2,
+.empty-state h3,
+.service-card h3, .service-card h4,
+.stat-card h3, .stat-card h4 {
+  font-family: var(--font-inter, 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif) !important;
+}
+
+.card p, .card-header p, .card-subtitle, .card-subheading, .card-desc,
+.page-header p,
+.panel-header-flex p,
+.panel p.muted,
+.events-big-card-title-group p,
+.events-column-header p,
+.metric-primary-caption, .metric-secondary-caption,
+.auth-card-header p, .login-header p, .login-hero-copy p,
+.modal-header p, .modal-subtitle, .modal-desc,
+.empty-state p,
+.member-event-snippet,
+.dashboard-hero-copy p,
+.subheading, .subtitle,
+.service-card p, .stat-card p {
+  font-family: var(--font-inter, 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif) !important;
+}
+
+/* ============================================================================
+   Branding Typography:
+   Visby for "MFC Youth"
+   Inter for "Area Management System"
+   ============================================================================ */
+.font-visby,
+.brand-mfc-youth,
+.sidebar-brand h2,
+.login-mobile-brand strong,
+.member-portal-brand strong,
+.mobile-topbar strong,
+.page-loader__overline,
+.auth-mini-logo-text {
+  font-family: var(--font-visby) !important;
+}
+
+.font-inter,
+.brand-ams,
+.sidebar-brand p,
+.login-mobile-brand span,
+.login-eyebrow,
+.page-loader__title {
+  font-family: var(--font-inter) !important;
 }
 
 .profile-header-avatar-wrap {
@@ -3657,7 +3717,7 @@ from { opacity: .45; }
 }
 
 /* =========================================================
-   UI REFRESH — Login, Dashboard and Uiverse-style buttons
+   UI REFRESH - Login, Dashboard and Uiverse-style buttons
    Interaction pattern adapted from Uiverse.io by ernestnash.
    ========================================================= */
 

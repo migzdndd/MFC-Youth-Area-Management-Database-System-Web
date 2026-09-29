@@ -572,49 +572,44 @@
     modal.innerHTML = `
       <div class="mfc-guide-modal-content">
         <button class="mfc-guide-close" id="mfcGuideClose" aria-label="Close Guide">&times;</button>
-        <h1>Welcome to the MFC Youth System</h1>
-        <h2>How to Access and Use the Portal</h2>
-        <p>Welcome! This quick guide will help you understand how to log in, what to expect when you access your account, and where you'll find your tools based on your role in MFC Youth.</p>
+        <h1>Welcome to <span class="brand-mfc-youth">MFC Youth</span></h1>
+        <h2>Portal Quick Guide</h2>
+        <p>Sign-in steps, security setup, and role-based portals.</p>
         <hr>
         <h3>1. Logging In</h3>
-        <p>To access your account, simply head to the main login page:</p>
+        <p>Enter your account credentials to access your portal:</p>
         <ol>
-          <li>Enter the <strong>Email Address</strong> associated with your MFC Youth profile.</li>
+          <li>Enter your profile <strong>Email Address</strong>.</li>
           <li>Enter your <strong>Password</strong>.</li>
-          <li>(Optional) Check the <strong>"Remember Me"</strong> box if you are using a personal, trusted device.</li>
+          <li>(Optional) Check <strong>"Remember Me"</strong> on personal devices.</li>
           <li>Click <strong>Sign In</strong>.</li>
         </ol>
-        <p><strong>Forgot your password?</strong> Don't worry! Click the "Forgot Password" link on the login page to securely reset it via email.</p>
+        <p><strong>Forgot password?</strong> Use the "Forgot Password" link on the login page to reset it via email.</p>
         <hr>
         <h3>2. First-Time Setup & Security</h3>
-        <p>If this is your very first time logging in, or if an administrator recently reset your account, the system may ask you to update your security settings before you can proceed:</p>
+        <p>New or reset accounts may prompt for immediate security updates:</p>
         <ul>
-          <li><strong>Change Password:</strong> You will be redirected to a secure page to choose a new, private password.</li>
-          <li><strong>Area Setup:</strong> If your local area profile isn't fully configured yet, you'll be asked to provide some quick details before jumping into the dashboard.</li>
+          <li><strong>Change Password:</strong> Set a new private password.</li>
+          <li><strong>Area Setup:</strong> Connect your account to your Area before entering the dashboard.</li>
         </ul>
         <hr>
-        <h3>3. Where You'll Go (Based on Your Role)</h3>
-        <p>The MFC Youth Area Management System automatically customizes your experience depending on your current service role. Once you log in, you will be taken to the portal that fits your responsibilities:</p>
+        <h3>3. Role Portals</h3>
+        <p>Access tools configured for your service role:</p>
         <h4><img src="/Icons/members.png" alt="" style="width: 20px; vertical-align: middle; margin-right: 8px; filter: brightness(0) saturate(100%) invert(23%) sepia(13%) saturate(1212%) hue-rotate(174deg) brightness(96%) contrast(87%);"> General Members</h4>
         <ul>
-          <li>Here, you can view your personal profile.</li>
-          <li>See upcoming MFC Youth events in your area.</li>
-          <li>Stay updated with recent announcements.</li>
+          <li>View profile details, upcoming <span class="brand-mfc-youth">MFC Youth</span> events, and announcements.</li>
         </ul>
         <h4><img src="/Icons/chapters.png" alt="" style="width: 20px; vertical-align: middle; margin-right: 8px; filter: brightness(0) saturate(100%) invert(23%) sepia(13%) saturate(1212%) hue-rotate(174deg) brightness(96%) contrast(87%);"> Chapter Servants</h4>
         <ul>
-          <li>From here, you can manage your chapter’s member list.</li>
-          <li>Keep track of chapter-specific activities and reports.</li>
+          <li>Manage chapter members and track local activities and reports.</li>
         </ul>
-        <h4><img src="/Icons/dashboard.png" alt="" style="width: 20px; vertical-align: middle; margin-right: 8px; filter: brightness(0) saturate(100%) invert(23%) sepia(13%) saturate(1212%) hue-rotate(174deg) brightness(96%) contrast(87%);"> Area Admins, Coordinators & Other Servant Leaders</h4>
+        <h4><img src="/Icons/dashboard.png" alt="" style="width: 20px; vertical-align: middle; margin-right: 8px; filter: brightness(0) saturate(100%) invert(23%) sepia(13%) saturate(1212%) hue-rotate(174deg) brightness(96%) contrast(87%);"> Area Leaders</h4>
         <ul>
-          <li>This is your high-level control center.</li>
-          <li>You’ll have access to area-wide analytics, activity reports, and cross-chapter member directories.</li>
+          <li>Access area analytics, activity records, and chapter directories.</li>
         </ul>
         <hr>
         <h3>Need Help?</h3>
-        <p>If you ever get lost, you can safely log out by clicking the <strong>"Logout"</strong> button located at the bottom of your sidebar navigation (or the top right in the Member Portal).</p>
-        <p>If you believe your account has the wrong role or you cannot access the features you need, please contact your immediate Area Administrator or Couple Coordinator for assistance.</p>
+        <p>Log out anytime from the navigation menu. For role adjustments or access issues, contact your Area Administrator.</p>
       </div>
     `;
 

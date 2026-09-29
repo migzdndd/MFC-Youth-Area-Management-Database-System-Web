@@ -661,6 +661,11 @@ function pageHeader(
   subtitle,
   actions = ''
 ) {
+  setTimeout(() => {
+    if (typeof applyBrandFonts === 'function') {
+      applyBrandFonts(document.getElementById('pageContent') || document.body);
+    }
+  }, 10);
   return `
     <header class="page-header">
       <div>
@@ -748,10 +753,11 @@ function registerAlpineSidebar() {
 
 document.addEventListener('alpine:init', registerAlpineSidebar);
 
-// Set up mobile menu and toast container once page HTML is loaded
+// Set up mobile menu, brand fonts, and toast container once page HTML is loaded
 document.addEventListener('DOMContentLoaded', () => {
   ensureToastWrap();
   registerAlpineSidebar();
+  applyBrandFonts();
 
   const sidebar = document.getElementById('sidebar');
   const menuBtn = document.getElementById('menuBtn');
@@ -784,3 +790,75 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+/**
+ * Applies brand typography to target phrases:
+ * - Visby for "MFC Youth"
+ * - Inter for "Area Management System"
+ */
+function applyBrandFonts(root = document.body) {
+  if (!root || typeof document === 'undefined') return;
+
+  try {
+    const walker = document.createTreeWalker(
+      root,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode(node) {
+          if (!node || !node.nodeValue) return NodeFilter.FILTER_REJECT;
+          const val = node.nodeValue;
+          if (!/(MFC\s+YOUTH|MFC\s+Youth|Area\s+Management\s+System|AREA\s+MANAGEMENT\s+SYSTEM)/i.test(val)) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          const parent = node.parentElement;
+          if (!parent) return NodeFilter.FILTER_REJECT;
+          const tag = parent.tagName.toLowerCase();
+          if (['script', 'style', 'textarea', 'input', 'code', 'pre', 'title', 'option'].includes(tag)) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          if (parent.closest('.brand-mfc-youth') || parent.closest('.brand-ams')) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      }
+    );
+
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+
+    for (const node of nodes) {
+      const parent = node.parentNode;
+      if (!parent) continue;
+      const text = node.nodeValue;
+      const regex = /(MFC\s+YOUTH|MFC\s+Youth|Area\s+Management\s+System|AREA\s+MANAGEMENT\s+SYSTEM)/gi;
+      if (!regex.test(text)) continue;
+
+      const fragment = document.createDocumentFragment();
+      let lastIndex = 0;
+      regex.lastIndex = 0;
+      let match;
+      while ((match = regex.exec(text)) !== null) {
+        if (match.index > lastIndex) {
+          fragment.appendChild(document.createTextNode(text.substring(lastIndex, match.index)));
+        }
+        const span = document.createElement('span');
+        if (/MFC/i.test(match[0])) {
+          span.className = 'brand-mfc-youth';
+        } else {
+          span.className = 'brand-ams';
+        }
+        span.textContent = match[0];
+        fragment.appendChild(span);
+        lastIndex = regex.lastIndex;
+      }
+      if (lastIndex < text.length) {
+        fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
+      }
+      parent.replaceChild(fragment, node);
+    }
+  } catch (err) {
+    // Non-blocking fail-safe
+  }
+}
+window.applyBrandFonts = applyBrandFonts;

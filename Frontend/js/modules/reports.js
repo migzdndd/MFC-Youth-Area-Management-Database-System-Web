@@ -523,8 +523,8 @@ function renderReports() {
     pageHeader(
       'Activity Reports',
       isChapterServantSession()
-        ? `Manage activity reports for ${esc(chapterScope.name)} Chapter. Your name and chapter are locked to your account scope.`
-        : 'Manage activity reports, filter records, review analytics, and export summarized documents.',
+        ? `Reports for ${esc(chapterScope.name)} Chapter.`
+        : 'Reports, analytics, and exports.',
       `
         <button
           class="btn blue"
@@ -1758,8 +1758,11 @@ function printReportSummary(
 
         <style>
 
+          @import url('https://fonts.cdnfonts.com/css/visby-cf');
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
           body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
             color: #17263a;
             margin:  36px;
           }
@@ -1770,11 +1773,13 @@ function printReportSummary(
           }
 
           h1 {
+            font-family: 'Visby CF', 'Visby', sans-serif;
             font-size: 20px;
             margin-bottom: 2px;
           }
 
           .sub {
+            font-family: 'Inter', sans-serif;
             color: #687386;
           }
 
@@ -1840,11 +1845,11 @@ function printReportSummary(
 
       <body>
 
-        <h1>
+        <h1 class="brand-mfc-youth">
           MFC YOUTH
         </h1>
 
-        <div class="sub">
+        <div class="sub brand-ams">
           Area Management System
         </div>
 

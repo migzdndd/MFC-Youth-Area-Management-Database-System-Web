@@ -75,13 +75,11 @@ async function showAreaOnboarding() {
         <header class="modal-header area-onboarding-header">
           <div>
             <span class="area-onboarding-kicker">Account Setup</span>
-            <h2 id="areaOnboardingTitle">Select Your MFC Youth Area</h2>
+            <h2 id="areaOnboardingTitle">Select Your <span class="brand-mfc-youth">MFC Youth</span> Area</h2>
           </div>
         </header>
         <div class="modal-body">
-          <p class="area-onboarding-intro">
-            Your Servant Leader account was created successfully. Before entering the management system, connect it to the Area you serve.
-          </p>
+          <p class="area-onboarding-intro">Connect your account to the Area you serve.</p>
           <div id="areaOnboardingMessage" class="message" role="status" x-show="message" :class="messageType" x-text="message"></div>
 
           <div class="area-setup-panel" id="existingAreaPanel" x-show="!showCreate" x-transition>
@@ -106,7 +104,7 @@ async function showAreaOnboarding() {
               <span>Area Name</span>
               <input class="text-input" id="newAreaName" type="text" maxlength="120" placeholder="e.g. MFC Youth NCR East" x-model="newArea">
             </label>
-            <p class="field-help">The backend will create the Area in Supabase and connect this account to it. Standard service records will also be prepared for the new Area.</p>
+            <p class="field-help">Creates the Area and connects your account.</p>
             <div class="area-create-actions">
               <button class="btn" id="cancelCreateAreaButton" type="button" @click="showCreate = false; newArea = '';">Cancel</button>
               <button class="btn blue" id="createAreaButton" type="button" x-bind:disabled="newArea.trim().length < 3 || isCreating">
@@ -117,7 +115,7 @@ async function showAreaOnboarding() {
           </div>
 
           ${session?.role === 'chapter_servant' ? `
-            <p class="area-chapter-note">Chapter Servant accounts will still need a Chapter assignment inside this Area before chapter-scoped tools become available.</p>
+            <p class="area-chapter-note">Chapter Servants still need a Chapter assignment within this Area.</p>
           ` : ''}
         </div>
       </section>

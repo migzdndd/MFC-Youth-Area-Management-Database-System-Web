@@ -814,14 +814,14 @@ async function bootstrapMemberPortal() {
                     </div>
                     <div style="flex: 1;">
                       <strong style="display: block; font-size: 0.95rem; color: #002847; margin-bottom: 2px;">Profile Picture</strong>
-                      <span style="display: block; font-size: 0.78rem; color: #64748b; margin-bottom: 10px;">Customize your photo instead of displaying default letters.</span>
+                      <span style="display: block; font-size: 0.78rem; color: #64748b; margin-bottom: 10px;">Upload a custom photo or reset to initials.</span>
                       <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                         <label class="btn blue" style="cursor: pointer; padding: 5px 14px; font-size: 0.78rem;" for="modalAvatarFileInput">
                           Upload Picture
                         </label>
                         <input type="file" id="modalAvatarFileInput" accept="image/*" style="display: none;">
                         <button class="btn" id="modalRemoveAvatarBtn" type="button" style="padding: 5px 12px; font-size: 0.78rem; color: #dc2626; border-color: #fecaca;" ${!tempAvatarUrl ? 'disabled' : ''}>
-                          Reset to Letters
+                          Reset to Initials
                         </button>
                       </div>
                     </div>
@@ -962,7 +962,7 @@ async function bootstrapMemberPortal() {
             <div class="dashboard-hero-copy">
               <div class="dashboard-kicker">
                 <span class="dashboard-live-dot"></span>
-                ${previewMode ? 'Member Preview Mode' : 'MFC Youth Member Portal'}
+                ${previewMode ? 'Member Preview Mode' : '<span class="brand-mfc-youth">MFC Youth</span> Member Portal'}
               </div>
               <h1>Welcome, ${esc(member.firstName || fullName(member))}!</h1>
               <div class="dashboard-identity-row">
@@ -984,7 +984,7 @@ async function bootstrapMemberPortal() {
               <!-- Event Participation Card -->
               <a class="metric-card-primary member-metric-primary" href="#events" title="Jump to Community Gatherings">
                 <div class="metric-primary-header">
-                  <span class="metric-primary-label">Event Participation & Attendance</span>
+                  <span class="metric-primary-label">Event Attendance</span>
                   <span class="metric-badge-primary">Primary Record</span>
                 </div>
 
@@ -1048,7 +1048,7 @@ async function bootstrapMemberPortal() {
           <section class="dashboard-events-big-card member-events-card animate-in is-visible" id="events">
             <div class="events-big-card-header">
               <div class="events-big-card-title-group">
-                <h3>Community Gatherings & Events</h3>
+                <h3>Gatherings</h3>
               </div>
               <div class="events-big-card-pills">
                 <span class="badge" style="background: #e0f2fe; color: #0369a1; font-weight: 700;">
@@ -1068,7 +1068,7 @@ async function bootstrapMemberPortal() {
               <div class="events-column" id="upcoming">
                 <div class="events-column-header">
                   <span class="badge" style="background: #0284c7; color: #ffffff;">UPCOMING</span>
-                  <h4>What's Next</h4>
+                  <h4>Upcoming</h4>
                   <span class="muted" style="margin-left: auto; font-size: 0.76rem;">${upcomingEvents.length} shown</span>
                 </div>
 
@@ -1078,7 +1078,7 @@ async function bootstrapMemberPortal() {
                       ${upcomingEvents.map(event => memberEventRow(event, eventRegistration(participants, member.id, event.id), 'upcoming')).join('')}
                     </div>
                   `
-                  : memberEmptyState('No upcoming events scheduled yet', 'New activities will appear here when posted by your Area leaders.')
+                  : memberEmptyState('No upcoming events', 'New activities will appear here when posted.')
                 }
               </div>
 
@@ -1086,7 +1086,7 @@ async function bootstrapMemberPortal() {
               <div class="events-column" id="recent">
                 <div class="events-column-header">
                   <span class="badge" style="background: #e2e8f0; color: #475569;">RECENT</span>
-                  <h4>Attendance History</h4>
+                  <h4>Past Gatherings</h4>
                   <span class="muted" style="margin-left: auto; font-size: 0.76rem;">${recentEvents.length} recorded</span>
                 </div>
 
@@ -1096,7 +1096,7 @@ async function bootstrapMemberPortal() {
                       ${recentEvents.map(event => memberEventRow(event, eventRegistration(participants, member.id, event.id), 'past')).join('')}
                     </div>
                   `
-                  : memberEmptyState('No recent gatherings on record', 'Your participation history will build up as activities conclude.')
+                  : memberEmptyState('No past gatherings', 'Attendance records will appear here.')
                 }
               </div>
             </div>
@@ -1164,7 +1164,7 @@ async function bootstrapMemberPortal() {
 
                 <!-- Column 2: Chapter & Ministries -->
                 <div class="profile-group-box">
-                  <span class="profile-group-title">MFC Youth Affiliation</span>
+                  <span class="profile-group-title"><span class="brand-mfc-youth">MFC Youth</span> Affiliation</span>
                   <dl class="profile-field-list">
                     <div>
                       <dt>Assigned Chapter</dt>

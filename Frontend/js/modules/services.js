@@ -27,12 +27,12 @@ let currentServiceSections = [];
 function renderServices() {
   const data = db();
   let pageTitle = 'Services';
-  let pageDesc = 'View the built-in MFC Youth service roles and assigned members.';
+  let pageDesc = 'Service roles and assigned members.';
   currentServiceSections = [];
 
   if (session?.role === 'area_servant' || session?.role === 'national_coordinator' || session?.role === 'couple_coordinator') {
     pageTitle = 'Area Core Roles & Chapters';
-    pageDesc = 'View the 4 Core Roles and the number of Chapters in your Area.';
+    pageDesc = 'Core roles and area chapters.';
     currentServiceSections = [
       {
         id: 'LIT Servant (Moderator)',
@@ -64,7 +64,7 @@ function renderServices() {
     ];
   } else if (session?.role === 'lit_servant') {
     pageTitle = 'Service Tab';
-    pageDesc = 'View the 5 Creative Ministries and assigned members.';
+    pageDesc = 'Creative ministries and members.';
     const ministries = ['Music', 'Dance', 'Creative Writing', 'Graphics & Promo', 'Photography & Videography'];
     currentServiceSections = ministries.map(service => ({
       id: service,
@@ -74,7 +74,7 @@ function renderServices() {
     }));
   } else if (session?.role === 'campus_servant') {
     pageTitle = 'Campus Services';
-    pageDesc = 'View Registered College and SHS Students.';
+    pageDesc = 'College and SHS student rosters.';
     currentServiceSections = [
       {
         id: 'SHS Students',
@@ -89,7 +89,7 @@ function renderServices() {
     ];
   } else if (session?.role === 'mfc_high_servant') {
     pageTitle = 'MFC High Services';
-    pageDesc = 'View Registered HS Students.';
+    pageDesc = 'High school student rosters.';
     currentServiceSections = [
       {
         id: 'HS Students',
@@ -99,7 +99,7 @@ function renderServices() {
     ];
   } else if (session?.role === 'area_kids_servant') {
     pageTitle = 'MFC Kids Services';
-    pageDesc = 'View Registered Heartchamps.';
+    pageDesc = 'Registered Heartchamps roster.';
     currentServiceSections = [
       {
         id: 'Heartchamp',
@@ -109,7 +109,7 @@ function renderServices() {
     ];
   } else if (session?.role === 'chapter_servant') {
     pageTitle = 'Chapter Services';
-    pageDesc = 'View and manage the Chapter you are assigned to.';
+    pageDesc = 'Assigned chapter roster.';
     const chapterId = session.chapterId || (data.chapters[0] ? data.chapters[0].id : null);
     const myChapter = data.chapters.find(c => c.id === chapterId);
     if (myChapter) {

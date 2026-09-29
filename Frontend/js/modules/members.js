@@ -117,7 +117,7 @@ function renderChapterServantMembers(data) {
     content.innerHTML =
       pageHeader(
         'Members',
-        'Your account is not assigned to a chapter yet.'
+        'No chapter assigned.'
       ) +
       emptyState(
         'No chapter assignment',
@@ -156,7 +156,7 @@ function renderChapterServantMembers(data) {
   content.innerHTML =
     pageHeader(
       'Members',
-      `View members and add new member records for ${esc(chapter.name)} Chapter. Existing records remain view-only for Chapter Servants.`,
+      `Members in ${esc(chapter.name)} Chapter.`,
       `
         <button class="btn blue" id="addChapterMember" type="button">
           + Add Member
@@ -280,7 +280,7 @@ function renderMembers() {
   content.innerHTML =
     pageHeader(
       'Members',
-      'Manage registered MFC Youth members, chapter assignments, services, and GIG records.',
+      'Member records, chapters, and services.',
       `
         <button
           class="btn blue"

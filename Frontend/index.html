@@ -15,7 +15,8 @@
   <meta name="description" content="MFC Youth Area Management System web application.">
   <title>Sign In - MFC Youth Area Management System</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.cdnfonts.com/css/visby-cf');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   </style>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="manifest" href="/manifest.webmanifest">
@@ -73,28 +74,27 @@
         </div>
 
         <div class="login-hero-copy">
-          <span class="login-eyebrow">AREA MANAGEMENT SYSTEM</span>
+          <span class="login-eyebrow brand-ams">AREA MANAGEMENT SYSTEM</span>
           <h2>Lead your Area with one clear, secure workspace.</h2>
-          <p>Members, chapters, services, events, reports, and GIG records stay organized in a single cloud-backed
-            dashboard built for MFC Youth leaders.</p>
+          <p>Central workspace for area records, events, and reports.</p>
         </div>
 
         <div class="login-feature-grid" aria-label="Key system features">
           <article>
             <strong>Members</strong>
-            <span>Profiles, access, chapters and service assignments</span>
+            <span>Profiles, chapters, and services</span>
           </article>
           <article>
             <strong>Events</strong>
-            <span>Registration, payment and attendance tracking</span>
+            <span>Registrations and attendance</span>
           </article>
           <article>
             <strong>Reports</strong>
-            <span>Activity reports and Area-level analytics</span>
+            <span>Activity summaries and exports</span>
           </article>
           <article>
             <strong>Secure</strong>
-            <span>Role-based access through Supabase Auth</span>
+            <span>Role-based leader access</span>
           </article>
           <article class="daily-readings-card-wrapper" style="grid-column: span 2;">
             <div class="card-hero-header">
@@ -140,7 +140,7 @@
         <div class="login-card-top">
           <div class="login-mobile-brand">
             <img src="/img/logo-2.png" alt="MFC Youth Logo">
-            <div><strong>MFC YOUTH</strong><span>Area Management System</span></div>
+            <div><strong class="brand-mfc-youth">MFC YOUTH</strong><span class="brand-ams">Area Management System</span></div>
           </div>
           <span class="secure-login-badge">Secure leader access</span>
         </div>
@@ -148,7 +148,7 @@
         <div class="login-header login-header-modern">
           <span class="login-eyebrow">WELCOME BACK</span>
           <h1 id="loginTitle">Sign in to your Area</h1>
-          <p>Use your registered MFC Youth account to continue to the management dashboard.</p>
+          <p>Sign in to access your area.</p>
         </div>
 
         <!-- Sign In Form -->
@@ -195,7 +195,7 @@
           <div class="login-divider"><span>or</span></div>
           <button class="btn-auth auth-slide-button auth-slide-demo" id="demoLoginButton" type="button">Open Demo
             Dashboard</button>
-          <p class="demo-login-note">Presentation mode only. Demo data is kept separate from your live Area records.</p>
+          <p class="demo-login-note">Preview mode with demo data.</p>
         </form>
 
         <div class="auth-bottom auth-bottom-modern">

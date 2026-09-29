@@ -71,7 +71,7 @@ async function openAreaSelectionModal() {
       <div style="padding: 24px 28px 16px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between;">
         <div>
           <h2 style="margin: 0; font-size: 1.3rem; font-weight: 700; color: #0f172a;">Select Registered Area</h2>
-          <p style="margin: 4px 0 0 0; font-size: 0.86rem; color: #64748b;">Choose an area to access its records and database metrics.</p>
+          <p style="margin: 4px 0 0 0; font-size: 0.86rem; color: #64748b;">Select an area to access records.</p>
         </div>
         <button type="button" id="closeNcAreaModal" @click="close()" style="background: transparent; border: none; font-size: 1.5rem; color: #64748b; cursor: pointer; padding: 4px 8px; border-radius: 6px; line-height: 1;" aria-label="Close modal">&times;</button>
       </div>
@@ -221,7 +221,7 @@ async function renderNationalCoordinatorDashboard(data) {
       <div class="dashboard-hero-copy">
         <div class="dashboard-kicker"><span class="dashboard-live-dot"></span> National Workspace</div>
         <h1>Welcome back, ${esc(session?.name || 'National Coordinator')}.</h1>
-        <p>You have Super Admin access across the national network. Select an Area below to view and manage its database, or review national records.</p>
+        <p>National overview. Select an Area below to manage records.</p>
         <div class="dashboard-identity-row">
           <span>National Coordinator</span>
           <span>Super Admin Access</span>
@@ -246,7 +246,7 @@ async function renderNationalCoordinatorDashboard(data) {
 
           <div>
             <div class="metric-primary-number">${membersCount}</div>
-            <p class="metric-primary-caption">Total members registered across all regional areas</p>
+            <p class="metric-primary-caption">Total members across all areas.</p>
           </div>
 
           <div class="metric-primary-footer">
@@ -278,7 +278,7 @@ async function renderNationalCoordinatorDashboard(data) {
             </div>
             <div class="metric-secondary-body">
               <span class="metric-secondary-number">${servicesCount}</span>
-              <p class="metric-secondary-caption">Core ministry services</p>
+              <p class="metric-secondary-caption">Core ministry roles.</p>
             </div>
             <div class="metric-secondary-footer">
               <span class="summary-link-hint" style="font-size: 0.76rem; color: #2563eb; font-weight: 600;">Manage services &rarr;</span>
@@ -292,7 +292,7 @@ async function renderNationalCoordinatorDashboard(data) {
             </div>
             <div class="metric-secondary-body">
               <span class="metric-secondary-number">${reportsCount}</span>
-              <p class="metric-secondary-caption">Reports filed across all areas</p>
+              <p class="metric-secondary-caption">Filed activity reports.</p>
             </div>
             <div class="metric-secondary-footer">
               <span class="summary-link-hint" style="font-size: 0.76rem; color: #059669; font-weight: 600;">View reports &rarr;</span>
@@ -307,7 +307,7 @@ async function renderNationalCoordinatorDashboard(data) {
       <div class="panel-header-flex">
         <div>
           <h3>Members by Chapter</h3>
-          <p class="muted" style="font-size: 0.8rem; margin: 2px 0 0;">Distribution of registered members across chapters</p>
+          <p class="muted" style="font-size: 0.8rem; margin: 2px 0 0;">Members across chapters.</p>
         </div>
         <div class="panel-header-badges">
           <span class="scope-chip" style="font-size: 0.76rem;">${chapterCounts.length} Chapter${chapterCounts.length === 1 ? '' : 's'}</span>
@@ -347,7 +347,7 @@ async function renderNationalCoordinatorDashboard(data) {
       <div class="events-big-card-header">
         <div class="events-big-card-title-group">
           <h3>Events Overview</h3>
-          <p>Scheduled activities, recent gatherings, and participation tracking</p>
+          <p>Activities, gatherings, and attendance.</p>
         </div>
         <div class="events-big-card-pills">
           <span class="metric-pill"><strong>${eventsCount}</strong> Total Events</span>
@@ -647,7 +647,7 @@ function renderDashboard() {
       <div class="dashboard-hero-copy">
         <div class="dashboard-kicker"><span class="dashboard-live-dot"></span> Cloud workspace</div>
         <h1>Welcome back, ${esc(session?.name || 'Area User')}.</h1>
-        <p>Here is the latest overview of ${esc(dashboardAreaName)}. Your records are organized, synced, and ready for action.</p>
+        <p>Overview for ${esc(dashboardAreaName)}.</p>
         <div class="dashboard-identity-row">
           <span>${esc(dashboardRole)}</span>
           <span>${esc(dashboardAreaName)}</span>
@@ -674,7 +674,7 @@ function renderDashboard() {
 
           <div>
             <div class="metric-primary-number">${membersCount}</div>
-            <p class="metric-primary-caption">${isChapterServantSession() ? 'Members in your assigned chapter' : `People currently on record in ${esc(dashboardAreaName)}`}</p>
+            <p class="metric-primary-caption">${isChapterServantSession() ? 'Assigned chapter members.' : `Active records in ${esc(dashboardAreaName)}.`}</p>
           </div>
 
           <div class="metric-primary-footer">
@@ -713,7 +713,7 @@ function renderDashboard() {
             </div>
             <div class="metric-secondary-body">
               <span class="metric-secondary-number">${reportsCount}</span>
-              <p class="metric-secondary-caption">Reports filed in system</p>
+              <p class="metric-secondary-caption">Filed activity reports.</p>
             </div>
             <div class="metric-secondary-footer">
               <span class="summary-link-hint" style="font-size: 0.76rem; color: #059669; font-weight: 600;">View reports &rarr;</span>
@@ -729,7 +729,7 @@ function renderDashboard() {
       <div class="panel-header-flex">
         <div>
           <h3>Members by Chapter</h3>
-          <p class="muted" style="font-size: 0.8rem; margin: 2px 0 0;">Distribution of registered members across chapters</p>
+          <p class="muted" style="font-size: 0.8rem; margin: 2px 0 0;">Members across chapters.</p>
         </div>
         <div class="panel-header-badges">
           <span class="scope-chip" style="font-size: 0.76rem;">${chapterCounts.length} Chapter${chapterCounts.length === 1 ? '' : 's'}</span>
@@ -769,7 +769,7 @@ function renderDashboard() {
       <div class="events-big-card-header">
         <div class="events-big-card-title-group">
           <h3>Events Overview</h3>
-          <p>Scheduled activities, recent gatherings, and participation tracking</p>
+          <p>Activities, gatherings, and attendance.</p>
         </div>
         <div class="events-big-card-pills">
           <span class="metric-pill"><strong>${totalEventsCount}</strong> Total Events</span>

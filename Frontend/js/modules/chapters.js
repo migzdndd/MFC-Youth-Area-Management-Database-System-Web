@@ -31,7 +31,7 @@ function renderChapterServantDashboard(data) {
     content.innerHTML =
       pageHeader(
         'Chapter Dashboard',
-        'Your Chapter Servant account is not assigned to a chapter yet.'
+        'No chapter assigned.'
       ) +
       emptyState(
         'No chapter assignment',
@@ -71,7 +71,7 @@ function renderChapterServantDashboard(data) {
   content.innerHTML =
     pageHeader(
       `${esc(chapter.name)} Chapter`,
-      'Chapter Servant dashboard. Your access is limited to this assigned chapter.',
+      `Dashboard for ${esc(chapter.name)} Chapter.`,
       `
         <button
           class="btn blue"
@@ -241,7 +241,7 @@ function renderChapters() {
   content.innerHTML =
     pageHeader(
       'Chapters',
-      'Create and manage MFC Youth chapters and view their assigned members.',
+      'Chapters and assigned rosters.',
       `
         <button
           class="btn blue"
