@@ -440,7 +440,13 @@ window.addEventListener('DOMContentLoaded', initializeRevealAnimations);
 
 // If someone is already signed in, don't show them the sign-in form again; send them directly to their workspace
 const currentSession = getSession();
-if (currentSession && document.body.dataset.allowAuthenticated !== 'true') {
+const isAuthPage = Boolean(
+  document.getElementById('loginForm') ||
+  document.getElementById('adminRegistrationForm') ||
+  document.getElementById('memberClaimForm') ||
+  document.getElementById('forcePasswordForm')
+);
+if (currentSession && isAuthPage && document.body.dataset.allowAuthenticated !== 'true') {
   navigateWithLoader(destinationFor(currentSession), true);
 }
 
