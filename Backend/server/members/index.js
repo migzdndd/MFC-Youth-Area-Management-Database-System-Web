@@ -230,16 +230,39 @@ async function updateMember(req, res) {
     return sendJson(res, 400, { ok: false, error: 'A Chapter Servant must be assigned to a chapter.' });
   }
 
-  await validateChapter(admin, chapterId, areaId);
+  const chapterChanged = chapterId !== existing.chapter_id;
+  const emailChanged = email.toLowerCase() !== String(existing.email || '').toLowerCase();
+  const roleChanged = accessLevel !== existing.access_level;
+  const statusChanged = status !== existing.status;
+  const nameChanged = firstName !== existing.first_name ||
+    middleName !== existing.middle_name ||
+    lastName !== existing.last_name;
 
-  const { data: duplicate, error: duplicateError } = await supabase
-    .from('members')
-    .select('id')
-    .ilike('email', email)
-    .neq('id', memberId)
-    .maybeSingle();
-  if (duplicateError) throw duplicateError;
-  if (duplicate) return sendJson(res, 409, { ok: false, error: 'Another member already uses that email address.' });
+  const preflightChecks = [];
+  if (chapterChanged && chapterId) {
+    preflightChecks.push(validateChapter(admin, chapterId, areaId));
+  }
+  if (emailChanged) {
+    preflightChecks.push(
+      supabase
+        .from('members')
+        .select('id')
+        .ilike('email', email)
+        .neq('id', memberId)
+        .maybeSingle()
+        .then(({ data: duplicate, error: duplicateError }) => {
+          if (duplicateError) throw duplicateError;
+          if (duplicate) {
+            const error = new Error('Another member already uses that email address.');
+            error.statusCode = 409;
+            throw error;
+          }
+        })
+    );
+  }
+  if (preflightChecks.length > 0) {
+    await Promise.all(preflightChecks);
+  }
 
   const { data: updated, error: updateError } = await supabase
     .from('members')
@@ -266,39 +289,61 @@ async function updateMember(req, res) {
     .single();
   if (updateError) throw updateError;
 
-  const { data: linkedProfile, error: linkedProfileError } = await admin
-    .from('profiles')
-    .select('id')
-    .eq('member_id', memberId)
-    .maybeSingle();
-  if (linkedProfileError) throw linkedProfileError;
-
-  if (linkedProfile?.id) {
-    const { error: profileUpdateError } = await admin
+  if (roleChanged || chapterChanged || statusChanged || nameChanged || emailChanged) {
+    const { data: linkedProfile, error: linkedProfileError } = await admin
       .from('profiles')
-      .update({
-        role: accessLevel,
-        chapter_id: chapterId,
-        is_active: status !== 'Inactive'
-      })
-      .eq('id', linkedProfile.id);
-    if (profileUpdateError) throw profileUpdateError;
+      .select('id')
+      .eq('member_id', memberId)
+      .maybeSingle();
+    if (linkedProfileError) throw linkedProfileError;
 
-    const authChanges = {
-      email,
-      user_metadata: {
-        display_name: [firstName, middleName, lastName].filter(Boolean).join(' ')
+    if (linkedProfile?.id) {
+      const syncTasks = [];
+
+      if (roleChanged || chapterChanged || statusChanged) {
+        syncTasks.push(
+          admin
+            .from('profiles')
+            .update({
+              role: accessLevel,
+              chapter_id: chapterId,
+              is_active: status !== 'Inactive'
+            })
+            .eq('id', linkedProfile.id)
+            .then(({ error: profileUpdateError }) => {
+              if (profileUpdateError) throw profileUpdateError;
+            })
+        );
       }
-    };
-    const { error: authUpdateError } = await admin.auth.admin.updateUserById(linkedProfile.id, authChanges);
-    if (authUpdateError) throw authUpdateError;
+
+      if (nameChanged || emailChanged) {
+        const authChanges = {
+          user_metadata: {
+            display_name: [firstName, middleName, lastName].filter(Boolean).join(' ')
+          }
+        };
+        if (emailChanged) authChanges.email = email;
+
+        syncTasks.push(
+          admin.auth.admin.updateUserById(linkedProfile.id, authChanges).then(({ error: authUpdateError }) => {
+            if (authUpdateError) throw authUpdateError;
+          })
+        );
+      }
+
+      if (syncTasks.length > 0) {
+        await Promise.all(syncTasks);
+      }
+    }
   }
 
-  await ensureRoleServiceAssignment(admin, {
-    memberId: updated.id,
-    areaId,
-    role: accessLevel
-  });
+  if (roleChanged) {
+    await ensureRoleServiceAssignment(admin, {
+      memberId: updated.id,
+      areaId,
+      role: accessLevel
+    });
+  }
 
   return sendJson(res, 200, { ok: true, member: updated });
 }

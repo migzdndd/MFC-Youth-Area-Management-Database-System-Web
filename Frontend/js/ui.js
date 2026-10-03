@@ -550,7 +550,30 @@ function openModal(
   if (hasSave) {
     const saveBtn = document.getElementById('saveModal');
     if (saveBtn) {
-      saveBtn.onclick = () => onSave(closeFn);
+      saveBtn.onclick = async () => {
+        if (saveBtn.disabled) return;
+        const originalText = saveBtn.textContent;
+        const cancelBtn = document.getElementById('cancelModal');
+        const closeBtn = document.getElementById('closeModal');
+
+        try {
+          const result = onSave(closeFn);
+          if (result && typeof result.then === 'function') {
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving…';
+            if (cancelBtn) cancelBtn.disabled = true;
+            if (closeBtn) closeBtn.disabled = true;
+            await result;
+          }
+        } finally {
+          if (document.getElementById('saveModal') === saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = originalText;
+            if (cancelBtn) cancelBtn.disabled = false;
+            if (closeBtn) closeBtn.disabled = false;
+          }
+        }
+      };
     }
   }
 

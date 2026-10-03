@@ -1753,9 +1753,12 @@ from {
    FRONTEND COMPLETION PASS
    ========================================================= */
 
-button:disabled {
+button:disabled, .btn:disabled {
   opacity: .62;
   cursor: not-allowed;
+  pointer-events: none;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .prototype-note, .auth-help {
