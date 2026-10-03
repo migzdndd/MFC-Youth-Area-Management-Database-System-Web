@@ -787,7 +787,7 @@ function memberModal(id = null) {
     <div class="form-grid">
 
       ${field(
-    'First Name',
+    'First Name (required)',
     'mFirst',
     'text',
     member.firstName || '',
@@ -803,7 +803,7 @@ function memberModal(id = null) {
   )}
 
       ${field(
-    'Last Name',
+    'Last Name (required)',
     'mLast',
     'text',
     member.lastName || '',
@@ -811,7 +811,7 @@ function memberModal(id = null) {
   )}
 
       ${field(
-    'Birth Date',
+    'Birth Date (required)',
     'mBirth',
     'date',
     member.birthDate || '',
@@ -819,7 +819,7 @@ function memberModal(id = null) {
   )}
 
       ${field(
-    'First Attended Youth Camp',
+    'First Attended Youth Camp (optional)',
     'mFirstYouthCamp',
     'date',
     member.firstAttendedYouthCamp || '',
@@ -827,7 +827,7 @@ function memberModal(id = null) {
   )}
 
       ${field(
-    'Contact Number',
+    'Contact Number (required)',
     'mContact',
     'tel',
     member.contact || '',
@@ -835,7 +835,7 @@ function memberModal(id = null) {
   )}
 
       ${field(
-    'Email Address',
+    'Email Address (required)',
     'mEmail',
     'email',
     member.email || '',
@@ -843,7 +843,7 @@ function memberModal(id = null) {
   )}
 
       ${selectField(
-    'Status',
+    'Status (required)',
     'mStatus',
     [
       'Active',
@@ -855,7 +855,7 @@ function memberModal(id = null) {
 
       <div class="form-group">
         <label for="mAccessLevel">
-          System Access Level
+          System Access Level (required)
         </label>
 
         ${isChapterServantSession() && !id
@@ -898,7 +898,7 @@ function memberModal(id = null) {
       <div class="form-group">
 
         <label for="mChapter">
-          Chapter
+          Chapter (optional)
         </label>
 
         <select
@@ -935,8 +935,8 @@ function memberModal(id = null) {
 
       </div>
 
-      <div class="form-group full">
-        <label for="mAcademicTrack">Academic Track</label>
+      <div class="form-group">
+        <label for="mAcademicTrack">Academic Track (optional)</label>
         <select class="select-input" id="mAcademicTrack">
           <option value="">Select Academic Track</option>
           <option value="High School (HS)" ${member.academicTrack === 'High School (HS)' ? 'selected' : ''}>High School (HS)</option>
@@ -946,28 +946,31 @@ function memberModal(id = null) {
         </select>
       </div>
 
-      <div class="form-group full">
-        <label for="mGradeLevel">Grade / Year Level</label>
+      <div class="form-group">
+        <label for="mGradeLevel">Grade / Year Level (optional)</label>
         <select class="select-input" id="mGradeLevel">
           <option value="">Select Grade Level</option>
           ${[1,2,3,4,5,6,7,8,9,10,11,12].map(n => `<option value="${n}" ${String(member.gradeLevel) === String(n) ? 'selected' : ''}>${n}</option>`).join('')}
         </select>
       </div>
 
-      ${field(
-        'School',
-        'mSchool',
-        'text',
-        member.school || '',
-        'maxlength="100"'
-      )}
+      <div class="form-group full">
+        <label for="mSchool">School (optional)</label>
+        <input
+          class="text-input"
+          id="mSchool"
+          type="text"
+          value="${esc(member.school || '')}"
+          maxlength="100"
+        >
+      </div>
 
       <div
         class="form-group full"
       >
 
         <label for="mAddress">
-          Address
+          Address (optional)
         </label>
 
         <textarea
