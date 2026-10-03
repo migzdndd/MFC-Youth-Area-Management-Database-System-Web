@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:wght@400;500;600;700;800;900&family=Raleway:ital,wght@0,300..800;1,300..800&display=swap');
+@import url('grid-system.css');
 
 /* ============================================================================
    MFC Youth Area Management System - Highly Optimized Global Stylesheet
@@ -19,8 +20,8 @@
   --font-inter: var(--font-opensans);
   --navy: #002847;
   --navy2: #001b30;
-  --blue: #0878bd;
-  --blue2: #05659f;
+  --blue: #002847;
+  --blue2: #001b30;
   --page: #f4f7fb;
   --card: #fff;
   --text: #15253b;
@@ -34,13 +35,13 @@
   --motion-medium: 240ms;
   --motion-slow: 300ms;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --ui-accent: #0b84d1;
-  --ui-accent-strong: #0067a7;
+  --ui-accent: #002847;
+  --ui-accent-strong: #001b30;
   --ui-accent-soft: #e7f5ff;
   --ui-panel: #ffffff;
   --ui-panel-dark: #031f34;
-  --ui-border: rgba(8, 84, 132, .14);
-  --ui-shadow: 0 18px 48px rgba(10, 49, 78, .10);
+  --ui-border: rgba(0, 40, 71, .14);
+  --ui-shadow: 0 18px 48px rgba(0, 40, 71, .10);
   --accent-cyan: #38bdf8;
   --alert-success-bg: #ecfdf5;
   --alert-success-border: #86efac;
@@ -284,6 +285,22 @@ button:active, .btn:active, .btn-auth:active {
   gap: clamp(28px, 4vw, 72px);
   align-items: center;
   margin-left: clamp(0px, 4vw, 70px);
+}
+
+@media (max-width: 900px) {
+  .auth-layout {
+    grid-template-columns: 1fr;
+    margin-left: 0;
+    justify-items: center;
+    text-align: center;
+  }
+  .auth-page {
+    justify-content: center;
+    padding: 40px 20px;
+  }
+  .login-card {
+    max-width: 440px;
+  }
 }
 
 .login-card {
@@ -736,6 +753,12 @@ button:active, .btn:active, .btn-auth:active {
   max-width: 600px;
 }
 
+@media (max-width: 480px) {
+  .info-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
 .info-stats div {
   padding: 18px 12px;
   border-radius: 18px;
@@ -948,6 +971,21 @@ button:active, .btn:active, .btn-auth:active {
   width: calc(100% - 268px);
   min-height: 100vh;
   padding: 34px clamp(22px, 3vw, 44px) 54px;
+}
+
+@media (max-width: 768px) {
+  .app-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 20px 16px 40px;
+  }
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform var(--motion-medium) var(--ease-out);
+  }
+  .sidebar.is-open {
+    transform: translateX(0);
+  }
 }
 
 .page-header {

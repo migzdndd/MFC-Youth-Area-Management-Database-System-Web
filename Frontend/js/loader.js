@@ -234,7 +234,7 @@
 
       root.innerHTML = markup;
     } catch (error) {
-      console.warn('Skeleton loader skipped:', error?.message || error);
+      // Silenced skeleton loader skip
     }
   }
 
@@ -260,7 +260,7 @@
         root.querySelector('[data-page-skeleton]')?.remove();
       });
     } catch (error) {
-      console.warn('Skeleton cleanup skipped:', error?.message || error);
+      // Silenced skeleton cleanup skip
     }
   }
 
@@ -301,7 +301,7 @@
 
       document.body.appendChild(overlay);
     } catch (error) {
-      console.warn('Page loader setup skipped:', error?.message || error);
+      // Silenced page loader setup skip
     }
   }
 
@@ -324,7 +324,7 @@
       overlay.classList.add('is-active');
       overlay.setAttribute('aria-hidden', 'false');
     } catch (error) {
-      console.warn('Page loader show skipped:', error?.message || error);
+      // Silenced page loader show skip
     }
   }
 
@@ -349,7 +349,7 @@
       overlay.classList.remove('is-active');
       overlay.setAttribute('aria-hidden', 'true');
     } catch (error) {
-      console.warn('Page loader hide skipped:', error?.message || error);
+      // Silenced page loader hide skip
     }
   }
 
@@ -492,7 +492,7 @@
         window.setTimeout(run, 120);
       }
     } catch (error) {
-      console.warn('Page prefetch skipped:', error?.message || error);
+      // Silenced page prefetch skip
     }
   }
 

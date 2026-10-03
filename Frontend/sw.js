@@ -69,7 +69,7 @@ self.addEventListener('install', event => {
       // Use individual caching with Promise.allSettled so an optional resource failure does not abort install
       const cachePromises = APP_SHELL_URLS.map(url =>
         cache.add(new Request(url, { cache: 'reload' })).catch(err => {
-          console.warn(`[sw] Warning: could not pre-cache ${url}:`, err.message);
+          // Silenced pre-cache warning
         })
       );
       await Promise.allSettled(cachePromises);
@@ -87,7 +87,6 @@ self.addEventListener('activate', event => {
     caches.keys().then(async keys => {
       const deletions = keys.map(key => {
         if (key !== SHELL_CACHE && key !== API_CACHE) {
-          console.log(`[sw] Removing legacy cache: ${key}`);
           return caches.delete(key);
         }
       });
