@@ -6,7 +6,7 @@
  * device, enabling the app to open instantly and continue functioning even without an internet connection.
  */
 
-const SHELL_CACHE = 'mfc-ams-shell-v3';
+const SHELL_CACHE = 'mfc-ams-shell-v4';
 const API_CACHE = 'mfc-ams-api-v1';
 
 const APP_SHELL_URLS = [
@@ -34,6 +34,7 @@ const APP_SHELL_URLS = [
   '/js/loader.js',
   '/js/password-strength.js',
   '/js/config.js',
+  '/js/auth.js',
   '/js/offline-store.js',
   '/js/sync-manager.js',
   '/js/api.js',

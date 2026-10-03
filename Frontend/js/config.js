@@ -10,7 +10,7 @@
 
 // Storage labels for browser memory
 const DB_KEY = 'mfc_web_database_v1';
-var SESSION_KEY = window.SESSION_KEY || 'mfc_auth_session';
+window.SESSION_KEY = window.SESSION_KEY || 'mfc_auth_session';
 const DB_VERSION = 8;
 let activeModalCleanup = null;
 
@@ -73,7 +73,7 @@ const ACCESS_LEVELS = [
   { value: 'member', label: 'Member' }
 ];
 
-var ACCESS_ROLE_VALUES = window.ACCESS_ROLE_VALUES || new Set(
+window.ACCESS_ROLE_VALUES = window.ACCESS_ROLE_VALUES || new Set(
   ACCESS_LEVELS.map(item => item.value)
 );
 

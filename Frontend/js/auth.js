@@ -7,10 +7,10 @@
  */
 
 // Storage Keys & Access Level Configuration
-var SESSION_KEY = window.SESSION_KEY || 'mfc_auth_session';
+window.SESSION_KEY = window.SESSION_KEY || 'mfc_auth_session';
 
 /** The list of recognized leadership and member roles in the system */
-var ACCESS_ROLE_VALUES = window.ACCESS_ROLE_VALUES || new Set([
+window.ACCESS_ROLE_VALUES = window.ACCESS_ROLE_VALUES || new Set([
   'national_coordinator',
   'couple_coordinator',
   'area_servant',
