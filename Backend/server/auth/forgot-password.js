@@ -3,13 +3,11 @@ import { createSupabaseAuthClient } from '../_lib/supabase.js';
 import { checkRateLimit } from '../_lib/rate-limit.js';
 
 /**
- * Send Password Recovery Link to Email
+ * Forgotten Password Reset Email Dispatcher
  *
- * What it does:
- * Generates and emails a secure, single-use password reset link to the user so they can regain access to their account.
- *
- * Backup plan if it breaks:
- * Always returns a generic "If an account exists, a reset link was sent" message even if the email doesn't exist or fails upstream, protecting user privacy against email enumeration attacks.
+ * What it Does: Simple non IT Terms
+ * Sends an email containing a secure link to help a user who forgot their password
+ * safely reset it and log back into their account.
  */
 export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);

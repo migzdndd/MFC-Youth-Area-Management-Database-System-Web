@@ -1,3 +1,11 @@
+/**
+ * Chapter Management and Listing Resource Endpoint
+ *
+ * What it Does: Simple non IT Terms
+ * Manages the neighborhood branches (Chapters) within an Area, allowing leaders to create
+ * new chapters, view existing chapters, update chapter details, or archive inactive chapters.
+ */
+
 import {
   requireAuthenticatedProfile,
   isAreaAdminRole,

@@ -1,19 +1,12 @@
 /**
- * ============================================================================
- * MFC Youth Area Management System - Service Worker (PWA)
- * ============================================================================
- * Features:
- * 1. App Shell Pre-caching for offline instant startup.
- * 2. Cache-First & Stale-While-Revalidate for static assets (HTML/CSS/JS/Fonts).
- * 3. Network-First with Cache fallback for GET /api/sync and read requests.
- * 4. Fetch Interception for offline mutations (POST/PATCH/DELETE) to:
- *    - /api/participants (Attendance & Payment toggles)
- *    - /api/reports (Activity Report drafts)
- * 5. Background sync integration (FIFO Outbox triggering).
- * ============================================================================
+ * Progressive Web App (PWA) Service Worker and Offline Cache Engine
+ *
+ * What it Does: Simple non IT Terms
+ * Works silently behind the scenes to save web pages, icons, fonts, and scripts onto your
+ * device, enabling the app to open instantly and continue functioning even without an internet connection.
  */
 
-const SHELL_CACHE = 'mfc-ams-shell-v2';
+const SHELL_CACHE = 'mfc-ams-shell-v3';
 const API_CACHE = 'mfc-ams-api-v1';
 
 const APP_SHELL_URLS = [
@@ -39,6 +32,7 @@ const APP_SHELL_URLS = [
   '/css/style.css',
   '/css/changelogs.css',
   '/js/loader.js',
+  '/js/password-strength.js',
   '/js/config.js',
   '/js/offline-store.js',
   '/js/sync-manager.js',

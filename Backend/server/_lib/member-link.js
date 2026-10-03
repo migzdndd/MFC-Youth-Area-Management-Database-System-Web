@@ -1,3 +1,11 @@
+/**
+ * Member and Leader Account Profile Linker
+ *
+ * What it Does: Simple non IT Terms
+ * Automatically connects login accounts with their corresponding profiles in the member roster,
+ * making sure servant leaders have roster entries and assigned leadership service tags.
+ */
+
 import { normalizeEmail } from './http.js';
 import { ensureRoleServiceAssignment } from './service-catalog.js';
 

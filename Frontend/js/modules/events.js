@@ -1,15 +1,10 @@
 /**
- * MFC Youth Area Management System - Events & Participant Attendance
+ * Community Events, Assemblies, and Attendance Tracking Module
  *
- * What this file does:
+ * What it Does: Simple non IT Terms
  * Manages Area assemblies, camps, youth conferences, and fellowship events.
- * It lets leaders create events, track participant registrations, verify fee payments,
- * and mark actual attendance.
- *
- * Backup plan if it breaks:
- * If participant records are missing, the system uses the manual attendance estimate entered
- * on the event. If an online save fails, it alerts you with a clear error toast and preserves
- * existing registration data.
+ * It lets leaders schedule new events, view upcoming and past gatherings, check in
+ * participants at the venue, and track fee payment statuses.
  */
 
 let eventFilters = {

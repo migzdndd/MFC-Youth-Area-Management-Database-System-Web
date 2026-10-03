@@ -1,3 +1,12 @@
+/**
+ * Brute-Force Password Protection and Account Lockout Guard
+ *
+ * What it Does: Simple non IT Terms
+ * Protects user accounts from password guessers and hackers. If someone types the wrong
+ * password 5 times in a row for an email address, it automatically locks the account for 15 minutes
+ * to keep the account safe.
+ */
+
 import { createSupabaseAdmin } from './supabase.js';
 import { sendJson, normalizeEmail } from './http.js';
 

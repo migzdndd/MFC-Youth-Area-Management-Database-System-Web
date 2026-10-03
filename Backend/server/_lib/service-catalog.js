@@ -1,3 +1,11 @@
+/**
+ * Service Catalog and Role Assignment Registry
+ *
+ * What it Does: Simple non IT Terms
+ * Keeps an official directory of all church community ministry service roles (like Music,
+ * Dance, Unit Servant, or Chapter Servant) and prevents spelling mistakes or mismatched titles.
+ */
+
 export const STANDARD_SERVICES = Object.freeze([
   'Unit Servant',
   'Household Servant',

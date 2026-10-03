@@ -1,3 +1,12 @@
+/**
+ * Sliding Window IP Rate Limiter and Traffic Flood Protector
+ *
+ * What it Does: Simple non IT Terms
+ * Serves as the traffic meter and flood protector. It tracks how many times someone
+ * tries to log in, reset a password, or submit requests, and tells them to wait if they
+ * are sending too many requests too quickly.
+ */
+
 import { createSupabaseAdmin } from './supabase.js';
 import { sendJson } from './http.js';
 

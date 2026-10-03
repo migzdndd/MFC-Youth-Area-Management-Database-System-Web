@@ -1,6 +1,14 @@
 import { sendJson, methodNotAllowed, apiError, readBearerToken, clearAuthCookies } from '../_lib/http.js';
 import { assertBackendConfigured } from '../_lib/env.js';
 
+/**
+ * User Logout and Session Invalidation Handler
+ *
+ * What it Does: Simple non IT Terms
+ * Signs the user out of their account, revokes their security session in the database,
+ * and clears any stored login cookies from their browser.
+ */
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
 

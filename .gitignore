@@ -84,6 +84,9 @@ coverage/
 .supabase/
 Backend/supabase/.temp/
 docs/legal-backup/
+.cloudflare/
+.env.production
+.env.staging
 
 # Archives and backup packages
 *.zip
@@ -100,4 +103,8 @@ AGENTS.md
 GEMINI.md
 agents.md
 gemini.md
+
+# Local Developer Debug Notes & Private Documentation
+DEBUGGING_NOTES.md
+*.local.md
 

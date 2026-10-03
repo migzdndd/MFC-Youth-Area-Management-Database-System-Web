@@ -1,19 +1,9 @@
 /**
- * ============================================================================
- * MFC Youth Area Management System - Background Re-synchronization Manager
- * ============================================================================
- * Purpose:
- * Coordinates the FIFO outbox queue processor, network status monitoring,
- * and conflict detection. Replays pending mutations (attendance, payments,
- * reports) sequentially to the backend router when connectivity is restored.
+ * Background Offline Sync and Mutation Outbox Queue Coordinator
  *
- * Emitted Custom DOM Events:
- * - `sync:started`        ({ total, manual })
- * - `sync:progress`       ({ current, total, mutation })
- * - `sync:completed`      ({ syncedCount, failedCount, remaining })
- * - `sync:conflict`       ({ mutation, error, status })
- * - `sync:status-changed` ({ isSyncing, pendingCount, isOnline })
- * ============================================================================
+ * What it Does: Simple non IT Terms
+ * Watches the device's internet connection. When you go offline, it queues any changes
+ * you make, and as soon as internet returns, it sends those changes to the cloud server one by one.
  */
 
 (function (root, factory) {
@@ -63,7 +53,7 @@
       return window.getSession();
     }
     try {
-      const stored = localStorage.getItem('mfc_demo_session') || sessionStorage.getItem('mfc_demo_session');
+      const stored = localStorage.getItem('mfc_auth_session') || sessionStorage.getItem('mfc_auth_session');
       return stored ? JSON.parse(stored) : null;
     } catch {
       return null;
@@ -176,7 +166,7 @@
         const token = session?.accessToken || '';
 
         // If backend auth is enabled but token is missing, pause sync until user logs in
-        if (session?.backendAuth && !session?.demo && !token) {
+        if (session?.backendAuth && !token) {
           console.warn('[sync-manager] Sync paused: Authentication token required.');
           isSyncing = false;
           await broadcastStatus();

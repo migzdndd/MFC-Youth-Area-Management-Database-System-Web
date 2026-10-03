@@ -1,19 +1,13 @@
 /**
- * MFC Youth Area Management System - Sign-In & Security Helpers
+ * Frontend Authentication, Session Management, and Credential Validator
  *
- * What this file does:
- * Handles everything related to signing in, signing up, remembering who is logged in,
- * and checking passwords.
- *
- * Backup plan if it breaks:
- * If the online server cannot be reached, the system automatically checks offline demo accounts
- * stored in your web browser so you can still test or view the system without getting locked out.
+ * What it Does: Simple non IT Terms
+ * Handles signing in, registering, claiming accounts, resetting passwords, and remembering
+ * who is currently logged into the app. It checks security requirements and saves login tokens.
  */
 
 // Storage Keys & Access Level Configuration
-const USER_KEY = 'mfc_demo_users';
-const SESSION_KEY = 'mfc_demo_session';
-const DB_KEY = 'mfc_web_database_v1';
+const SESSION_KEY = 'mfc_auth_session';
 
 /** The list of recognized leadership and member roles in the system */
 const ACCESS_ROLE_VALUES = new Set([
@@ -44,18 +38,6 @@ function normalizeAccessRole(value) {
   return ACCESS_ROLE_VALUES.has(role) ? role : 'member';
 }
 
-/**
- * Find Member's Official Role
- *
- * What it does:
- * Looks up what permission level a member record holds.
- *
- * Backup plan if it breaks:
- * If the member record is missing or has no role set, it safely assumes they are a basic "member".
- */
-function roleForMember(member) {
-  return normalizeAccessRole(member?.accessLevel || 'member');
-}
 
 /**
  * Safe Information Reader
@@ -83,139 +65,6 @@ function normalizeEmail(value = '') {
   return String(value).trim().toLowerCase();
 }
 
-// ---------------------------------------------------------------------------
-// Browser Storage: Loading and Updating Member Records & Demo Users
-// ---------------------------------------------------------------------------
-
-/**
- * Read Cached Members
- *
- * What it does:
- * Grabs the list of youth members saved in your browser's local storage.
- *
- * Backup plan if it breaks:
- * If storage is empty or damaged, it returns an empty list so the screen still loads without error.
- */
-function getMembers() {
-  const data = safeParse(localStorage.getItem(DB_KEY) || '{}', {});
-  return Array.isArray(data.members) ? data.members : [];
-}
-
-/**
- * Read and Sync Demo Users
- *
- * What it does:
- * Reads the list of login accounts stored in the browser and makes sure each account's role,
- * name, and chapter match their official member record.
- *
- * Backup plan if it breaks:
- * If an account has no matching member record, it labels it as an unlinked account and preserves
- * whatever information was already saved.
- */
-function getUsers() {
-  const users = safeParse(localStorage.getItem(USER_KEY) || '[]', []);
-  if (!Array.isArray(users)) return [];
-
-  const members = getMembers();
-  let changed = false;
-
-  const normalized = users.map(raw => {
-    const user = {
-      ...raw,
-      email: normalizeEmail(raw.email)
-    };
-
-    let linkedMember = null;
-
-    if (
-      user.memberId !== null &&
-      user.memberId !== undefined
-    ) {
-      linkedMember = members.find(
-        member => String(member.id) === String(user.memberId)
-      ) || null;
-    }
-
-    if (!linkedMember && user.email) {
-      const matches = members.filter(
-        member =>
-          normalizeEmail(member.email) &&
-          normalizeEmail(member.email) === user.email
-      );
-
-      if (matches.length === 1) {
-        linkedMember = matches[0];
-      }
-    }
-
-    if (!user.role) {
-      if (linkedMember) {
-        user.role = roleForMember(linkedMember);
-        user.memberId = linkedMember.id;
-        user.mustChangePassword = user.mustChangePassword !== false;
-      } else {
-        user.role = 'legacy';
-      }
-      changed = true;
-    }
-
-    if (linkedMember && user.role !== 'legacy') {
-      const desiredRole = roleForMember(linkedMember);
-      const desiredChapterId = linkedMember.chapterId ?? null;
-      const desiredActive = String(linkedMember.status || 'Active') !== 'Inactive';
-      const desiredName = [
-        linkedMember.firstName,
-        linkedMember.middleName,
-        linkedMember.lastName
-      ].filter(Boolean).join(' ');
-
-      if (user.role !== desiredRole) {
-        user.role = desiredRole;
-        changed = true;
-      }
-
-      if (String(user.memberId) !== String(linkedMember.id)) {
-        user.memberId = linkedMember.id;
-        changed = true;
-      }
-
-      if (String(user.chapterId ?? '') !== String(desiredChapterId ?? '')) {
-        user.chapterId = desiredChapterId;
-        changed = true;
-      }
-
-      if (user.isActive !== desiredActive) {
-        user.isActive = desiredActive;
-        changed = true;
-      }
-
-      if (desiredName && user.name !== desiredName) {
-        user.name = desiredName;
-        user.firstName = linkedMember.firstName || '';
-        user.lastName = linkedMember.lastName || '';
-        changed = true;
-      }
-    }
-
-    return user;
-  });
-
-  if (changed) saveUsers(normalized);
-  return normalized;
-}
-
-/**
- * Save User Accounts Locally
- *
- * What it does:
- * Writes the list of test and offline users into your browser's local storage.
- *
- * Backup plan if it breaks:
- * If the browser storage is full or restricted, it fails quietly so the current page continues running.
- */
-function saveUsers(users) {
-  localStorage.setItem(USER_KEY, JSON.stringify(users));
-}
 
 // ---------------------------------------------------------------------------
 // Login Memory & Screen Directions
@@ -236,8 +85,8 @@ function getSession() {
   const raw = safeParse(localStorage.getItem(SESSION_KEY), null) || safeParse(sessionStorage.getItem(SESSION_KEY), null);
   if (!raw) return null;
 
-  // Check if login time has expired and automatically sign out if too old
-  if (raw.expiresAt) {
+  // Check if login time has expired and automatically sign out if too old and not refreshable
+  if (raw.expiresAt && !raw.refreshToken) {
     const expiresAtMs = typeof raw.expiresAt === 'number' ? raw.expiresAt * 1000 : new Date(raw.expiresAt).getTime();
     if (Date.now() >= expiresAtMs) {
       clearSession();
@@ -333,7 +182,7 @@ function destinationFor(session) {
  */
 async function apiJson(path, options = {}) {
   const activeSession = getSession();
-  const accessToken = activeSession?.backendAuth && !activeSession?.demo
+  const accessToken = activeSession?.backendAuth
     ? String(activeSession.accessToken || '')
     : '';
 
@@ -402,8 +251,7 @@ function backendSessionFromResponse(payload, remember = false) {
     accessToken: serverSession.accessToken || '',
     refreshToken: serverSession.refreshToken || '',
     expiresAt: serverSession.expiresAt || null,
-    backendAuth: true,
-    demo: false
+    backendAuth: true
   };
   saveSession(session, remember);
   return session;
@@ -511,6 +359,9 @@ function isValidEmail(value) {
  * Returns a clear, friendly instruction explaining what needs to be added if it is too short or weak.
  */
 function passwordError(password) {
+  if (typeof window !== 'undefined' && typeof window.passwordError === 'function') {
+    return window.passwordError(password);
+  }
   if (password.length < 8) return 'Password must be at least 8 characters long.';
   if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) return 'Password must contain at least one letter and one number.';
   return '';
@@ -593,287 +444,6 @@ if (currentSession && document.body.dataset.allowAuthenticated !== 'true') {
   navigateWithLoader(destinationFor(currentSession), true);
 }
 
-// ---------------------------------------------------------------------------
-// Demo Practice Accounts (No Internet Required)
-// ---------------------------------------------------------------------------
-
-/** Pre-set leadership roles available for quick test-driving */
-const DEMO_ROLES = [
-  {
-    role: 'area_servant',
-    label: 'Area Servant',
-    badge: 'Full Area Access',
-    description: 'Comprehensive management across all members, chapters, services, reports, and events.'
-  },
-  {
-    role: 'lit_servant',
-    label: 'Area LIT Servant',
-    badge: 'LIT & Services',
-    description: 'Focus on Leader-In-Training development, chapter service roles, reports, and events.'
-  },
-  {
-    role: 'area_kids_servant',
-    label: 'Area Kids Servant',
-    badge: 'Kids Ministry',
-    description: 'Management of kids ministry records, member rosters, activity reports, and events.'
-  },
-  {
-    role: 'mfc_high_servant',
-    label: 'MFC High Servant',
-    badge: 'High School',
-    description: 'High school section coordination with filtered member roster, service view, and reports.'
-  },
-  {
-    role: 'campus_servant',
-    label: 'Campus Servant',
-    badge: 'Campus & College',
-    description: 'Campus ministry coordination covering Senior High and College members, service view, and events.'
-  },
-  {
-    role: 'chapter_servant',
-    label: 'Chapter Servant',
-    badge: 'Chapter Level',
-    description: 'Chapter-scoped operations with chapter profile management, activity reports, and events.'
-  }
-];
-
-/**
- * Instant Demo Sign-In
- *
- * What it does:
- * Instantly logs in with a selected leadership role so you can explore all features right away.
- *
- * Backup plan if it breaks:
- * If the selected role cannot be found, it safely defaults to Area Servant so you are never locked out of testing.
- */
-function startDemoLogin(roleKey = 'area_servant', remember = false) {
-  const chosen = DEMO_ROLES.find(r => r.role === roleKey) || DEMO_ROLES[0];
-  
-  let demoChapterId = null;
-  if (chosen.role === 'chapter_servant') {
-    const data = safeParse(localStorage.getItem(DB_KEY) || '{}', {});
-    if (Array.isArray(data.chapters) && data.chapters.length > 0) {
-      demoChapterId = data.chapters[0].id;
-    } else {
-      demoChapterId = '1';
-    }
-  }
-
-  const session = {
-    email: `${chosen.role}@mfcyouth.local`,
-    name: `${chosen.label} (Demo)`,
-    role: chosen.role,
-    chapterId: demoChapterId,
-    areaId: 'NCR-CENTRAL',
-    areaName: 'NCR Central',
-    loginAt: new Date().toISOString(),
-    mustChangePassword: false,
-    demo: true
-  };
-
-  saveSession(session, remember);
-  navigateWithLoader('/dashboard');
-}
-
-/**
- * Open Demo Account Selection Window
- *
- * What it does:
- * Shows a compact, draggable card window where you can pick which role you want to practice with.
- *
- * Backup plan if it breaks:
- * The window can be closed at any time by pressing Escape, clicking Cancel, or clicking outside,
- * and will never slide off the visible edges of your screen.
- */
-function openDemoRoleModal(remember = false) {
-  const existing = document.getElementById('demoRoleModal');
-  if (existing) existing.remove();
-
-  const modal = document.createElement('div');
-  modal.id = 'demoRoleModal';
-  modal.className = 'demo-role-modal-overlay is-open';
-
-  modal.innerHTML = `
-    <div class="demo-role-modal-dialog" role="dialog" aria-labelledby="demoRoleModalTitle" aria-modal="true">
-      <div class="demo-role-modal-header">
-        <div class="demo-role-title-group">
-          <span class="demo-role-drag-grip" title="Drag to reposition">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-              <circle cx="5" cy="4" r="1.5"/>
-              <circle cx="11" cy="4" r="1.5"/>
-              <circle cx="5" cy="8" r="1.5"/>
-              <circle cx="11" cy="8" r="1.5"/>
-              <circle cx="5" cy="12" r="1.5"/>
-              <circle cx="11" cy="12" r="1.5"/>
-            </svg>
-          </span>
-          <div>
-            <h2 id="demoRoleModalTitle">Select Demo Access Level</h2>
-            <p>Choose a leadership role to test in this session.</p>
-          </div>
-        </div>
-        <button type="button" id="closeDemoRoleModal" class="demo-role-close-btn" aria-label="Close demo prompt">&times;</button>
-      </div>
-
-      <div class="demo-role-modal-body">
-        ${DEMO_ROLES.map(r => `
-          <button
-            type="button"
-            class="demo-role-card demo-role-option"
-            data-role="${r.role}"
-          >
-            <div class="demo-role-card-top">
-              <strong>${r.label}</strong>
-              <span class="demo-role-badge">${r.badge}</span>
-            </div>
-            <p>${r.description}</p>
-          </button>
-        `).join('')}
-      </div>
-
-      <div class="demo-role-modal-footer">
-        <span class="demo-role-modal-hint">
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-            <path d="M7 2a1 1 0 0 1 2 0v2.586l1.293-1.293a1 1 0 1 1 1.414 1.414L9.414 7H12a1 1 0 1 1 0 2H9.414l2.293 2.293a1 1 0 0 1-1.414 1.414L9 10.414V13a1 1 0 1 1-2 0v-2.586l-1.293 1.293a1 1 0 0 1-1.414-1.414L6.586 8H4a1 1 0 0 1 0-2h2.586L4.293 4.707a1 1 0 0 1 1.414-1.414L7 4.586V2z"/>
-          </svg>
-          Drag header to move
-        </span>
-        <button type="button" id="cancelDemoRoleModal" class="demo-role-cancel-btn">Cancel</button>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-
-  const dialog = modal.querySelector('.demo-role-modal-dialog');
-  const header = modal.querySelector('.demo-role-modal-header');
-
-  let isDragging = false;
-  let hasMoved = false;
-  let startX = 0;
-  let startY = 0;
-  let initialLeft = 0;
-  let initialTop = 0;
-
-  const onPointerDown = (e) => {
-    if (e.button !== undefined && e.button !== 0) return;
-    if (e.target.closest('#closeDemoRoleModal')) return;
-
-    isDragging = true;
-    hasMoved = false;
-    startX = e.clientX;
-    startY = e.clientY;
-
-    const rect = dialog.getBoundingClientRect();
-    initialLeft = rect.left;
-    initialTop = rect.top;
-
-    dialog.style.left = `${rect.left}px`;
-    dialog.style.top = `${rect.top}px`;
-    dialog.style.transform = 'none';
-    dialog.style.margin = '0';
-    dialog.classList.add('is-dragging');
-
-    if (header.setPointerCapture && e.pointerId !== undefined) {
-      try { header.setPointerCapture(e.pointerId); } catch (_) {}
-    }
-
-    window.addEventListener('pointermove', onPointerMove, { passive: false });
-    window.addEventListener('pointerup', onPointerUp);
-    window.addEventListener('pointercancel', onPointerUp);
-  };
-
-  const onPointerMove = (e) => {
-    if (!isDragging) return;
-    e.preventDefault();
-
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
-    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
-      hasMoved = true;
-    }
-
-    const rect = dialog.getBoundingClientRect();
-    const minX = 8;
-    const maxX = window.innerWidth - rect.width - 8;
-    const minY = 8;
-    const maxY = window.innerHeight - rect.height - 8;
-
-    let targetLeft = initialLeft + dx;
-    let targetTop = initialTop + dy;
-
-    if (maxX > minX) {
-      targetLeft = Math.max(minX, Math.min(targetLeft, maxX));
-    }
-    if (maxY > minY) {
-      targetTop = Math.max(minY, Math.min(targetTop, maxY));
-    }
-
-    dialog.style.left = `${targetLeft}px`;
-    dialog.style.top = `${targetTop}px`;
-  };
-
-  const onPointerUp = (e) => {
-    if (!isDragging) return;
-    isDragging = false;
-    dialog.classList.remove('is-dragging');
-
-    if (header.releasePointerCapture && e.pointerId !== undefined) {
-      try { header.releasePointerCapture(e.pointerId); } catch (_) {}
-    }
-
-    window.removeEventListener('pointermove', onPointerMove);
-    window.removeEventListener('pointerup', onPointerUp);
-    window.removeEventListener('pointercancel', onPointerUp);
-  };
-
-  header.addEventListener('pointerdown', onPointerDown);
-
-  const close = () => {
-    window.removeEventListener('pointermove', onPointerMove);
-    window.removeEventListener('pointerup', onPointerUp);
-    window.removeEventListener('pointercancel', onPointerUp);
-    document.removeEventListener('keydown', onKeyDown);
-    header.removeEventListener('pointerdown', onPointerDown);
-    modal.remove();
-  };
-
-  const onKeyDown = (e) => {
-    if (e.key === 'Escape') close();
-  };
-  document.addEventListener('keydown', onKeyDown);
-
-  document.getElementById('closeDemoRoleModal')?.addEventListener('click', close);
-  document.getElementById('cancelDemoRoleModal')?.addEventListener('click', close);
-
-  let overlayDown = false;
-  modal.addEventListener('pointerdown', (e) => {
-    overlayDown = e.target === modal;
-  });
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal && overlayDown && !hasMoved) {
-      close();
-    }
-  });
-
-  modal.querySelectorAll('.demo-role-option').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const selectedRole = btn.getAttribute('data-role');
-      btn.style.opacity = '0.7';
-      const badge = btn.querySelector('.demo-role-badge');
-      if (badge) badge.textContent = 'Launching…';
-      startDemoLogin(selectedRole, remember);
-    });
-  });
-}
-
-// Demo button listener
-const demoLoginButton = document.getElementById('demoLoginButton');
-if (demoLoginButton) {
-  demoLoginButton.addEventListener('click', () => {
-    openDemoRoleModal(false);
-  });
-}
 
 // ---------------------------------------------------------------------------
 // Main Login Form Submission
@@ -894,15 +464,6 @@ if (loginForm) {
 
     setButtonBusy(submit, true, 'Signing In…');
 
-    // Quick shortcut for built-in demo administrator
-    const demoOk = email === 'admin@mfcyouth.local' && password === 'admin123';
-    if (demoOk) {
-      setButtonBusy(submit, false, 'Sign In');
-      openDemoRoleModal(remember);
-      return;
-    }
-
-    // Try signing in through the online cloud server first, falling back to local storage if offline
     try {
       const payload = await apiJson('/api/auth/login', {
         method: 'POST',
@@ -924,42 +485,8 @@ if (loginForm) {
       navigateWithLoader(destinationFor(session));
       return;
     } catch (backendError) {
-      const users = getUsers();
-      const user = users.find(item => item.email === email && item.password === password);
-
-      if (!user) {
-        setButtonBusy(submit, false);
-        showMessage('loginMessage', backendError?.message || 'Account not found or password is incorrect.');
-        return;
-      }
-
-      if (user.role === 'legacy') {
-        setButtonBusy(submit, false);
-        showMessage('loginMessage', 'This older account is not linked to a member record. Ask an Area-level servant to add or link you from the Members page.');
-        return;
-      }
-
-      if (user.isActive === false) {
-        setButtonBusy(submit, false);
-        showMessage('loginMessage', 'This account is currently inactive. Contact an Area-level servant.');
-        return;
-      }
-
-      const session = {
-        userId: user.id,
-        memberId: user.memberId ?? null,
-        email: user.email,
-        name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
-        role: normalizeAccessRole(user.role || 'member'),
-        chapterId: user.chapterId ?? null,
-        loginAt: new Date().toISOString(),
-        mustChangePassword: user.mustChangePassword === true,
-        needsAreaSetup: false,
-        demo: false
-      };
-
-      saveSession(session, remember);
-      navigateWithLoader(destinationFor(session));
+      setButtonBusy(submit, false);
+      showMessage('loginMessage', backendError?.message || 'Invalid email or password.');
     }
   });
 }
@@ -988,7 +515,7 @@ if (adminRegistrationForm) {
       showMessage('adminRegistrationMessage', 'Enter a valid email address.');
       return;
     }
-    if (!['national_coordinator', 'couple_coordinator', 'area_servant', 'lit_servant', 'campus_servant', 'mfc_high_servant', 'area_kids_servant', 'chapter_servant'].includes(role)) {
+    if (!['couple_coordinator', 'area_servant', 'lit_servant', 'campus_servant', 'mfc_high_servant', 'area_kids_servant', 'chapter_servant'].includes(role)) {
       showMessage('adminRegistrationMessage', 'Select your System Access Level.');
       return;
     }
@@ -1061,7 +588,7 @@ if (memberClaimForm) {
       return;
     }
 
-    setButtonBusy(submit, true, 'Creating Account…');
+    setButtonBusy(submit, true, 'Claiming Account…');
     try {
       const payload = await apiJson('/api/auth/member-claim', {
         method: 'POST',
@@ -1079,7 +606,7 @@ if (memberClaimForm) {
       setTimeout(() => navigateWithLoader(destinationFor(session)), 550);
     } catch (error) {
       setButtonBusy(submit, false);
-      showMessage('memberClaimMessage', error?.message || 'Unable to create your Member Portal account. Please try again.');
+      showMessage('memberClaimMessage', error?.message || 'Unable to claim your Member Portal account. Please try again.');
     }
   });
 }
@@ -1094,7 +621,7 @@ if (backToLoginButton) {
     backToLoginButton.disabled = true;
     backToLoginButton.textContent = 'Signing Out…';
 
-    if (activeSession?.backendAuth && !activeSession?.demo && activeSession?.accessToken) {
+    if (activeSession?.backendAuth && activeSession?.accessToken) {
       try {
         await apiJson('/api/auth/logout', {
           method: 'POST',
@@ -1117,11 +644,8 @@ if (forcePasswordForm) {
   const pageTitle = document.getElementById('passwordPageTitle');
   const pageIntro = document.getElementById('passwordPageIntro');
 
-  if (!session) {
+  if (!session || !session.backendAuth) {
     navigateWithLoader('/', true);
-  } else if (session.demo) {
-    showMessage('passwordMessage', 'The built-in demo administrator password cannot be changed from this prototype.', 'error');
-    forcePasswordForm.querySelectorAll('input, button[type="submit"]').forEach(el => { el.disabled = true; });
   } else {
     if (accountEmail) accountEmail.textContent = session.email;
     if (session.mustChangePassword) {
@@ -1155,42 +679,21 @@ if (forcePasswordForm) {
       }
 
       // Online server accounts: update password via cloud endpoint
-      if (session.backendAuth && !session.demo) {
-        setButtonBusy(submit, true, 'Updating…');
-        try {
-          await apiJson('/api/auth/change-password', {
-            method: 'POST',
-            body: JSON.stringify({ currentPassword, newPassword: password })
-          });
+      setButtonBusy(submit, true, 'Updating…');
+      try {
+        await apiJson('/api/auth/change-password', {
+          method: 'POST',
+          body: JSON.stringify({ currentPassword, newPassword: password })
+        });
 
-          const updatedSession = { ...session, mustChangePassword: false };
-          updateSession(updatedSession);
-          showMessage('passwordMessage', 'Password updated successfully. Redirecting…', 'success');
-          setTimeout(() => { navigateWithLoader(destinationFor(updatedSession)); }, 650);
-        } catch (error) {
-          setButtonBusy(submit, false);
-          showMessage('passwordMessage', error?.message || 'Unable to update your password. Please try again.');
-        }
-        return;
+        const updatedSession = { ...session, mustChangePassword: false };
+        updateSession(updatedSession);
+        showMessage('passwordMessage', 'Password updated successfully. Redirecting…', 'success');
+        setTimeout(() => { navigateWithLoader(destinationFor(updatedSession)); }, 650);
+      } catch (error) {
+        setButtonBusy(submit, false);
+        showMessage('passwordMessage', error?.message || 'Unable to update your password. Please try again.');
       }
-
-      // Offline demo accounts fallback: update password directly in browser memory
-      const users = getUsers();
-      const user = users.find(item => String(item.id) === String(session.userId)) || users.find(item => item.email === session.email);
-      if (!user || user.password !== currentPassword) {
-        showMessage('passwordMessage', 'Your current password is incorrect.');
-        return;
-      }
-
-      user.password = password;
-      user.mustChangePassword = false;
-      user.passwordUpdatedAt = new Date().toISOString();
-      saveUsers(users);
-
-      const updatedSession = { ...session, mustChangePassword: false };
-      updateSession(updatedSession);
-      showMessage('passwordMessage', 'Password updated successfully. Redirecting…', 'success');
-      setTimeout(() => { navigateWithLoader(destinationFor(updatedSession)); }, 650);
     });
   }
 }
@@ -1203,7 +706,7 @@ if (changeEmailForm) {
   const emailSession = getSession();
   const newEmailInput = document.getElementById('newAccountEmail');
 
-  if (!emailSession || emailSession.demo || !emailSession.backendAuth) {
+  if (!emailSession || !emailSession.backendAuth) {
     changeEmailForm.querySelectorAll('input, button').forEach(element => { element.disabled = true; });
     showMessage('emailChangeMessage', 'Email changes are available only for signed-in cloud accounts.');
   } else {

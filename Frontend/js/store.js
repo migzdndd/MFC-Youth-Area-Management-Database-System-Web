@@ -1,15 +1,9 @@
 /**
- * ============================================================================
- * MFC Youth Area Management System - Data Storage & Leader Permissions
- * ============================================================================
- * What this file is:
- * This script manages the saved records on your device (members, chapters, events,
- * and reports) and controls who has permission to view or edit them.
+ * Local Data Storage, Seed Engine, and Client Permission Guard
  *
- * Backup plan if something breaks:
- * If stored data is ever damaged, incomplete, or missing, this script cleans and
- * repairs the structure on the spot so the app keeps running safely.
- * ============================================================================
+ * What it Does: Simple non IT Terms
+ * Manages the records saved on the user's phone or computer (members, chapters, events,
+ * and reports) and makes sure leaders can only see information allowed for their role.
  */
 
 // Section 1: Leader Permissions & Chapter Boundaries

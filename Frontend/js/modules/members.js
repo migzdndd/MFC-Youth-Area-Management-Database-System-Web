@@ -1,14 +1,10 @@
 /**
- * MFC Youth Area Management System - Member Records & GIG Contributions
+ * Community Member Directory, Roster Management, and GIG Ledger Module
  *
- * What this file does:
- * Manages youth member profiles, chapter assignments, leadership roles,
- * and tracks GIG (God Is Good) tithes and voluntary offerings.
- *
- * Backup plan if it breaks:
- * If an internet sync fails or you are offline, all changes are safely saved to your
- * browser's local memory. Role permissions are checked before any action to ensure leaders
- * only modify records they are authorized to manage.
+ * What it Does: Simple non IT Terms
+ * Manages the youth membership database for an Area. Leaders can search and view member
+ * profiles, edit contact information, change statuses, manage ministry roles, and record
+ * voluntary GIG financial offerings.
  */
 
 let memberFilters = {

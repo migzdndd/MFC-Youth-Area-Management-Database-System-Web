@@ -2,6 +2,14 @@ import { requireAuthenticatedProfile } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { ensureLeadershipMemberRecord } from '../_lib/member-link.js';
 
+/**
+ * Authenticated User Profile and Identity Resolver
+ *
+ * What it Does: Simple non IT Terms
+ * Looks up who is currently signed in, retrieves their role, area, and chapter permissions,
+ * and loads their connected member profile so the app knows what buttons and pages to show them.
+ */
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') return methodNotAllowed(res, ['GET']);
 

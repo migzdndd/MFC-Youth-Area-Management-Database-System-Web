@@ -1,3 +1,11 @@
+/**
+ * Member Account Claim and Resolution Helper
+ *
+ * What it Does: Simple non IT Terms
+ * Finds the correct member record when a user claims their account using their email address,
+ * ensuring that members are not linked twice or attached to the wrong profile.
+ */
+
 import { normalizeEmail } from './http.js';
 
 /**

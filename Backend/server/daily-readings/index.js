@@ -1,3 +1,11 @@
+/**
+ * Catholic Daily Scripture Readings Scraper and Feed
+ *
+ * What it Does: Simple non IT Terms
+ * Fetches the daily Catholic Mass Scripture readings (First Reading, Psalm, Gospel)
+ * for members and leaders to reflect on each day, customized for Philippine local time.
+ */
+
 import * as cheerio from 'cheerio';
 import { sendJson } from '../_lib/http.js';
 import { checkRateLimit } from '../_lib/rate-limit.js';

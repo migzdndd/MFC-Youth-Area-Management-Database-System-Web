@@ -1,3 +1,11 @@
+/**
+ * Geographical Area Management and Creation Endpoint
+ *
+ * What it Does: Simple non IT Terms
+ * Handles viewing and setting up youth ministry geographical territories (Areas),
+ * calculating member statistics and linking leaders to their chosen area.
+ */
+
 import { requireAuthenticatedProfile } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { ensureLeadershipMemberRecord } from '../_lib/member-link.js';

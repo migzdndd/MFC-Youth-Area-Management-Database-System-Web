@@ -1,7 +1,10 @@
 /**
- * ============================================================================
- * MFC Youth Area Management System - Activity Reports & PDF Exports
- * ============================================================================
+ * Youth Ministry Activity Reports and PDF Export Module
+ *
+ * What it Does: Simple non IT Terms
+ * Lets chapter servants and area leaders create, view, filter, and print official youth
+ * activity reports (such as household meetings, assemblies, and fellowships), and download
+ * formatted PDF summary sheets.
  */
 
 // Section 15: Activity Reports Module
@@ -1758,11 +1761,10 @@ function printReportSummary(
 
         <style>
 
-          @import url('https://fonts.cdnfonts.com/css/visby-cf');
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:wght@400;500;600;700;800;900&family=Raleway:ital,wght@0,300..800;1,300..800&display=swap');
 
           body {
-            font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+            font-family: 'Open Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
             color: #17263a;
             margin:  36px;
           }
@@ -1770,16 +1772,16 @@ function printReportSummary(
           h1,
           h2 {
             color: #002847;
+            font-family: 'Poppins', sans-serif;
           }
 
           h1 {
-            font-family: 'Visby CF', 'Visby', sans-serif;
             font-size: 20px;
             margin-bottom: 2px;
           }
 
           .sub {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Raleway', sans-serif;
             color: #687386;
           }
 

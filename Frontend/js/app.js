@@ -1,16 +1,10 @@
 /**
- * ============================================================================
- * MFC Youth Area Management System - Main Coordinator Script
- * ============================================================================
- * What this file is:
- * This is the conductor of the leader dashboard. It verifies who is logged in,
- * shows or hides navigation buttons based on your role, draws the right page
- * (Dashboard, Members, Chapters, Services, Reports, or Events), and keeps data synced.
+ * Main Frontend Application Controller and Router
  *
- * Backup plan if something breaks:
- * If a page fails to draw or the server is slow, this script catches the problem,
- * protects your saved data from being lost, and displays a friendly retry card.
- * ============================================================================
+ * What it Does: Simple non IT Terms
+ * Acts as the conductor of the leader portal. It checks who is logged in, shows the
+ * right navigation tabs according to their leadership role, renders pages (Dashboard,
+ * Members, Chapters, Services, Reports, Events), and keeps offline storage up to date.
  */
 
 // Global screen indicators

@@ -1,22 +1,74 @@
 /**
- * ============================================================================
- * MFC Youth Area Management System - Server Communicator & Data Sync
- * ============================================================================
- * What this file is:
- * This script is the bridge between this web page and the online cloud server.
- * It downloads the newest records (members, chapters, events, reports) and saves
- * an offline copy on your device so everything loads fast.
+ * Frontend Cloud API Communicator and Request Manager
  *
- * Backup plan if something breaks:
- * If your internet drops or the server is slow, the script stops waiting,
- * keeps your screen running smoothly, and uses the saved records on your device.
- * ============================================================================
+ * What it Does: Simple non IT Terms
+ * Acts as the messenger between the web browser and the backend server. It sends
+ * updates (like saving a member or registering for an event) and receives the newest
+ * community data, automatically attaching security credentials.
  */
 
 // Section 1: Active Requests Tracker
 
 // Keeps track of active questions asked to the server so we don't ask twice at once
 const activeApiRequests = new Map();
+let pendingRefreshPromise = null;
+
+async function requestTokenRefresh(currentRefreshToken) {
+  if (pendingRefreshPromise) {
+    return pendingRefreshPromise;
+  }
+
+  pendingRefreshPromise = (async () => {
+    try {
+      const response = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ refreshToken: currentRefreshToken })
+      });
+
+      const body = await response.json();
+      if (!response.ok || !body?.session?.accessToken) {
+        throw new Error(body?.error || 'Token refresh failed.');
+      }
+
+      const active = (typeof session !== 'undefined' && session)
+        ? session
+        : (typeof getSession === 'function' ? getSession() : null);
+
+      if (active) {
+        active.accessToken = body.session.accessToken;
+        active.refreshToken = body.session.refreshToken;
+        active.expiresAt = body.session.expiresAt;
+
+        if (typeof updateSession === 'function') {
+          updateSession(active);
+        } else {
+          try {
+            const raw = JSON.parse(localStorage.getItem('mfc_auth_session') || sessionStorage.getItem('mfc_auth_session') || '{}');
+            Object.assign(raw, {
+              accessToken: body.session.accessToken,
+              refreshToken: body.session.refreshToken,
+              expiresAt: body.session.expiresAt
+            });
+            if (localStorage.getItem('mfc_auth_session')) {
+              localStorage.setItem('mfc_auth_session', JSON.stringify(raw));
+            } else {
+              sessionStorage.setItem('mfc_auth_session', JSON.stringify(raw));
+            }
+          } catch {}
+        }
+      }
+
+      return body.session;
+    } finally {
+      pendingRefreshPromise = null;
+    }
+  })();
+
+  return pendingRefreshPromise;
+}
 
 /**
  * Asks the Online Server for Information or Updates
@@ -71,8 +123,11 @@ async function backendApi(path, options = {}) {
     return activeApiRequests.get(dedupeKey);
   }
 
-  const executeRequest = async (attempt = 0) => {
-    const token = session?.accessToken || '';
+  const executeRequest = async (attempt = 0, isRetryAfterRefresh = false) => {
+    const activeSession = (typeof session !== 'undefined' && session)
+      ? session
+      : (typeof getSession === 'function' ? getSession() : null);
+    const token = activeSession?.accessToken || '';
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
 
@@ -83,8 +138,8 @@ async function backendApi(path, options = {}) {
         ...(options.headers || {})
       };
 
-      if (session?.role === 'national_coordinator' && session?.areaId) {
-        headers['X-MFC-Area-ID'] = session.areaId;
+      if (activeSession?.role === 'national_coordinator' && activeSession?.areaId) {
+        headers['X-MFC-Area-ID'] = activeSession.areaId;
       }
 
       const response = await fetch(path, {
@@ -114,6 +169,27 @@ async function backendApi(path, options = {}) {
             window.location.href = '/mfa-verify.html';
           }
         }
+
+        // Silent token refresh interceptor on 401
+        if (response.status === 401 && !path.includes('/api/auth/refresh') && !isRetryAfterRefresh) {
+          const currentSession = (typeof session !== 'undefined' && session)
+            ? session
+            : (typeof getSession === 'function' ? getSession() : null);
+
+          if (currentSession?.refreshToken) {
+            try {
+              await requestTokenRefresh(currentSession.refreshToken);
+              return executeRequest(attempt, true);
+            } catch {
+              if (typeof clearSession === 'function') clearSession();
+              const error = new Error('Your session has expired. Please sign in again.');
+              error.status = 401;
+              error.code = 'INVALID_SESSION';
+              throw error;
+            }
+          }
+        }
+
         if (response.status === 401 && (body?.code === 'INVALID_SESSION' || body?.code === 'AUTH_REQUIRED')) {
           if (typeof clearSession === 'function') clearSession();
         }
@@ -122,7 +198,7 @@ async function backendApi(path, options = {}) {
         if (attempt < maxRetries && (response.status === 502 || response.status === 503 || response.status === 504)) {
           const delay = Math.min(1000 * Math.pow(2, attempt) + Math.random() * 200, 3000);
           await new Promise(r => setTimeout(r, delay));
-          return executeRequest(attempt + 1);
+          return executeRequest(attempt + 1, isRetryAfterRefresh);
         }
 
         const error = new Error(body?.error || 'Request failed.');
@@ -142,7 +218,7 @@ async function backendApi(path, options = {}) {
       if (error instanceof TypeError && attempt < maxRetries) {
         const delay = Math.min(1000 * Math.pow(2, attempt) + Math.random() * 200, 3000);
         await new Promise(r => setTimeout(r, delay));
-        return executeRequest(attempt + 1);
+        return executeRequest(attempt + 1, isRetryAfterRefresh);
       }
 
       // Intercept dropped connection on mutations and queue offline
@@ -238,11 +314,11 @@ function cloudMemberToLocal(member, previous = {}) {
  * in browser storage so the Members page loads instantly.
  *
  * Backup plan if it breaks:
- * - If you have no internet or are testing in demo mode, it exits safely.
+ * - If you have no internet, it exits safely.
  * - The Members page continues to run smoothly using your saved offline records.
  */
 async function syncBackendMembersIntoLocalDb() {
-  if (!session?.backendAuth || session?.demo || !session?.areaId) return false;
+  if (!session?.backendAuth || !session?.areaId) return false;
 
   try {
     const payload = await backendApi('/api/members');
@@ -354,11 +430,11 @@ function cloudGigToLocal(row) {
  * contributions from the server in one batch, then saves an offline copy.
  *
  * Backup plan if it breaks:
- * If you are offline, demo-mode, or the server takes more than 10 seconds, it cancels
+ * If you are offline or the server takes more than 10 seconds, it cancels
  * gracefully and allows the dashboard to keep displaying your saved offline records.
  */
 async function syncCloudModulesIntoLocalDb() {
-  if (!session?.backendAuth || session?.demo || !session?.areaId) return false;
+  if (!session?.backendAuth || !session?.areaId) return false;
 
   let payload = null;
   try {
@@ -453,11 +529,11 @@ async function syncCloudModulesIntoLocalDb() {
  * updates the visible page so leaders see the latest changes immediately.
  *
  * Backup plan if it breaks:
- * If offline or in demo mode, it exits safely. If downloading encounters an error,
+ * If offline, it exits safely. If downloading encounters an error,
  * the existing page stays visible with its current records without flashing or breaking.
  */
 async function refreshAllCloudData({ render = true } = {}) {
-  if (!session?.backendAuth || session?.demo || !session?.areaId) return false;
+  if (!session?.backendAuth || !session?.areaId) return false;
   await Promise.all([
     syncBackendMembersIntoLocalDb(),
     syncCloudModulesIntoLocalDb()

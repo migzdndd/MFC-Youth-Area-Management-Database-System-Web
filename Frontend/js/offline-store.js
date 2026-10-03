@@ -1,18 +1,9 @@
 /**
- * ============================================================================
- * MFC Youth Area Management System - Client Offline Storage Engine
- * ============================================================================
- * Purpose:
- * Native IndexedDB wrapper managing offline cached data and outgoing mutations.
- * Enables zero-dependency offline persistence for:
- * 1. Event Attendance & Payment Toggles (POST/PATCH /api/participants)
- * 2. Activity Report Drafting (POST/PATCH /api/reports)
- * 3. High-capacity cached read data (GET /api/sync)
+ * Client-Side Offline Storage and IndexedDB Database Engine
  *
- * Stores:
- * - `read_cache`: High-capacity mirror of /api/sync and static datasets
- * - `mutation_queue`: FIFO outbox queue of pending server mutations
- * ============================================================================
+ * What it Does: Simple non IT Terms
+ * Saves community records inside the web browser's built-in database (IndexedDB) so the app
+ * loads instantly and lets leaders mark attendance or write reports even with zero internet.
  */
 
 (function (root, factory) {

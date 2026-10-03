@@ -2,13 +2,11 @@ import { requireAuthenticatedProfile, isAreaAdminRole, isChapterServantRole } fr
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 
 /**
- * Permanently Delete Authenticated Servant Account
+ * Authenticated Servant Leader Account Deletion Endpoint
  *
- * What it does:
- * Completely removes the logged-in servant leader's login account, profile, and linked membership record from the database upon user request.
- *
- * Backup plan if it breaks:
- * Restricts self-deletion to servant leaders. Deletes authentication credentials first so access is revoked immediately even if cleaning up member records runs into an issue.
+ * What it Does: Simple non IT Terms
+ * Completely removes a logged-in servant leader's login account, user profile, and linked
+ * roster record from the database when they choose to delete their account.
  */
 export default async function handler(req, res) {
   if (req.method !== 'DELETE') return methodNotAllowed(res, ['DELETE']);

@@ -1,3 +1,11 @@
+/**
+ * Community Member Roster Directory Management Endpoint
+ *
+ * What it Does: Simple non IT Terms
+ * Manages the youth membership records in an Area, allowing leaders to register new members,
+ * look up contact information, update statuses (Active, Inactive, Moved), and assign services.
+ */
+
 import {
   requireAuthenticatedProfile,
   isAreaAdminRole,

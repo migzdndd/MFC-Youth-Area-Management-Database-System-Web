@@ -1,14 +1,16 @@
+/**
+ * Youth Member Account Claim and Registration Handler
+ *
+ * What it Does: Simple non IT Terms
+ * Allows a member who is already listed in the community roster to claim their online account,
+ * set a secure password, and connect their login directly to their member profile.
+ */
+
 import { createSupabaseAdmin, createSupabaseAuthClient } from '../_lib/supabase.js';
 import { requireAuthenticatedUser } from '../_lib/access.js';
 import { claimMemberRecord } from '../_lib/member-claim.js';
-import { sendJson, methodNotAllowed, normalizeEmail, isValidEmail, apiError } from '../_lib/http.js';
+import { sendJson, methodNotAllowed, normalizeEmail, isValidEmail, apiError, passwordError } from '../_lib/http.js';
 import { checkRateLimit } from '../_lib/rate-limit.js';
-
-function passwordError(password) {
-  if (password.length < 8) return 'Password must be at least 8 characters long.';
-  if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) return 'Password must contain at least one letter and one number.';
-  return '';
-}
 
 function escapeLikePattern(value) {
   return String(value).replace(/[\\%_]/g, character => `\\${character}`);
@@ -48,7 +50,7 @@ export default async function handler(req, res) {
 
     const authClient = createSupabaseAuthClient();
     const { data, error } = await authClient.auth.signUp({ email, password });
-    if (error || !data?.user) return sendJson(res, 400, { ok: false, error: 'Unable to create your Member Portal account. Please try again.' });
+    if (error || !data?.user) return sendJson(res, 400, { ok: false, error: 'Unable to claim your Member Portal account. Please try again.' });
 
     if (!data.session) {
       return sendJson(res, 202, {

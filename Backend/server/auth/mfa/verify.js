@@ -1,3 +1,11 @@
+/**
+ * Multi-Factor Authentication Login Verification Handler
+ *
+ * What it Does: Simple non IT Terms
+ * Checks the 6-digit code from the user's authenticator app during login to finish
+ * signing them into their account securely and grant full access to the portal.
+ */
+
 import { createClient } from '@supabase/supabase-js';
 import { assertBackendConfigured } from '../../_lib/env.js';
 import { createSupabaseAdmin } from '../../_lib/supabase.js';

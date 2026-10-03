@@ -1,14 +1,14 @@
-import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
+import { sendJson, methodNotAllowed, apiError, passwordError } from '../_lib/http.js';
 import { createSupabaseAuthClient } from '../_lib/supabase.js';
 import { checkRateLimit } from '../_lib/rate-limit.js';
 
-function validatePassword(password) {
-  if (String(password).length < 8) return 'Password must be at least 8 characters long.';
-  if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) {
-    return 'Password must contain at least one letter and one number.';
-  }
-  return '';
-}
+/**
+ * Password Recovery Verification and Password Reset Endpoint
+ *
+ * What it Does: Simple non IT Terms
+ * Takes the secret recovery code from the password reset email, verifies that it is valid,
+ * checks that the user's new password is strong, and safely saves the new password.
+ */
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
       return sendJson(res, 400, { ok: false, error: 'Recovery token is missing.' });
     }
 
-    const validationError = validatePassword(newPassword);
+    const validationError = passwordError(newPassword);
     if (validationError) return sendJson(res, 400, { ok: false, error: validationError });
 
     const { data: verifyData, error: verifyError } = await authClient.auth.verifyOtp({

@@ -1,3 +1,11 @@
+/**
+ * Chapter Member Bulk Assignment Handler
+ *
+ * What it Does: Simple non IT Terms
+ * Moves or groups selected members into a designated Chapter (neighborhood branch),
+ * making sure chapter leaders can only assign youth within their own branch.
+ */
+
 import {
   requireAuthenticatedProfile,
   isAreaAdminRole,

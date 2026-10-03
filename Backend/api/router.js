@@ -1,3 +1,12 @@
+/**
+ * API Request Router and Security Gateway
+ *
+ * What it Does: Simple non IT Terms
+ * Acts like a central postal sorting station for the application. When a request comes in
+ * from the website, this router applies security protections and directs the request to
+ * the correct feature (such as login, attendance, members, or reports).
+ */
+
 import health from '../server/health.js';
 import areas from '../server/areas/index.js';
 import areaSelect from '../server/areas/select.js';

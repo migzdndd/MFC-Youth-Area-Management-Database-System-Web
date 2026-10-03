@@ -1,3 +1,11 @@
+/**
+ * Youth Ministry Activity Reports Resource Endpoint
+ *
+ * What it Does: Simple non IT Terms
+ * Lets chapter servants and area leaders submit and view activity reports, documenting
+ * events, household attendance, service meetings, and youth activities.
+ */
+
 import { requireAuthenticatedProfile, isAreaAdminRole, isChapterServantRole } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { cleanText, nullableText, requireArea, validateIsoDate, asNonNegativeInteger, ensureChapterInArea, loadAreaRow } from '../_lib/cloud-data.js';

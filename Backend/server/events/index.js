@@ -1,3 +1,11 @@
+/**
+ * Community Events and Gatherings Resource Endpoint
+ *
+ * What it Does: Simple non IT Terms
+ * Allows youth leaders to create, view, update, and manage youth events, youth camps,
+ * conferences, assemblies, and prayer meetings across their community Area.
+ */
+
 import { requireAuthenticatedProfile, isAreaAdminRole } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { cleanText, nullableText, requireArea, requireAreaAdmin, asNonNegativeNumber, asNonNegativeInteger, loadAreaRow } from '../_lib/cloud-data.js';

@@ -1,3 +1,11 @@
+/**
+ * Multi-Factor Authentication Factor Removal Endpoint
+ *
+ * What it Does: Simple non IT Terms
+ * Allows a user to remove a two-factor authentication device from their account if they
+ * no longer have access to it or wish to turn off two-factor authentication.
+ */
+
 import { createClient } from '@supabase/supabase-js';
 import { assertBackendConfigured } from '../../_lib/env.js';
 import { requireAuthenticatedUser } from '../../_lib/access.js';

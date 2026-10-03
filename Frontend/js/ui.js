@@ -1,15 +1,9 @@
 /**
- * ============================================================================
- * MFC Youth Area Management System - User Interface & Visual Tools
- * ============================================================================
- * What this file is:
- * This script handles popup alerts (toasts), dialog windows (modals),
- * date/money formatters, and the mobile navigation menu.
+ * UI Components, Modal Dialogs, Toast Notifications, and Formatting Utilities
  *
- * Backup plan if something breaks:
- * If an alert or popup fails to close normally, this script includes built-in
- * safety timers and keyboard escape keys to ensure you are never stuck on screen.
- * ============================================================================
+ * What it Does: Simple non IT Terms
+ * Controls visual elements on the screen such as popup alert messages (toasts),
+ * confirmation windows (modals), mobile dropdown menus, and date/money formatters.
  */
 
 // Section 1: Unique IDs, Text Safety, and Date/Money Formatters

@@ -1,3 +1,11 @@
+/**
+ * Multi-Factor Authentication Challenge Generator
+ *
+ * What it Does: Simple non IT Terms
+ * Starts the two-factor authentication verification step by asking the security system
+ * to expect an authenticator code for the specified factor.
+ */
+
 import { createClient } from '@supabase/supabase-js';
 import { assertBackendConfigured } from '../../_lib/env.js';
 import { readBearerToken, sendJson, methodNotAllowed, apiError } from '../../_lib/http.js';

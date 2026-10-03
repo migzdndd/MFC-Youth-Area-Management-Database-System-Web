@@ -1,3 +1,11 @@
+/**
+ * Catholic Daily Readings Scraper Diagnostic Test Script
+ *
+ * What it Does: Simple non IT Terms
+ * A test tool used by developers to check if daily Catholic readings can be fetched
+ * and read correctly from online sources.
+ */
+
 import * as cheerio from 'cheerio';
 
 async function test() {

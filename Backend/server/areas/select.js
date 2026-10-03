@@ -14,13 +14,11 @@ const LEADERSHIP_ROLES = new Set([
 ]);
 
 /**
- * Select and Join Existing Area Community
+ * Servant Leader Area Assignment Selection Endpoint
  *
- * What it does:
- * Associates a newly registered servant leader with an existing Area and links their profile to the official member roster.
- *
- * Backup plan if it breaks:
- * Blocks leaders who already belong to an Area from changing areas without administrator permission. If the chosen Area is deactivated or invalid, it returns a 404 "Area not available" notice.
+ * What it Does: Simple non IT Terms
+ * Lets a newly registered youth leader select and join their designated community Area,
+ * updating their leadership profile and linking them to that Area's member directory.
  */
 export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);

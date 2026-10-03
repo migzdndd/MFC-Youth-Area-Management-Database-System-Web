@@ -1,17 +1,22 @@
 <!DOCTYPE html>
-<!-- MFC Youth Area Management System: Registration form -->
+<!--
+  Member Account Claim and Servant Leader Registration Page
+
+  What it Does: Simple non IT Terms
+  Provides two onboarding paths: allows youth members to claim their online account using their
+  community email, and lets approved servant leaders register with an official secret passcode.
+-->
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#002847">
-  <meta name="description" content="MFC Youth first-time access and Servant Leader registration.">
-  <title>First-Time Access - MFC Youth Area Management System</title>
-  <style>
-    @import url('https://fonts.cdnfonts.com/css/visby-cf');
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-  </style>
+  <meta name="description" content="MFC Youth member account claim and Servant Leader registration.">
+  <title>Claim Account &amp; Leader Registration - MFC Youth Area Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:wght@400;500;600;700;800;900&family=Raleway:ital,wght@0,300..800;1,300..800&display=swap">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" type="image/png" href="/img/logo-2.png">
 </head>
@@ -21,15 +26,15 @@
   <main class="auth-page auth-page-modern auth-access-page">
     <div class="auth-access-layout">
 
-      <!-- Card 1: Member Account Access -->
-      <section class="auth-card-modern access-info-card" aria-labelledby="firstAccessTitle">
+      <!-- Card 1: Claim Member Account -->
+      <section class="auth-card-modern access-info-card" aria-labelledby="memberClaimTitle">
         <div class="auth-card-header">
           <div class="auth-card-brand">
             <img src="/img/logo-2.png" alt="MFC Youth" class="auth-mini-logo">
-            <span class="auth-card-tag">Member Access</span>
+            <span class="auth-card-tag">Claim Account</span>
           </div>
-          <h1 id="firstAccessTitle">First-Time Member Access</h1>
-          <p>Set a password for your member profile.</p>
+          <h1 id="memberClaimTitle">Claim Member Account</h1>
+          <p>Activate your member profile and set your account password.</p>
         </div>
 
         <form class="auth-compact-form member-claim-form" id="memberClaimForm" novalidate>
@@ -45,10 +50,28 @@
 
           <div class="auth-form-grid">
             <div class="auth-form-row">
-              <label class="auth-control-label" for="memberClaimPassword">Create Password</label>
+              <label class="auth-control-label" for="memberClaimPassword">Set Password</label>
               <div class="auth-compact-field">
                 <input class="auth-compact-input" id="memberClaimPassword" type="password"
                   placeholder="Password" autocomplete="new-password" required>
+                <button class="password-toggle" type="button" data-password-toggle="memberClaimPassword"
+                  aria-label="Show password">Show</button>
+              </div>
+              <div class="password-strength-meter" data-for="memberClaimPassword" aria-live="polite">
+                <div class="strength-track">
+                  <span class="strength-bar"></span>
+                  <span class="strength-bar"></span>
+                  <span class="strength-bar"></span>
+                  <span class="strength-bar"></span>
+                </div>
+                <div class="strength-meta">
+                  <span class="strength-label">Strength: <strong class="strength-rating strength-empty">Not entered</strong></span>
+                </div>
+                <div class="strength-criteria">
+                  <span class="strength-rule" data-rule="length">8+ characters</span>
+                  <span class="strength-rule" data-rule="letter">Letters</span>
+                  <span class="strength-rule" data-rule="number">Numbers</span>
+                </div>
               </div>
             </div>
 
@@ -57,12 +80,17 @@
               <div class="auth-compact-field">
                 <input class="auth-compact-input" id="memberClaimPasswordConfirm" type="password"
                   placeholder="Confirm" autocomplete="new-password" required>
+                <button class="password-toggle" type="button" data-password-toggle="memberClaimPasswordConfirm"
+                  aria-label="Show confirmed password">Show</button>
+              </div>
+              <div class="password-match-indicator" data-match-for="memberClaimPasswordConfirm" data-match-with="memberClaimPassword" aria-live="polite">
+                Must match password
               </div>
             </div>
           </div>
 
           <div class="auth-actions-group">
-            <button class="btn-auth auth-slide-button auth-slide-primary" id="memberClaimButton" type="submit">Create Account</button>
+            <button class="btn-auth auth-slide-button auth-slide-primary" id="memberClaimButton" type="submit">Claim Account</button>
             <button class="btn-auth auth-slide-button auth-slide-secondary" type="button" onclick="navigateWithLoader('/')">Back to Sign In</button>
           </div>
         </form>
@@ -141,6 +169,22 @@
                 <button class="password-toggle" type="button" data-password-toggle="adminPassword"
                   aria-label="Show password">Show</button>
               </div>
+              <div class="password-strength-meter" data-for="adminPassword" aria-live="polite">
+                <div class="strength-track">
+                  <span class="strength-bar"></span>
+                  <span class="strength-bar"></span>
+                  <span class="strength-bar"></span>
+                  <span class="strength-bar"></span>
+                </div>
+                <div class="strength-meta">
+                  <span class="strength-label">Strength: <strong class="strength-rating strength-empty">Not entered</strong></span>
+                </div>
+                <div class="strength-criteria">
+                  <span class="strength-rule" data-rule="length">8+ characters</span>
+                  <span class="strength-rule" data-rule="letter">Letters</span>
+                  <span class="strength-rule" data-rule="number">Numbers</span>
+                </div>
+              </div>
             </div>
 
             <div class="auth-form-row">
@@ -150,6 +194,9 @@
                   placeholder="Confirm" autocomplete="new-password" required>
                 <button class="password-toggle" type="button" data-password-toggle="adminPasswordConfirm"
                   aria-label="Show confirmed password">Show</button>
+              </div>
+              <div class="password-match-indicator" data-match-for="adminPasswordConfirm" data-match-with="adminPassword" aria-live="polite">
+                Must match password
               </div>
             </div>
           </div>
@@ -172,6 +219,7 @@
       rel="noopener noreferrer">mfcyouth.org</a> &middot; <a href="/changelogs">System Changelogs</a> &middot; Powered &amp; designed by <a
       href="https://migzdndd.github.io/web-portfolio/" target="_blank" rel="noopener noreferrer">migz.dev</a></footer>
   <script src="/js/loader.js"></script>
+  <script src="/js/password-strength.js"></script>
   <script src="/js/auth.js"></script>
 </body>
 

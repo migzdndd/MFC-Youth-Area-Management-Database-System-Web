@@ -1,14 +1,10 @@
 /**
- * MFC Youth Area Management System - Chapters & Local Communities
+ * Chapter Management and Local Community Module
  *
- * What this file does:
- * Manages local MFC Youth chapters, displays chapter rosters, handles member assignments,
- * and provides Chapter Servants with their localized chapter management dashboard.
- *
- * Backup plan if it breaks:
- * If a Chapter Servant is not linked to a chapter yet, the system shows a friendly notice
- * asking an Area Servant to assign them, rather than crashing or showing unauthorized data.
- * All edits and deletions verify safety rules (e.g., chapters with members cannot be deleted).
+ * What it Does: Simple non IT Terms
+ * Manages the neighborhood branches (Chapters) within an Area, showing lists of members
+ * belonging to each chapter, allowing leaders to create new chapters, and providing chapter
+ * servants with their localized summary dashboard.
  */
 
 let chapterSearch = '';

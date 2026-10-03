@@ -1,3 +1,11 @@
+/**
+ * Administrative Member Email Override Handler
+ *
+ * What it Does: Simple non IT Terms
+ * Allows authorized area leaders to change a member's email address in both the community roster
+ * and their login account if the member typed it wrong or lost access, while logging who made the change.
+ */
+
 import { requireAuthenticatedProfile, isAreaAdminRole } from '../../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError, isValidEmail, normalizeEmail } from '../../_lib/http.js';
 

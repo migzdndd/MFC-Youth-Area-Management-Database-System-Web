@@ -1,24 +1,16 @@
+/**
+ * Authenticated User Password Update Handler
+ *
+ * What it Does: Simple non IT Terms
+ * Confirms the user's current password for security, validates that their new password
+ * is strong, updates their credentials in the database, and clears any forced password change notices.
+ */
+
 import { requireAuthenticatedProfile } from '../_lib/access.js';
-import { sendJson, methodNotAllowed, apiError, readBearerToken } from '../_lib/http.js';
+import { sendJson, methodNotAllowed, apiError, readBearerToken, passwordError } from '../_lib/http.js';
 import { assertBackendConfigured } from '../_lib/env.js';
 import { createSupabaseAuthClient } from '../_lib/supabase.js';
 
-/**
- * Validate Password Security Strength
- *
- * What it does:
- * Ensures the new password meets security standards (at least 8 characters with both letters and numbers).
- *
- * Backup plan if it breaks:
- * Returns an explanatory message if too weak, or an empty string if valid.
- */
-function passwordError(password) {
-  if (String(password).length < 8) return 'Password must be at least 8 characters long.';
-  if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) {
-    return 'Password must contain at least one letter and one number.';
-  }
-  return '';
-}
 
 /**
  * Destroy Temporary Verification Session

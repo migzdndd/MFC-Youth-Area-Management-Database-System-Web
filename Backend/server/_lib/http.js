@@ -1,4 +1,13 @@
 /**
+ * HTTP Transport, Security Headers, Cookie, and Response Utility Suite
+ *
+ * What it Does: Simple non IT Terms
+ * Serves as the central post office and security checkpoint for all server communications.
+ * It formats outgoing answers as clean messages, attaches security badges so bad actors cannot tamper with responses,
+ * manages login cookies, and translates confusing technical errors into friendly explanations.
+ */
+
+/**
  * Apply Web Security Shields to Browser Response
  *
  * What it does:
@@ -210,6 +219,22 @@ export function normalizeEmail(value = '') {
  */
 export function isValidEmail(value = '') {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmail(value));
+}
+
+/**
+ * Verify Password Strength & Security Requirements
+ *
+ * What it does:
+ * Enforces minimum password standards (8+ characters, at least one letter and one number).
+ *
+ * Backup plan if it breaks:
+ * Returns an informative error message string if invalid, or an empty string if valid.
+ */
+export function passwordError(password = '') {
+  const pwd = String(password || '');
+  if (pwd.length < 8) return 'Password must be at least 8 characters long.';
+  if (!/[A-Za-z]/.test(pwd) || !/\d/.test(pwd)) return 'Password must contain at least one letter and one number.';
+  return '';
 }
 
 /**

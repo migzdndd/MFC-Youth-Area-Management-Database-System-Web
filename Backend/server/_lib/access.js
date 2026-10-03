@@ -1,3 +1,13 @@
+/**
+ * Role Access and Authentication Token Validator
+ *
+ * What it Does: Simple non IT Terms
+ * Serves as the security badge scanner and gatekeeper for leadership access.
+ * It reads the user's electronic ID badge (Bearer token or cookie), checks what job role
+ * they hold (like Area Servant, Chapter Servant, or Member), and ensures leaders can only view
+ * and edit data belonging to their own assigned geographic area or chapter.
+ */
+
 import { createSupabaseAdmin } from './supabase.js';
 import { readBearerToken } from './http.js';
 

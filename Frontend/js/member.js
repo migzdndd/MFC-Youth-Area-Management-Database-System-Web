@@ -1,23 +1,16 @@
 /**
- * ============================================================================
- * MFC Youth Member Portal - Web Script
- * ============================================================================
- * What this file is:
- * This is the main script for the Member Portal screen.
- * It shows the member's profile, chapter, ministry service, and gatherings.
+ * Member Portal Dashboard Controller and View Renderer
  *
- * Backup plan if something breaks:
- * If the internet is down or the online server is slow, this script uses
- * saved copies of your records on your device so the screen stays working.
- * ============================================================================
+ * What it Does: Simple non IT Terms
+ * Drives the personalized youth member portal page. It displays the member's profile card,
+ * upcoming events, attendance history, ministry service assignments, and GIG giving records.
  */
 
 // Section 1: Saved Information Names & Ministry List
 
 // Names used to find your saved login and records on this computer/phone
-const SESSION_KEY = 'mfc_demo_session';
+const SESSION_KEY = 'mfc_auth_session';
 const DB_KEY = 'mfc_web_database_v1';
-const USER_KEY = 'mfc_demo_users';
 
 // Standard list of MFC Youth ministries and servant roles
 const STANDARD_SERVICES = [
@@ -468,11 +461,11 @@ function portalCloudMember(member, previous = {}) {
  * server and saves an offline copy on your device so everything loads fast next time.
  *
  * Backup plan if it breaks:
- * - If you have no internet or are testing in demo mode, it skips syncing gracefully.
+ * - If you have no internet, it skips syncing gracefully.
  * - The portal continues to load and display your existing offline data without any interruption.
  */
 async function syncMemberPortalCloudCache() {
-  if (!session?.backendAuth || session?.demo || !session?.areaId) return;
+  if (!session?.backendAuth || !session?.areaId) return;
 
   const [membersPayload, syncPayload] = await Promise.all([
     portalBackendApi('/api/members'),
@@ -601,8 +594,10 @@ async function bootstrapMemberPortal() {
     console.warn('Member Portal cloud sync skipped:', error?.message || error);
   }
 
-  // Check login status: redirect if logged out or if password reset is required
-  if (!session) {
+  // Check login status: redirect if logged out or not authenticated with backend
+  if (!session || !session.backendAuth) {
+    localStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_KEY);
     navigateWithLoader('/', true);
   } else if (session.mustChangePassword) {
     navigateWithLoader('/change-password', true);
@@ -618,18 +613,11 @@ async function bootstrapMemberPortal() {
     );
     const member = linkedMember || (previewMode ? previewMemberFromSession(session) : null);
 
-    const users = safeParse(localStorage.getItem(USER_KEY) || '[]', []);
-    const account = Array.isArray(users)
-      ? users.find(item => String(item.id) === String(session.userId))
-      : null;
-
-    // Safety check: ensure account is active and member record exists
+    // Safety check: ensure member record exists and is active
     if (
       !previewMode &&
       (
         !member ||
-        (!session.backendAuth && !account) ||
-        account?.isActive === false ||
         String(member?.status || 'Active') === 'Inactive'
       )
     ) {
@@ -765,7 +753,7 @@ async function bootstrapMemberPortal() {
           localStorage.setItem(SESSION_KEY, JSON.stringify(s));
         }
 
-        if (session?.backendAuth && !session?.demo) {
+        if (session?.backendAuth) {
           try {
             await portalBackendApi('/api/members', {
               method: 'PUT',
@@ -1268,7 +1256,7 @@ async function bootstrapMemberPortal() {
       }
 
       // Tell the server to end this login session
-      if (session?.backendAuth && !session?.demo && session?.accessToken) {
+      if (session?.backendAuth && session?.accessToken) {
         try {
           await fetch('/api/auth/logout', {
             method: 'POST',

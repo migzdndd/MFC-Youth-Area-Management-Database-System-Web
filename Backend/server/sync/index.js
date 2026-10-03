@@ -1,3 +1,11 @@
+/**
+ * Offline Sync and Full Area Data Aggregation Endpoint
+ *
+ * What it Does: Simple non IT Terms
+ * Bundles all the Area's data (chapters, members, events, attendance, and reports) into
+ * a single download package so the app can work smoothly even when internet is slow or offline.
+ */
+
 import { requireAuthenticatedProfile, isAreaAdminRole, isChapterServantRole } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { requireArea } from '../_lib/cloud-data.js';

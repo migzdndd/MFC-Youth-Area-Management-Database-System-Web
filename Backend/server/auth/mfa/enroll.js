@@ -1,3 +1,11 @@
+/**
+ * Multi-Factor Authentication TOTP Enrollment Handler
+ *
+ * What it Does: Simple non IT Terms
+ * Starts setting up two-factor authentication for a user by creating a new TOTP factor
+ * and providing a QR code and secret key to scan into an authenticator app (like Google Authenticator).
+ */
+
 import { createClient } from '@supabase/supabase-js';
 import { assertBackendConfigured } from '../../_lib/env.js';
 import { requireAuthenticatedUser } from '../../_lib/access.js';

@@ -1,3 +1,11 @@
+/**
+ * Multi-Factor Authentication Enrollment Confirmation Handler
+ *
+ * What it Does: Simple non IT Terms
+ * Confirms that the user's authenticator app is working by testing the 6-digit code they enter;
+ * once verified, two-factor authentication is officially locked in and turned on for the account.
+ */
+
 import { createClient } from '@supabase/supabase-js';
 import { assertBackendConfigured } from '../../_lib/env.js';
 import { requireAuthenticatedUser } from '../../_lib/access.js';

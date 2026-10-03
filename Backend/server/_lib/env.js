@@ -1,4 +1,13 @@
 /**
+ * Backend Environment Variables and Secret Configuration Validator
+ *
+ * What it Does: Simple non IT Terms
+ * Acts as the master key safe and configuration checklist for the entire backend.
+ * It reads secret settings (like database passwords, API keys, and admin registration codes)
+ * from the environment and makes sure the server has all required credentials before starting up.
+ */
+
+/**
  * Clean Environment Secret Text
  *
  * What it does:

@@ -1,5 +1,4 @@
-@import url('https://fonts.cdnfonts.com/css/visby-cf');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:wght@400;500;600;700;800;900&family=Raleway:ital,wght@0,300..800;1,300..800&display=swap');
 
 /* ============================================================================
    MFC Youth Area Management System - Highly Optimized Global Stylesheet
@@ -9,9 +8,15 @@
    ============================================================================ */
 
 :root {
-  --font-visby: 'Visby CF', 'Visby', 'Visby Round CF', 'Montserrat', 'Century Gothic', -apple-system, sans-serif;
-  --font-inter: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-base: var(--font-inter);
+  --font-poppins: 'Poppins', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-opensans: 'Open Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-raleway: 'Raleway', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: var(--font-poppins);
+  --font-card-heading: var(--font-poppins);
+  --font-subheading: var(--font-raleway);
+  --font-base: var(--font-opensans);
+  --font-visby: var(--font-poppins);
+  --font-inter: var(--font-opensans);
   --navy: #002847;
   --navy2: #001b30;
   --blue: #0878bd;
@@ -99,9 +104,15 @@ html {
 
 body {
   min-height: 100vh;
-  --font-visby: 'Visby CF', 'Visby', 'Visby Round CF', 'Montserrat', 'Century Gothic', -apple-system, sans-serif;
-  --font-inter: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-base: var(--font-inter);
+  --font-poppins: 'Poppins', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-opensans: 'Open Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-raleway: 'Raleway', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: var(--font-poppins);
+  --font-card-heading: var(--font-poppins);
+  --font-subheading: var(--font-raleway);
+  --font-base: var(--font-opensans);
+  --font-visby: var(--font-poppins);
+  --font-inter: var(--font-opensans);
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-family: var(--font-base);
   color: var(--text);
@@ -830,13 +841,13 @@ button:active, .btn:active, .btn-auth:active {
 }
 
 .sidebar-brand h2 {
-  font-family: var(--font-visby) !important;
+  font-family: var(--font-heading) !important;
   font-size: 0.95rem;
   letter-spacing: .025em;
 }
 
 .sidebar-brand p {
-  font-family: var(--font-inter) !important;
+  font-family: var(--font-subheading) !important;
   font-size: .56rem;
   color: #b8cbd8;
   margin-top: 2px;
@@ -2917,34 +2928,44 @@ button:disabled {
 }
 
 /* ============================================================================
-   Typography: Sans Serif for Card Headings and Sub Headings
+   Typography System:
+   - Poppins for Main and Card Headings
+   - Raleway for Sub Headings
+   - Open Sans for Words / Body
    ============================================================================ */
-.card h1, .card h2, .card h3, .card h4, .card h5, .card h6,
-.card-header h1, .card-header h2, .card-header h3, .card-header h4,
+
+/* Main Headings & Card Headings: Poppins */
+h1, h2, h3,
+.card h1, .card h2, .card h3,
+.card-header h1, .card-header h2, .card-header h3,
 .card-title, .card-hero-title,
 .events-big-card-title-group h3,
-.events-column-header h4,
 .profile-group-title,
 .member-profile-header h2,
 .member-events-card h3,
 .member-profile-card h2,
 .metric-card-primary h2, .metric-card-primary h3,
 .metric-card-secondary h2, .metric-card-secondary h3,
-.panel h1, .panel h2, .panel h3, .panel h4,
+.panel h1, .panel h2, .panel h3,
 .modal-header h2, .modal-header h3, .modal h2, .modal h3,
 .auth-card-header h1, .auth-card-header h2,
 .login-header h1, .login-header h2,
 .empty-state h3,
-.service-card h3, .service-card h4,
-.stat-card h3, .stat-card h4 {
-  font-family: var(--font-inter, 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif) !important;
+.service-card h3,
+.stat-card h3 {
+  font-family: var(--font-heading) !important;
 }
 
-.card p, .card-header p, .card-subtitle, .card-subheading, .card-desc,
+/* Sub Headings: Raleway */
+h4, h5, h6,
+.card h4, .card h5, .card h6,
+.card-header h4, .card-header h5, .card-header h6,
+.card-subtitle, .card-subheading, .card-caption, .card-desc,
 .page-header p,
 .panel-header-flex p,
 .panel p.muted,
 .events-big-card-title-group p,
+.events-column-header h4,
 .events-column-header p,
 .metric-primary-caption, .metric-secondary-caption,
 .auth-card-header p, .login-header p, .login-hero-copy p,
@@ -2953,15 +2974,16 @@ button:disabled {
 .member-event-snippet,
 .dashboard-hero-copy p,
 .subheading, .subtitle,
-.service-card p, .stat-card p {
-  font-family: var(--font-inter, 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif) !important;
+.service-card h4, .stat-card h4 {
+  font-family: var(--font-subheading) !important;
 }
 
 /* ============================================================================
    Branding Typography:
-   Visby for "MFC Youth"
-   Inter for "Area Management System"
+   Poppins for "MFC Youth"
+   Raleway for "Area Management System"
    ============================================================================ */
+.font-poppins,
 .font-visby,
 .brand-mfc-youth,
 .sidebar-brand h2,
@@ -2970,16 +2992,16 @@ button:disabled {
 .mobile-topbar strong,
 .page-loader__overline,
 .auth-mini-logo-text {
-  font-family: var(--font-visby) !important;
+  font-family: var(--font-heading) !important;
 }
 
-.font-inter,
+.font-raleway,
 .brand-ams,
 .sidebar-brand p,
 .login-mobile-brand span,
 .login-eyebrow,
 .page-loader__title {
-  font-family: var(--font-inter) !important;
+  font-family: var(--font-subheading) !important;
 }
 
 .profile-header-avatar-wrap {
@@ -5870,6 +5892,185 @@ from { opacity: .45; }
   color: #94a3b8;
   text-align: center;
   line-height: 1.35;
+}
+
+/* ============================================================================
+   Password Strength Validation & Confirmation Indicator
+   ============================================================================ */
+.password-strength-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 6px;
+  width: 100%;
+}
+
+.password-strength-meter .strength-track {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+}
+
+.password-strength-meter .strength-bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.25);
+  transition: background-color var(--motion-fast) var(--ease-out), filter var(--motion-fast) var(--ease-out);
+}
+
+.password-strength-meter .strength-bar.is-filled.level-weak {
+  background-color: #ef4444;
+}
+
+.password-strength-meter .strength-bar.is-filled.level-fair {
+  background-color: #f59e0b;
+}
+
+.password-strength-meter .strength-bar.is-filled.level-good {
+  background-color: #0284c7;
+}
+
+.password-strength-meter .strength-bar.is-filled.level-strong {
+  background-color: #10b981;
+}
+
+.password-strength-meter .strength-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  line-height: 1.2;
+}
+
+.password-strength-meter .strength-label {
+  color: var(--muted, #64748b);
+}
+
+.auth-card-modern .password-strength-meter .strength-label {
+  color: #94a3b8;
+}
+
+.password-strength-meter .strength-rating {
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.password-strength-meter .strength-rating.strength-empty {
+  color: var(--muted, #64748b);
+}
+
+.password-strength-meter .strength-rating.strength-weak {
+  color: #dc2626;
+}
+
+.auth-card-modern .password-strength-meter .strength-rating.strength-weak {
+  color: #f87171;
+}
+
+.password-strength-meter .strength-rating.strength-fair {
+  color: #b45309;
+}
+
+.auth-card-modern .password-strength-meter .strength-rating.strength-fair {
+  color: #fbbf24;
+}
+
+.password-strength-meter .strength-rating.strength-good {
+  color: #0369a1;
+}
+
+.auth-card-modern .password-strength-meter .strength-rating.strength-good {
+  color: #38bdf8;
+}
+
+.password-strength-meter .strength-rating.strength-strong {
+  color: #15803d;
+}
+
+.auth-card-modern .password-strength-meter .strength-rating.strength-strong {
+  color: #4ade80;
+}
+
+.password-strength-meter .strength-criteria {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.password-strength-meter .strength-rule {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(148, 163, 184, 0.12);
+  color: #64748b;
+  border: 1px solid rgba(148, 163, 184, 0.20);
+  transition: all var(--motion-fast) var(--ease-out);
+}
+
+.password-strength-meter .strength-rule::before {
+  content: "•";
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.password-strength-meter .strength-rule.is-met {
+  background: rgba(16, 185, 129, 0.12);
+  color: #15803d;
+  border-color: rgba(16, 185, 129, 0.30);
+}
+
+.password-strength-meter .strength-rule.is-met::before {
+  content: "✓";
+  font-weight: 800;
+}
+
+.auth-card-modern .password-strength-meter .strength-rule {
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  border-color: rgba(255, 255, 255, 0.10);
+}
+
+.auth-card-modern .password-strength-meter .strength-rule.is-met {
+  background: rgba(34, 197, 94, 0.18);
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
+/* Password Match Indicator */
+.password-match-indicator {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--muted, #64748b);
+  transition: color var(--motion-fast) var(--ease-out);
+}
+
+.auth-card-modern .password-match-indicator {
+  color: #94a3b8;
+}
+
+.password-match-indicator.match-success {
+  color: #15803d;
+}
+
+.auth-card-modern .password-match-indicator.match-success {
+  color: #4ade80;
+}
+
+.password-match-indicator.match-error {
+  color: #dc2626;
+}
+
+.auth-card-modern .password-match-indicator.match-error {
+  color: #f87171;
 }
 
 /* ============================================================================

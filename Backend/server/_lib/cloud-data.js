@@ -1,3 +1,11 @@
+/**
+ * Database Data Sanitization and Scoped Access Filter Utilities
+ *
+ * What it Does: Simple non IT Terms
+ * Cleans up and standardizes text, checks whether IDs are valid codes, and ensures
+ * leaders only see and edit data belonging to their specific area or chapter.
+ */
+
 import {
   isAreaAdminRole,
   isChapterServantRole

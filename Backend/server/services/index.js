@@ -1,3 +1,11 @@
+/**
+ * Ministry Services Catalog and Member Assignment Endpoint
+ *
+ * What it Does: Simple non IT Terms
+ * Provides the list of community ministries (Music, Dance, Liturgy, etc.) and allows area leaders
+ * to assign members to their designated ministry service.
+ */
+
 import { requireAuthenticatedProfile, isAreaAdminRole } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { requireArea, loadAreaRow } from '../_lib/cloud-data.js';

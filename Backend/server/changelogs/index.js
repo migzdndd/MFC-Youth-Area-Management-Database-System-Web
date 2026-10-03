@@ -1,3 +1,11 @@
+/**
+ * System Changelogs and Release History Endpoint
+ *
+ * What it Does: Simple non IT Terms
+ * Fetches and displays recent updates, improvements, and bug fixes made to the application,
+ * showing leaders what is new in the current version of the system.
+ */
+
 import { sendJson } from '../_lib/http.js';
 import { checkRateLimit } from '../_lib/rate-limit.js';
 

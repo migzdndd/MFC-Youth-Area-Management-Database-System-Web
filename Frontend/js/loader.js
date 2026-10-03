@@ -1,13 +1,9 @@
 /**
- * MFC Youth Area Management System - Page Loader & Screen Transition Animations
+ * Page Transition Loader and Skeleton Screen Manager
  *
- * What this file does:
- * Makes moving between pages feel smooth and instant. It shows a branded loading curtain
- * and placeholder outlines (skeletons) while data is loading so the screen never flickers or jumps.
- *
- * Backup plan if it breaks:
- * If an animation or prefetch fails, the system automatically falls back to standard browser
- * page loading, and an emergency 5-second timer ensures the loading curtain is never stuck on screen.
+ * What it Does: Simple non IT Terms
+ * Makes switching between pages feel smooth and fast. It displays a branded loading screen
+ * and grey placeholder cards while data is being prepared so the screen does not jump or freeze.
  */
 
 (() => {

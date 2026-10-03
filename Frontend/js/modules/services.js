@@ -1,14 +1,9 @@
 /**
- * MFC Youth Area Management System - Ministry Services & Assignments
+ * Ministry Services Directory and Team Assignment Module
  *
- * What this file does:
- * Organizes and displays ministry service teams (such as Music, Dance, Media, Graphics,
- * and high school or campus tracks). It allows leaders to view who is serving in each ministry
- * and manage ministry assignments.
- *
- * Backup plan if it breaks:
- * If service groups cannot be loaded or an unassigned chapter is encountered, the screen
- * safely shows an empty state message and lets you navigate back to the dashboard without losing data.
+ * What it Does: Simple non IT Terms
+ * Groups youth into ministry teams (such as Music, Dance, LIT, Media, Campus, or High School)
+ * so leaders can see who is serving in each ministry and update youth service assignments.
  */
 
 let currentServiceSections = [];

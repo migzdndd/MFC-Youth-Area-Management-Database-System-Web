@@ -1,7 +1,15 @@
+/**
+ * Servant Leader and Admin Registration Handler
+ *
+ * What it Does: Simple non IT Terms
+ * Allows approved youth leaders and administrators to create their official management portal
+ * accounts using an authorized secret registration code provided by the youth coordinators.
+ */
+
 import { timingSafeEqual } from 'node:crypto';
 import { createSupabaseAdmin, createSupabaseAuthClient } from '../_lib/supabase.js';
 import { assertAdminRegistrationConfigured } from '../_lib/env.js';
-import { sendJson, methodNotAllowed, normalizeEmail, isValidEmail, apiError } from '../_lib/http.js';
+import { sendJson, methodNotAllowed, normalizeEmail, isValidEmail, apiError, passwordError } from '../_lib/http.js';
 import { checkRateLimit } from '../_lib/rate-limit.js';
 
 const ADMIN_ROLES = new Set([
@@ -28,22 +36,6 @@ function cleanText(value, max = 160) {
   return String(value || '').trim().slice(0, max);
 }
 
-/**
- * Validate Password Security Strength
- *
- * What it does:
- * Checks that the chosen password is at least 8 characters long and includes both letters and numbers.
- *
- * Backup plan if it breaks:
- * Returns a friendly explanation of the missing password requirements if too simple, or an empty string if valid.
- */
-function passwordError(password) {
-  if (password.length < 8) return 'Password must be at least 8 characters long.';
-  if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) {
-    return 'Password must contain at least one letter and one number.';
-  }
-  return '';
-}
 
 /**
  * Securely Verify Admin Registration Passcode

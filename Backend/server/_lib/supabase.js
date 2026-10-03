@@ -1,3 +1,12 @@
+/**
+ * Cloud Database Client Factory and HTTPS Connection Manager
+ *
+ * What it Does: Simple non IT Terms
+ * Manages the secure phone line between our server and the cloud database (Supabase).
+ * It creates authenticated clients with the right security keys and ensures every message travels
+ * over encrypted HTTPS, automatically hanging up if the cloud takes more than 10 seconds to answer.
+ */
+
 import { createClient } from '@supabase/supabase-js';
 import { assertBackendConfigured } from './env.js';
 

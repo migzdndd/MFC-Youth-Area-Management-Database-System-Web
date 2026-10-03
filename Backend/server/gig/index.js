@@ -1,3 +1,11 @@
+/**
+ * Give It Generously (GIG) Contribution Management Endpoint
+ *
+ * What it Does: Simple non IT Terms
+ * Records and tracks voluntary financial youth contributions (GIG), allowing youth members
+ * to view their personal giving history and leaders to review chapter or area totals.
+ */
+
 import { requireAuthenticatedProfile, isAreaAdminRole, isChapterServantRole } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { cleanText, requireArea, validateIsoDate, asNonNegativeNumber, loadAreaRow } from '../_lib/cloud-data.js';

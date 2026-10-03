@@ -1,3 +1,11 @@
+/**
+ * Administrative Member Password Override Deprecation Boundary
+ *
+ * What it Does: Simple non IT Terms
+ * Politely informs administrators that they cannot manually set or see member passwords;
+ * youth members must securely claim their own accounts or reset passwords themselves.
+ */
+
 import { requireAuthenticatedProfile, isAreaAdminRole } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 

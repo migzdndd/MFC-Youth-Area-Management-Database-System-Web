@@ -1,15 +1,10 @@
 /**
- * MFC Youth Area Management System - Area Leadership Dashboard
+ * Area Leadership Dashboard View and Metrics Module
  *
- * What this file does:
- * Renders the main dashboard for servant leaders and coordinators.
- * It highlights your primary mission numbers (Total and Active Members), displays secondary
- * summaries (Services and Activity Reports), shows members per chapter, and tracks both
- * upcoming and recent events in a unified view.
- *
- * Backup plan if it breaks:
- * If live cloud data cannot be reached, the dashboard immediately falls back to locally saved
- * records in your browser, and gracefully handles missing data with helpful empty state notices.
+ * What it Does: Simple non IT Terms
+ * The homepage for youth coordinators and servant leaders. It presents key mission metrics
+ * (total members, active youth, upcoming gatherings, activity reports, and ministry services)
+ * in clean summary cards and interactive charts.
  */
 
 let cachedAreasPromise = null;

@@ -1,23 +1,16 @@
 /**
- * ============================================================================
- * MFC Youth Area Management System - Global Settings & Ministry Lists
- * ============================================================================
- * What this file is:
- * This script holds the standard rules, ministry names, and access roles
- * used across the entire Area Management System.
+ * System Configuration, Ministry Roles, and UI Constants
  *
- * Backup plan if something breaks:
- * If an unrecognized role or scrambled text is found, this file supplies safe
- * default values so the rest of the application never gets stuck.
- * ============================================================================
+ * What it Does: Simple non IT Terms
+ * Stores official global settings for the app, including standard service names (like Music
+ * or Dance), leadership titles, database storage keys, and visual theme options.
  */
 
 // Section 1: Storage Keys & Visual Smoothness
 
 // Storage labels for browser memory
 const DB_KEY = 'mfc_web_database_v1';
-const SESSION_KEY = 'mfc_demo_session';
-const USER_KEY = 'mfc_demo_users';
+const SESSION_KEY = 'mfc_auth_session';
 const DB_VERSION = 8;
 let activeModalCleanup = null;
 

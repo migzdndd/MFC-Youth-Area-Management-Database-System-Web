@@ -1,15 +1,9 @@
 /**
- * MFC Youth Area Management System - First-Time Leader Area Connection Wizard
+ * First-Time Servant Leader Onboarding and Area Setup Wizard
  *
- * What this file does:
- * When a newly registered coordinator or servant leader logs in for the first time,
- * this wizard guides them to choose which Area they serve (or create a new Area)
- * before taking them into their management dashboard.
- *
- * Backup plan if it breaks:
- * If area information fails to load from the server, the wizard displays a friendly message
- * and allows leaders to create their area directly. If connection fails, it unlocks the buttons
- * so they can try again without losing their place.
+ * What it Does: Simple non IT Terms
+ * When a newly registered leader signs into the portal for the very first time, this wizard
+ * guides them to select an existing Area to join or create a brand-new Area for their territory.
  */
 
 /**

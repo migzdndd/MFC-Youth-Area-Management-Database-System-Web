@@ -1,3 +1,11 @@
+/**
+ * Multi-Factor Authentication Factors Lister
+ *
+ * What it Does: Simple non IT Terms
+ * Lists all two-factor authentication devices and methods currently registered to the user's
+ * account, showing whether each one is active or pending confirmation.
+ */
+
 import { createClient } from '@supabase/supabase-js';
 import { assertBackendConfigured } from '../../_lib/env.js';
 import { requireAuthenticatedUser } from '../../_lib/access.js';

@@ -1,3 +1,11 @@
+/**
+ * Event Participants and Attendance Check-In Endpoint
+ *
+ * What it Does: Simple non IT Terms
+ * Tracks who has registered for an event, records whether they have paid their registration fee,
+ * and marks their attendance when they arrive at the venue.
+ */
+
 import { requireAuthenticatedProfile, isAreaAdminRole, isChapterServantRole } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { cleanText, requireArea, loadAreaRow } from '../_lib/cloud-data.js';

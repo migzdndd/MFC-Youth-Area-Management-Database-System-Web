@@ -3,13 +3,11 @@ import { sendJson, methodNotAllowed, apiError, isValidEmail, normalizeEmail } fr
 import { assertBackendConfigured } from '../_lib/env.js';
 
 /**
- * Request Account Email Address Change
+ * User Account Email Change Handler
  *
- * What it does:
- * Allows a signed-in user to change their account login email, initiating a verification email to the new address to confirm ownership.
- *
- * Backup plan if it breaks:
- * Validates that the new email is valid and different from the current email. If the cloud auth provider rejects the change, it extracts the error explanation and returns a clear status message.
+ * What it Does: Simple non IT Terms
+ * Lets a signed-in user change the email address they use to sign into the system,
+ * triggering a verification link sent to their new email inbox to confirm they own it.
  */
 export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
