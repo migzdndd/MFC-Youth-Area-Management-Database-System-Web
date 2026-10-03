@@ -9,7 +9,7 @@
 // Section 1: Saved Information Names & Ministry List
 
 // Names used to find your saved login and records on this computer/phone
-const SESSION_KEY = 'mfc_auth_session';
+var SESSION_KEY = window.SESSION_KEY || 'mfc_auth_session';
 const DB_KEY = 'mfc_web_database_v1';
 
 // Standard list of MFC Youth ministries and servant roles
