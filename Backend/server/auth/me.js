@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') return methodNotAllowed(res, ['GET']);
 
   try {
-    const { user, profile: authenticatedProfile, supabase } = await requireAuthenticatedProfile(req);
+    const { user, profile: authenticatedProfile, supabase, admin } = await requireAuthenticatedProfile(req);
     let profile = authenticatedProfile;
     let member = null;
 
@@ -22,7 +22,7 @@ export default async function handler(req, res) {
     // registration was linked to public.members.
     if (!profile.member_id && profile.area_id) {
       const memberLink = await ensureLeadershipMemberRecord({
-        supabase,
+        supabase: admin,
         user,
         profile,
         areaId: profile.area_id,
@@ -48,7 +48,7 @@ export default async function handler(req, res) {
     const authEmail = String(user.email || '').trim().toLowerCase();
     const memberEmail = String(member?.email || '').trim().toLowerCase();
     if (member?.id && authEmail && authEmail !== memberEmail) {
-      const { error: emailSyncError } = await supabase
+      const { error: emailSyncError } = await admin
         .from('members')
         .update({ email: authEmail, updated_at: new Date().toISOString() })
         .eq('id', member.id);

@@ -93,7 +93,7 @@ async function listMembers(req, res) {
 }
 
 async function createMember(req, res) {
-  const { supabase, profile, user } = await requireAuthenticatedProfile(req);
+  const { supabase, admin, profile, user } = await requireAuthenticatedProfile(req);
   if (!isAreaAdminRole(profile.role) && !isChapterServantRole(profile.role)) {
     return sendJson(res, 403, { ok: false, error: 'You do not have permission to add members.' });
   }
@@ -137,7 +137,7 @@ async function createMember(req, res) {
     return sendJson(res, 400, { ok: false, error: 'A Chapter Servant must be assigned to a chapter.' });
   }
 
-  await validateChapter(supabase, chapterId, areaId);
+  await validateChapter(admin, chapterId, areaId);
 
   const { data: existingMember, error: existingError } = await supabase
     .from('members')
@@ -173,7 +173,7 @@ async function createMember(req, res) {
     .single();
   if (memberError) throw memberError;
 
-  await ensureRoleServiceAssignment(supabase, {
+  await ensureRoleServiceAssignment(admin, {
     memberId: createdMember.id,
     areaId,
     role: accessLevel
@@ -183,7 +183,7 @@ async function createMember(req, res) {
 }
 
 async function updateMember(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const { supabase, admin, profile } = await requireAuthenticatedProfile(req);
   const input = req.body || {};
   const memberId = input.id;
   if (!memberId) return sendJson(res, 400, { ok: false, error: 'Member ID is required.' });
@@ -230,7 +230,7 @@ async function updateMember(req, res) {
     return sendJson(res, 400, { ok: false, error: 'A Chapter Servant must be assigned to a chapter.' });
   }
 
-  await validateChapter(supabase, chapterId, areaId);
+  await validateChapter(admin, chapterId, areaId);
 
   const { data: duplicate, error: duplicateError } = await supabase
     .from('members')
@@ -266,7 +266,7 @@ async function updateMember(req, res) {
     .single();
   if (updateError) throw updateError;
 
-  const { data: linkedProfile, error: linkedProfileError } = await supabase
+  const { data: linkedProfile, error: linkedProfileError } = await admin
     .from('profiles')
     .select('id')
     .eq('member_id', memberId)
@@ -274,7 +274,7 @@ async function updateMember(req, res) {
   if (linkedProfileError) throw linkedProfileError;
 
   if (linkedProfile?.id) {
-    const { error: profileUpdateError } = await supabase
+    const { error: profileUpdateError } = await admin
       .from('profiles')
       .update({
         role: accessLevel,
@@ -290,11 +290,11 @@ async function updateMember(req, res) {
         display_name: [firstName, middleName, lastName].filter(Boolean).join(' ')
       }
     };
-    const { error: authUpdateError } = await supabase.auth.admin.updateUserById(linkedProfile.id, authChanges);
+    const { error: authUpdateError } = await admin.auth.admin.updateUserById(linkedProfile.id, authChanges);
     if (authUpdateError) throw authUpdateError;
   }
 
-  await ensureRoleServiceAssignment(supabase, {
+  await ensureRoleServiceAssignment(admin, {
     memberId: updated.id,
     areaId,
     role: accessLevel
@@ -304,7 +304,7 @@ async function updateMember(req, res) {
 }
 
 async function deleteMember(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const { supabase, admin, profile } = await requireAuthenticatedProfile(req);
   if (!isAreaAdminRole(profile.role)) {
     return sendJson(res, 403, { ok: false, error: 'Only Area-level servant accounts can delete member records.' });
   }
@@ -326,7 +326,7 @@ async function deleteMember(req, res) {
     });
   }
 
-  const { data: linkedProfile, error: profileError } = await supabase
+  const { data: linkedProfile, error: profileError } = await admin
     .from('profiles')
     .select('id')
     .eq('member_id', memberId)

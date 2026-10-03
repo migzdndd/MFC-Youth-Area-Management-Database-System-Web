@@ -13,10 +13,10 @@ import { requireArea } from '../_lib/cloud-data.js';
 export default async function handler(req, res) {
   if (req.method !== 'GET') return methodNotAllowed(res, ['GET']);
   try {
-    const { supabase, profile } = await requireAuthenticatedProfile(req);
+    const { supabase, admin, profile } = await requireAuthenticatedProfile(req);
     const areaId = requireArea(req, profile);
 
-    let chaptersQuery = supabase.from('chapters').select('id, area_id, name, is_active, created_at, updated_at').eq('area_id', areaId).eq('is_active', true).order('name');
+    let chaptersQuery = admin.from('chapters').select('id, area_id, name, is_active, created_at, updated_at').eq('area_id', areaId).eq('is_active', true).order('name');
     let reportsQuery = supabase.from('activity_reports').select('id, area_id, chapter_id, prepared_by_member_id, prepared_by_name, chapter_name_snapshot, report_type, activity_date, title, activity, participant_count, location, event_id, notes, created_at, updated_at').eq('area_id', areaId).order('activity_date', { ascending: false });
     let gigQuery = supabase.from('gig_contributions').select('id, area_id, chapter_id, member_id, amount, contribution_date, notes, created_at').eq('area_id', areaId).order('contribution_date', { ascending: false });
 
@@ -51,9 +51,9 @@ export default async function handler(req, res) {
 
     const [chaptersResult, servicesResult, membersResult, eventsResult, reportsResult, gigResult] = await Promise.all([
       chaptersQuery,
-      supabase.from('services').select('id, area_id, name, is_active').eq('area_id', areaId).eq('is_active', true).order('name'),
+      admin.from('services').select('id, area_id, name, is_active').eq('area_id', areaId).eq('is_active', true).order('name'),
       membersQuery,
-      supabase.from('events').select('id, area_id, name, description, venue, starts_at, ends_at, fee, manual_attendance, created_at, updated_at').eq('area_id', areaId).order('starts_at', { ascending: false }),
+      admin.from('events').select('id, area_id, name, description, venue, starts_at, ends_at, fee, manual_attendance, created_at, updated_at').eq('area_id', areaId).order('starts_at', { ascending: false }),
       reportsQuery,
       gigQuery
     ]);
@@ -67,7 +67,7 @@ export default async function handler(req, res) {
     const serviceIds = (servicesResult.data || []).map(item => item.id);
     let serviceLinks = [];
     if (serviceIds.length && scopedMemberIds.length) {
-      const serviceLinksResult = await supabase
+      const serviceLinksResult = await admin
         .from('member_services')
         .select('member_id, service_id')
         .in('service_id', serviceIds);
@@ -78,7 +78,7 @@ export default async function handler(req, res) {
     const eventIds = (eventsResult.data || []).map(item => item.id);
     let participants = [];
     if (eventIds.length) {
-      let participantQuery = supabase
+      let participantQuery = admin
         .from('event_participants')
         .select('id, event_id, member_id, mode_of_payment, payment_status, attended, registered_at, updated_at')
         .in('event_id', eventIds)

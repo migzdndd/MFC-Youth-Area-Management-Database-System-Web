@@ -38,10 +38,10 @@ async function validateAssignmentScope(supabase, profile, chapterId, areaId) {
 }
 
 async function listUnassigned(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const { supabase, admin, profile } = await requireAuthenticatedProfile(req);
   const areaId = requireArea(req, profile);
   const chapterId = req.query?.chapterId;
-  await validateAssignmentScope(supabase, profile, chapterId, areaId);
+  await validateAssignmentScope(admin, profile, chapterId, areaId);
 
   const { data, error } = await supabase
     .from('members')
@@ -57,11 +57,11 @@ async function listUnassigned(req, res) {
 }
 
 async function assignMembers(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const { supabase, admin, profile } = await requireAuthenticatedProfile(req);
   const areaId = requireArea(req, profile);
   const chapterId = req.body?.chapterId;
   const memberIds = [...new Set((Array.isArray(req.body?.memberIds) ? req.body.memberIds : []).map(String).filter(Boolean))].slice(0, 250);
-  await validateAssignmentScope(supabase, profile, chapterId, areaId);
+  await validateAssignmentScope(admin, profile, chapterId, areaId);
   if (!memberIds.length) return sendJson(res, 400, { ok: false, error: 'Select at least one member.' });
 
   const { data: available, error: loadError } = await supabase
@@ -82,7 +82,7 @@ async function assignMembers(req, res) {
     .select('id, chapter_id');
   if (updateError) throw updateError;
 
-  const { error: profileError } = await supabase
+  const { error: profileError } = await admin
     .from('profiles')
     .update({ chapter_id: chapterId })
     .in('member_id', availableIds);

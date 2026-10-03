@@ -8,7 +8,7 @@
  * and edit data belonging to their own assigned geographic area or chapter.
  */
 
-import { createSupabaseAdmin } from './supabase.js';
+import { createSupabaseAdmin, createSupabaseUserClient } from './supabase.js';
 import { readBearerToken } from './http.js';
 
 export const AREA_ADMIN_ROLES = new Set([
@@ -86,8 +86,8 @@ export async function requireAuthenticatedUser(req, options = {}) {
     throw error;
   }
 
-  const supabase = createSupabaseAdmin();
-  const { data: userData, error: userError } = await supabase.auth.getUser(token);
+  const admin = createSupabaseAdmin();
+  const { data: userData, error: userError } = await admin.auth.getUser(token);
   if (userError || !userData?.user) {
     const error = new Error('Session is invalid or expired.');
     error.statusCode = 401;
@@ -114,7 +114,9 @@ export async function requireAuthenticatedUser(req, options = {}) {
     }
   }
 
-  return { supabase, user: userData.user, token };
+  const userClient = createSupabaseUserClient(token);
+
+  return { supabase: userClient, userClient, admin, user: userData.user, token };
 }
 
 /**
@@ -127,8 +129,8 @@ export async function requireAuthenticatedUser(req, options = {}) {
  * If the profile does not exist or has been disabled, it stops the request and returns an "Account is not active" error.
  */
 export async function requireAuthenticatedProfile(req) {
-  const { supabase, user, token } = await requireAuthenticatedUser(req);
-  const { data: profile, error: profileError } = await supabase
+  const { admin, userClient, user, token } = await requireAuthenticatedUser(req);
+  const { data: profile, error: profileError } = await admin
     .from('profiles')
     .select('*')
     .eq('id', user.id)
@@ -142,5 +144,5 @@ export async function requireAuthenticatedProfile(req) {
     throw error;
   }
 
-  return { supabase, user, profile, token };
+  return { supabase: userClient, userClient, admin, user, profile, token };
 }

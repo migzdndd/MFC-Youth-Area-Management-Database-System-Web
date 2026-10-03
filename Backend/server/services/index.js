@@ -12,14 +12,14 @@ import { requireArea, loadAreaRow } from '../_lib/cloud-data.js';
 import { ensureStandardServices, normalizeServiceName } from '../_lib/service-catalog.js';
 
 async function listServices(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const { admin, profile } = await requireAuthenticatedProfile(req);
   const areaId = requireArea(req, profile);
-  const services = await ensureStandardServices(supabase, areaId);
+  const services = await ensureStandardServices(admin, areaId);
   return sendJson(res, 200, { ok: true, services });
 }
 
 async function assignServices(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const { supabase, admin, profile } = await requireAuthenticatedProfile(req);
   if (!isAreaAdminRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'Only Area-level servant accounts can assign services.' });
   const areaId = requireArea(req, profile);
   const memberId = req.body?.memberId;
@@ -29,14 +29,14 @@ async function assignServices(req, res) {
   const member = await loadAreaRow(supabase, 'members', memberId, areaId, 'id');
   if (!member) return sendJson(res, 404, { ok: false, error: 'Member not found in your Area.' });
 
-  const services = await ensureStandardServices(supabase, areaId);
+  const services = await ensureStandardServices(admin, areaId);
   const byName = new Map((services || []).map(item => [normalizeServiceName(item.name), item.id]));
   const unknown = serviceNames.filter(name => !byName.has(name));
   if (unknown.length) return sendJson(res, 400, { ok: false, error: `Unknown service: ${unknown[0]}` });
 
   const targetIds = serviceNames.map(name => byName.get(name));
   const targetSet = new Set(targetIds.map(String));
-  const { data: existingLinks, error: existingError } = await supabase
+  const { data: existingLinks, error: existingError } = await admin
     .from('member_services')
     .select('service_id')
     .eq('member_id', memberId);
@@ -49,11 +49,11 @@ async function assignServices(req, res) {
 
   if (toAdd.length) {
     const rows = toAdd.map(serviceId => ({ member_id: memberId, service_id: serviceId }));
-    const { error: insertError } = await supabase.from('member_services').insert(rows);
+    const { error: insertError } = await admin.from('member_services').insert(rows);
     if (insertError) throw insertError;
   }
   if (toRemove.length) {
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await admin
       .from('member_services')
       .delete()
       .eq('member_id', memberId)

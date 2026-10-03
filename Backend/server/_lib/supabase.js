@@ -56,7 +56,7 @@ function secureFetch(input, init = {}) {
  * Backup plan if it breaks:
  * Explicitly disables automatic token refreshing on the backend to avoid secret token leaks.
  */
-function clientOptions() {
+function clientOptions(token = '') {
   return {
     auth: {
       autoRefreshToken: false,
@@ -65,7 +65,8 @@ function clientOptions() {
     global: {
       fetch: secureFetch,
       headers: {
-        'X-Client-Info': 'mfc-youth-web-api'
+        'X-Client-Info': 'mfc-youth-web-api',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
       }
     }
   };
@@ -97,4 +98,16 @@ export function createSupabaseAdmin() {
 export function createSupabaseAuthClient() {
   const { supabaseUrl, supabaseAnonKey } = assertBackendConfigured();
   return createClient(supabaseUrl, supabaseAnonKey, clientOptions());
+}
+
+/**
+ * Create Scoped User Database Client
+ *
+ * What it does:
+ * Initializes a client using the public anon key combined with the signed-in user's JWT.
+ * Postgres evaluates this connection as role: 'authenticated' and enforces table-level RLS policies.
+ */
+export function createSupabaseUserClient(token) {
+  const { supabaseUrl, supabaseAnonKey } = assertBackendConfigured();
+  return createClient(supabaseUrl, supabaseAnonKey, clientOptions(token));
 }

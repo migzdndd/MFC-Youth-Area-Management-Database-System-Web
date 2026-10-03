@@ -12,14 +12,14 @@ export default async function handler(req, res) {
   if (req.method !== 'DELETE') return methodNotAllowed(res, ['DELETE']);
 
   try {
-    const { supabase, user, profile } = await requireAuthenticatedProfile(req);
+    const { supabase, admin, user, profile } = await requireAuthenticatedProfile(req);
     if (!isAreaAdminRole(profile?.role) && !isChapterServantRole(profile?.role)) {
       return sendJson(res, 403, { ok: false, error: 'Account deletion from the management portal is available only to Servant Leader accounts.' });
     }
 
     const memberId = profile?.member_id || null;
 
-    const { error: authDeleteError } = await supabase.auth.admin.deleteUser(user.id);
+    const { error: authDeleteError } = await admin.auth.admin.deleteUser(user.id);
     if (authDeleteError) throw authDeleteError;
 
     // profiles.id references auth.users ON DELETE CASCADE, so the profile is

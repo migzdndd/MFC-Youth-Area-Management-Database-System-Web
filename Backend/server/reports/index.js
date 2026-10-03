@@ -30,7 +30,7 @@ async function listReports(req, res) {
 }
 
 async function saveReport(req, res, isUpdate) {
-  const { supabase, profile, user } = await requireAuthenticatedProfile(req);
+  const { supabase, admin, profile, user } = await requireAuthenticatedProfile(req);
   if (!isAreaAdminRole(profile.role) && !isChapterServantRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'You do not have permission to manage activity reports.' });
   const areaId = requireArea(req, profile);
   const input = req.body || {};
@@ -51,9 +51,9 @@ async function saveReport(req, res, isUpdate) {
     chapterId = existing.chapter_id;
   }
   if (isChapterServantRole(profile.role)) chapterId = profile.chapter_id;
-  if (chapterId) await ensureChapterInArea(supabase, chapterId, areaId);
+  if (chapterId) await ensureChapterInArea(admin, chapterId, areaId);
   if (input.eventId) {
-    const event = await loadAreaRow(supabase, 'events', input.eventId, areaId, 'id');
+    const event = await loadAreaRow(admin, 'events', input.eventId, areaId, 'id');
     if (!event) return sendJson(res, 400, { ok: false, error: 'The linked event does not belong to your Area.' });
   }
   const reportType = cleanText(input.type, 100);

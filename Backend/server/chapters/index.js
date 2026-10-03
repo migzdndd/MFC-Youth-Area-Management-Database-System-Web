@@ -15,10 +15,10 @@ import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { cleanText, requireArea, requireAreaAdmin, loadAreaRow } from '../_lib/cloud-data.js';
 
 async function listChapters(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const { admin, profile } = await requireAuthenticatedProfile(req);
   const areaId = requireArea(req, profile);
 
-  let query = supabase
+  let query = admin
     .from('chapters')
     .select('id, area_id, name, is_active, created_at, updated_at')
     .eq('area_id', areaId)
@@ -40,13 +40,13 @@ async function listChapters(req, res) {
 }
 
 async function createChapter(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const { admin, profile } = await requireAuthenticatedProfile(req);
   requireAreaAdmin(profile);
   const areaId = requireArea(req, profile);
   const name = cleanText(req.body?.name, 100);
   if (!name) return sendJson(res, 400, { ok: false, error: 'Chapter name is required.' });
 
-  const { data: duplicate, error: duplicateError } = await supabase
+  const { data: duplicate, error: duplicateError } = await admin
     .from('chapters')
     .select('id')
     .eq('area_id', areaId)
@@ -55,7 +55,7 @@ async function createChapter(req, res) {
   if (duplicateError) throw duplicateError;
   if (duplicate) return sendJson(res, 409, { ok: false, error: 'That chapter already exists.' });
 
-  const { data, error } = await supabase
+  const { data, error } = await admin
     .from('chapters')
     .insert({ area_id: areaId, name, is_active: true })
     .select('*')
@@ -65,17 +65,17 @@ async function createChapter(req, res) {
 }
 
 async function updateChapter(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const { admin, profile } = await requireAuthenticatedProfile(req);
   requireAreaAdmin(profile);
   const areaId = requireArea(req, profile);
   const id = req.body?.id;
   const name = cleanText(req.body?.name, 100);
   if (!id || !name) return sendJson(res, 400, { ok: false, error: 'Chapter ID and name are required.' });
 
-  const existing = await loadAreaRow(supabase, 'chapters', id, areaId, 'id');
+  const existing = await loadAreaRow(admin, 'chapters', id, areaId, 'id');
   if (!existing) return sendJson(res, 404, { ok: false, error: 'Chapter not found in your Area.' });
 
-  const { data: duplicate, error: duplicateError } = await supabase
+  const { data: duplicate, error: duplicateError } = await admin
     .from('chapters')
     .select('id')
     .eq('area_id', areaId)
@@ -85,7 +85,7 @@ async function updateChapter(req, res) {
   if (duplicateError) throw duplicateError;
   if (duplicate) return sendJson(res, 409, { ok: false, error: 'That chapter already exists.' });
 
-  const { data, error } = await supabase
+  const { data, error } = await admin
     .from('chapters')
     .update({ name })
     .eq('id', id)
@@ -97,13 +97,13 @@ async function updateChapter(req, res) {
 }
 
 async function deleteChapter(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const { supabase, admin, profile } = await requireAuthenticatedProfile(req);
   requireAreaAdmin(profile);
   const areaId = requireArea(req, profile);
   const id = req.query?.id || req.body?.id;
   if (!id) return sendJson(res, 400, { ok: false, error: 'Chapter ID is required.' });
 
-  const existing = await loadAreaRow(supabase, 'chapters', id, areaId, 'id');
+  const existing = await loadAreaRow(admin, 'chapters', id, areaId, 'id');
   if (!existing) return sendJson(res, 404, { ok: false, error: 'Chapter not found in your Area.' });
 
   const { count, error: countError } = await supabase
@@ -116,7 +116,7 @@ async function deleteChapter(req, res) {
     return sendJson(res, 409, { ok: false, error: 'Move or remove members from this chapter before deleting it.' });
   }
 
-  const { error } = await supabase.from('chapters').delete().eq('id', id).eq('area_id', areaId);
+  const { error } = await admin.from('chapters').delete().eq('id', id).eq('area_id', areaId);
   if (error) throw error;
   return sendJson(res, 200, { ok: true, deleted: true, id });
 }

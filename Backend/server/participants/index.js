@@ -19,13 +19,13 @@ async function memberInArea(supabase, memberId, areaId) {
 }
 
 async function listParticipants(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const { supabase, admin, profile } = await requireAuthenticatedProfile(req);
   const areaId = requireArea(req, profile);
-  const { data: events, error: eventError } = await supabase.from('events').select('id').eq('area_id', areaId);
+  const { data: events, error: eventError } = await admin.from('events').select('id').eq('area_id', areaId);
   if (eventError) throw eventError;
   const eventIds = (events || []).map(item => item.id);
   if (!eventIds.length) return sendJson(res, 200, { ok: true, participants: [] });
-  let query = supabase
+  let query = admin
     .from('event_participants')
     .select('id, event_id, member_id, mode_of_payment, payment_status, attended, registered_at, updated_at')
     .in('event_id', eventIds)
@@ -46,20 +46,20 @@ async function listParticipants(req, res) {
 }
 
 async function createParticipant(req, res) {
-  const { supabase, profile, user } = await requireAuthenticatedProfile(req);
+  const { supabase, admin, profile, user } = await requireAuthenticatedProfile(req);
   if (!isAreaAdminRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'Only Area-level servant accounts can register event participants.' });
   const areaId = requireArea(req, profile);
   const eventId = req.body?.eventId;
   const memberId = req.body?.memberId;
   if (!eventId || !memberId) return sendJson(res, 400, { ok: false, error: 'Event and member are required.' });
-  if (!(await eventInArea(supabase, eventId, areaId)) || !(await memberInArea(supabase, memberId, areaId))) {
+  if (!(await eventInArea(admin, eventId, areaId)) || !(await memberInArea(supabase, memberId, areaId))) {
     return sendJson(res, 400, { ok: false, error: 'Event or member does not belong to your Area.' });
   }
-  const { data: duplicate, error: duplicateError } = await supabase
+  const { data: duplicate, error: duplicateError } = await admin
     .from('event_participants').select('id').eq('event_id', eventId).eq('member_id', memberId).maybeSingle();
   if (duplicateError) throw duplicateError;
   if (duplicate) return sendJson(res, 409, { ok: false, error: 'That member is already registered for this event.' });
-  const { data, error } = await supabase.from('event_participants').insert({
+  const { data, error } = await admin.from('event_participants').insert({
     event_id: eventId,
     member_id: memberId,
     mode_of_payment: cleanText(req.body?.paymentMode, 80) || null,
@@ -72,15 +72,15 @@ async function createParticipant(req, res) {
 }
 
 async function updateParticipant(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const { admin, profile } = await requireAuthenticatedProfile(req);
   if (!isAreaAdminRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'Only Area-level servant accounts can edit event participants.' });
   const areaId = requireArea(req, profile);
   const id = req.body?.id;
   if (!id) return sendJson(res, 400, { ok: false, error: 'Participant ID is required.' });
-  const { data: existing, error: existingError } = await supabase.from('event_participants').select('id, event_id').eq('id', id).maybeSingle();
+  const { data: existing, error: existingError } = await admin.from('event_participants').select('id, event_id').eq('id', id).maybeSingle();
   if (existingError) throw existingError;
-  if (!existing || !(await eventInArea(supabase, existing.event_id, areaId))) return sendJson(res, 404, { ok: false, error: 'Participant record not found in your Area.' });
-  const { data, error } = await supabase.from('event_participants').update({
+  if (!existing || !(await eventInArea(admin, existing.event_id, areaId))) return sendJson(res, 404, { ok: false, error: 'Participant record not found in your Area.' });
+  const { data, error } = await admin.from('event_participants').update({
     mode_of_payment: cleanText(req.body?.paymentMode, 80) || null,
     payment_status: cleanText(req.body?.paymentStatus, 80) || 'Unpaid',
     attended: Boolean(req.body?.attended)
@@ -90,15 +90,15 @@ async function updateParticipant(req, res) {
 }
 
 async function deleteParticipant(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const { admin, profile } = await requireAuthenticatedProfile(req);
   if (!isAreaAdminRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'Only Area-level servant accounts can delete event participants.' });
   const areaId = requireArea(req, profile);
   const id = req.query?.id || req.body?.id;
   if (!id) return sendJson(res, 400, { ok: false, error: 'Participant ID is required.' });
-  const { data: existing, error: existingError } = await supabase.from('event_participants').select('id, event_id').eq('id', id).maybeSingle();
+  const { data: existing, error: existingError } = await admin.from('event_participants').select('id, event_id').eq('id', id).maybeSingle();
   if (existingError) throw existingError;
-  if (!existing || !(await eventInArea(supabase, existing.event_id, areaId))) return sendJson(res, 404, { ok: false, error: 'Participant record not found in your Area.' });
-  const { error } = await supabase.from('event_participants').delete().eq('id', id);
+  if (!existing || !(await eventInArea(admin, existing.event_id, areaId))) return sendJson(res, 404, { ok: false, error: 'Participant record not found in your Area.' });
+  const { error } = await admin.from('event_participants').delete().eq('id', id);
   if (error) throw error;
   return sendJson(res, 200, { ok: true, deleted: true, id });
 }
