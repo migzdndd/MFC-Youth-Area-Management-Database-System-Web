@@ -9,6 +9,44 @@ import { checkRateLimit } from '../_lib/rate-limit.js';
  * Sends an email containing a secure link to help a user who forgot their password
  * safely reset it and log back into their account.
  */
+function getSafeRedirectUrl(req) {
+  if (process.env.APP_URL) {
+    const appUrl = String(process.env.APP_URL).trim().replace(/\/+$/, '');
+    return `${appUrl}/reset-password`;
+  }
+
+  const rawOrigin = req.headers?.origin;
+  const rawHost = req.headers?.host;
+
+  let candidateUrl = '';
+  if (rawOrigin) {
+    try {
+      const parsed = new URL(rawOrigin);
+      candidateUrl = parsed.origin;
+    } catch {}
+  } else if (rawHost) {
+    const protocol = req.headers?.['x-forwarded-proto'] || (rawHost.includes('localhost') ? 'http' : 'https');
+    try {
+      const parsed = new URL(`${protocol}://${rawHost}`);
+      candidateUrl = parsed.origin;
+    } catch {}
+  }
+
+  if (candidateUrl) {
+    try {
+      const url = new URL(candidateUrl);
+      const hostname = url.hostname.toLowerCase();
+      const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+      const isAllowedDomain = isLocalhost || hostname.endsWith('.vercel.app') || hostname.endsWith('.github.io');
+      if (isAllowedDomain) {
+        return `${url.origin}/reset-password`;
+      }
+    } catch {}
+  }
+
+  return undefined;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
 
@@ -21,18 +59,10 @@ export default async function handler(req, res) {
     if (!isValidEmail(email)) return genericResponse();
 
     const supabase = createSupabaseAuthClient();
-
-    // Attempt to infer base URL from origin or host for the RedirectTo param
-    let baseUrl = '';
-    if (req.headers.origin) {
-      baseUrl = req.headers.origin;
-    } else if (req.headers.host) {
-      const protocol = req.headers['x-forwarded-proto'] || (req.headers.host.includes('localhost') ? 'http' : 'https');
-      baseUrl = `${protocol}://${req.headers.host}`;
-    }
+    const redirectTo = getSafeRedirectUrl(req);
 
     const { error: recoveryError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: baseUrl ? `${baseUrl}/reset-password` : undefined
+      redirectTo
     });
     if (recoveryError) throw recoveryError;
 

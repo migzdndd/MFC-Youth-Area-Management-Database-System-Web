@@ -592,27 +592,7 @@ button:active, .btn:active, .btn-auth:active {
   background: rgba(45, 52, 58, 0.95);
 }
 
-.btn-demo {
-  width: 100%;
-  margin-top: 10px;
-  background: transparent;
-  border: 1px solid rgba(124, 196, 249, 0.55);
-  color: #9ed5ff;
-  box-shadow: inset 0 0 0 1px rgba(13, 126, 190, 0.08);
-}
 
-.btn-demo:hover {
-  background: rgba(31, 139, 211, 0.12);
-  border-color: rgba(124, 196, 249, 0.9);
-}
-
-.demo-login-note {
-  margin: 2px 0 0;
-  color: #64748b;
-  font-size: .66rem;
-  line-height: 1.3;
-  text-align: center;
-}
 
 .btn-dark:hover {
   background: rgba(0, 0, 0, 0.9);
@@ -4513,8 +4493,7 @@ from { opacity: .45; }
   transition: box-shadow var(--motion-fast) var(--ease-out), border-color var(--motion-fast) var(--ease-out);
 }
 
-.floating-login-card::-webkit-scrollbar, .auth-layout-modern .login-card-modern::-webkit-scrollbar,
-.demo-role-modal-body::-webkit-scrollbar {
+.floating-login-card::-webkit-scrollbar, .auth-layout-modern .login-card-modern::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
@@ -4693,8 +4672,7 @@ from { opacity: .45; }
   background: #0369a1;
 }
 
-.auth-slide-primary:hover, .auth-slide-primary:focus-visible,
-.auth-slide-demo:hover, .auth-slide-demo:focus-visible {
+.auth-slide-primary:hover, .auth-slide-primary:focus-visible {
   color: #fff;
   border-color: #38bdf8;
 }
@@ -4708,17 +4686,6 @@ from { opacity: .45; }
 .auth-slide-secondary:hover, .auth-slide-secondary:focus-visible {
   color: #002847;
   border-color: #fff;
-}
-
-.auth-slide-demo {
-  --button-accent: #1e3a5f;
-  min-height: 36px;
-  padding: .45rem .75rem;
-  width: 100%;
-  color: #93c5fd;
-  border-color: rgba(56, 189, 248, .28);
-  font-size: .78rem;
-  border-radius: 9px;
 }
 
 .login-divider {
@@ -5545,218 +5512,7 @@ from { opacity: .45; }
   background: #f1f5f9;
 }
 
-/* =========================================================
-   DEMO ROLE SELECTION MODAL (COMPACT, GLASSMORPHIC & DRAGGABLE)
-   ========================================================= */
 
-.demo-role-modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(2, 10, 18, 0.45);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  padding: 16px;
-  animation: fadeIn 0.18s ease-out;
-}
-
-.demo-role-modal-dialog {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: min(560px, calc(100vw - 28px));
-  max-height: calc(100vh - 32px);
-  background: rgba(6, 26, 44, 0.90);
-  backdrop-filter: blur(24px) saturate(140%);
-  -webkit-backdrop-filter: blur(24px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 16px;
-  box-shadow: 0 24px 60px -10px rgba(0, 0, 0, 0.7),
-    0 0 0 1px rgba(255, 255, 255, 0.08),
-    0 8px 32px rgba(56, 189, 248, 0.1);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  color: #f8fafc;
-  animation: modalPopIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform, left, top;
-}
-
-.demo-role-modal-dialog.is-dragging {
-  opacity: 0.95;
-  box-shadow: 0 32px 75px -10px rgba(0, 0, 0, 0.8),
-    0 0 0 1px rgba(56, 189, 248, 0.3),
-    0 12px 40px rgba(56, 189, 248, 0.2);
-  cursor: grabbing !important;
-}
-
-.demo-role-modal-dialog.is-dragging * {
-  cursor: grabbing !important;
-  user-select: none !important;
-}
-
-.demo-role-modal-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.025);
-  cursor: grab;
-  user-select: none;
-  touch-action: none;
-}
-
-.demo-role-modal-header:active {
-  cursor: grabbing;
-}
-
-.demo-role-title-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.demo-role-drag-grip {
-  display: flex;
-  align-items: center;
-  color: #64748b;
-  opacity: 0.8;
-  cursor: grab;
-}
-
-.demo-role-title-group h2 {
-  margin: 0;
-  font-size: 1.02rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: #f8fafc;
-}
-
-.demo-role-title-group p {
-  margin: 2px 0 0 0;
-  font-size: 0.73rem;
-  color: #94a3b8;
-}
-
-.demo-role-close-btn {
-  background: transparent;
-  border: 0;
-  font-size: 1.35rem;
-  line-height: 1;
-  color: #94a3b8;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: all var(--motion-fast) ease;
-}
-
-.demo-role-close-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
-}
-
-.demo-role-modal-body {
-  padding: 11px 13px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  overflow-y: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.demo-role-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  padding: 9px 12px;
-  text-align: left;
-  cursor: pointer;
-  transition: all var(--motion-fast) var(--ease-out);
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  color: inherit;
-}
-
-.demo-role-card:hover, .demo-role-card:focus-visible {
-  background: rgba(56, 189, 248, 0.12);
-  border-color: rgba(56, 189, 248, 0.38);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-}
-
-.demo-role-card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 6px;
-}
-
-.demo-role-card-top strong {
-  font-size: 0.84rem;
-  font-weight: 700;
-  color: #f1f5f9;
-}
-
-.demo-role-badge {
-  font-size: 0.62rem;
-  font-weight: 700;
-  background: rgba(56, 189, 248, 0.14);
-  color: #7dd3fc;
-  padding: 1px 7px;
-  border-radius: 999px;
-  border: 1px solid rgba(56, 189, 248, 0.28);
-  white-space: nowrap;
-}
-
-.demo-role-card p {
-  margin: 0;
-  font-size: 0.70rem;
-  color: #94a3b8;
-  line-height: 1.3;
-}
-
-.demo-role-modal-footer {
-  padding: 8px 14px 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(255, 255, 255, 0.015);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.demo-role-modal-hint {
-  font-size: 0.68rem;
-  color: #64748b;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  user-select: none;
-}
-
-.demo-role-cancel-btn {
-  padding: 5px 14px;
-  font-size: 0.76rem;
-  font-weight: 600;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 7px;
-  cursor: pointer;
-  color: #cbd5e1;
-  transition: all var(--motion-fast) ease;
-}
-
-.demo-role-cancel-btn:hover {
-  background: rgba(255, 255, 255, 0.09);
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.28);
-}
 
 @keyframes modalPopIn {
 0% {
@@ -6221,10 +5977,7 @@ from { opacity: .45; }
     width: 82px;
   }
 
-  .demo-role-modal-body {
-    grid-template-columns: 1fr;
-    max-height: 55vh;
-  }
+
 
 }
 

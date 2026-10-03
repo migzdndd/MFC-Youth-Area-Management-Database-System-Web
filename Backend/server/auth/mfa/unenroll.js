@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
 
   try {
-    const { token } = await requireAuthenticatedUser(req, { allowAal1: true });
+    const { token } = await requireAuthenticatedUser(req);
     const factorId = String(req.body?.factorId || '').trim();
 
     if (!factorId) {

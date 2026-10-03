@@ -290,7 +290,7 @@ window.eventModal = function (id = null) {
       };
 
       try {
-        if (session?.backendAuth && !session?.demo) {
+        if (session?.backendAuth) {
           await backendApi('/api/events', {
             method: id ? 'PATCH' : 'POST',
             body: JSON.stringify({ ...record, id: id || undefined })
@@ -330,7 +330,7 @@ window.deleteEvent = async id => {
   if (!confirm('Delete this event and all of its participant records?')) return;
 
   try {
-    if (session?.backendAuth && !session?.demo) {
+    if (session?.backendAuth) {
       await backendApi(`/api/events?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
       await refreshAllCloudData({ render: false });
     } else {
@@ -643,7 +643,7 @@ window.participantModal = (eventId, id = null) => {
       };
 
       try {
-        if (session?.backendAuth && !session?.demo) {
+        if (session?.backendAuth) {
           const apiRes = await backendApi('/api/participants', {
             method: id ? 'PATCH' : 'POST',
             body: JSON.stringify({ ...record, id: id || undefined })
@@ -719,7 +719,7 @@ window.deleteParticipant = async (eventId, id) => {
   if (!confirm('Delete this participant?')) return;
 
   try {
-    if (session?.backendAuth && !session?.demo) {
+    if (session?.backendAuth) {
       const apiRes = await backendApi(`/api/participants?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
       if (apiRes?.offline) {
         const data = db();

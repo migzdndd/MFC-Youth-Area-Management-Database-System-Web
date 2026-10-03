@@ -257,7 +257,7 @@ function safeBackendMessage(error) {
   if (lower.includes('failed to fetch') || lower.includes('fetch failed') || lower.includes('enotfound')) {
     return 'The backend could not reach Supabase. Check SUPABASE_URL.';
   }
-  if (lower.includes('password')) {
+  if (lower.includes('password') && (lower.includes('least') || lower.includes('weak') || lower.includes('short') || lower.includes('character'))) {
     return message;
   }
   if (lower.includes('email') && (lower.includes('already') || lower.includes('registered'))) {
@@ -271,6 +271,42 @@ function safeBackendMessage(error) {
   }
 
   return 'Backend request failed.';
+}
+
+/**
+ * Redact Sensitive Fields from Logs
+ *
+ * What it does:
+ * Recursively masks passwords, tokens, and authorization headers from objects
+ * before they can be logged or serialized.
+ */
+export function sanitizeLogData(data) {
+  if (!data || typeof data !== 'object') return data;
+  if (Array.isArray(data)) return data.map(sanitizeLogData);
+
+  const SENSITIVE_KEYS = new Set([
+    'password',
+    'currentpassword',
+    'newpassword',
+    'confirmpassword',
+    'token',
+    'accesstoken',
+    'refreshtoken',
+    'secret',
+    'authorization'
+  ]);
+
+  const sanitized = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (SENSITIVE_KEYS.has(key.toLowerCase().replace(/[^a-z]/g, ''))) {
+      sanitized[key] = '[REDACTED]';
+    } else if (value && typeof value === 'object') {
+      sanitized[key] = sanitizeLogData(value);
+    } else {
+      sanitized[key] = value;
+    }
+  }
+  return sanitized;
 }
 
 /**
@@ -297,4 +333,41 @@ export function apiError(res, error) {
   }
 
   return sendJson(res, status, body);
+}
+
+/**
+ * Verify Request Origin for Mutating Actions
+ *
+ * What it does:
+ * Protects state-changing operations (POST, PUT, PATCH, DELETE) against Cross-Site Request Forgery (CSRF).
+ * Ensures that if an Origin header is sent by a browser, it matches the host or configured APP_URL.
+ *
+ * Backup plan if it breaks:
+ * Allows same-origin and server-to-server requests without an Origin header, and permits localhost during development.
+ */
+export function verifyRequestOrigin(req, res) {
+  const method = String(req.method || 'GET').toUpperCase();
+  if (['GET', 'HEAD', 'OPTIONS'].includes(method)) return true;
+
+  const origin = req.headers?.origin;
+  if (!origin) return true;
+
+  const host = req.headers?.['x-forwarded-host'] || req.headers?.host;
+  try {
+    const originUrl = new URL(origin);
+    if (host && originUrl.host.toLowerCase() === host.toLowerCase()) return true;
+
+    const appUrl = process.env.APP_URL ? new URL(process.env.APP_URL) : null;
+    if (appUrl && originUrl.origin.toLowerCase() === appUrl.origin.toLowerCase()) return true;
+
+    if (process.env.NODE_ENV !== 'production') {
+      if (['localhost', '127.0.0.1'].includes(originUrl.hostname)) return true;
+    }
+
+    sendJson(res, 403, { ok: false, error: 'Cross-origin request forbidden.' });
+    return false;
+  } catch {
+    sendJson(res, 403, { ok: false, error: 'Invalid request origin.' });
+    return false;
+  }
 }

@@ -453,7 +453,7 @@ window.visitArea = async (areaId, areaName) => {
   session.areaName = areaName;
   updateStoredSession(session);
   
-  if (session.backendAuth && !session.demo) {
+  if (session.backendAuth) {
     toast(`Switching to ${areaName}...`);
     try {
       await refreshAllCloudData({ render: false });
@@ -461,8 +461,6 @@ window.visitArea = async (areaId, areaName) => {
     } catch (error) {
       toast('Failed to load area data', 'error');
     }
-  } else {
-    toast(`Switched to ${areaName}`);
   }
   
   navigateWithLoader('/members', true);
@@ -488,7 +486,7 @@ function renderDashboard() {
     return;
   }
 
-  const cloudSummary = session?.backendAuth && !session?.demo
+  const cloudSummary = session?.backendAuth
     ? data.cloudDashboard
     : null;
 

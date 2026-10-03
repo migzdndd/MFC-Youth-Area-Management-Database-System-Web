@@ -44,20 +44,30 @@ export default async function handler(req, res) {
       .ilike('email', escapeLikePattern(email))
       .maybeSingle();
     if (memberLookupError) throw memberLookupError;
+
+    const genericClaimResponse = () => sendJson(res, 200, {
+      ok: true,
+      verificationRequired: true,
+      message: 'If your email is linked to an eligible Member record, check your inbox to complete verification.'
+    });
+
     if (!matchingMember) {
-      return sendJson(res, 404, { ok: false, error: 'No Member record is associated with this email.' });
+      return genericClaimResponse();
     }
 
     const authClient = createSupabaseAuthClient();
     const { data, error } = await authClient.auth.signUp({ email, password });
-    if (error || !data?.user) return sendJson(res, 400, { ok: false, error: 'Unable to claim your Member Portal account. Please try again.' });
+    if (error) {
+      const errMsg = String(error.message || '').toLowerCase();
+      if (errMsg.includes('already') || errMsg.includes('registered')) {
+        return genericClaimResponse();
+      }
+      return sendJson(res, 400, { ok: false, error: 'Unable to claim your Member Portal account. Please try again.' });
+    }
+    if (!data?.user) return sendJson(res, 400, { ok: false, error: 'Unable to claim your Member Portal account. Please try again.' });
 
     if (!data.session) {
-      return sendJson(res, 202, {
-        ok: true,
-        verificationRequired: true,
-        message: 'Check your email to verify your Member Portal account, then sign in.'
-      });
+      return genericClaimResponse();
     }
     if (!data.user.email_confirmed_at) {
       return sendJson(res, 403, { ok: false, error: 'Verify your email address before claiming a Member record.' });

@@ -7,8 +7,8 @@
 */
 alter table public.members add column if not exists avatar_url text;
 
--- Add profile picture column to user_profiles table (nullable)
-alter table public.user_profiles add column if not exists avatar_url text;
+-- Add profile picture column to profiles table (nullable)
+alter table public.profiles add column if not exists avatar_url text;
 
 -- Note: These columns store the URL of the profile picture. 
 -- The frontend should use these URLs for displaying profile pictures.

@@ -1490,7 +1490,7 @@ window.reportModal = function (
       };
 
       try {
-        if (session?.backendAuth && !session?.demo) {
+        if (session?.backendAuth) {
           const apiRes = await backendApi('/api/reports', {
             method: id ? 'PATCH' : 'POST',
             body: JSON.stringify({ ...record, chapterName, id: id || undefined })
@@ -1611,7 +1611,7 @@ window.deleteReport = async id => {
   if (!confirm('Delete this activity report?')) return;
 
   try {
-    if (session?.backendAuth && !session?.demo) {
+    if (session?.backendAuth) {
       const apiRes = await backendApi(`/api/reports?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
       if (apiRes?.offline) {
         data.reports = data.reports.filter(report => String(report.id) !== String(id));

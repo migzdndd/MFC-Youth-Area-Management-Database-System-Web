@@ -21,6 +21,7 @@ import authResetPassword from '../server/auth/reset-password.js';
 import adminChangeEmail from '../server/admin/members/change-email.js';
 import authMe from '../server/auth/me.js';
 import authMemberClaim from '../server/auth/member-claim.js';
+import authRefresh from '../server/auth/refresh.js';
 import chapters from '../server/chapters/index.js';
 import chapterAssignMembers from '../server/chapters/assign-members.js';
 import events from '../server/events/index.js';
@@ -39,7 +40,7 @@ import mfaChallenge from '../server/auth/mfa/challenge.js';
 import mfaVerify from '../server/auth/mfa/verify.js';
 import mfaFactors from '../server/auth/mfa/factors.js';
 import mfaUnenroll from '../server/auth/mfa/unenroll.js';
-import { applySecurityHeaders } from '../server/_lib/http.js';
+import { applySecurityHeaders, verifyRequestOrigin, sanitizeLogData } from '../server/_lib/http.js';
 
 const ROUTES = new Map([
   ['health', health],
@@ -56,6 +57,7 @@ const ROUTES = new Map([
   ['admin/members/change-email', adminChangeEmail],
   ['auth/me', authMe],
   ['auth/member-claim', authMemberClaim],
+  ['auth/refresh', authRefresh],
   ['mfa/enroll', mfaEnroll],
   ['auth/mfa/enroll', mfaEnroll],
   ['mfa/verify-enroll', mfaVerifyEnroll],
@@ -107,6 +109,8 @@ function normalizeRoute(value) {
  */
 export default async function handler(req, res) {
   applySecurityHeaders(res);
+  if (!verifyRequestOrigin(req, res)) return;
+
   try {
     const route = normalizeRoute(req.query?.route);
     const routeHandler = ROUTES.get(route);
@@ -120,7 +124,11 @@ export default async function handler(req, res) {
 
     return await routeHandler(req, res);
   } catch (error) {
-    console.error('API router error:', error);
+    console.error('API router error:', sanitizeLogData({
+      message: error?.message,
+      code: error?.code,
+      status: error?.statusCode || 500
+    }));
     if (res.headersSent) return;
     return res.status(500).json({
       ok: false,

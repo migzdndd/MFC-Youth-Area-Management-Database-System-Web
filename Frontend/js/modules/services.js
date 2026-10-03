@@ -179,7 +179,7 @@ window.removeMemberService = async (memberId, serviceName) => {
 
   const updatedServices = (member.services || []).filter(s => s !== serviceName);
   try {
-    if (session?.backendAuth && !session?.demo) {
+    if (session?.backendAuth) {
       await backendApi('/api/services', {
         method: 'PATCH',
         body: JSON.stringify({ memberId: member.id, serviceNames: updatedServices })

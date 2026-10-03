@@ -60,7 +60,7 @@ function renderChapterServantDashboard(data) {
     .sort((a, b) => parseEventTimestamp(b.date) - parseEventTimestamp(a.date));
 
   const unassignedCount = data.members.filter(isUnassignedMember).length;
-  const unassignedLabel = session?.backendAuth && !session?.demo
+  const unassignedLabel = session?.backendAuth
     ? 'Unassigned members available on demand'
     : `${unassignedCount} unassigned member${unassignedCount === 1 ? '' : 's'} available`;
 
@@ -459,7 +459,7 @@ function chapterModal(id = null) {
       }
 
       try {
-        if (session?.backendAuth && !session?.demo) {
+        if (session?.backendAuth) {
           await backendApi('/api/chapters', {
             method: id ? 'PATCH' : 'POST',
             body: JSON.stringify(id ? { id, name } : { name })
@@ -509,7 +509,7 @@ window.deleteChapter = async id => {
   if (!confirm('Delete this chapter?')) return;
 
   try {
-    if (session?.backendAuth && !session?.demo) {
+    if (session?.backendAuth) {
       await backendApi(`/api/chapters?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
       await refreshAllCloudData({ render: false });
     } else {
@@ -638,7 +638,7 @@ window.addMembersToChapter = async id => {
   let unassigned = [];
 
   try {
-    if (session?.backendAuth && !session?.demo) {
+    if (session?.backendAuth) {
       const result = await backendApi(
         `/api/chapters/assign-members?chapterId=${encodeURIComponent(chapter.id)}`,
         { timeoutMs: 8000 }
@@ -750,7 +750,7 @@ window.addMembersToChapter = async id => {
 
       try {
         let assignedCount = 0;
-        if (session?.backendAuth && !session?.demo) {
+        if (session?.backendAuth) {
           const result = await backendApi('/api/chapters/assign-members', {
             method: 'POST',
             body: JSON.stringify({ chapterId: chapter.id, memberIds: selectedIds })

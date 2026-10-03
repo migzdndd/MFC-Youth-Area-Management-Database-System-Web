@@ -73,7 +73,8 @@ const session = getSession();
 // 2. If password must be changed, go to change-password.
 // 3. If regular youth member, go to the Member Portal.
 // 4. If trying to visit a page not allowed for your role, redirect to your dashboard.
-if (!session) {
+if (!session || !session.backendAuth) {
+  clearSession();
   navigateWithLoader('/', true);
 } else if (session.mustChangePassword) {
   navigateWithLoader('/change-password', true);
@@ -130,168 +131,7 @@ function applySidebarRoleConfig() {
 }
 applySidebarRoleConfig();
 
-// Section 3: Demo Role Switcher (For Presentation Mode)
 
-const DEMO_ROLES = [
-  {
-    role: 'area_servant',
-    label: 'Area Servant',
-    badge: 'Full Area Access',
-    description: 'Comprehensive management across all members, chapters, services, reports, and events.'
-  },
-  {
-    role: 'lit_servant',
-    label: 'Area LIT Servant',
-    badge: 'LIT & Services',
-    description: 'Focus on Leader-In-Training development, chapter service roles, reports, and events.'
-  },
-  {
-    role: 'area_kids_servant',
-    label: 'Area Kids Servant',
-    badge: 'Kids Ministry',
-    description: 'Management of kids ministry records, member rosters, activity reports, and events.'
-  },
-  {
-    role: 'mfc_high_servant',
-    label: 'MFC High Servant',
-    badge: 'High School',
-    description: 'High school section coordination with filtered member roster, service view, and reports.'
-  },
-  {
-    role: 'campus_servant',
-    label: 'Campus Servant',
-    badge: 'Campus & College',
-    description: 'Campus ministry coordination covering Senior High and College members, service view, and events.'
-  },
-  {
-    role: 'chapter_servant',
-    label: 'Chapter Servant',
-    badge: 'Chapter Level',
-    description: 'Chapter-scoped operations with chapter profile management, activity reports, and events.'
-  }
-];
-
-/**
- * Opens Demo Role Switcher Popup
- *
- * What it does:
- * Allows people testing or presenting the demo to switch between leadership roles
- * instantly without having to log out.
- *
- * Backup plan if it breaks:
- * Can be closed by pressing Escape or clicking outside. If role switching fails,
- * your current session stays intact.
- */
-function openDemoRoleSwitcher() {
-  const existing = document.getElementById('demoRoleModal');
-  if (existing) existing.remove();
-
-  const modal = document.createElement('div');
-  modal.id = 'demoRoleModal';
-  modal.className = 'modal is-open';
-  modal.style.cssText = `
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(15, 23, 42, 0.65);
-    backdrop-filter: blur(4px);
-    padding: 16px;
-    animation: fadeIn 0.2s ease;
-  `;
-
-  modal.setAttribute('x-data', '{ open: true, close() { this.open = false; setTimeout(() => modal.remove(), 220); } }');
-  modal.setAttribute('x-show', 'open');
-  modal.setAttribute('x-transition.opacity', '');
-  modal.setAttribute('@keydown.escape.window', 'close()');
-  modal.setAttribute('@click.self', 'close()');
-
-  modal.innerHTML = `
-    <div x-show="open" x-transition style="background: var(--surface, #ffffff); border-radius: 16px; max-width: 580px; width: 100%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); border: 1px solid var(--border, #e2e8f0); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;">
-      <div style="padding: 20px 24px; border-bottom: 1px solid var(--border, #e2e8f0); display: flex; justify-content: space-between; align-items: center; background: #fafafa;">
-        <div>
-          <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #0f172a;">Switch Demo Access Level</h2>
-          <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #64748b;">Select another leadership role to test in this session.</p>
-        </div>
-        <button type="button" id="closeDemoRoleModal" @click="close()" style="background: none; border: none; font-size: 1.5rem; line-height: 1; color: #64748b; cursor: pointer; padding: 4px 8px; border-radius: 6px;">&times;</button>
-      </div>
-
-      <div style="padding: 16px 20px; overflow-y: auto; display: grid; grid-template-columns: 1fr; gap: 10px;">
-        ${DEMO_ROLES.map(r => `
-          <button
-            type="button"
-            class="demo-role-option"
-            data-role="${r.role}"
-            style="background: ${session?.role === r.role ? '#eff6ff' : '#ffffff'}; border: 1px solid ${session?.role === r.role ? '#3b82f6' : '#e2e8f0'}; border-radius: 10px; padding: 14px 16px; text-align: left; cursor: pointer; transition: all 0.15s ease; display: flex; flex-direction: column; gap: 4px;"
-            onmouseover="if('${session?.role}' !== '${r.role}') { this.style.borderColor='#3b82f6'; this.style.background='#f8fafc'; }"
-            onmouseout="if('${session?.role}' !== '${r.role}') { this.style.borderColor='#e2e8f0'; this.style.background='#ffffff'; }"
-          >
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <strong style="font-size: 1rem; color: #0f172a;">${r.label}</strong>
-              <span style="font-size: 0.72rem; font-weight: 600; background: ${session?.role === r.role ? '#2563eb' : '#eff6ff'}; color: ${session?.role === r.role ? '#ffffff' : '#2563eb'}; padding: 2px 8px; border-radius: 12px; border: 1px solid #bfdbfe;">
-                ${session?.role === r.role ? 'Current Role' : r.badge}
-              </span>
-            </div>
-            <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.35;">${r.description}</p>
-          </button>
-        `).join('')}
-      </div>
-
-      <div style="padding: 12px 20px; border-top: 1px solid var(--border, #e2e8f0); background: #f8fafc; text-align: right;">
-        <button type="button" id="cancelDemoRoleModal" @click="close()" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 500; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 6px; cursor: pointer; color: #475569;">Close</button>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-
-  const close = () => {
-    if (modal._x_dataStack?.[0]?.close) {
-      modal._x_dataStack[0].close();
-    } else {
-      modal.remove();
-    }
-  };
-
-  const closeBtn = document.getElementById('closeDemoRoleModal');
-  if (closeBtn) closeBtn.onclick = close;
-  const cancelBtn = document.getElementById('cancelDemoRoleModal');
-  if (cancelBtn) cancelBtn.onclick = close;
-
-  if (window.Alpine) {
-    try {
-      window.Alpine.initTree(modal);
-    } catch (initErr) {
-      console.warn('Alpine tree initialization skipped for demo role modal:', initErr);
-    }
-  }
-
-  modal.querySelectorAll('.demo-role-option').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const selectedRole = btn.getAttribute('data-role');
-      const chosen = DEMO_ROLES.find(r => r.role === selectedRole);
-      if (!chosen) return;
-
-      const data = db();
-      let demoChapterId = null;
-      if (chosen.role === 'chapter_servant') {
-        demoChapterId = data.chapters?.[0]?.id || '1';
-      }
-
-      session.role = chosen.role;
-      session.name = `${chosen.label} (Demo)`;
-      session.email = `${chosen.role}@mfcyouth.local`;
-      session.chapterId = demoChapterId;
-      updateStoredSession(session);
-      
-      close();
-      toast(`Switched Demo Access Level to ${chosen.label}`);
-      navigateWithLoader('/dashboard', true);
-    });
-  });
-}
 
 // Section 4: Sidebar Profile Card, Preview Links, and Account Actions
 
@@ -348,16 +188,7 @@ if (logoutBtn) {
       logoutBtn.parentElement?.insertBefore(returnButton, logoutBtn);
     }
 
-    // Role switcher button when in demo mode
-    if (session?.demo) {
-      const switchDemoBtn = document.createElement('button');
-      switchDemoBtn.type = 'button';
-      switchDemoBtn.className = 'sidebar-account-action';
-      switchDemoBtn.style.color = 'var(--blue, #2563eb)';
-      switchDemoBtn.textContent = 'Switch Demo Role';
-      switchDemoBtn.onclick = () => openDemoRoleSwitcher();
-      logoutBtn.parentElement?.insertBefore(switchDemoBtn, logoutBtn);
-    }
+
 
     // Button to preview the Member Portal
     const previewButton = document.createElement('button');
@@ -368,7 +199,7 @@ if (logoutBtn) {
     logoutBtn.parentElement?.insertBefore(previewButton, logoutBtn);
 
     // Permanent Account Deletion (with safety double-confirmation)
-    if (session?.backendAuth && !session?.demo) {
+    if (session?.backendAuth) {
       const deleteButton = document.createElement('button');
       deleteButton.type = 'button';
       deleteButton.className = 'sidebar-account-action delete-account-button';
@@ -435,7 +266,7 @@ if (logoutBtn) {
     if (alpineData) alpineData.loading = true;
     else { logoutBtn.disabled = true; logoutBtn.textContent = 'Signing Out…'; }
 
-    if (session?.backendAuth && !session?.demo && session?.accessToken) {
+    if (session?.backendAuth && session?.accessToken) {
       try {
         await backendApi('/api/auth/logout', {
           method: 'POST',

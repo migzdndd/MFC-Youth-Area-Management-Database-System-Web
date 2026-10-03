@@ -36,7 +36,6 @@ function isLeadershipSession() {
 async function showAreaOnboarding() {
   if (
     page !== 'dashboard' ||
-    session?.demo ||
     !session?.backendAuth ||
     !isLeadershipSession() ||
     (session?.areaId && !session?.needsAreaSetup)

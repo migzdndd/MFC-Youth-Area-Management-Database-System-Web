@@ -184,14 +184,14 @@ async function createMember(req, res) {
 
 async function updateMember(req, res) {
   const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const input = req.body || {};
+  const memberId = input.id;
+  if (!memberId) return sendJson(res, 400, { ok: false, error: 'Member ID is required.' });
+
   const isSelf = profile.member_id && String(profile.member_id) === String(memberId);
   if (!isAreaAdminRole(profile.role) && !isSelf) {
     return sendJson(res, 403, { ok: false, error: 'Only Area-level servant accounts can edit member records.' });
   }
-
-  const input = req.body || {};
-  const memberId = input.id;
-  if (!memberId) return sendJson(res, 400, { ok: false, error: 'Member ID is required.' });
 
   const areaId = requireArea(req, profile);
   const existing = await loadAreaMember(supabase, memberId, areaId);

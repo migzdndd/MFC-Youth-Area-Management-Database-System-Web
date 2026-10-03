@@ -12,8 +12,7 @@ import { assertAdminRegistrationConfigured } from '../_lib/env.js';
 import { sendJson, methodNotAllowed, normalizeEmail, isValidEmail, apiError, passwordError } from '../_lib/http.js';
 import { checkRateLimit } from '../_lib/rate-limit.js';
 
-const ADMIN_ROLES = new Set([
-  'national_coordinator',
+const ALLOWED_ADMIN_ROLES = new Set([
   'couple_coordinator',
   'area_servant',
   'lit_servant',
@@ -98,11 +97,22 @@ export default async function handler(req, res) {
     if (!isValidEmail(email)) {
       return sendJson(res, 400, { ok: false, error: 'Enter a valid email address.' });
     }
-    if (!ADMIN_ROLES.has(role)) {
-      return sendJson(res, 400, { ok: false, error: 'Select a valid Servant Leader access level.' });
-    }
-    if (!registrationCodeMatches(verificationCode, adminRegistrationCode)) {
-      return sendJson(res, 403, { ok: false, error: 'Administrator registration verification failed.' });
+
+    if (role === 'national_coordinator') {
+      const nationalCode = String(process.env.NATIONAL_COORDINATOR_REGISTRATION_CODE || '').trim();
+      if (!nationalCode || !registrationCodeMatches(verificationCode, nationalCode)) {
+        return sendJson(res, 403, {
+          ok: false,
+          error: 'Registration for National Coordinator requires dedicated secondary authorization.'
+        });
+      }
+    } else {
+      if (!ALLOWED_ADMIN_ROLES.has(role)) {
+        return sendJson(res, 400, { ok: false, error: 'Select a valid Servant Leader access level.' });
+      }
+      if (!registrationCodeMatches(verificationCode, adminRegistrationCode)) {
+        return sendJson(res, 403, { ok: false, error: 'Administrator registration verification failed.' });
+      }
     }
 
     const pError = passwordError(password);

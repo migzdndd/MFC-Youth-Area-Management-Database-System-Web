@@ -1206,7 +1206,7 @@ function memberModal(id = null) {
 
       let savedRecord = record;
 
-      if (session?.backendAuth && !session?.demo) {
+      if (session?.backendAuth) {
         const originalEmail = String(member?.email || '').trim().toLowerCase();
         const emailChanged = Boolean(id && email && email !== originalEmail);
 
@@ -1330,7 +1330,7 @@ window.deleteMember = async id => {
 
   if (!confirm('Delete this member and their GIG contribution records? This cannot be undone.')) return;
 
-  if (member.cloudBacked && session?.backendAuth && !session?.demo) {
+  if (member.cloudBacked && session?.backendAuth) {
     try {
       await backendApi(`/api/members?id=${encodeURIComponent(member.id)}`, { method: 'DELETE' });
       await refreshAllCloudData({ render: false });
@@ -1427,7 +1427,7 @@ window.serviceMember = id => {
       const selectedServices = selectedService ? [selectedService] : [];
 
       try {
-        if (session?.backendAuth && !session?.demo) {
+        if (session?.backendAuth) {
           await backendApi('/api/services', {
             method: 'PATCH',
             body: JSON.stringify({ memberId: member.id, serviceNames: selectedServices })
@@ -1609,7 +1609,7 @@ window.gigMember = id => {
       }
 
       try {
-        if (session?.backendAuth && !session?.demo) {
+        if (session?.backendAuth) {
           await backendApi('/api/gig', {
             method: 'POST',
             body: JSON.stringify({ memberId: id, date, amount, note })
@@ -1652,7 +1652,7 @@ window.deleteGigContribution = async (memberId, contributionId) => {
   if (!confirm('Delete this GIG contribution?')) return;
 
   try {
-    if (session?.backendAuth && !session?.demo) {
+    if (session?.backendAuth) {
       await backendApi(`/api/gig?id=${encodeURIComponent(contributionId)}`, { method: 'DELETE' });
       await refreshAllCloudData({ render: false });
     } else {

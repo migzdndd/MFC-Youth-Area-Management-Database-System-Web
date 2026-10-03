@@ -8,7 +8,7 @@
  */
 
 import { createSupabaseAdmin } from './supabase.js';
-import { sendJson } from './http.js';
+import { sendJson, normalizeEmail } from './http.js';
 
 /**
  * Detect User's Internet Location Address
@@ -34,9 +34,9 @@ const RATE_CONFIGS = {
   'reset-password': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
   'admin-register': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
   'member-claim': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
-  'daily-readings': { maxAttempts: 30, windowMs: 5 * 60 * 1000, label: '5 minutes' },
-  changelogs: { maxAttempts: 30, windowMs: 5 * 60 * 1000, label: '5 minutes' },
-  health: { maxAttempts: 60, windowMs: 5 * 60 * 1000, label: '5 minutes' },
+  'daily-readings': { maxAttempts: 120, windowMs: 5 * 60 * 1000, label: '5 minutes' },
+  changelogs: { maxAttempts: 120, windowMs: 5 * 60 * 1000, label: '5 minutes' },
+  health: { maxAttempts: 120, windowMs: 5 * 60 * 1000, label: '5 minutes' },
   default: { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' }
 };
 
@@ -49,10 +49,23 @@ const RATE_CONFIGS = {
  * Backup plan if it breaks:
  * If the rate-limiting database table is unreachable, it logs a warning and allows the request to pass through so real users are never locked out by database hiccups.
  */
-export async function checkRateLimit(req, res, endpoint) {
+export async function checkRateLimit(req, res, endpoint, targetIdentifier = null) {
   const config = RATE_CONFIGS[endpoint] || RATE_CONFIGS.default;
   const ip = getClientIp(req);
-  const rateKey = `${endpoint}:${ip}`;
+
+  let target = targetIdentifier;
+  if (!target && req.body) {
+    if (req.body.email) {
+      target = normalizeEmail(req.body.email);
+    } else if (req.body.token_hash) {
+      target = String(req.body.token_hash).slice(0, 32);
+    }
+  }
+
+  const isAuthEndpoint = ['login', 'forgot-password', 'reset-password', 'member-claim'].includes(endpoint);
+  const rateKey = (isAuthEndpoint && target)
+    ? `${endpoint}:${ip}:${target}`
+    : `${endpoint}:${ip}`;
   const now = new Date();
 
   try {
@@ -132,13 +145,13 @@ export async function checkRateLimit(req, res, endpoint) {
 
     await admin
       .from('auth_rate_limits')
-      .insert({
+      .upsert({
         rate_key: rateKey,
         attempt_count: 1,
         window_started_at: now.toISOString(),
         blocked_until: null,
         updated_at: now.toISOString()
-      });
+      }, { onConflict: 'rate_key' });
 
     return true;
   } catch (err) {

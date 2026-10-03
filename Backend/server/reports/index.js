@@ -34,7 +34,22 @@ async function saveReport(req, res, isUpdate) {
   if (!isAreaAdminRole(profile.role) && !isChapterServantRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'You do not have permission to manage activity reports.' });
   const areaId = requireArea(req, profile);
   const input = req.body || {};
+
+  let existing = null;
+  if (isUpdate) {
+    const id = input.id;
+    if (!id) return sendJson(res, 400, { ok: false, error: 'Report ID is required.' });
+    existing = await loadAreaRow(supabase, 'activity_reports', id, areaId, 'id, chapter_id');
+    if (!existing) return sendJson(res, 404, { ok: false, error: 'Report not found in your Area.' });
+    if (isChapterServantRole(profile.role) && String(existing.chapter_id || '') !== String(profile.chapter_id || '')) {
+      return sendJson(res, 403, { ok: false, error: 'You can only edit reports for your assigned chapter.' });
+    }
+  }
+
   let chapterId = input.chapterId || null;
+  if (isUpdate && input.chapterId === undefined && existing) {
+    chapterId = existing.chapter_id;
+  }
   if (isChapterServantRole(profile.role)) chapterId = profile.chapter_id;
   if (chapterId) await ensureChapterInArea(supabase, chapterId, areaId);
   if (input.eventId) {
@@ -65,13 +80,8 @@ async function saveReport(req, res, isUpdate) {
     if (error) throw error;
     return sendJson(res, 201, { ok: true, report: data });
   }
-  const id = input.id;
-  if (!id) return sendJson(res, 400, { ok: false, error: 'Report ID is required.' });
-  const existing = await loadAreaRow(supabase, 'activity_reports', id, areaId, 'id, chapter_id');
-  if (!existing) return sendJson(res, 404, { ok: false, error: 'Report not found in your Area.' });
-  if (isChapterServantRole(profile.role) && String(existing.chapter_id || '') !== String(profile.chapter_id || '')) return sendJson(res, 403, { ok: false, error: 'You can only edit reports for your assigned chapter.' });
   delete payload.created_by;
-  const { data, error } = await supabase.from('activity_reports').update(payload).eq('id', id).eq('area_id', areaId).select('*').single();
+  const { data, error } = await supabase.from('activity_reports').update(payload).eq('id', input.id).eq('area_id', areaId).select('*').single();
   if (error) throw error;
   return sendJson(res, 200, { ok: true, report: data });
 }
