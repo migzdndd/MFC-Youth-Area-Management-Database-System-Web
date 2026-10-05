@@ -1281,7 +1281,7 @@ async function bootstrapMemberPortal() {
       } else if (button) {
         button.textContent = originalText;
       }
-      navigateWithLoader('/');
+      navigateWithLoader('/member-login');
     });
 
     document.getElementById('changePasswordBtn')?.addEventListener('click', () => {

@@ -6,7 +6,7 @@
  * device, enabling the app to open instantly and continue functioning even without an internet connection.
  */
 
-const SHELL_CACHE = 'mfc-ams-shell-v6';
+const SHELL_CACHE = 'mfc-ams-shell-v7';
 const API_CACHE = 'mfc-ams-api-v1';
 
 const APP_SHELL_URLS = [
@@ -26,6 +26,8 @@ const APP_SHELL_URLS = [
   '/services.html',
   '/member',
   '/member.html',
+  '/member-login',
+  '/member-login.html',
   '/changelogs',
   '/changelogs.html',
   '/manifest.webmanifest',

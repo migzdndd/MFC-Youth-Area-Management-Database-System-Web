@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<!--
+  Dedicated Youth Member Portal Authentication and Account Access Page
+
+  What it Does: Simple non IT Terms
+  The dedicated front door for youth community members. Members can sign in with their
+  account credentials, or claim their profile record if accessing the portal for the first time.
+-->
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#002847">
+  <meta name="description" content="Sign in to the MFC Youth Member Portal for personal gatherings, ministry services, and community records.">
+  <title>Member Sign In - MFC Youth Member Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:wght@400;500;600;700;800;900&family=Raleway:ital,wght@0,300..800;1,300..800&display=swap">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MFC Youth Member">
+  <link rel="apple-touch-icon" href="/img/logo-2.png">
+  <link rel="icon" type="image/png" href="/img/logo-2.png">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<body class="auth-body auth-body-modern member-login-body">
+  <!-- Distinguishable Background Animation (Isometric Cubes with Emerald / Oceanic Tint) -->
+  <div class="auth-bg-container" aria-hidden="true">
+    <div class="pattern-bg">
+      <svg class="cube-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" preserveAspectRatio="none">
+        <defs>
+          <pattern id="memberIsometricPattern" width="60" height="104" patternUnits="userSpaceOnUse">
+            <!-- Cube 1 Top Face (Deep Teal / Emerald Tint) -->
+            <polygon points="30,0 60,17.32 30,34.64 0,17.32" fill="#064e3b" stroke="#00182b" stroke-width="1.2"/>
+            <!-- Cube 1 Left Face -->
+            <polygon points="0,17.32 30,34.64 30,69.28 0,51.96" fill="#022c22" stroke="#00182b" stroke-width="1.2"/>
+            <!-- Cube 1 Right Face -->
+            <polygon points="30,34.64 60,17.32 60,51.96 30,69.28" fill="#065f46" stroke="#00182b" stroke-width="1.2"/>
+            
+            <!-- Staggered Cube Row -->
+            <polygon points="0,51.96 30,69.28 0,86.6 -30,69.28" fill="#042f2e" stroke="#00182b" stroke-width="1.2"/>
+            <polygon points="60,51.96 90,69.28 60,86.6 30,69.28" fill="#064e3b" stroke="#00182b" stroke-width="1.2"/>
+            
+            <polygon points="-30,69.28 0,86.6 0,121.24 -30,103.92" fill="#011b15" stroke="#00182b" stroke-width="1.2"/>
+            <polygon points="30,69.28 60,86.6 60,121.24 30,103.92" fill="#011b15" stroke="#00182b" stroke-width="1.2"/>
+            
+            <polygon points="-30,-34.72 0,-17.4 0,17.24 -30,0" fill="#022c22" stroke="#00182b" stroke-width="1.2"/>
+            <polygon points="30,-34.72 60,-17.4 60,17.24 30,0" fill="#022c22" stroke="#00182b" stroke-width="1.2"/>
+            
+            <polygon points="0,86.6 30,69.28 30,103.92 0,121.24" fill="#0f3d3e" stroke="#00182b" stroke-width="1.2"/>
+            <polygon points="60,86.6 90,69.28 90,103.92 60,121.24" fill="#0f3d3e" stroke="#00182b" stroke-width="1.2"/>
+            
+            <polygon points="0,-17.4 30,-34.72 30,0 0,17.24" fill="#0f3d3e" stroke="#00182b" stroke-width="1.2"/>
+            <polygon points="60,-17.4 90,-34.72 90,0 60,17.24" fill="#0f3d3e" stroke="#00182b" stroke-width="1.2"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#memberIsometricPattern)" />
+      </svg>
+    </div>
+  </div>
+
+  <!-- Main Member Login Container -->
+  <main class="auth-page auth-page-modern">
+    <div class="auth-layout auth-layout-modern">
+
+      <!-- Left Hero Column: Member Portal & Community Overview -->
+      <aside class="auth-info login-hero member-hero animate-in" aria-label="MFC Youth Member Portal overview">
+        <div class="login-hero-brand">
+          <img src="/img/logo.png" class="login-hero-logo" alt="MFC Youth">
+          <span class="member-hero-chip"><span class="member-status-dot"></span> Member Portal Access</span>
+        </div>
+
+        <div class="login-hero-copy">
+          <span class="login-eyebrow member-eyebrow">YOUTH COMMUNITY PORTAL</span>
+          <h2>Live your faith, stay connected with your chapter.</h2>
+          <p>Your personal portal for youth assemblies, chapter gatherings, ministry services, and community records.</p>
+        </div>
+
+        <div class="login-feature-grid" aria-label="Key member portal features">
+          <article>
+            <strong>Gatherings</strong>
+            <span>Assemblies, conferences, and event registrations</span>
+          </article>
+          <article>
+            <strong>Ministry &amp; Service</strong>
+            <span>Music, LIT, logistics, and service assignments</span>
+          </article>
+          <article>
+            <strong>Household &amp; Chapter</strong>
+            <span>Connect with your chapter household and servants</span>
+          </article>
+          <article>
+            <strong>Giving &amp; GIG</strong>
+            <span>Track personal gift-in-giving records and mission support</span>
+          </article>
+
+          <!-- Daily Readings Live Feed -->
+          <article class="daily-readings-card-wrapper" style="grid-column: span 2;">
+            <div class="card-hero-header">
+              <strong id="dailyReadingsTitle" class="card-hero-title">Daily Readings</strong>
+            </div>
+            <div id="dailyReadingsContent" class="daily-readings-content">
+              Loading today's readings...
+            </div>
+          </article>
+
+          <!-- Community Scripture / Inspiration -->
+          <article class="changelog-card-wrapper" style="grid-column: span 2; border-color: rgba(52, 211, 153, 0.22) !important;">
+            <div class="card-hero-header changelogs-header-row">
+              <div class="changelog-title-group">
+                <strong class="card-hero-title" style="color: #6ee7b7;">Youth Word of Life</strong>
+                <span class="live-sync-indicator" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(52, 211, 153, 0.3); color: #a7f3d0;" title="Community reflection">
+                  <span class="live-sync-dot" style="background: #10b981;"></span> 1 Timothy 4:12
+                </span>
+              </div>
+            </div>
+            <div style="padding: 10px 0 6px; color: #bad1df; font-size: 0.85rem; line-height: 1.55; font-style: italic;">
+              &ldquo;Don't let anyone look down on you because you are young, but set an example for the believers in speech, in conduct, in love, in faith and in purity.&rdquo;
+            </div>
+            <div class="changelog-card-footer" style="border-top-color: rgba(52, 211, 153, 0.15);">
+              <span style="font-size: 0.74rem; color: #6ee7b7; font-weight: 600;">MFC Youth Community &middot; Rooted in Christ</span>
+            </div>
+          </article>
+        </div>
+
+        <div class="login-hero-footer">
+          <span><strong>100%</strong> Youth focused</span>
+          <span><strong>Active</strong> Chapters</span>
+          <span><strong>24/7</strong> Personal access</span>
+        </div>
+      </aside>
+
+      <!-- Right Card Column: Member Portal Authentication Card -->
+      <section class="login-card login-card-modern floating-login-card member-login-card animate-in" aria-labelledby="memberLoginTitle">
+        <div class="login-card-top">
+          <div class="login-mobile-brand">
+            <img src="/img/logo-2.png" alt="MFC Youth Logo">
+            <div><strong class="brand-mfc-youth">MFC YOUTH</strong><span class="brand-ams brand-member" style="color: #34d399;">Member Portal</span></div>
+          </div>
+          <span class="member-portal-badge"><span class="member-dot"></span> Member Access</span>
+        </div>
+
+        <div class="login-header login-header-modern">
+          <span class="login-eyebrow member-eyebrow">WELCOME YOUTH</span>
+          <h1 id="memberLoginTitle">Sign in to Member Portal</h1>
+          <p id="memberLoginSubtitle">Enter your member credentials to access your profile.</p>
+        </div>
+
+        <!-- Mode Switcher: Sign In vs Claim Account -->
+        <div class="auth-tabs" role="tablist" aria-label="Member Authentication Modes">
+          <button type="button" class="auth-tab active" id="tabMemberSignIn" role="tab" aria-selected="true" aria-controls="memberSignInPanel">
+            Member Sign In
+          </button>
+          <button type="button" class="auth-tab" id="tabMemberClaim" role="tab" aria-selected="false" aria-controls="memberClaimPanel">
+            First-Time / Claim Account
+          </button>
+        </div>
+
+        <!-- Tab Panel 1: Member Sign In Form -->
+        <div class="auth-tab-panel active" id="memberSignInPanel" role="tabpanel" aria-labelledby="tabMemberSignIn">
+          <form class="login-form login-form-modern" id="loginForm" novalidate>
+            <div id="loginMessage"></div>
+
+            <label class="auth-control-label" for="loginEmail">Member Email Address</label>
+            <div class="login-field">
+              <svg class="input-icon" viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+                <path d="M14 14s-1-5-6-5-6 5-6 5 2 2 6 2 6-2 6-2z" />
+              </svg>
+              <input class="login-input" id="loginEmail" type="email" placeholder="member@example.com" autocomplete="email" required>
+            </div>
+
+            <label class="auth-control-label" for="loginPassword">Password</label>
+            <div class="login-field">
+              <svg class="input-icon" viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M13 8h-1V6a4 4 0 0 0-8 0v2H3a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2zM6 6a2 2 0 0 1 4 0v2H6V6z" />
+              </svg>
+              <input class="login-input" id="loginPassword" type="password" placeholder="Enter your password" autocomplete="current-password" required aria-label="Password">
+              <button class="password-toggle" type="button" data-password-toggle="loginPassword" aria-label="Show password">Show</button>
+            </div>
+
+            <div class="form-options">
+              <label class="checkbox-btn remember-me" for="rememberMe">
+                <input id="rememberMe" type="checkbox">
+                <span class="checkmark"></span>
+                <span class="checkbox-text">Remember me</span>
+              </label>
+              <a href="/forgot-password">Forgot password?</a>
+            </div>
+
+            <div class="login-buttons login-buttons-modern">
+              <button class="btn-auth auth-slide-button auth-slide-member" type="submit">Sign In to Portal</button>
+              <button class="btn-auth auth-slide-button auth-slide-secondary" type="button" id="switchToClaimBtn">First-Time Access</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Tab Panel 2: Member Account Claim Form -->
+        <div class="auth-tab-panel" id="memberClaimPanel" role="tabpanel" aria-labelledby="tabMemberClaim">
+          <form class="auth-compact-form member-claim-form" id="memberClaimForm" novalidate>
+            <div id="memberClaimMessage"></div>
+
+            <div class="auth-form-row">
+              <label class="auth-control-label" for="memberClaimEmail">Registered Member Email</label>
+              <div class="auth-compact-field">
+                <input class="auth-compact-input" id="memberClaimEmail" type="email" placeholder="name@example.com" autocomplete="email" required>
+              </div>
+            </div>
+
+            <div class="auth-form-grid">
+              <div class="auth-form-row">
+                <label class="auth-control-label" for="memberClaimPassword">Create Password</label>
+                <div class="auth-compact-field">
+                  <input class="auth-compact-input" id="memberClaimPassword" type="password" placeholder="Password" autocomplete="new-password" required>
+                  <button class="password-toggle" type="button" data-password-toggle="memberClaimPassword" aria-label="Show password">Show</button>
+                </div>
+                <div class="password-strength-meter" data-for="memberClaimPassword" aria-live="polite">
+                  <div class="strength-track">
+                    <span class="strength-bar"></span>
+                    <span class="strength-bar"></span>
+                    <span class="strength-bar"></span>
+                    <span class="strength-bar"></span>
+                  </div>
+                  <div class="strength-meta">
+                    <span class="strength-label">Strength: <strong class="strength-rating strength-empty">Not entered</strong></span>
+                  </div>
+                  <div class="strength-criteria">
+                    <span class="strength-rule" data-rule="length">8+ characters</span>
+                    <span class="strength-rule" data-rule="letter">Letters</span>
+                    <span class="strength-rule" data-rule="number">Numbers</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="auth-form-row">
+                <label class="auth-control-label" for="memberClaimPasswordConfirm">Confirm Password</label>
+                <div class="auth-compact-field">
+                  <input class="auth-compact-input" id="memberClaimPasswordConfirm" type="password" placeholder="Confirm" autocomplete="new-password" required>
+                  <button class="password-toggle" type="button" data-password-toggle="memberClaimPasswordConfirm" aria-label="Show confirmed password">Show</button>
+                </div>
+                <div class="password-match-indicator" data-match-for="memberClaimPasswordConfirm" data-match-with="memberClaimPassword" aria-live="polite">
+                  Must match password
+                </div>
+              </div>
+            </div>
+
+            <div class="auth-actions-group">
+              <button class="btn-auth auth-slide-button auth-slide-member" id="memberClaimButton" type="submit">Claim Account</button>
+              <button class="btn-auth auth-slide-button auth-slide-secondary" type="button" id="switchToSignInBtn">Back to Sign In</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Cross-Portal Navigation Link -->
+        <div class="auth-bottom auth-bottom-modern">
+          <span>Not yet in the community roster? Contact your Chapter Servant.</span>
+          <div>
+            <span style="color: #8fa4b3;">Servant Leader or Coordinator?</span>
+            <a href="/" class="portal-switch-link" style="margin-left: 4px;">Switch to Leader Portal &rarr;</a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Global Authentication Footer -->
+  <footer class="auth-footer">Visit the Official MFC Youth Page at <a href="https://mfcyouth.org" target="_blank"
+      rel="noopener noreferrer">mfcyouth.org</a> &middot; <a href="/changelogs">System Changelogs</a> &middot; Powered &amp; designed by <a
+      href="https://migzdndd.github.io/web-portfolio/" target="_blank" rel="noopener noreferrer">migz.dev</a></footer>
+  <script src="/js/loader.js"></script>
+  <script src="/js/password-strength.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Tab Switching Logic between Member Sign In & Claim Account
+      const tabSignIn = document.getElementById('tabMemberSignIn');
+      const tabClaim = document.getElementById('tabMemberClaim');
+      const panelSignIn = document.getElementById('memberSignInPanel');
+      const panelClaim = document.getElementById('memberClaimPanel');
+      const switchToClaimBtn = document.getElementById('switchToClaimBtn');
+      const switchToSignInBtn = document.getElementById('switchToSignInBtn');
+      const pageTitle = document.getElementById('memberLoginTitle');
+      const pageSubtitle = document.getElementById('memberLoginSubtitle');
+
+      function setMode(mode) {
+        if (mode === 'claim') {
+          tabSignIn?.classList.remove('active');
+          tabSignIn?.setAttribute('aria-selected', 'false');
+          tabClaim?.classList.add('active');
+          tabClaim?.setAttribute('aria-selected', 'true');
+          panelSignIn?.classList.remove('active');
+          panelClaim?.classList.add('active');
+          if (pageTitle) pageTitle.textContent = 'Claim Member Account';
+          if (pageSubtitle) pageSubtitle.textContent = 'Activate your profile and set your portal password.';
+        } else {
+          tabClaim?.classList.remove('active');
+          tabClaim?.setAttribute('aria-selected', 'false');
+          tabSignIn?.classList.add('active');
+          tabSignIn?.setAttribute('aria-selected', 'true');
+          panelClaim?.classList.remove('active');
+          panelSignIn?.classList.add('active');
+          if (pageTitle) pageTitle.textContent = 'Sign in to Member Portal';
+          if (pageSubtitle) pageSubtitle.textContent = 'Enter your member credentials to access your profile.';
+        }
+      }
+
+      tabSignIn?.addEventListener('click', () => setMode('signin'));
+      tabClaim?.addEventListener('click', () => setMode('claim'));
+      switchToClaimBtn?.addEventListener('click', () => setMode('claim'));
+      switchToSignInBtn?.addEventListener('click', () => setMode('signin'));
+
+      // Check URL parameters or hash
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('mode') === 'claim' || window.location.hash === '#claim') {
+        setMode('claim');
+      }
+
+      // Helper to escape HTML and prevent XSS
+      const escapeHtml = (unsafe) => {
+        if (!unsafe) return '';
+        return String(unsafe)
+             .replace(/&/g, "&amp;")
+             .replace(/</g, "&lt;")
+             .replace(/>/g, "&gt;")
+             .replace(/"/g, "&quot;")
+             .replace(/'/g, "&#039;");
+      };
+
+      // Load Daily Readings
+      async function loadDailyReadings() {
+        const content = document.getElementById('dailyReadingsContent');
+        const title = document.getElementById('dailyReadingsTitle');
+        if (!content || !title) return;
+
+        // Determine date in Asia/Manila
+        const parts = new Intl.DateTimeFormat('en-CA', {
+          timeZone: 'Asia/Manila',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }).formatToParts(new Date());
+        
+        const y = parts.find(p => p.type === 'year').value;
+        const m = parts.find(p => p.type === 'month').value;
+        const d = parts.find(p => p.type === 'day').value;
+        const targetDate = `${y}-${m}-${d}`;
+        const cacheKey = `mfc_daily_readings_${targetDate}`;
+
+        function renderReadings(data) {
+          title.innerHTML = `Daily Readings<span class="daily-readings-date-sub">${escapeHtml(data.day)}, ${escapeHtml(data.date)}</span>`;
+          
+          let html = `<div class="daily-readings-celebration">
+            <strong>${escapeHtml(data.celebration || 'Liturgical Readings for Today')}</strong>
+          </div>`;
+
+          if (data.readings && data.readings.length > 0) {
+            html += `<div class="daily-readings-list">`;
+            data.readings.forEach(reading => {
+              html += `
+                <div class="daily-reading-item">
+                  <div class="daily-reading-type">${escapeHtml(reading.type || 'Reading')}</div>
+                  <div class="daily-reading-ref">${escapeHtml(reading.reference || '')}</div>
+                </div>
+              `;
+            });
+            html += `</div>`;
+          } else {
+            html += `<p style="color: #94a3b8; font-size: 0.8rem;">No readings parsed for today.</p>`;
+          }
+
+          if (data.source && data.source.url) {
+            html += `
+              <div class="daily-readings-source">
+                <a href="${escapeHtml(data.source.url)}" target="_blank" rel="noopener noreferrer">
+                  Source: ${escapeHtml(data.source.name || 'EWTN')} Daily Readings &nearr;
+                </a>
+              </div>
+            `;
+          }
+          
+          content.innerHTML = html;
+        }
+
+        function renderError(dateStr) {
+          content.innerHTML = `
+            <p style="margin-bottom: 10px; color: #cbd5e1; font-size: 0.82rem;">Today's readings are temporarily unavailable from the server feed.</p>
+            <a href="https://www.ewtn.com/catholicism/daily-readings/${escapeHtml(dateStr)}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; background: #059669; color: #ffffff; border-radius: 6px; text-decoration: none; font-size: 0.78rem; font-weight: 600;">
+              View Readings on EWTN &nearr;
+            </a>
+          `;
+        }
+
+        try {
+          const cached = localStorage.getItem(cacheKey);
+          if (cached) {
+            const data = JSON.parse(cached);
+            renderReadings(data);
+            return;
+          }
+        } catch(e) {}
+
+        try {
+          const response = await fetch(`/api/daily-readings?date=${targetDate}`);
+          if (!response.ok) throw new Error('Network response was not ok');
+          const data = await response.json();
+          if (data.ok) {
+            localStorage.setItem(cacheKey, JSON.stringify(data));
+            renderReadings(data);
+          } else {
+            throw new Error(data.error || 'Unknown error');
+          }
+        } catch (error) {
+          console.error('Failed to fetch daily readings:', error);
+          renderError(targetDate);
+        }
+      }
+
+      loadDailyReadings();
+    });
+  </script>
+</body>
+
+</html>

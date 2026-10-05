@@ -58,7 +58,11 @@ const server = http.createServer(async (req, res) => {
 
   try {
     if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
-      filePath = path.join(FRONTEND_DIR, '404.html');
+      if (fs.existsSync(filePath + '.html')) {
+        filePath = filePath + '.html';
+      } else {
+        filePath = path.join(FRONTEND_DIR, '404.html');
+      }
     }
 
     const ext = path.extname(filePath).toLowerCase();
