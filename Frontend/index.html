@@ -28,40 +28,6 @@
 </head>
 
 <body class="auth-body auth-body-modern">
-  <!-- Background Animation (Uiverse by chase2k25 adapted) -->
-  <div class="auth-bg-container" aria-hidden="true">
-    <div class="pattern-bg">
-      <svg class="cube-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" preserveAspectRatio="none">
-        <defs>
-          <pattern id="isometricCubesPattern" width="60" height="104" patternUnits="userSpaceOnUse">
-            <!-- Cube 1 Top Face -->
-            <polygon points="30,0 60,17.32 30,34.64 0,17.32" fill="#0d3f66" stroke="#00182b" stroke-width="1.2"/>
-            <!-- Cube 1 Left Face -->
-            <polygon points="0,17.32 30,34.64 30,69.28 0,51.96" fill="#042038" stroke="#00182b" stroke-width="1.2"/>
-            <!-- Cube 1 Right Face -->
-            <polygon points="30,34.64 60,17.32 60,51.96 30,69.28" fill="#082d4f" stroke="#00182b" stroke-width="1.2"/>
-            
-            <!-- Staggered Cube Row -->
-            <polygon points="0,51.96 30,69.28 0,86.6 -30,69.28" fill="#0d3f66" stroke="#00182b" stroke-width="1.2"/>
-            <polygon points="60,51.96 90,69.28 60,86.6 30,69.28" fill="#0d3f66" stroke="#00182b" stroke-width="1.2"/>
-            
-            <polygon points="-30,69.28 0,86.6 0,121.24 -30,103.92" fill="#042038" stroke="#00182b" stroke-width="1.2"/>
-            <polygon points="30,69.28 60,86.6 60,121.24 30,103.92" fill="#042038" stroke="#00182b" stroke-width="1.2"/>
-            
-            <polygon points="-30,-34.72 0,-17.4 0,17.24 -30,0" fill="#042038" stroke="#00182b" stroke-width="1.2"/>
-            <polygon points="30,-34.72 60,-17.4 60,17.24 30,0" fill="#042038" stroke="#00182b" stroke-width="1.2"/>
-            
-            <polygon points="0,86.6 30,69.28 30,103.92 0,121.24" fill="#082d4f" stroke="#00182b" stroke-width="1.2"/>
-            <polygon points="60,86.6 90,69.28 90,103.92 60,121.24" fill="#082d4f" stroke="#00182b" stroke-width="1.2"/>
-            
-            <polygon points="0,-17.4 30,-34.72 30,0 0,17.24" fill="#082d4f" stroke="#00182b" stroke-width="1.2"/>
-            <polygon points="60,-17.4 90,-34.72 90,0 60,17.24" fill="#082d4f" stroke="#00182b" stroke-width="1.2"/>
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#isometricCubesPattern)" />
-      </svg>
-    </div>
-  </div>
 
   <!-- Main Login Container -->
   <main class="auth-page auth-page-modern">
@@ -128,14 +94,19 @@
         </div>
 
         <div class="login-hero-footer">
-          <span><strong>4</strong> NCR Areas ready</span>
-          <span><strong>1</strong> Connected workspace</span>
+          <span><strong>Connected</strong> Workspace</span>
           <span><strong>24/7</strong> Web access</span>
+          <span><a href="/member-login" class="hero-member-portal-link">Member Portal Login &rarr;</a></span>
         </div>
       </aside>
 
       <!-- Section: Sign In Card -->
       <section class="login-card login-card-modern floating-login-card animate-in" aria-labelledby="loginTitle">
+        <div class="portal-switch-prompt">
+          <span>Looking for Member Access?</span>
+          <a href="/member-login" class="portal-switch-pill">Member Portal Login &rarr;</a>
+        </div>
+
         <div class="login-card-top">
           <div class="login-mobile-brand">
             <img src="/img/logo-2.png" alt="MFC Youth Logo">
@@ -186,23 +157,23 @@
           </div>
 
           <div class="login-buttons login-buttons-modern">
-            <button class="btn-auth auth-slide-button auth-slide-primary" type="submit">Sign In</button>
+            <button class="btn-auth auth-slide-button auth-slide-primary" type="submit">Sign In as Leader</button>
             <button class="btn-auth auth-slide-button auth-slide-secondary" type="button"
-              onclick="navigateWithLoader('/register')">First-Time Access</button>
+              onclick="navigateWithLoader('/register')">Leader Registration</button>
           </div>
         </form>
 
         <div class="auth-bottom auth-bottom-modern">
-          <span>Not yet in the database? Contact your Chapter Servant.</span>
-          <a href="/register">Learn how access works</a>
+          <span>Are you an MFC Youth Member?</span>
+          <a href="/member-login" class="portal-switch-link member-link">Sign in to Member Portal &rarr;</a>
         </div>
       </section>
     </div>
   </main>
 
   <!-- Global Authentication Footer -->
-  <footer class="auth-footer">Visit the Official MFC Youth Page at <a href="https://mfcyouth.org" target="_blank"
-      rel="noopener noreferrer">mfcyouth.org</a> &middot; <a href="/changelogs">System Changelogs</a> &middot; Powered & designed by <a href="https://migzdndd.github.io/web-portfolio/" target="_blank" rel="noopener noreferrer">migz.dev</a></footer>
+  <footer class="auth-footer"><a href="/member-login" style="font-weight: 700; color: #38bdf8;">Member Portal Login</a> &middot; Visit the Official MFC Youth Page at <a href="https://mfcyouth.org" target="_blank"
+      rel="noopener noreferrer">mfcyouth.org</a> &middot; <a href="/changelogs">System Changelogs</a> &middot; Powered &amp; designed by <a href="https://migzdndd.github.io/web-portfolio/" target="_blank" rel="noopener noreferrer">migz.dev</a></footer>
   <script src="/js/loader.js"></script>
   <script src="/js/auth.js"></script>
   <script>

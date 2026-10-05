@@ -30,6 +30,8 @@ const APP_SHELL_URLS = [
   '/services.html',
   '/member',
   '/member.html',
+  '/member-login',
+  '/member-login.html',
   '/changelogs',
   '/changelogs.html',
   '/manifest.webmanifest',

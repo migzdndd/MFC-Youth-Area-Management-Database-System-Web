@@ -39,14 +39,19 @@ updates:
       - "dependencies"
       - "frontend"
 
-  # GitHub Actions CI/CD workflows
+  # GitHub Actions CI/CD workflows (Ignore major version bumps to prevent breaking workflow tags)
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     open-pull-requests-limit: 5
     commit-message:
       prefix: "chore(ci)"
     labels:
       - "dependencies"
       - "github-actions"
+    ignore:
+      - dependency-name: "actions/*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "docker/*"
+        update-types: ["version-update:semver-major"]

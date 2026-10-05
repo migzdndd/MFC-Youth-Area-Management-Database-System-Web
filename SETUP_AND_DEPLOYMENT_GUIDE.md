@@ -140,13 +140,37 @@ Make sure `vercel.json` exists in your repository root before pushing to GitHub.
 
 ---
 
-## 8. Git Commands for Committing & Pushing
+## 8. Containerized Deployment & CI/CD Pipelines
+
+### 8.1 Docker Container Setup
+To run the application locally or deploy to containerized hosts (Cloud Run, AWS ECS, Azure App Service):
+
+```bash
+# Build Docker image
+docker build -t mfc-youth-app .
+
+# Run with Docker Compose
+docker-compose up -d
+```
+
+Access the application at `http://localhost:3000` and API health check at `http://localhost:3000/api/health`.
+
+### 8.2 GitHub Actions CI/CD Pipeline
+The repository includes automated CI/CD (`.github/workflows/ci-cd.yml`):
+1. **Lint & Syntax Check**: Automatically runs node syntax validation on code changes.
+2. **Security Audit**: Runs `npm audit` on backend dependencies.
+3. **Docker Build Verification**: Validates container image build integrity.
+4. **PaaS Deployment Trigger**: Connects seamlessly with Vercel git-backed deployments.
+
+---
+
+## 9. Git Commands for Committing & Pushing
 
 Run these commands in PowerShell or Terminal to keep your repository updated:
 
 ```bash
 git status
-git add SETUP_AND_DEPLOYMENT_GUIDE.md
-git commit -m "docs(setup): update guide for production vercel web dashboard deployment"
+git add .
+git commit -m "feat(infra): add containerization, CI/CD pipeline, and PaaS/load balancing alignment"
 git push origin main
 ```

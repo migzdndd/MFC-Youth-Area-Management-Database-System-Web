@@ -2,5 +2,17 @@
   "name": "mfc-youth-area-management-system-web",
   "version": "1.0.1",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "workspaces": [
+    "Backend"
+  ],
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.0",
+    "cheerio": "^1.0.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test:syntax": "node --check server.js && node --check Backend/api/router.js",
+    "test:health": "node -e \"import('./server.js'); setTimeout(async () => { const res = await fetch('http://localhost:3000/api/health'); const data = await res.json(); console.log('Health Check Status:', res.status, data.service); process.exit(data.service === 'mfc-youth-web-api' ? 0 : 1); }, 1500);\""
+  }
 }
