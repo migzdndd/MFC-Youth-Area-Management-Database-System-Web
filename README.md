@@ -1,6 +1,6 @@
 # MFC Youth Area Management System
 
-A cloud-based web application and management platform engineered for **Missionary Families for Christ (MFC) Youth & Kids Ministries**. The system streamlines youth membership tracking, household pastoral groupings, chapter administration, event registrations, service cataloging, and ministry analytics.
+A cloud-based web application and management platform engineered for **Missionary Families for Christ (MFC) Youth**. The system streamlines youth membership tracking, household pastoral groupings, chapter administration, event registrations, service cataloging, and ministry analytics.
 
 ---
 
@@ -13,7 +13,7 @@ The **MFC Youth Area Management System** serves as a central operational platfor
 ## Key Features & Capabilities
 
 ### Member & Pastoral Profile Management
-- **Youth & Kids Directory**: Complete records for MFC Kids (ages 4–12) and MFC Youth (ages 13–21), including contact details, residential addresses, emergency contacts, and chapter assignments.
+- **Youth Directory**: Complete records for MFC Youth (ages 13–21), including contact details, residential addresses, emergency contacts, and chapter assignments.
 - **Pastoral Grouping & Households**: Track household membership, household heads, and pastoral growth milestones across area chapters.
 - **Extended Ministry Attributes**: Comprehensive support for school/campus fields, LIT (Leaders in Training), Creative Ministries, and High Servant designations.
 
@@ -23,7 +23,7 @@ The **MFC Youth Area Management System** serves as a central operational platfor
 - **Interactive Dashboards**: Role-tailored dashboards providing area-wide member stats, chapter breakdowns, and quick action shortcuts.
 
 ### Event & Activity Management
-- **Event Registrations**: Manage youth camps, conferences, household assemblies, and leadership training events.
+- **Event Registrations**: Manage youth camps, conferences, area assemblies, and leadership training events.
 - **Attendance & Fee Tracking**: Record event participation, fee statuses (free vs paid), and activity logs.
 
 ### GIG (God Is Generous) & Financial Service Catalog
