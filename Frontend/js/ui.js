@@ -914,3 +914,18 @@ function applyBrandFonts(root = document.body) {
   }
 }
 window.applyBrandFonts = applyBrandFonts;
+
+/**
+ * Shows a Toast Alert Message
+ *
+ * What it does:
+ * Displays a popup alert notification on screen.
+ *
+ * Backup plan if it breaks:
+ * Safely falls back to the core toast notification mechanism.
+ */
+function showToast(text, type = 'success', duration = 4000) {
+  return toast(text, type, duration);
+}
+
+window.showToast = showToast;

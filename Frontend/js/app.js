@@ -18,48 +18,48 @@ seedDB();
 
 // List of allowed pages for each servant leader role
 const ROLE_ALLOWED_PAGES = {
-  area_servant: new Set(['dashboard', 'members', 'chapters', 'services', 'reports', 'events']),
-  couple_coordinator: new Set(['dashboard', 'members', 'chapters', 'services', 'reports', 'events']),
-  lit_servant: new Set(['dashboard', 'members', 'chapters', 'services', 'reports', 'events']),
-  campus_servant: new Set(['dashboard', 'members', 'services', 'reports', 'events']),
-  mfc_high_servant: new Set(['dashboard', 'members', 'services', 'reports', 'events']),
-  area_kids_servant: new Set(['dashboard', 'members', 'reports', 'events']),
-  chapter_servant: new Set(['dashboard', 'chapters', 'reports', 'events']),
-  national_coordinator: new Set(['dashboard', 'members', 'chapters', 'services', 'reports', 'events'])
+  area_servant: new Set(['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings']),
+  couple_coordinator: new Set(['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings']),
+  lit_servant: new Set(['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings']),
+  campus_servant: new Set(['dashboard', 'members', 'services', 'reports', 'events', 'gig', 'readings']),
+  mfc_high_servant: new Set(['dashboard', 'members', 'services', 'reports', 'events', 'gig', 'readings']),
+  area_kids_servant: new Set(['dashboard', 'members', 'reports', 'events', 'gig', 'readings']),
+  chapter_servant: new Set(['dashboard', 'chapters', 'reports', 'events', 'gig', 'readings']),
+  national_coordinator: new Set(['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings'])
 };
 
 // Which links appear in the sidebar menu for each role
 const ROLE_SIDEBAR_CONFIG = {
   area_servant: {
-    paths: ['/dashboard', '/members', '/chapters', '/services', '/reports', '/events'],
+    paths: ['/dashboard', '/members', '/chapters', '/services', '/reports', '/events', '/gig', '/readings'],
     labels: { '/chapters': 'Chapters', '/services': 'Services' }
   },
   couple_coordinator: {
-    paths: ['/dashboard', '/members', '/chapters', '/services', '/reports', '/events'],
+    paths: ['/dashboard', '/members', '/chapters', '/services', '/reports', '/events', '/gig', '/readings'],
     labels: { '/chapters': 'Chapters', '/services': 'Services' }
   },
   lit_servant: {
-    paths: ['/dashboard', '/members', '/chapters', '/services', '/reports', '/events'],
+    paths: ['/dashboard', '/members', '/chapters', '/services', '/reports', '/events', '/gig', '/readings'],
     labels: { '/chapters': 'Chapter', '/services': 'Services' }
   },
   campus_servant: {
-    paths: ['/dashboard', '/members', '/services', '/reports', '/events'],
+    paths: ['/dashboard', '/members', '/services', '/reports', '/events', '/gig', '/readings'],
     labels: { '/services': 'Service' }
   },
   mfc_high_servant: {
-    paths: ['/dashboard', '/members', '/services', '/reports', '/events'],
+    paths: ['/dashboard', '/members', '/services', '/reports', '/events', '/gig', '/readings'],
     labels: { '/services': 'Service' }
   },
   area_kids_servant: {
-    paths: ['/dashboard', '/members', '/reports', '/events'],
+    paths: ['/dashboard', '/members', '/reports', '/events', '/gig', '/readings'],
     labels: {}
   },
   chapter_servant: {
-    paths: ['/dashboard', '/chapters', '/reports', '/events'],
+    paths: ['/dashboard', '/chapters', '/reports', '/events', '/gig', '/readings'],
     labels: { '/chapters': 'Chapter' }
   },
   national_coordinator: {
-    paths: ['/dashboard', '/reports', '/events'],
+    paths: ['/dashboard', '/reports', '/events', '/gig', '/readings'],
     labels: {}
   }
 };
@@ -295,7 +295,9 @@ const renderers = {
   chapters: renderChapters,
   services: renderServices,
   reports: renderReports,
-  events: renderEvents
+  events: renderEvents,
+  gig: renderGig,
+  readings: renderReadings
 };
 
 /**

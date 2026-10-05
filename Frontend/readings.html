@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <!--
-  Pastoral Ministry Services Management Page
+  Catholic Daily Scripture Readings Page
 
   What it Does: Simple non IT Terms
-  Displays and organizes youth community ministry teams (such as Music, Dance, LIT,
-  Media, Campus, or High School) and lets leaders assign members to ministries.
+  Displays the daily Catholic Mass Scripture readings (First Reading, Psalm, Gospel)
+  for personal prayer and reflection, synchronized to Philippine local time.
 -->
 <html lang="en">
 
@@ -12,8 +12,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#002847">
-  <meta name="description" content="Services - MFC Youth Area Management System.">
-  <title>Services - MFC Youth Area Management System</title>
+  <meta name="description" content="Daily Readings - MFC Youth Area Management System.">
+  <title>Daily Readings — MFC Youth Area Management System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:wght@400;500;600;700;800;900&family=Raleway:ital,wght@0,300..800;1,300..800&display=swap">
@@ -27,7 +27,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
-<body data-page="services">
+<body data-page="readings">
   <div class="mobile-topbar"><strong class="brand-mfc-youth">MFC Youth <span class="brand-ams">AMS</span></strong><button id="menuBtn" type="button" aria-label="Toggle navigation menu">Menu</button></div>
   <div class="app-layout">
     <!-- Main Sidebar Navigation -->
@@ -41,11 +41,11 @@
       <nav class="sidebar-nav"><a href="/dashboard" class=""><img src="/Icons/dashboard.png" class="nav-icon"
             alt="">Dashboard</a><a href="/members" class=""><img src="/Icons/members.png" class="nav-icon"
             alt="">Members</a><a href="/chapters" class=""><img src="/Icons/chapters.png" class="nav-icon"
-            alt="">Chapters</a><a href="/services" class="active"><img src="/Icons/services.png" class="nav-icon"
+            alt="">Chapters</a><a href="/services" class=""><img src="/Icons/services.png" class="nav-icon"
             alt="">Services</a><a href="/reports" class=""><img src="/Icons/reports.png" class="nav-icon"
             alt="">Activity Reports</a><a href="/events" class=""><img src="/Icons/events.png" class="nav-icon"
             alt="">Events</a><a href="/gig" class=""><img src="/Icons/reports.png" class="nav-icon"
-            alt="">GIG Stewardship</a><a href="/readings" class=""><img src="/Icons/dashboard.png" class="nav-icon"
+            alt="">GIG Stewardship</a><a href="/readings" class="active"><img src="/Icons/dashboard.png" class="nav-icon"
             alt="">Daily Readings</a></nav>
       <div class="sidebar-bottom">
         <button class="logout-link" id="logoutBtn" type="button">Logout</button>

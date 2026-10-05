@@ -108,3 +108,8 @@ gemini.md
 DEBUGGING_NOTES.md
 *.local.md
 
+# Native Compilation & Generated Specifications
+COMPILATION_GUIDE.md
+PRD.md
+Architecture.md
+

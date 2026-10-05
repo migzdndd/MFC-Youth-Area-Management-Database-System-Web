@@ -541,3 +541,18 @@ async function refreshAllCloudData({ render = true } = {}) {
   if (render) renderPageSafely();
   return true;
 }
+
+/**
+ * Unified API Request Dispatcher
+ *
+ * What it does:
+ * Sends requests to the backend server with automatic authentication and retry logic.
+ *
+ * Backup plan if it breaks:
+ * Catches connection issues and returns a clean error object without halting execution.
+ */
+function callApi(path, options = {}) {
+  return backendApi(path, options);
+}
+
+window.callApi = callApi;
