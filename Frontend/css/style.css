@@ -215,59 +215,6 @@ button:active, .btn:active, .btn-auth:active {
   color: #fff;
 }
 
-/* From Uiverse.io by chase2k25 - Adapted for Login Background with solid blue */
-.auth-bg-container,
-.container.pattern-container {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  display: flex;
-  align-items: stretch;
-  justify-content: stretch;
-  background: #001524;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.pattern-bg {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  /* Solid alternating deep-blue stripes (hard stops with no gradient fading) */
-  background: repeating-linear-gradient(
-    135deg,
-    #001524 0px,
-    #001524 60px,
-    #002238 60px,
-    #002238 120px
-  );
-}
-
-.cube-svg {
-  position: absolute;
-  width: 200%;
-  height: 200%;
-  left: -30%;
-  top: -20%;
-  background: transparent;
-  opacity: 0.45;
-  z-index: 1;
-  animation: cubeMove 18s linear infinite alternate;
-}
-
-@keyframes cubeMove {
-  from {
-    transform: translateY(0) scale(1);
-  }
-  to {
-    transform: translateY(-20%) scale(1.02) rotate(1deg);
-  }
-}
-
 .auth-page {
   position: relative;
   z-index: 1;
@@ -4040,7 +3987,10 @@ from { opacity: .45; }
 /* ---------- Login refresh ---------- */
 
 .auth-body-modern {
-  background: #001524;
+  background: radial-gradient(circle at 85% 15%, rgba(14, 165, 233, 0.08) 0%, transparent 45%),
+              radial-gradient(circle at 15% 85%, rgba(2, 132, 199, 0.06) 0%, transparent 45%),
+              #001524;
+  min-height: 100vh;
 }
 
 .auth-page-modern {
@@ -4841,13 +4791,83 @@ from { opacity: .45; }
   letter-spacing: 0.04em;
 }
 
-.member-dot {
+.member-login-page-centered {
+  min-height: calc(100vh - 46px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(24px, 4vh, 48px) clamp(16px, 3vw, 32px);
+}
+
+.member-login-centered-container {
+  width: min(440px, 100%);
+  margin: 0 auto;
+}
+
+.member-topbar-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.28);
+  color: #6ee7b7;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: help;
+  transition: all var(--motion-fast) ease;
+}
+
+.member-topbar-role:hover {
+  background: rgba(16, 185, 129, 0.22);
+  border-color: rgba(52, 211, 153, 0.45);
+}
+
+.member-role-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: #34d399;
-  box-shadow: 0 0 8px #34d399;
-  display: inline-block;
+  box-shadow: 0 0 6px #34d399;
+}
+
+.member-access-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.10);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  color: #065f46;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: help;
+  transition: all var(--motion-fast) ease;
+}
+
+.member-access-chip:hover {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: rgba(52, 211, 153, 0.45);
+}
+
+.identity-access-level {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: help;
+}
+
+.info-inline-icon {
+  opacity: 0.75;
+  transition: opacity var(--motion-fast) ease;
+  vertical-align: middle;
+}
+
+.identity-access-level:hover .info-inline-icon,
+.member-access-chip:hover .info-inline-icon {
+  opacity: 1;
 }
 
 .member-login-card {

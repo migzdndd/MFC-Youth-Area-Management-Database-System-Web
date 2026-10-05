@@ -154,7 +154,7 @@ if (logoutBtn) {
     'Area User'
   )}
     </strong>
-    <small class="signed-in-role">
+    <small class="signed-in-role" title="Leadership Access: ${esc(accessRoleLabel(session?.role))} — Authorized with administrative permissions to manage area and chapter records.">
       ${esc(accessRoleLabel(session?.role))}
       ${chapter ? ` · ${esc(chapter.name)}` : ''}
     </small>

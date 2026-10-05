@@ -3,8 +3,8 @@
   Dedicated Youth Member Portal Authentication and Account Access Page
 
   What it Does: Simple non IT Terms
-  The dedicated front door for youth community members. Members can sign in with their
-  account credentials, or claim their profile record if accessing the portal for the first time.
+  A dedicated, centralized sign-in entrance for youth community members. Members can sign in
+  with their member credentials or claim their profile record if it is their first time.
 -->
 <html lang="en">
 
@@ -28,126 +28,24 @@
 </head>
 
 <body class="auth-body auth-body-modern member-login-body">
-  <!-- Distinguishable Background Animation (Isometric Cubes with Emerald / Oceanic Tint) -->
-  <div class="auth-bg-container" aria-hidden="true">
-    <div class="pattern-bg">
-      <svg class="cube-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" preserveAspectRatio="none">
-        <defs>
-          <pattern id="memberIsometricPattern" width="60" height="104" patternUnits="userSpaceOnUse">
-            <!-- Cube 1 Top Face (Deep Teal / Emerald Tint) -->
-            <polygon points="30,0 60,17.32 30,34.64 0,17.32" fill="#064e3b" stroke="#00182b" stroke-width="1.2"/>
-            <!-- Cube 1 Left Face -->
-            <polygon points="0,17.32 30,34.64 30,69.28 0,51.96" fill="#022c22" stroke="#00182b" stroke-width="1.2"/>
-            <!-- Cube 1 Right Face -->
-            <polygon points="30,34.64 60,17.32 60,51.96 30,69.28" fill="#065f46" stroke="#00182b" stroke-width="1.2"/>
-            
-            <!-- Staggered Cube Row -->
-            <polygon points="0,51.96 30,69.28 0,86.6 -30,69.28" fill="#042f2e" stroke="#00182b" stroke-width="1.2"/>
-            <polygon points="60,51.96 90,69.28 60,86.6 30,69.28" fill="#064e3b" stroke="#00182b" stroke-width="1.2"/>
-            
-            <polygon points="-30,69.28 0,86.6 0,121.24 -30,103.92" fill="#011b15" stroke="#00182b" stroke-width="1.2"/>
-            <polygon points="30,69.28 60,86.6 60,121.24 30,103.92" fill="#011b15" stroke="#00182b" stroke-width="1.2"/>
-            
-            <polygon points="-30,-34.72 0,-17.4 0,17.24 -30,0" fill="#022c22" stroke="#00182b" stroke-width="1.2"/>
-            <polygon points="30,-34.72 60,-17.4 60,17.24 30,0" fill="#022c22" stroke="#00182b" stroke-width="1.2"/>
-            
-            <polygon points="0,86.6 30,69.28 30,103.92 0,121.24" fill="#0f3d3e" stroke="#00182b" stroke-width="1.2"/>
-            <polygon points="60,86.6 90,69.28 90,103.92 60,121.24" fill="#0f3d3e" stroke="#00182b" stroke-width="1.2"/>
-            
-            <polygon points="0,-17.4 30,-34.72 30,0 0,17.24" fill="#0f3d3e" stroke="#00182b" stroke-width="1.2"/>
-            <polygon points="60,-17.4 90,-34.72 90,0 60,17.24" fill="#0f3d3e" stroke="#00182b" stroke-width="1.2"/>
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#memberIsometricPattern)" />
-      </svg>
-    </div>
-  </div>
 
-  <!-- Main Member Login Container -->
-  <main class="auth-page auth-page-modern">
-    <div class="auth-layout auth-layout-modern">
+  <!-- Centralized Member Login Container -->
+  <main class="auth-page auth-page-modern member-login-page-centered">
+    <div class="member-login-centered-container">
 
-      <!-- Left Hero Column: Member Portal & Community Overview -->
-      <aside class="auth-info login-hero member-hero animate-in" aria-label="MFC Youth Member Portal overview">
-        <div class="login-hero-brand">
-          <img src="/img/logo.png" class="login-hero-logo" alt="MFC Youth">
-          <span class="member-hero-chip"><span class="member-status-dot"></span> Member Portal Access</span>
-        </div>
-
-        <div class="login-hero-copy">
-          <span class="login-eyebrow member-eyebrow">YOUTH COMMUNITY PORTAL</span>
-          <h2>Live your faith, stay connected with your chapter.</h2>
-          <p>Your personal portal for youth assemblies, chapter gatherings, ministry services, and community records.</p>
-        </div>
-
-        <div class="login-feature-grid" aria-label="Key member portal features">
-          <article>
-            <strong>Gatherings</strong>
-            <span>Assemblies, conferences, and event registrations</span>
-          </article>
-          <article>
-            <strong>Ministry &amp; Service</strong>
-            <span>Music, LIT, logistics, and service assignments</span>
-          </article>
-          <article>
-            <strong>Household &amp; Chapter</strong>
-            <span>Connect with your chapter household and servants</span>
-          </article>
-          <article>
-            <strong>Giving &amp; GIG</strong>
-            <span>Track personal gift-in-giving records and mission support</span>
-          </article>
-
-          <!-- Daily Readings Live Feed -->
-          <article class="daily-readings-card-wrapper" style="grid-column: span 2;">
-            <div class="card-hero-header">
-              <strong id="dailyReadingsTitle" class="card-hero-title">Daily Readings</strong>
-            </div>
-            <div id="dailyReadingsContent" class="daily-readings-content">
-              Loading today's readings...
-            </div>
-          </article>
-
-          <!-- Community Scripture / Inspiration -->
-          <article class="changelog-card-wrapper" style="grid-column: span 2; border-color: rgba(52, 211, 153, 0.22) !important;">
-            <div class="card-hero-header changelogs-header-row">
-              <div class="changelog-title-group">
-                <strong class="card-hero-title" style="color: #6ee7b7;">Youth Word of Life</strong>
-                <span class="live-sync-indicator" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(52, 211, 153, 0.3); color: #a7f3d0;" title="Community reflection">
-                  <span class="live-sync-dot" style="background: #10b981;"></span> 1 Timothy 4:12
-                </span>
-              </div>
-            </div>
-            <div style="padding: 10px 0 6px; color: #bad1df; font-size: 0.85rem; line-height: 1.55; font-style: italic;">
-              &ldquo;Don't let anyone look down on you because you are young, but set an example for the believers in speech, in conduct, in love, in faith and in purity.&rdquo;
-            </div>
-            <div class="changelog-card-footer" style="border-top-color: rgba(52, 211, 153, 0.15);">
-              <span style="font-size: 0.74rem; color: #6ee7b7; font-weight: 600;">MFC Youth Community &middot; Rooted in Christ</span>
-            </div>
-          </article>
-        </div>
-
-        <div class="login-hero-footer">
-          <span><strong>100%</strong> Youth focused</span>
-          <span><strong>Active</strong> Chapters</span>
-          <span><strong>24/7</strong> Personal access</span>
-        </div>
-      </aside>
-
-      <!-- Right Card Column: Member Portal Authentication Card -->
+      <!-- Centralized Member Portal Authentication Card -->
       <section class="login-card login-card-modern floating-login-card member-login-card animate-in" aria-labelledby="memberLoginTitle">
         <div class="login-card-top">
           <div class="login-mobile-brand">
             <img src="/img/logo-2.png" alt="MFC Youth Logo">
             <div><strong class="brand-mfc-youth">MFC YOUTH</strong><span class="brand-ams brand-member" style="color: #34d399;">Member Portal</span></div>
           </div>
-          <span class="member-portal-badge"><span class="member-dot"></span> Member Access</span>
+          <span class="member-portal-badge"><span class="member-role-dot"></span> Member Access</span>
         </div>
 
-        <div class="login-header login-header-modern">
-          <span class="login-eyebrow member-eyebrow">WELCOME YOUTH</span>
+        <div class="login-header login-header-modern" style="margin-bottom: 16px;">
+          <span class="login-eyebrow member-eyebrow">YOUTH MEMBER PORTAL</span>
           <h1 id="memberLoginTitle">Sign in to Member Portal</h1>
-          <p id="memberLoginSubtitle">Enter your member credentials to access your profile.</p>
         </div>
 
         <!-- Mode Switcher: Sign In vs Claim Account -->
@@ -285,7 +183,6 @@
       const switchToClaimBtn = document.getElementById('switchToClaimBtn');
       const switchToSignInBtn = document.getElementById('switchToSignInBtn');
       const pageTitle = document.getElementById('memberLoginTitle');
-      const pageSubtitle = document.getElementById('memberLoginSubtitle');
 
       function setMode(mode) {
         if (mode === 'claim') {
@@ -296,7 +193,6 @@
           panelSignIn?.classList.remove('active');
           panelClaim?.classList.add('active');
           if (pageTitle) pageTitle.textContent = 'Claim Member Account';
-          if (pageSubtitle) pageSubtitle.textContent = 'Activate your profile and set your portal password.';
         } else {
           tabClaim?.classList.remove('active');
           tabClaim?.setAttribute('aria-selected', 'false');
@@ -305,7 +201,6 @@
           panelClaim?.classList.remove('active');
           panelSignIn?.classList.add('active');
           if (pageTitle) pageTitle.textContent = 'Sign in to Member Portal';
-          if (pageSubtitle) pageSubtitle.textContent = 'Enter your member credentials to access your profile.';
         }
       }
 
@@ -319,108 +214,6 @@
       if (urlParams.get('mode') === 'claim' || window.location.hash === '#claim') {
         setMode('claim');
       }
-
-      // Helper to escape HTML and prevent XSS
-      const escapeHtml = (unsafe) => {
-        if (!unsafe) return '';
-        return String(unsafe)
-             .replace(/&/g, "&amp;")
-             .replace(/</g, "&lt;")
-             .replace(/>/g, "&gt;")
-             .replace(/"/g, "&quot;")
-             .replace(/'/g, "&#039;");
-      };
-
-      // Load Daily Readings
-      async function loadDailyReadings() {
-        const content = document.getElementById('dailyReadingsContent');
-        const title = document.getElementById('dailyReadingsTitle');
-        if (!content || !title) return;
-
-        // Determine date in Asia/Manila
-        const parts = new Intl.DateTimeFormat('en-CA', {
-          timeZone: 'Asia/Manila',
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit'
-        }).formatToParts(new Date());
-        
-        const y = parts.find(p => p.type === 'year').value;
-        const m = parts.find(p => p.type === 'month').value;
-        const d = parts.find(p => p.type === 'day').value;
-        const targetDate = `${y}-${m}-${d}`;
-        const cacheKey = `mfc_daily_readings_${targetDate}`;
-
-        function renderReadings(data) {
-          title.innerHTML = `Daily Readings<span class="daily-readings-date-sub">${escapeHtml(data.day)}, ${escapeHtml(data.date)}</span>`;
-          
-          let html = `<div class="daily-readings-celebration">
-            <strong>${escapeHtml(data.celebration || 'Liturgical Readings for Today')}</strong>
-          </div>`;
-
-          if (data.readings && data.readings.length > 0) {
-            html += `<div class="daily-readings-list">`;
-            data.readings.forEach(reading => {
-              html += `
-                <div class="daily-reading-item">
-                  <div class="daily-reading-type">${escapeHtml(reading.type || 'Reading')}</div>
-                  <div class="daily-reading-ref">${escapeHtml(reading.reference || '')}</div>
-                </div>
-              `;
-            });
-            html += `</div>`;
-          } else {
-            html += `<p style="color: #94a3b8; font-size: 0.8rem;">No readings parsed for today.</p>`;
-          }
-
-          if (data.source && data.source.url) {
-            html += `
-              <div class="daily-readings-source">
-                <a href="${escapeHtml(data.source.url)}" target="_blank" rel="noopener noreferrer">
-                  Source: ${escapeHtml(data.source.name || 'EWTN')} Daily Readings &nearr;
-                </a>
-              </div>
-            `;
-          }
-          
-          content.innerHTML = html;
-        }
-
-        function renderError(dateStr) {
-          content.innerHTML = `
-            <p style="margin-bottom: 10px; color: #cbd5e1; font-size: 0.82rem;">Today's readings are temporarily unavailable from the server feed.</p>
-            <a href="https://www.ewtn.com/catholicism/daily-readings/${escapeHtml(dateStr)}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; background: #059669; color: #ffffff; border-radius: 6px; text-decoration: none; font-size: 0.78rem; font-weight: 600;">
-              View Readings on EWTN &nearr;
-            </a>
-          `;
-        }
-
-        try {
-          const cached = localStorage.getItem(cacheKey);
-          if (cached) {
-            const data = JSON.parse(cached);
-            renderReadings(data);
-            return;
-          }
-        } catch(e) {}
-
-        try {
-          const response = await fetch(`/api/daily-readings?date=${targetDate}`);
-          if (!response.ok) throw new Error('Network response was not ok');
-          const data = await response.json();
-          if (data.ok) {
-            localStorage.setItem(cacheKey, JSON.stringify(data));
-            renderReadings(data);
-          } else {
-            throw new Error(data.error || 'Unknown error');
-          }
-        } catch (error) {
-          console.error('Failed to fetch daily readings:', error);
-          renderError(targetDate);
-        }
-      }
-
-      loadDailyReadings();
     });
   </script>
 </body>
