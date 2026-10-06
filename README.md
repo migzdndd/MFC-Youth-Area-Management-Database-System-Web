@@ -83,10 +83,10 @@ MFC-Youth-Area-Management-System-Web/
 │   ├── js/                   # Core application logic, auth handlers, & UI modules
 │   ├── index.html            # Main login & authentication portal
 │   ├── dashboard.html        # Area management dashboard
-│   ├── members.html          # Youth directory & pastoral profiles
+│   ├── members.html          # Youth directory, pastoral profiles, & GIG logs
 │   ├── chapters.html         # Chapter & household administration
 │   ├── events.html           # Event registration & activity tracking
-│   ├── services.html         # Service catalog & GIG contribution logs
+│   ├── services.html         # Service catalog & ministry assignments
 │   ├── reports.html          # Analytics & reporting interface
 │   ├── changelogs.html       # System release notes & update logs
 │   └── package.json

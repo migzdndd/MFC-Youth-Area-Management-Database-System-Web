@@ -31,35 +31,35 @@ const ROLE_ALLOWED_PAGES = {
 // Which links appear in the sidebar menu for each role
 const ROLE_SIDEBAR_CONFIG = {
   area_servant: {
-    paths: ['/dashboard', '/members', '/chapters', '/services', '/reports', '/events', '/gig', '/readings'],
+    paths: ['/dashboard', '/members', '/chapters', '/services', '/reports', '/events', '/readings'],
     labels: { '/chapters': 'Chapters', '/services': 'Services' }
   },
   couple_coordinator: {
-    paths: ['/dashboard', '/members', '/chapters', '/services', '/reports', '/events', '/gig', '/readings'],
+    paths: ['/dashboard', '/members', '/chapters', '/services', '/reports', '/events', '/readings'],
     labels: { '/chapters': 'Chapters', '/services': 'Services' }
   },
   lit_servant: {
-    paths: ['/dashboard', '/members', '/chapters', '/services', '/reports', '/events', '/gig', '/readings'],
+    paths: ['/dashboard', '/members', '/chapters', '/services', '/reports', '/events', '/readings'],
     labels: { '/chapters': 'Chapter', '/services': 'Services' }
   },
   campus_servant: {
-    paths: ['/dashboard', '/members', '/services', '/reports', '/events', '/gig', '/readings'],
+    paths: ['/dashboard', '/members', '/services', '/reports', '/events', '/readings'],
     labels: { '/services': 'Service' }
   },
   mfc_high_servant: {
-    paths: ['/dashboard', '/members', '/services', '/reports', '/events', '/gig', '/readings'],
+    paths: ['/dashboard', '/members', '/services', '/reports', '/events', '/readings'],
     labels: { '/services': 'Service' }
   },
   area_kids_servant: {
-    paths: ['/dashboard', '/members', '/reports', '/events', '/gig', '/readings'],
+    paths: ['/dashboard', '/members', '/reports', '/events', '/readings'],
     labels: {}
   },
   chapter_servant: {
-    paths: ['/dashboard', '/chapters', '/reports', '/events', '/gig', '/readings'],
+    paths: ['/dashboard', '/chapters', '/reports', '/events', '/readings'],
     labels: { '/chapters': 'Chapter' }
   },
   national_coordinator: {
-    paths: ['/dashboard', '/reports', '/events', '/gig', '/readings'],
+    paths: ['/dashboard', '/reports', '/events', '/readings'],
     labels: {}
   }
 };
