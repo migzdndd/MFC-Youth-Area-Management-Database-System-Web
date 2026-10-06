@@ -280,20 +280,43 @@ async function handleStaticAsset(request) {
  * Strategy: Network-First with Cache fallback for HTML navigations.
  */
 async function handleNavigation(request) {
+  const url = new URL(request.url);
+  const lowerPath = url.pathname.toLowerCase();
+  const cleanPath = lowerPath.replace(/\.html$/, '').replace(/\/+$/, '') || '/';
+
+  // Normalize uppercase navigation paths to canonical lowercase
+  if (url.pathname !== lowerPath) {
+    const canonicalUrl = `${url.origin}${cleanPath}${url.search}${url.hash}`;
+    return Response.redirect(canonicalUrl, 301);
+  }
+
   try {
     const networkResponse = await fetch(request);
     if (networkResponse && networkResponse.status === 200) {
       const cache = await caches.open(SHELL_CACHE);
       cache.put(request, networkResponse.clone());
+      return networkResponse;
     }
+
+    if (networkResponse && networkResponse.status === 404 && url.pathname !== cleanPath) {
+      const canonicalUrl = `${url.origin}${cleanPath}${url.search}${url.hash}`;
+      const fallbackResponse = await fetch(canonicalUrl);
+      if (fallbackResponse && fallbackResponse.status === 200) {
+        return Response.redirect(canonicalUrl, 301);
+      }
+    }
+
     return networkResponse;
   } catch (error) {
     const cachedPage = await caches.match(request);
     if (cachedPage) return cachedPage;
 
+    // Check lowercase cached variant
+    const lowerCached = await caches.match(cleanPath);
+    if (lowerCached) return lowerCached;
+
     // Clean URL fallback: e.g. /events -> /events.html
-    const url = new URL(request.url);
-    const htmlFallback = await caches.match(`${url.pathname}.html`);
+    const htmlFallback = await caches.match(`${cleanPath}.html`);
     if (htmlFallback) return htmlFallback;
 
     // General app shell fallback

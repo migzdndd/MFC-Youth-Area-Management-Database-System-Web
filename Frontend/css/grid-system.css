@@ -1,19 +1,45 @@
-
-/* Responsive Grid System */
+/* Fluid grid and layout utilities */
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 24px;
-  width: 100%;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: clamp(16px, 2.5vw, 24px);
+  width: min(100%, 100%);
 }
 
 .card-grid-compact {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
-  width: 100%;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: clamp(12px, 2vw, 16px);
+  width: min(100%, 100%);
+}
+
+.grid-auto-fit-sm {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  gap: clamp(10px, 1.8vw, 16px);
+  width: min(100%, 100%);
+}
+
+.grid-auto-fit-md {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: clamp(14px, 2.2vw, 20px);
+  width: min(100%, 100%);
+}
+
+.grid-auto-fit-lg {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: clamp(18px, 3vw, 28px);
+  width: min(100%, 100%);
+}
+
+.container-fluid-limited {
+  width: min(100%, var(--container-max-width, 1200px));
+  margin-inline: auto;
 }
 
 .grid-item {
   width: 100%;
+  min-width: 0;
 }

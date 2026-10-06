@@ -13,7 +13,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="The requested page was not found in the MFC Youth Area Management System.">
   <meta name="theme-color" content="#002847">
+  <meta name="robots" content="noindex, follow">
   <title>Page Not Found - MFC Youth Area Management System</title>
+  <script>
+    (function () {
+      var pathname = window.location.pathname;
+      var lower = pathname.toLowerCase();
+      var clean = lower.replace(/\.html$/, '').replace(/\/+$/, '') || '/';
+
+      var knownRoutes = [
+        '/', '/dashboard', '/events', '/gig', '/readings', '/reports',
+        '/members', '/chapters', '/services', '/member', '/member-login',
+        '/changelogs', '/mfa-setup', '/mfa-verify', '/forgot-password',
+        '/reset-password', '/change-password', '/confirm', '/recover', '/register'
+      ];
+
+      var routeAliases = {
+        '/index': '/',
+        '/home': '/',
+        '/login': '/member-login',
+        '/signin': '/',
+        '/sign-in': '/',
+        '/auth': '/'
+      };
+
+      var target = routeAliases[clean] || (knownRoutes.indexOf(clean) !== -1 ? clean : (pathname !== lower ? lower : null));
+
+      if (target && target !== pathname) {
+        window.location.replace(target + window.location.search + window.location.hash);
+      }
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:wght@400;500;600;700;800;900&family=Raleway:ital,wght@0,300..800;1,300..800&display=swap">

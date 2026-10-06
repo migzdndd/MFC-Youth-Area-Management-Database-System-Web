@@ -53,8 +53,15 @@ const server = http.createServer(async (req, res) => {
     return handler(req, res);
   }
 
+  // Normalize casing for static frontend routes so users reach pages regardless of caps
+  const lowerPathname = parsedUrl.pathname.toLowerCase();
+  if (parsedUrl.pathname !== lowerPathname) {
+    res.writeHead(301, { Location: lowerPathname + (parsedUrl.search || '') + (parsedUrl.hash || '') });
+    return res.end();
+  }
+
   // Serve static frontend assets
-  let filePath = path.join(FRONTEND_DIR, parsedUrl.pathname === '/' ? 'index.html' : parsedUrl.pathname);
+  let filePath = path.join(FRONTEND_DIR, lowerPathname === '/' ? 'index.html' : lowerPathname);
 
   try {
     if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {

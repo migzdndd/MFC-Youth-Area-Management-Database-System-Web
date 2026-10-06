@@ -1,0 +1,10 @@
+# Robots.txt for MFC Youth Area Management System
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /member-login.html
+Allow: /changelogs.html
+Allow: /manifest.webmanifest
+Disallow: /api/
+
+Sitemap: /sitemap.xml
