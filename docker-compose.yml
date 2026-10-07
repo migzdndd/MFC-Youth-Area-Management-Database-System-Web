@@ -6,8 +6,10 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: mfc-youth-management-app
+    restart: unless-stopped
     ports:
-      - "3000:3000"
+      # Bind strictly to localhost (reverse proxy should handle TLS & public traffic)
+      - "127.0.0.1:3000:3000"
     environment:
       - PORT=3000
       - NODE_ENV=production
@@ -15,9 +17,20 @@ services:
       - SUPABASE_PUBLISHABLE_KEY=${SUPABASE_PUBLISHABLE_KEY}
       - SUPABASE_SECRET_KEY=${SUPABASE_SECRET_KEY}
       - ADMIN_REGISTRATION_CODE=${ADMIN_REGISTRATION_CODE}
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "node -e \"import('http').then(h => h.get('http://localhost:3000/api/health', r => process.exit(r.statusCode === 200 ? 0 : 1)))\""]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

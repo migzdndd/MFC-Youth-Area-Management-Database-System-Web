@@ -1,9 +1,19 @@
+# Version control & CI
 .git
+.github
 .gitignore
+.gitattributes
+
+# Dependencies
 node_modules
 **/node_modules
-npm-debug.log
-.env.local
-.env*.local
+npm-debug.log*
+
+# Secrets & Environment variables (all variations)
+.env*
+
+# Scratch, docs, and tests
 scratch
 .gemini
+*.md
+tests
