@@ -290,7 +290,7 @@
         <div class="page-loader__content" role="status" aria-live="polite" aria-label="Loading page">
           <div class="page-loader__mark" aria-hidden="true">
             <span class="page-loader__mark-ring"></span>
-            <img class="page-loader__logo" src="/img/logo-2.svg" alt="" decoding="async" fetchpriority="high">
+            <img class="page-loader__logo" src="/img/logo-2.png" alt="" decoding="async" fetchpriority="high">
           </div>
           <div class="page-loader__copy">
             <span class="page-loader__overline">MFC Youth</span>
