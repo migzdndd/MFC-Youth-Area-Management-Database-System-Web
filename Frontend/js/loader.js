@@ -290,7 +290,7 @@
         <div class="page-loader__content" role="status" aria-live="polite" aria-label="Loading page">
           <div class="page-loader__mark" aria-hidden="true">
             <span class="page-loader__mark-ring"></span>
-            <img class="page-loader__logo" src="/img/logo-2.png" alt="" decoding="async" fetchpriority="high">
+            <img class="page-loader__logo" src="/img/logo-2.svg" alt="" decoding="async" fetchpriority="high">
           </div>
           <div class="page-loader__copy">
             <span class="page-loader__overline">MFC Youth</span>
@@ -592,15 +592,15 @@
         <hr>
         <h3>3. Role Portals</h3>
         <p>Access tools configured for your service role:</p>
-        <h4><img src="/Icons/members.png" alt="" style="width: 20px; vertical-align: middle; margin-right: 8px; filter: brightness(0) saturate(100%) invert(23%) sepia(13%) saturate(1212%) hue-rotate(174deg) brightness(96%) contrast(87%);"> General Members</h4>
+        <h4><img src="/Icons/members.svg" alt="" style="width: 20px; vertical-align: middle; margin-right: 8px; filter: brightness(0) saturate(100%) invert(23%) sepia(13%) saturate(1212%) hue-rotate(174deg) brightness(96%) contrast(87%);"> General Members</h4>
         <ul>
           <li>View profile details, upcoming <span class="brand-mfc-youth">MFC Youth</span> events, and announcements.</li>
         </ul>
-        <h4><img src="/Icons/chapters.png" alt="" style="width: 20px; vertical-align: middle; margin-right: 8px; filter: brightness(0) saturate(100%) invert(23%) sepia(13%) saturate(1212%) hue-rotate(174deg) brightness(96%) contrast(87%);"> Chapter Servants</h4>
+        <h4><img src="/Icons/chapters.svg" alt="" style="width: 20px; vertical-align: middle; margin-right: 8px; filter: brightness(0) saturate(100%) invert(23%) sepia(13%) saturate(1212%) hue-rotate(174deg) brightness(96%) contrast(87%);"> Chapter Servants</h4>
         <ul>
           <li>Manage chapter members and track local activities and reports.</li>
         </ul>
-        <h4><img src="/Icons/dashboard.png" alt="" style="width: 20px; vertical-align: middle; margin-right: 8px; filter: brightness(0) saturate(100%) invert(23%) sepia(13%) saturate(1212%) hue-rotate(174deg) brightness(96%) contrast(87%);"> Area Leaders</h4>
+        <h4><img src="/Icons/dashboard.svg" alt="" style="width: 20px; vertical-align: middle; margin-right: 8px; filter: brightness(0) saturate(100%) invert(23%) sepia(13%) saturate(1212%) hue-rotate(174deg) brightness(96%) contrast(87%);"> Area Leaders</h4>
         <ul>
           <li>Access area analytics, activity records, and chapter directories.</li>
         </ul>

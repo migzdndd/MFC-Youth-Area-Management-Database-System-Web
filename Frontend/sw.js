@@ -6,7 +6,7 @@
  * device, enabling the app to open instantly and continue functioning even without an internet connection.
  */
 
-const SHELL_CACHE = 'mfc-ams-shell-v8';
+const SHELL_CACHE = 'mfc-ams-shell-v9';
 const API_CACHE = 'mfc-ams-api-v1';
 
 const APP_SHELL_URLS = [
@@ -58,14 +58,15 @@ const APP_SHELL_URLS = [
   '/js/modules/gig.js',
   '/js/modules/readings.js',
   '/js/modules/onboarding.js',
-  '/img/logo-2.png',
-  '/img/logo.png',
-  '/Icons/dashboard.png',
-  '/Icons/members.png',
-  '/Icons/chapters.png',
-  '/Icons/services.png',
-  '/Icons/reports.png',
-  '/Icons/events.png',
+  '/img/logo-2.svg',
+  '/img/logo.svg',
+  '/Icons/dashboard.svg',
+  '/Icons/members.svg',
+  '/Icons/chapters.svg',
+  '/Icons/services.svg',
+  '/Icons/reports.svg',
+  '/Icons/events.svg',
+  '/Icons/readings.svg',
   'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js'
 ];
 

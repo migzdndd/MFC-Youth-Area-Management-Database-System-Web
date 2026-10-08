@@ -12,27 +12,27 @@
   "categories": ["productivity", "management", "utilities"],
   "icons": [
     {
-      "src": "/img/logo-2.png",
+      "src": "/img/logo-2.svg",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "/img/logo-2.png",
+      "src": "/img/logo-2.svg",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "/img/logo.png",
+      "src": "/img/logo.svg",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/img/logo.png",
+      "src": "/img/logo.svg",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any"
     }
   ],
@@ -42,28 +42,28 @@
       "short_name": "Dashboard",
       "description": "View Area overview and key statistics",
       "url": "/dashboard",
-      "icons": [{ "src": "/Icons/dashboard.png", "sizes": "96x96" }]
+      "icons": [{ "src": "/Icons/dashboard.svg", "sizes": "96x96" }]
     },
     {
       "name": "Events & Attendance",
       "short_name": "Events",
       "description": "Manage gatherings, attendance, and fee payments",
       "url": "/events",
-      "icons": [{ "src": "/Icons/events.png", "sizes": "96x96" }]
+      "icons": [{ "src": "/Icons/events.svg", "sizes": "96x96" }]
     },
     {
       "name": "Activity Reports",
       "short_name": "Reports",
       "description": "Draft and review monthly activity reports",
       "url": "/reports",
-      "icons": [{ "src": "/Icons/reports.png", "sizes": "96x96" }]
+      "icons": [{ "src": "/Icons/reports.svg", "sizes": "96x96" }]
     },
     {
       "name": "Members Directory",
       "short_name": "Members",
       "description": "Look up youth member profiles and ministries",
       "url": "/members",
-      "icons": [{ "src": "/Icons/members.png", "sizes": "96x96" }]
+      "icons": [{ "src": "/Icons/members.svg", "sizes": "96x96" }]
     }
   ]
 }
