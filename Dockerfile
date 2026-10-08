@@ -25,7 +25,6 @@ ENV PORT=3000
 
 # Copy production node_modules from deps stage
 COPY --from=deps --chown=node:node /app/node_modules ./node_modules
-COPY --from=deps --chown=node:node /app/Backend/node_modules ./Backend/node_modules
 
 # Copy application source code with unprivileged user ownership
 COPY --chown=node:node package.json server.js ./

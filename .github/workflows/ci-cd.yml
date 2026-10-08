@@ -87,8 +87,8 @@ jobs:
           ignore-unfixed: true
 
       - name: Upload Vulnerability Scan Results
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('trivy-results.sarif') != ''
         with:
           sarif_file: 'trivy-results.sarif'
 
