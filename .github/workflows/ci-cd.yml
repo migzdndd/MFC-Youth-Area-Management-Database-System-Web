@@ -97,10 +97,23 @@ jobs:
           docker run -d --name test-app -p 3000:3000 \
             -e NODE_ENV=production \
             mfc-youth-app:${{ github.sha }}
-          sleep 4
-          curl -s --fail http://localhost:3000/api/health || exit 1
+
+          for i in {1..10}; do
+            if curl -s http://localhost:3000/api/health | grep -q "mfc-youth-web-api"; then
+              echo "✓ Container smoke test passed successfully."
+              docker stop test-app
+              docker rm test-app
+              exit 0
+            fi
+            echo "Waiting for container startup (attempt $i/10)..."
+            sleep 2
+          done
+
+          echo "Container smoke test failed! Container logs:"
+          docker logs test-app
           docker stop test-app
           docker rm test-app
+          exit 1
 
   vercel-paas-deployment-check:
     name: PaaS Routing & Deployment Check
