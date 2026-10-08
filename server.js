@@ -76,7 +76,18 @@ const server = http.createServer(async (req, res) => {
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
     const content = fs.readFileSync(filePath);
 
-    res.writeHead(200, { 'Content-Type': contentType });
+    let cacheControl = 'public, max-age=0, must-revalidate';
+    if (ext === '.png' || ext === '.jpg' || ext === '.svg' || ext === '.ico') {
+      cacheControl = 'public, max-age=604800, stale-while-revalidate=2592000';
+    } else if (ext === '.css' || (ext === '.js' && !filePath.endsWith('sw.js'))) {
+      cacheControl = 'public, max-age=86400, stale-while-revalidate=604800';
+    }
+
+    res.writeHead(200, {
+      'Content-Type': contentType,
+      'Cache-Control': cacheControl,
+      'X-Content-Type-Options': 'nosniff'
+    });
     res.end(content);
   } catch (err) {
     res.writeHead(500, { 'Content-Type': 'text/plain' });

@@ -789,7 +789,7 @@ window.addMembersToChapter = async id => {
     ...document.querySelectorAll('[data-member-search]')
   ];
 
-  searchInput?.addEventListener('input', () => {
+  const onChapterSearch = () => {
     const query = searchInput.value.trim().toLowerCase();
     let visible = 0;
 
@@ -802,5 +802,7 @@ window.addMembersToChapter = async id => {
     });
 
     emptyMessage?.classList.toggle('hidden', visible !== 0);
-  });
+  };
+
+  searchInput?.addEventListener('input', typeof debounce === 'function' ? debounce(onChapterSearch, 120) : onChapterSearch);
 };

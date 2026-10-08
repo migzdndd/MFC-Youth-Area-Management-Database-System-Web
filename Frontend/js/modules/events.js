@@ -689,7 +689,7 @@ window.participantModal = (eventId, id = null) => {
     const emptyMessage = document.getElementById('participantMemberEmpty');
     const rows = [...document.querySelectorAll('[data-participant-member-search]')];
 
-    searchInput?.addEventListener('input', () => {
+    const onParticipantSearch = () => {
       const query = searchInput.value.trim().toLowerCase();
       let visible = 0;
 
@@ -700,7 +700,9 @@ window.participantModal = (eventId, id = null) => {
       });
 
       emptyMessage?.classList.toggle('hidden', visible !== 0);
-    });
+    };
+
+    searchInput?.addEventListener('input', typeof debounce === 'function' ? debounce(onParticipantSearch, 120) : onParticipantSearch);
   }
 };
 

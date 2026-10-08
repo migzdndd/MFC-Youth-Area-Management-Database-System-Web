@@ -235,9 +235,23 @@ function renderChapterServantMembers(data) {
 
   document.getElementById('addChapterMember').onclick = () => memberModal();
 
+  const handleChapterSearch = typeof debounce === 'function'
+    ? debounce(val => {
+        memberFilters.search = val;
+        renderMembers();
+        const input = document.getElementById('memberSearch');
+        if (input) {
+          input.focus();
+          input.setSelectionRange(input.value.length, input.value.length);
+        }
+      }, 180)
+    : val => {
+        memberFilters.search = val;
+        renderMembers();
+      };
+
   document.getElementById('memberSearch').oninput = event => {
-    memberFilters.search = event.target.value;
-    renderMembers();
+    handleChapterSearch(event.target.value);
   };
 
   document.getElementById('memberStatus').onchange = event => {
@@ -537,13 +551,25 @@ function renderMembers() {
     'addMember'
   ).onclick = () => memberModal();
 
+  const handleAreaMemberSearch = typeof debounce === 'function'
+    ? debounce(val => {
+        memberFilters.search = val;
+        renderMembers();
+        const input = document.getElementById('memberSearch');
+        if (input) {
+          input.focus();
+          input.setSelectionRange(input.value.length, input.value.length);
+        }
+      }, 180)
+    : val => {
+        memberFilters.search = val;
+        renderMembers();
+      };
+
   document.getElementById(
     'memberSearch'
   ).oninput = event => {
-    memberFilters.search =
-      event.target.value;
-
-    renderMembers();
+    handleAreaMemberSearch(event.target.value);
   };
 
   document.getElementById(

@@ -50,6 +50,21 @@ function esc(value = '') {
 }
 
 /**
+ * Debounce Function Execution
+ *
+ * What it does:
+ * Postpones calling an expensive function (like live table searches or filtering)
+ * until after the user pauses typing, preventing UI stutter and input latency.
+ */
+function debounce(fn, wait = 180) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, args), wait);
+  };
+}
+
+/**
  * Currency Formatter (Philippine Pesos)
  *
  * What it does:

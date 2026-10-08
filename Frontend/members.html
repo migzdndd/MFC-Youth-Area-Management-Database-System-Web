@@ -16,7 +16,8 @@
   <title>Members - MFC Youth Area Management System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:wght@400;500;600;700;800;900&family=Raleway:ital,wght@0,300..800;1,300..800&display=swap">
+  <link rel="preload" as="image" href="/img/logo-2.png" fetchpriority="high">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Poppins:wght@600;700&family=Raleway:wght@500;600&display=swap">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -32,19 +33,19 @@
   <div class="app-layout">
     <!-- Main Sidebar Navigation -->
     <aside class="sidebar" id="sidebar" aria-label="Main navigation">
-      <div class="sidebar-brand"><img src="/img/logo-2.png" class="sidebar-logo" alt="MFC Youth Logo">
+      <div class="sidebar-brand"><img src="/img/logo-2.png" class="sidebar-logo" alt="MFC Youth Logo" width="44" height="44" fetchpriority="high" decoding="async">
         <div>
           <h2 class="brand-mfc-youth">MFC YOUTH</h2>
           <p class="brand-ams">AREA MANAGEMENT SYSTEM</p>
         </div>
       </div>
-      <nav class="sidebar-nav"><a href="/dashboard" class=""><img src="/Icons/dashboard.png" class="nav-icon"
-            alt="">Dashboard</a><a href="/members" class="active"><img src="/Icons/members.png" class="nav-icon"
-            alt="">Members</a><a href="/chapters" class=""><img src="/Icons/chapters.png" class="nav-icon"
-            alt="">Chapters</a><a href="/services" class=""><img src="/Icons/services.png" class="nav-icon"
-            alt="">Services</a><a href="/reports" class=""><img src="/Icons/reports.png" class="nav-icon"
-            alt="">Activity Reports</a><a href="/events" class=""><img src="/Icons/events.png" class="nav-icon"
-            alt="">Events</a><a href="/readings" class=""><img src="/Icons/dashboard.png" class="nav-icon"
+      <nav class="sidebar-nav"><a href="/dashboard" class=""><img src="/Icons/dashboard.png" class="nav-icon" width="20" height="20" decoding="async"
+            alt="">Dashboard</a><a href="/members" class="active"><img src="/Icons/members.png" class="nav-icon" width="20" height="20" decoding="async"
+            alt="">Members</a><a href="/chapters" class=""><img src="/Icons/chapters.png" class="nav-icon" width="20" height="20" decoding="async"
+            alt="">Chapters</a><a href="/services" class=""><img src="/Icons/services.png" class="nav-icon" width="20" height="20" decoding="async"
+            alt="">Services</a><a href="/reports" class=""><img src="/Icons/reports.png" class="nav-icon" width="20" height="20" decoding="async"
+            alt="">Activity Reports</a><a href="/events" class=""><img src="/Icons/events.png" class="nav-icon" width="20" height="20" decoding="async"
+            alt="">Events</a><a href="/readings" class=""><img src="/Icons/dashboard.png" class="nav-icon" width="20" height="20" decoding="async"
             alt="">Daily Readings</a></nav>
       <div class="sidebar-bottom">
         <button class="logout-link" id="logoutBtn" type="button">Logout</button>
@@ -59,23 +60,15 @@
   </div>
   <div id="modalRoot"></div>
   <div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
-  <script src="/js/loader.js"></script>
-  <script src="/js/config.js"></script>
-  <script src="/js/offline-store.js"></script>
-  <script src="/js/sync-manager.js"></script>
-  <script src="/js/api.js"></script>
-  <script src="/js/store.js"></script>
-  <script src="/js/ui.js"></script>
-  <script src="/js/modules/dashboard.js"></script>
-  <script src="/js/modules/members.js"></script>
-  <script src="/js/modules/chapters.js"></script>
-  <script src="/js/modules/services.js"></script>
-  <script src="/js/modules/reports.js"></script>
-  <script src="/js/modules/events.js"></script>
-  <script src="/js/modules/gig.js"></script>
-  <script src="/js/modules/readings.js"></script>
-  <script src="/js/modules/onboarding.js"></script>
-  <script src="/js/app.js"></script>
+  <script defer src="/js/loader.js"></script>
+  <script defer src="/js/config.js"></script>
+  <script defer src="/js/offline-store.js"></script>
+  <script defer src="/js/sync-manager.js"></script>
+  <script defer src="/js/api.js"></script>
+  <script defer src="/js/store.js"></script>
+  <script defer src="/js/ui.js"></script>
+  <script defer src="/js/modules/members.js"></script>
+  <script defer src="/js/app.js"></script>
 </body>
 
 </html>

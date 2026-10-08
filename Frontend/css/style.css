@@ -1,5 +1,48 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:wght@400;500;600;700;800;900&family=Raleway:ital,wght@0,300..800;1,300..800&display=swap');
-@import url('grid-system.css');
+/* Fluid grid and layout utilities inlined to avoid network waterfalls */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: clamp(16px, 2.5vw, 24px);
+  width: min(100%, 100%);
+}
+
+.card-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: clamp(12px, 2vw, 16px);
+  width: min(100%, 100%);
+}
+
+.grid-auto-fit-sm {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  gap: clamp(10px, 1.8vw, 16px);
+  width: min(100%, 100%);
+}
+
+.grid-auto-fit-md {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: clamp(14px, 2.2vw, 20px);
+  width: min(100%, 100%);
+}
+
+.grid-auto-fit-lg {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: clamp(18px, 3vw, 28px);
+  width: min(100%, 100%);
+}
+
+.container-fluid-limited {
+  width: min(100%, var(--container-max-width, 1200px));
+  margin-inline: auto;
+}
+
+.grid-item {
+  width: 100%;
+  min-width: 0;
+}
 
 /* Global design tokens and root variables */
 
@@ -764,7 +807,9 @@ button:active, .btn:active, .btn-auth:active {
 
     & .sidebar-logo {
       width: 44px;
-      height: auto;
+      height: 44px;
+      aspect-ratio: 1 / 1;
+      object-fit: contain;
       filter: drop-shadow(0 8px 16px rgba(0, 0, 0, .2));
     }
 
@@ -789,6 +834,14 @@ button:active, .btn:active, .btn-auth:active {
     display: flex;
     flex-direction: column;
     gap: 6px;
+
+    & .nav-icon {
+      width: 20px;
+      height: 20px;
+      aspect-ratio: 1 / 1;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
 
     & a {
       position: relative;
@@ -4014,6 +4067,8 @@ from { opacity: .45; }
   width: 210px;
   max-width: 52%;
   height: auto;
+  aspect-ratio: 15 / 7;
+  object-fit: contain;
   filter: drop-shadow(0 12px 28px rgba(0,0,0,.2));
 }
 
@@ -4132,6 +4187,7 @@ from { opacity: .45; }
   font-size: 0.82rem;
   color: #e2e8f0;
   line-height: 1.45;
+  min-height: 120px;
   max-height: 185px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -4297,6 +4353,7 @@ from { opacity: .45; }
   margin-top: 8px;
   list-style: none;
   padding: 0;
+  min-height: 120px;
   max-height: 145px;
   overflow-y: auto;
   overflow-x: hidden;

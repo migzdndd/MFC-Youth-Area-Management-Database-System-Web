@@ -6,10 +6,11 @@
  * device, enabling the app to open instantly and continue functioning even without an internet connection.
  */
 
-const SHELL_CACHE = 'mfc-ams-shell-v7';
+const SHELL_CACHE = 'mfc-ams-shell-v8';
 const API_CACHE = 'mfc-ams-api-v1';
 
 const APP_SHELL_URLS = [
+  'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Poppins:wght@600;700&family=Raleway:wght@500;600&display=swap',
   '/',
   '/index.html',
   '/dashboard',

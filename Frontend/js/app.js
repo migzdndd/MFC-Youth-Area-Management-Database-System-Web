@@ -290,14 +290,14 @@ if (logoutBtn) {
 
 // Maps page names to their visual builder functions
 const renderers = {
-  dashboard: renderDashboard,
-  members: renderMembers,
-  chapters: renderChapters,
-  services: renderServices,
-  reports: renderReports,
-  events: renderEvents,
-  gig: renderGig,
-  readings: renderReadings
+  dashboard: typeof renderDashboard === 'function' ? renderDashboard : null,
+  members: typeof renderMembers === 'function' ? renderMembers : null,
+  chapters: typeof renderChapters === 'function' ? renderChapters : null,
+  services: typeof renderServices === 'function' ? renderServices : null,
+  reports: typeof renderReports === 'function' ? renderReports : null,
+  events: typeof renderEvents === 'function' ? renderEvents : null,
+  gig: typeof renderGig === 'function' ? renderGig : null,
+  readings: typeof renderReadings === 'function' ? renderReadings : null
 };
 
 /**
@@ -348,7 +348,10 @@ function renderPageFailure(error) {
 function renderPageSafely() {
   try {
     const target = content || document.getElementById('pageContent');
-    const renderer = renderers[page] || renderDashboard;
+    const renderer = renderers[page] || (typeof renderDashboard === 'function' ? renderDashboard : null);
+    if (typeof renderer !== 'function') {
+      throw new Error(`Renderer for page "${page}" is not available.`);
+    }
     renderer();
     target?.removeAttribute('aria-busy');
     window.MFCPageSkeleton?.clear?.();
