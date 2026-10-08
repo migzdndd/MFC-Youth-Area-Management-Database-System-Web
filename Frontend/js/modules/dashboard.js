@@ -495,8 +495,8 @@ function renderDashboard() {
       'members',
       'Total Members',
       (session?.role === 'campus_servant' || session?.role === 'mfc_high_servant' || isChapterServantSession())
-        ? getVisibleMembers(data).length
-        : (cloudSummary?.members ?? data.members.length),
+        ? (typeof getVisibleMembers === 'function' ? getVisibleMembers(data).length : (data.members?.length || 0))
+        : (cloudSummary?.members ?? (data.members?.length || 0)),
       'People currently on record',
       (isChapterServantSession() ? '/chapters' : '/members')
     ],
@@ -557,12 +557,16 @@ function renderDashboard() {
 
   const cards = cardKeys.map(key => allCardDefs[key]).filter(Boolean);
 
+  const visibleMembersList = typeof getVisibleMembers === 'function'
+    ? getVisibleMembers(data)
+    : (data?.members || []);
+
   const chapterCounts =
-    data.chapters
+    (data.chapters || [])
       .map(chapter => ({
         name: chapter.name,
 
-        count: getVisibleMembers(data).filter(
+        count: visibleMembersList.filter(
           member =>
             String(member.chapterId) ===
             String(chapter.id)
@@ -608,12 +612,12 @@ function renderDashboard() {
     .slice(0, 5);
 
   const activeMembers = (session?.role === 'campus_servant' || session?.role === 'mfc_high_servant') 
-    ? getVisibleMembers(data).filter(member => member.status === 'Active').length 
-    : (cloudSummary?.activeMembers ?? data.members.filter(
+    ? visibleMembersList.filter(member => member.status === 'Active').length 
+    : (cloudSummary?.activeMembers ?? (data.members || []).filter(
     member => member.status === 'Active'
   ).length);
 
-  const attended = cloudSummary?.attended ?? data.participants.filter(
+  const attended = cloudSummary?.attended ?? (data.participants || []).filter(
     participant => participant.attended
   ).length;
 
@@ -621,8 +625,8 @@ function renderDashboard() {
   const dashboardRole = accessRoleLabel(session?.role);
 
   const membersCount = (session?.role === 'campus_servant' || session?.role === 'mfc_high_servant' || isChapterServantSession())
-    ? getVisibleMembers(data).length
-    : (cloudSummary?.members ?? data.members.length);
+    ? visibleMembersList.length
+    : (cloudSummary?.members ?? (data.members?.length || 0));
 
   const servicesCard = allCardDefs.services;
   const servicesCount = servicesCard[2];

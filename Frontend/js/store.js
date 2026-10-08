@@ -70,6 +70,39 @@ function scopedChapter(data) {
 }
 
 /**
+ * Scopes Members Visibility by Role
+ *
+ * What it does:
+ * Limits which youth members are visible according to the active leadership role.
+ * Campus servants see Senior High and College youth, MFC High servants see High School youth,
+ * and Chapter Servants see only their assigned chapter. Other area leaders see all area members.
+ *
+ * Backup plan if it breaks:
+ * Returns an empty list if data or session is missing.
+ */
+function getVisibleMembers(data) {
+  if (!session || !data?.members) return [];
+
+  if (session.role === 'campus_servant') {
+    return data.members.filter(m => m.academicTrack === 'SHS' || m.academicTrack === 'College');
+  }
+
+  if (session.role === 'mfc_high_servant') {
+    return data.members.filter(m => m.academicTrack === 'HS');
+  }
+
+  if (isChapterServantSession()) {
+    const chapter = scopedChapter(data);
+    if (!chapter) return [];
+    return data.members.filter(m => String(m.chapterId) === String(chapter.id));
+  }
+
+  return data.members;
+}
+
+window.getVisibleMembers = getVisibleMembers;
+
+/**
  * Security Guard for Area Admin Actions
  *
  * What it does:
