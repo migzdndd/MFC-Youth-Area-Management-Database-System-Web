@@ -146,7 +146,7 @@ function renderEvents() {
 
     <section class="card table-wrap">
       ${list.length
-        ? `
+      ? `
           <table class="data-table">
             <thead>
               <tr>
@@ -162,12 +162,12 @@ function renderEvents() {
             </thead>
             <tbody>
               ${list.map(event => {
-                const participants = data.participants.filter(
-                  participant => String(participant.eventId) === String(event.id)
-                );
-                const upcoming = new Date(event.date).getTime() >= now;
+        const participants = data.participants.filter(
+          participant => String(participant.eventId) === String(event.id)
+        );
+        const upcoming = new Date(event.date).getTime() >= now;
 
-                return `
+        return `
                   <tr>
                     <td>${fmtDateTime(event.date)}</td>
                     <td><strong>${esc(event.name)}</strong></td>
@@ -183,26 +183,26 @@ function renderEvents() {
                     <td class="actions-cell">
                       <button class="btn" onclick='viewEvent(${inlineJsArg(event.id)})'>View</button>
                       ${canManage
-                        ? `
+            ? `
                           <button class="btn" onclick='eventModal(${inlineJsArg(event.id)})'>Edit</button>
                           <button class="btn red" onclick='deleteEvent(${inlineJsArg(event.id)})'>Delete</button>
                         `
-                        : ''
-                      }
+            : ''
+          }
                     </td>
                   </tr>
                 `;
-              }).join('')}
+      }).join('')}
             </tbody>
           </table>
         `
-        : emptyState(
-            'No matching events',
-            data.events.length
-              ? 'Change or clear the event filters.'
-              : 'Add your first Area event.'
-          )
-      }
+      : emptyState(
+        'No matching events',
+        data.events.length
+          ? 'Change or clear the event filters.'
+          : 'Add your first Area event.'
+      )
+    }
     </section>
   `;
 
@@ -396,12 +396,12 @@ window.viewEvent = id => {
           </thead>
           <tbody>
             ${participants.map(participant => {
-              const member = participantMember(data, participant);
-              const age = member ? calculateAge(member.birthDate) : participant.age || null;
-              const chapter = member ? member.chapterName : participant.chapter;
-              const services = member ? (member.services || []).join(', ') : participant.service;
+      const member = participantMember(data, participant);
+      const age = member ? calculateAge(member.birthDate) : participant.age || null;
+      const chapter = member ? member.chapterName : participant.chapter;
+      const services = member ? (member.services || []).join(', ') : participant.service;
 
-              return `
+      return `
                 <tr>
                   <td>${esc(participantName(data, participant) || '—')}</td>
                   <td>${age === null || age === undefined || age === '' ? '—' : esc(String(age))}</td>
@@ -419,24 +419,24 @@ window.viewEvent = id => {
                   </td>
                   <td class="actions-cell">
                     ${canManage
-                      ? `
+          ? `
                         <button class="btn" onclick='participantModal(${inlineJsArg(id)}, ${inlineJsArg(participant.id)})'>Edit</button>
                         <button class="btn red" onclick='deleteParticipant(${inlineJsArg(id)}, ${inlineJsArg(participant.id)})'>Delete</button>
                       `
-                      : '<span class="muted">View only</span>'
-                    }
+          : '<span class="muted">View only</span>'
+        }
                   </td>
                 </tr>
               `;
-            }).join('')}
+    }).join('')}
           </tbody>
         </table>
       </div>
     `
     : emptyState(
-        'No participants yet',
-        'Register the first participant for this event.'
-      );
+      'No participants yet',
+      'Register the first participant for this event.'
+    );
 
   const body = `
     <div class="event-summary">
@@ -453,9 +453,9 @@ window.viewEvent = id => {
     <div class="modal-section-heading">
       <h3>Participants (${participants.length})</h3>
       ${canManage
-        ? `<button class="btn blue" type="button" onclick='participantModal(${inlineJsArg(id)})'>+ Register Participant</button>`
-        : '<span class="scope-chip">View Only</span>'
-      }
+      ? `<button class="btn blue" type="button" onclick='participantModal(${inlineJsArg(id)})'>+ Register Participant</button>`
+      : '<span class="scope-chip">View Only</span>'
+    }
     </div>
 
     ${participantTable}
@@ -504,8 +504,8 @@ window.participantModal = (eventId, id = null) => {
       <strong>${esc(fullName(member) || 'Unnamed Member')}</strong>
       <span>${esc(member.chapterName || 'No Chapter')} · ${esc(member.contact || 'No Contact')}</span>
       <small>${esc(member.status || 'Active')}${(member.services || []).length
-        ? ` · ${esc((member.services || []).join(', '))}`
-        : ''}</small>
+      ? ` · ${esc((member.services || []).join(', '))}`
+      : ''}</small>
     </div>
   `;
 
@@ -576,8 +576,8 @@ window.participantModal = (eventId, id = null) => {
         <label>Registered Member</label>
         <div class="participant-member-notice">
           ${data.members.length
-            ? 'All registered members are already participants in this event.'
-            : 'There are no registered members yet. Add a member in the Members tab first.'}
+        ? 'All registered members are already participants in this event.'
+        : 'There are no registered members yet. Add a member in the Members tab first.'}
         </div>
       </div>
     `;

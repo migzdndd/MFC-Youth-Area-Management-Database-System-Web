@@ -2722,6 +2722,200 @@ button:disabled, .btn:disabled {
   border-bottom: 1px solid #edf1f5;
 }
 
+/* Chapter Directory Statistical Cards */
+.chapters-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: clamp(14px, 2vw, 20px);
+  width: 100%;
+}
+
+.chapter-stat-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 22px 20px 20px;
+  border-radius: 14px;
+  background: var(--card, #ffffff);
+  border: 1px solid var(--line, #dce3eb);
+  box-shadow: 0 4px 14px rgba(0, 40, 71, 0.04);
+  transition: transform var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) var(--ease-out);
+  position: relative;
+  overflow: hidden;
+}
+
+.chapter-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(0, 40, 71, 0.08);
+  border-color: rgba(8, 120, 189, 0.28);
+}
+
+.chapter-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.chapter-card-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.chapter-card-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #0878bd;
+}
+
+.chapter-card-name {
+  font-family: var(--font-heading, inherit);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--navy, #002847);
+  line-height: 1.25;
+  margin: 0;
+  word-break: break-word;
+}
+
+.chapter-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.chapter-status-pill.is-active {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.chapter-status-pill.is-inactive {
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.chapter-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.chapter-metrics-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: #f8fafc;
+  border: 1px solid #eef2f6;
+  border-radius: 10px;
+  padding: 12px 10px;
+  margin-bottom: 12px;
+}
+
+.chapter-metric-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.chapter-metric-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.chapter-metric-value {
+  font-family: var(--font-heading, inherit);
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--navy, #002847);
+  line-height: 1;
+}
+
+.chapter-metric-value.active-val {
+  color: #15803d;
+}
+
+.chapter-metric-divider {
+  width: 1px;
+  height: 32px;
+  background: #e2e8f0;
+}
+
+.chapter-ratio-track {
+  width: 100%;
+  height: 5px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.chapter-ratio-fill {
+  height: 100%;
+  background: #16a34a;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.chapter-card-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.chapter-card-actions .btn {
+  width: 100%;
+  min-height: 44px;
+  font-size: 0.8rem;
+  padding: 8px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .chapters-stat-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .chapter-stat-card {
+    padding: 16px;
+  }
+
+  .chapter-card-actions {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+}
+
 /* =========================================================
    MEMBER PORTAL - DISTINCT MEMBER EXPERIENCE
    ========================================================= */

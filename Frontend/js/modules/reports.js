@@ -688,32 +688,32 @@ function renderReports() {
       .join('')}
 
         ${(() => {
-        // Add any legacy types that don't match standard types
-        const legacyTypes = types.filter(
-          type => !REPORT_TYPES.includes(type)
-        );
+      // Add any legacy types that don't match standard types
+      const legacyTypes = types.filter(
+        type => !REPORT_TYPES.includes(type)
+      );
 
-        if (legacyTypes.length === 0) {
-          return '';
-        }
+      if (legacyTypes.length === 0) {
+        return '';
+      }
 
-        return legacyTypes
-          .map(
-            type => `
+      return legacyTypes
+        .map(
+          type => `
               <option
                 value="${esc(type)}"
                 ${reportFilters.type ===
-            type
-            ? 'selected'
-            : ''
-          }
+              type
+              ? 'selected'
+              : ''
+            }
               >
                 ${esc(type)} (Legacy)
               </option>
             `
-          )
-          .join('');
-      })()}
+        )
+        .join('');
+    })()}
       </select>
 
       <label class="date-filter">
@@ -724,8 +724,8 @@ function renderReports() {
           id="reportFrom"
           type="date"
           value="${esc(
-        reportFilters.from
-      )}"
+      reportFilters.from
+    )}"
         >
       </label>
 
@@ -737,8 +737,8 @@ function renderReports() {
           id="reportTo"
           type="date"
           value="${esc(
-        reportFilters.to
-      )}"
+      reportFilters.to
+    )}"
         >
       </label>
 
@@ -754,8 +754,8 @@ function renderReports() {
     <div class="result-count">
       Report scope:
       ${esc(
-        reportScopeText()
-      )}
+      reportScopeText()
+    )}
     </div>
 
     <!-- Primary Card: Activity Records Table -->
@@ -931,13 +931,13 @@ function renderReports() {
                   style="
                     height:
                     ${month.count === 0
-          ? 0
-          : Math.max(
-            8,
-            (month.count /
-              max) *
-            125
-          )}px
+            ? 0
+            : Math.max(
+              8,
+              (month.count /
+                max) *
+              125
+            )}px
                   "
                 ></div>
 
@@ -1262,18 +1262,18 @@ window.reportModal = function (
       .join('')}
 
           ${(() => {
-        const existingChapter = report?.chapter;
-        const isHistorical = existingChapter &&
-          !data.chapters.some(chapter => chapter.name === existingChapter);
+      const existingChapter = report?.chapter;
+      const isHistorical = existingChapter &&
+        !data.chapters.some(chapter => chapter.name === existingChapter);
 
-        return isHistorical
-          ? `
+      return isHistorical
+        ? `
               <option value="${esc(existingChapter)}" selected>
                 ${esc(existingChapter)} (Historical)
               </option>
             `
-          : '';
-      })()}
+        : '';
+    })()}
 
         </select>
       </div>
@@ -1307,85 +1307,85 @@ window.reportModal = function (
       .join('')}
 
           ${(() => {
-        // Add legacy types if editing an old report with non-standard type
-        const existingType = report?.type;
+      // Add legacy types if editing an old report with non-standard type
+      const existingType = report?.type;
 
-        if (
-          existingType &&
-          !REPORT_TYPES.includes(
-            existingType
-          )
-        ) {
-          return `
+      if (
+        existingType &&
+        !REPORT_TYPES.includes(
+          existingType
+        )
+      ) {
+        return `
                   <option
                     value="${esc(
-            existingType
-          )}"
+          existingType
+        )}"
                     selected
                   >
                     ${esc(
-            existingType
-          )} (Legacy)
+          existingType
+        )} (Legacy)
                   </option>
                 `;
-        }
+      }
 
-        return '';
-      })()}
+      return '';
+    })()}
 
         </select>
       </div>
 
       ${field(
-        'Activity',
-        'rActivity',
-        'text',
-        report?.activity || '',
-        'maxlength="120"'
-      )}
+      'Activity',
+      'rActivity',
+      'text',
+      report?.activity || '',
+      'maxlength="120"'
+    )}
 
       ${field(
-        'Report Date',
-        'rDate',
-        'date',
-        report?.date ||
-        todayISO(),
-        `required max="${todayISO()}"`
-      )}
+      'Report Date',
+      'rDate',
+      'date',
+      report?.date ||
+      todayISO(),
+      `required max="${todayISO()}"`
+    )}
 
       ${field(
-        'Prepared By',
-        'rPrepared',
-        'text',
-        isChapterServantSession()
-          ? (session?.name || '')
-          : (
-              report?.preparedBy ||
-              session?.name ||
-              ''
-            ),
-        isChapterServantSession()
-          ? 'maxlength="100" readonly'
-          : 'maxlength="100"'
-      )}
+      'Prepared By',
+      'rPrepared',
+      'text',
+      isChapterServantSession()
+        ? (session?.name || '')
+        : (
+          report?.preparedBy ||
+          session?.name ||
+          ''
+        ),
+      isChapterServantSession()
+        ? 'maxlength="100" readonly'
+        : 'maxlength="100"'
+    )}
 
       ${field(
-        'Participants / Attendance',
-        'rParticipants',
-        'number',
-        report?.participants ?? '',
-        'min="0" step="1"'
-      )}
+      'Participants / Attendance',
+      'rParticipants',
+      'number',
+      report?.participants ?? '',
+      'min="0" step="1"'
+    )}
 
       ${field(
-        'Location',
-        'rLocation',
-        'text',
-        report?.location ||
-        linkedEvent?.venue ||
-        '',
-        'maxlength="150"'
-      )}
+      'Location',
+      'rLocation',
+      'text',
+      report?.location ||
+      linkedEvent?.venue ||
+      '',
+      'maxlength="150"'
+    )}
 
       <div class="form-group full">
 
@@ -1421,9 +1421,9 @@ window.reportModal = function (
           id="rDescription"
           maxlength="1000"
         >${esc(
-        report?.description ||
-        ''
-      )}</textarea>
+      report?.description ||
+      ''
+    )}</textarea>
 
       </div>
 

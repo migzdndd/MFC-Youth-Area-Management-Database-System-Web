@@ -209,12 +209,11 @@ function renderChapterServantDashboard(data) {
  * Display All Chapters Screen
  *
  * What it does:
- * Renders the chapters directory table with search, member count totals, and action buttons.
- * If signed in as a Chapter Servant, it automatically shows your personal chapter dashboard instead.
+ * Renders the chapters directory as responsive statistical cards with member counts,
+ * active ratios, and leadership action buttons.
  *
  * Backup plan if it breaks:
- * If no chapters match the search keyword, it shows a friendly "No matching chapters" message
- * with a quick button to clear the search filter.
+ * If no chapters match the search keyword, it displays a clear empty state with a filter reset action.
  */
 function renderChapters() {
   const data = db();
@@ -281,99 +280,90 @@ function renderChapters() {
     }
     </div>
 
-    <section class="card table-wrap">
-
-      ${list.length
+    ${list.length
       ? `
-            <table class="data-table">
-
-              <thead>
-                <tr>
-                  <th>Chapter</th>
-                  <th>Member Count</th>
-                  <th>Active Members</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-
-              <tbody>
-
-                ${list
-        .map(
-          chapter => {
-            const members =
-              data.members.filter(
-                member =>
-                  String(member.chapterId) ===
-                  String(chapter.id)
+        <div class="chapters-stat-grid" aria-label="Chapters Directory">
+          ${list
+            .map(chapter => {
+              const members = data.members.filter(
+                member => String(member.chapterId) === String(chapter.id)
               );
+              const totalMembers = members.length;
+              const activeMembers = members.filter(
+                member => member.status === 'Active'
+              ).length;
+              const activePercent = totalMembers > 0
+                ? Math.round((activeMembers / totalMembers) * 100)
+                : 0;
 
-            return `
-                        <tr>
+              return `
+                <article class="chapter-stat-card" data-chapter-id="${esc(chapter.id)}">
+                  <header class="chapter-card-header">
+                    <div class="chapter-card-title-group">
+                      <span class="chapter-card-badge">Chapter</span>
+                      <h3 class="chapter-card-name" title="${esc(chapter.name)}">${esc(chapter.name)}</h3>
+                    </div>
+                    <div class="chapter-status-pill ${activeMembers > 0 ? 'is-active' : 'is-inactive'}">
+                      <span class="chapter-status-dot" aria-hidden="true"></span>
+                      <span>${totalMembers > 0 ? `${activePercent}% Active` : 'No Roster'}</span>
+                    </div>
+                  </header>
 
-                          <td>
-                            <strong>
-                              ${esc(
-              chapter.name
-            )}
-                            </strong>
-                          </td>
+                  <div class="chapter-metrics-row">
+                    <div class="chapter-metric-box">
+                      <span class="chapter-metric-label">Member Count</span>
+                      <span class="chapter-metric-value">${totalMembers}</span>
+                    </div>
+                    <div class="chapter-metric-divider" aria-hidden="true"></div>
+                    <div class="chapter-metric-box">
+                      <span class="chapter-metric-label">Active Members</span>
+                      <span class="chapter-metric-value ${activeMembers > 0 ? 'active-val' : ''}">${activeMembers}</span>
+                    </div>
+                  </div>
 
-                          <td>
-                            ${members.length}
-                          </td>
+                  <div class="chapter-ratio-track" role="progressbar" aria-valuenow="${activePercent}" aria-valuemin="0" aria-valuemax="100" aria-label="Active member ratio for ${esc(chapter.name)}">
+                    <div class="chapter-ratio-fill" style="width: ${activePercent}%;"></div>
+                  </div>
 
-                          <td>
-                            ${members.filter(
-              member =>
-                member.status ===
-                'Active'
-            ).length
-              }
-                          </td>
+                  <footer class="chapter-card-actions">
+                    <button
+                      type="button"
+                      class="btn"
+                      onclick='viewChapter(${inlineJsArg(chapter.id)})'
+                    >
+                      View Members
+                    </button>
 
-                          <td
-                            class="actions-cell"
-                          >
-                            <button
-                              class="btn"
-                              onclick='viewChapter(${inlineJsArg(chapter.id)})'
-                            >
-                              View Members
-                            </button>
+                    <button
+                      type="button"
+                      class="btn"
+                      onclick='window.addMembersToChapter(${inlineJsArg(chapter.id)})'
+                    >
+                      + Add Members
+                    </button>
 
-                            <button
-                              class="btn"
-                              onclick='window.addMembersToChapter(${inlineJsArg(chapter.id)})'
-                            >
-                              + Add Members
-                            </button>
+                    <button
+                      type="button"
+                      class="btn"
+                      onclick='editChapter(${inlineJsArg(chapter.id)})'
+                    >
+                      Rename
+                    </button>
 
-                            <button
-                              class="btn"
-                              onclick='editChapter(${inlineJsArg(chapter.id)})'
-                            >
-                              Rename
-                            </button>
-
-                            <button
-                              class="btn red"
-                              onclick='deleteChapter(${inlineJsArg(chapter.id)})'
-                            >
-                              Delete
-                            </button>
-                          </td>
-
-                        </tr>
-                      `;
-          }
-        )
-        .join('')}
-
-              </tbody>
-
-            </table>
-          `
+                    <button
+                      type="button"
+                      class="btn red"
+                      onclick='deleteChapter(${inlineJsArg(chapter.id)})'
+                    >
+                      Delete
+                    </button>
+                  </footer>
+                </article>
+              `;
+            })
+            .join('')}
+        </div>
+      `
       : emptyState(
         'No matching chapters',
         data.chapters.length
@@ -381,8 +371,6 @@ function renderChapters() {
           : 'Add your first chapter.'
       )
     }
-
-    </section>
   `;
 
   document.getElementById(
