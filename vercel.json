@@ -91,8 +91,11 @@
       "use": "@vercel/node"
     },
     {
-      "src": "Frontend/**",
-      "use": "@vercel/static"
+      "src": "frontend-react/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
     }
   ],
   "routes": [
@@ -101,8 +104,16 @@
       "dest": "/Backend/api/router.js?route=$1"
     },
     {
+      "src": "/assets/(.*)",
+      "dest": "/frontend-react/assets/$1"
+    },
+    {
+      "src": "/(favicon\\.svg|manifest\\.webmanifest|sw\\.js|workbox-.*\\.js|img/.*|Icons/.*)",
+      "dest": "/frontend-react/$1"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/Frontend/$1"
+      "dest": "/frontend-react/index.html"
     }
   ]
 }

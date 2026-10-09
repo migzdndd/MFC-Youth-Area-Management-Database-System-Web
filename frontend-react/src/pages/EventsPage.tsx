@@ -1,0 +1,316 @@
+import React, { useState } from 'react';
+import {
+  useEvents,
+  useCreateEvent,
+  useEventParticipants,
+  useUpdateParticipantAttendance,
+} from '@/hooks/useEvents';
+import { useMembers } from '@/hooks/useMembers';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Modal } from '@/components/ui/Modal';
+import { Badge } from '@/components/ui/Badge';
+import { Spinner } from '@/components/ui/Spinner';
+import { formatCurrency, formatDateTime } from '@/lib/utils';
+import { CalendarPlus, MapPin, Clock, Users, CheckCircle, Circle } from 'lucide-react';
+import type { CommunityEvent } from '@/types/event';
+
+export const EventsPage: React.FC = () => {
+  const { data: events = [], isLoading } = useEvents();
+  const { data: members = [] } = useMembers();
+
+  const createEvent = useCreateEvent();
+  const updateAttendance = useUpdateParticipantAttendance();
+
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CommunityEvent | null>(null);
+
+  // Form state
+  const [name, setName] = useState('');
+  const [startsAt, setStartsAt] = useState('');
+  const [venue, setVenue] = useState('');
+  const [fee, setFee] = useState('0');
+  const [description, setDescription] = useState('');
+  const [formError, setFormError] = useState('');
+
+  // Selected event participants
+  const { data: participants = [], isLoading: participantsLoading } = useEventParticipants(
+    selectedEvent?.id || ''
+  );
+
+  const openCreateModal = () => {
+    setName('');
+    setStartsAt('');
+    setVenue('');
+    setFee('0');
+    setDescription('');
+    setFormError('');
+    setIsCreateOpen(true);
+  };
+
+  const handleCreateEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError('');
+
+    if (!name.trim() || !startsAt.trim() || !venue.trim()) {
+      setFormError('Event name, start schedule, and venue are required.');
+      return;
+    }
+
+    try {
+      await createEvent.mutateAsync({
+        name: name.trim(),
+        starts_at: startsAt,
+        venue: venue.trim(),
+        fee: parseFloat(fee) || 0,
+        description: description.trim(),
+      });
+      setIsCreateOpen(false);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setFormError(err.message);
+      } else {
+        setFormError('Failed to schedule event.');
+      }
+    }
+  };
+
+  const toggleCheckIn = async (memberId: string, currentStatus: boolean) => {
+    if (!selectedEvent) return;
+    try {
+      await updateAttendance.mutateAsync({
+        event_id: selectedEvent.id,
+        member_id: memberId,
+        attended: !currentStatus,
+      });
+    } catch {
+      alert('Failed to update attendance.');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-border-subtle">
+        <div>
+          <h1 className="text-2xl font-bold text-text-main font-heading tracking-tight">
+            Events & Gatherings
+          </h1>
+          <p className="text-sm text-text-muted">
+            Assemblies, youth camps, and rapid one-tap attendance check-ins.
+          </p>
+        </div>
+
+        <Button onClick={openCreateModal} className="flex items-center gap-2 shrink-0">
+          <CalendarPlus className="w-4 h-4" />
+          <span>Schedule Event</span>
+        </Button>
+      </div>
+
+      {/* Events List */}
+      {isLoading ? (
+        <div className="p-12 flex flex-col items-center justify-center gap-3">
+          <Spinner size="lg" />
+          <span className="text-xs text-text-muted">Loading gatherings...</span>
+        </div>
+      ) : events.length === 0 ? (
+        <div className="bg-white border border-border-subtle rounded-xl p-12 text-center">
+          <CalendarPlus className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+          <h3 className="text-sm font-bold text-text-main">No upcoming events</h3>
+          <p className="text-xs text-text-muted mt-1">
+            Schedule a chapter assembly or camp gathering to start tracking attendance.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {events.map((event) => (
+            <div
+              key={event.id}
+              className="bg-white border border-border-subtle rounded-xl p-5 hover:border-slate-300 transition-colors flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <h3 className="font-bold text-text-main text-base font-heading">
+                    {event.name}
+                  </h3>
+                  <Badge variant={event.fee > 0 ? 'warning' : 'success'}>
+                    {event.fee > 0 ? formatCurrency(event.fee) : 'Free'}
+                  </Badge>
+                </div>
+
+                {event.description && (
+                  <p className="text-xs text-text-muted mb-4 line-clamp-2">
+                    {event.description}
+                  </p>
+                )}
+
+                <div className="space-y-2 py-1">
+                  <div className="flex items-center gap-2 text-xs text-text-muted">
+                    <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span>{formatDateTime(event.starts_at)}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs text-text-muted">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span className="truncate">{event.venue}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 mt-4 border-t border-border-subtle flex items-center justify-between">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setSelectedEvent(event)}
+                  className="w-full flex items-center justify-center gap-2"
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  <span>Attendance Check-in</span>
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Schedule Event Modal */}
+      <Modal
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+        title="Schedule Community Event"
+        maxWidth="md"
+      >
+        <form onSubmit={handleCreateEvent} className="space-y-4">
+          {formError && (
+            <div className="p-3 text-xs text-mfc-red bg-red-50 border border-red-200 rounded-md font-medium">
+              {formError}
+            </div>
+          )}
+
+          <Input
+            label="Event Name"
+            required
+            placeholder="e.g. Monthly Chapter Assembly"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+
+          <Input
+            label="Date & Time"
+            type="datetime-local"
+            required
+            value={startsAt}
+            onChange={(e) => setStartsAt(e.target.value)}
+          />
+
+          <Input
+            label="Venue Location"
+            required
+            placeholder="Parish Hall / Camp Site"
+            value={venue}
+            onChange={(e) => setVenue(e.target.value)}
+          />
+
+          <Input
+            label="Registration Fee (PHP)"
+            type="number"
+            min="0"
+            step="1"
+            placeholder="0 for Free"
+            value={fee}
+            onChange={(e) => setFee(e.target.value)}
+          />
+
+          <div className="w-full flex flex-col gap-1.5">
+            <label className="text-sm font-semibold text-text-main">Description / Agenda</label>
+            <textarea
+              rows={3}
+              className="w-full px-3.5 py-2.5 text-sm bg-white text-text-main border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy"
+              placeholder="Event details..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-border-subtle">
+            <Button type="button" variant="secondary" onClick={() => setIsCreateOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" isLoading={createEvent.isPending}>
+              Schedule Event
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Rapid Attendance Check-in Modal */}
+      <Modal
+        isOpen={Boolean(selectedEvent)}
+        onClose={() => setSelectedEvent(null)}
+        title={selectedEvent ? `Attendance: ${selectedEvent.name}` : 'Attendance'}
+        description="One-tap check-in for registered area youth members."
+        maxWidth="lg"
+      >
+        <div className="space-y-4">
+          {participantsLoading ? (
+            <div className="p-8 flex justify-center">
+              <Spinner />
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-[60vh] overflow-y-auto divide-y divide-border-subtle">
+              {members.map((member) => {
+                const participant = participants.find((p) => p.member_id === member.id);
+                const isAttended = participant?.attended ?? false;
+
+                return (
+                  <div
+                    key={member.id}
+                    className="flex items-center justify-between py-2.5 px-1 hover:bg-slate-50 transition-colors"
+                  >
+                    <div>
+                      <div className="font-semibold text-sm text-text-main">
+                        {member.first_name} {member.last_name}
+                      </div>
+                      <div className="text-xs text-text-muted">
+                        {member.academic_track || 'Member'} &middot;{' '}
+                        {member.chapter_name || 'Unassigned'}
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => toggleCheckIn(member.id, isAttended)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold min-h-[44px] transition-colors ${
+                        isAttended
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      {isAttended ? (
+                        <>
+                          <CheckCircle className="w-4 h-4 text-emerald-600" />
+                          <span>Present</span>
+                        </>
+                      ) : (
+                        <>
+                          <Circle className="w-4 h-4 text-slate-400" />
+                          <span>Mark Present</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="flex justify-end pt-3 border-t border-border-subtle">
+            <Button variant="secondary" onClick={() => setSelectedEvent(null)}>
+              Done
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
+};

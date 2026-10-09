@@ -1,0 +1,461 @@
+import React, { useState, useMemo } from 'react';
+import { useMembers, useCreateMember, useUpdateMember, useDeleteMember } from '@/hooks/useMembers';
+import { useChapters } from '@/hooks/useChapters';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
+import { SearchBar } from '@/components/ui/SearchBar';
+import { Badge } from '@/components/ui/Badge';
+import { Modal } from '@/components/ui/Modal';
+import { Spinner } from '@/components/ui/Spinner';
+import { UserPlus, Edit2, Trash2, Filter, AlertTriangle } from 'lucide-react';
+import type { Member, AcademicTrack, MemberStatus } from '@/types/member';
+
+export const MembersPage: React.FC = () => {
+  const [search, setSearch] = useState('');
+  const [chapterFilter, setChapterFilter] = useState('');
+  const [trackFilter, setTrackFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
+  const { data: members = [], isLoading } = useMembers();
+  const { data: chapters = [] } = useChapters();
+
+  const createMember = useCreateMember();
+  const updateMember = useUpdateMember();
+  const deleteMember = useDeleteMember();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingMember, setEditingMember] = useState<Member | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Form state
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [gender, setGender] = useState<'Male' | 'Female'>('Male');
+  const [chapterId, setChapterId] = useState('');
+  const [track, setTrack] = useState<AcademicTrack>('College');
+  const [contact, setContact] = useState('');
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<MemberStatus>('active');
+  const [guardianName, setGuardianName] = useState('');
+  const [guardianContact, setGuardianContact] = useState('');
+  const [formError, setFormError] = useState('');
+
+  const filteredMembers = useMemo(() => {
+    return members.filter((m) => {
+      const q = search.toLowerCase();
+      const matchesSearch =
+        !q ||
+        m.first_name.toLowerCase().includes(q) ||
+        m.last_name.toLowerCase().includes(q) ||
+        (m.email && m.email.toLowerCase().includes(q)) ||
+        (m.contact && m.contact.includes(q));
+
+      const matchesChapter = !chapterFilter || m.chapter_id === chapterFilter;
+      const matchesTrack = !trackFilter || m.academic_track === trackFilter;
+      const matchesStatus = !statusFilter || m.status === statusFilter;
+
+      return matchesSearch && matchesChapter && matchesTrack && matchesStatus;
+    });
+  }, [members, search, chapterFilter, trackFilter, statusFilter]);
+
+  const openCreateModal = () => {
+    setEditingMember(null);
+    setFirstName('');
+    setLastName('');
+    setNickname('');
+    setGender('Male');
+    setChapterId(chapters[0]?.id || '');
+    setTrack('College');
+    setContact('');
+    setEmail('');
+    setStatus('active');
+    setGuardianName('');
+    setGuardianContact('');
+    setFormError('');
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (member: Member) => {
+    setEditingMember(member);
+    setFirstName(member.first_name);
+    setLastName(member.last_name);
+    setNickname(member.nickname || '');
+    setGender(member.gender === 'Female' ? 'Female' : 'Male');
+    setChapterId(member.chapter_id || '');
+    setTrack(member.academic_track || 'College');
+    setContact(member.contact || '');
+    setEmail(member.email || '');
+    setStatus(member.status || 'active');
+    setGuardianName(member.guardian_name || '');
+    setGuardianContact(member.guardian_contact || '');
+    setFormError('');
+    setIsModalOpen(true);
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError('');
+
+    if (!firstName.trim() || !lastName.trim()) {
+      setFormError('First and last name are required.');
+      return;
+    }
+
+    try {
+      if (editingMember) {
+        await updateMember.mutateAsync({
+          id: editingMember.id,
+          first_name: firstName,
+          last_name: lastName,
+          nickname,
+          gender,
+          chapter_id: chapterId || null,
+          academic_track: track,
+          contact,
+          email,
+          status,
+          guardian_name: guardianName,
+          guardian_contact: guardianContact,
+        });
+      } else {
+        await createMember.mutateAsync({
+          first_name: firstName,
+          last_name: lastName,
+          nickname,
+          gender,
+          chapter_id: chapterId || null,
+          academic_track: track,
+          contact,
+          email,
+          status,
+          guardian_name: guardianName,
+          guardian_contact: guardianContact,
+        });
+      }
+      setIsModalOpen(false);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setFormError(err.message);
+      } else {
+        setFormError('Failed to save member record.');
+      }
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteMember.mutateAsync(id);
+      setDeletingId(null);
+    } catch {
+      alert('Failed to delete member.');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header and Action */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-border-subtle">
+        <div>
+          <h1 className="text-2xl font-bold text-text-main font-heading tracking-tight">
+            Members Directory
+          </h1>
+          <p className="text-sm text-text-muted">
+            Manage youth rosters, pastoral contacts, and track assignments.
+          </p>
+        </div>
+
+        <Button onClick={openCreateModal} className="flex items-center gap-2 shrink-0">
+          <UserPlus className="w-4 h-4" />
+          <span>Add Member</span>
+        </Button>
+      </div>
+
+      {/* Filter and Search Bar */}
+      <div className="bg-white border border-border-subtle rounded-xl p-4 space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div className="md:col-span-1">
+            <SearchBar value={search} onChange={setSearch} placeholder="Search by name, email..." />
+          </div>
+
+          <Select
+            value={chapterFilter}
+            onChange={(e) => setChapterFilter(e.target.value)}
+            options={[
+              { value: '', label: 'All Chapters' },
+              ...chapters.map((c) => ({ value: c.id, label: c.name })),
+            ]}
+          />
+
+          <Select
+            value={trackFilter}
+            onChange={(e) => setTrackFilter(e.target.value)}
+            options={[
+              { value: '', label: 'All Academic Tracks' },
+              { value: 'High School', label: 'High School' },
+              { value: 'Senior High School', label: 'Senior High School' },
+              { value: 'College', label: 'College' },
+              { value: 'Working', label: 'Working' },
+            ]}
+          />
+
+          <Select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            options={[
+              { value: '', label: 'All Statuses' },
+              { value: 'active', label: 'Active' },
+              { value: 'inactive', label: 'Inactive' },
+            ]}
+          />
+        </div>
+      </div>
+
+      {/* Data Table */}
+      <div className="bg-white border border-border-subtle rounded-xl overflow-hidden shadow-xs">
+        {isLoading ? (
+          <div className="p-12 flex flex-col items-center justify-center gap-3">
+            <Spinner size="lg" />
+            <span className="text-xs text-text-muted">Loading members list...</span>
+          </div>
+        ) : filteredMembers.length === 0 ? (
+          <div className="p-12 text-center">
+            <Filter className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+            <h3 className="text-sm font-bold text-text-main">No members found</h3>
+            <p className="text-xs text-text-muted mt-1">
+              {search || chapterFilter || trackFilter
+                ? 'Try adjusting your search filters to find what you are looking for.'
+                : 'No members registered yet. Add your first member to get started.'}
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50 text-xs font-bold text-text-muted uppercase border-b border-border-subtle tracking-wider">
+                <tr>
+                  <th className="px-5 py-3.5">Name</th>
+                  <th className="px-5 py-3.5">Track</th>
+                  <th className="px-5 py-3.5">Chapter</th>
+                  <th className="px-5 py-3.5">Contact</th>
+                  <th className="px-5 py-3.5">Status</th>
+                  <th className="px-5 py-3.5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border-subtle">
+                {filteredMembers.map((member) => (
+                  <tr key={member.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="px-5 py-4">
+                      <div className="font-semibold text-text-main">
+                        {member.first_name} {member.last_name}
+                      </div>
+                      {member.nickname && (
+                        <div className="text-xs text-text-muted">"{member.nickname}"</div>
+                      )}
+                    </td>
+                    <td className="px-5 py-4 text-xs font-medium text-text-muted">
+                      {member.academic_track || '-'}
+                    </td>
+                    <td className="px-5 py-4 text-xs font-medium text-text-muted">
+                      {member.chapter_name ||
+                        chapters.find((c) => c.id === member.chapter_id)?.name ||
+                        'Unassigned'}
+                    </td>
+                    <td className="px-5 py-4 text-xs text-text-muted">
+                      <div>{member.contact || '-'}</div>
+                      <div className="text-[11px] text-slate-400">{member.email || ''}</div>
+                    </td>
+                    <td className="px-5 py-4">
+                      <Badge variant={member.status === 'active' ? 'success' : 'default'}>
+                        {member.status === 'active' ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => openEditModal(member)}
+                          className="p-1.5 text-text-muted hover:text-navy rounded hover:bg-slate-100 transition-colors"
+                          aria-label={`Edit ${member.first_name} ${member.last_name}`}
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDeletingId(member.id)}
+                          className="p-1.5 text-text-muted hover:text-mfc-red rounded hover:bg-red-50 transition-colors"
+                          aria-label={`Delete ${member.first_name} ${member.last_name}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Add / Edit Member Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingMember ? 'Edit Member Record' : 'Register New Member'}
+        maxWidth="lg"
+      >
+        <form onSubmit={handleFormSubmit} className="space-y-4">
+          {formError && (
+            <div className="p-3 text-xs text-mfc-red bg-red-50 border border-red-200 rounded-md font-medium">
+              {formError}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input
+              label="First Name"
+              required
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+            <Input
+              label="Last Name"
+              required
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input
+              label="Nickname"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+            />
+            <Select
+              label="Gender"
+              value={gender}
+              onChange={(e) => setGender(e.target.value as 'Male' | 'Female')}
+              options={[
+                { value: 'Male', label: 'Male' },
+                { value: 'Female', label: 'Female' },
+              ]}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Select
+              label="Assigned Chapter"
+              value={chapterId}
+              onChange={(e) => setChapterId(e.target.value)}
+              options={[
+                { value: '', label: 'Unassigned' },
+                ...chapters.map((c) => ({ value: c.id, label: c.name })),
+              ]}
+            />
+            <Select
+              label="Academic Track"
+              value={track}
+              onChange={(e) => setTrack(e.target.value as AcademicTrack)}
+              options={[
+                { value: 'High School', label: 'High School' },
+                { value: 'Senior High School', label: 'Senior High School' },
+                { value: 'College', label: 'College' },
+                { value: 'Working', label: 'Working' },
+              ]}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input
+              label="Mobile Number"
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+              placeholder="09123456789"
+            />
+            <Input
+              label="Email Address"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="name@example.com"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input
+              label="Guardian Name"
+              value={guardianName}
+              onChange={(e) => setGuardianName(e.target.value)}
+              placeholder="Parent or Guardian"
+            />
+            <Input
+              label="Guardian Contact"
+              value={guardianContact}
+              onChange={(e) => setGuardianContact(e.target.value)}
+              placeholder="Emergency phone number"
+            />
+          </div>
+
+          <Select
+            label="Membership Status"
+            value={status}
+            onChange={(e) => setStatus(e.target.value as MemberStatus)}
+            options={[
+              { value: 'active', label: 'Active' },
+              { value: 'inactive', label: 'Inactive' },
+            ]}
+          />
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-border-subtle">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setIsModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              isLoading={createMember.isPending || updateMember.isPending}
+            >
+              {editingMember ? 'Save Changes' : 'Register Member'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={Boolean(deletingId)}
+        onClose={() => setDeletingId(null)}
+        title="Confirm Member Deletion"
+        maxWidth="sm"
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 p-3 bg-red-50 text-mfc-red rounded-lg">
+            <AlertTriangle className="w-5 h-5 shrink-0" />
+            <p className="text-xs">
+              Are you sure you want to permanently delete this member record? This action cannot be undone.
+            </p>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <Button variant="secondary" onClick={() => setDeletingId(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              isLoading={deleteMember.isPending}
+              onClick={() => deletingId && handleDelete(deletingId)}
+            >
+              Delete Permanently
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
+};
