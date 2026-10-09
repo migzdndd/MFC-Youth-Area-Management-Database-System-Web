@@ -1,27 +1,11 @@
-/**
- * Community Events, Assemblies, and Attendance Tracking Module
- *
- * What it Does: Simple non IT Terms
- * Manages Area assemblies, camps, youth conferences, and fellowship events.
- * It lets leaders schedule new events, view upcoming and past gatherings, check in
- * participants at the venue, and track fee payment statuses.
- */
+// Manages community events, attendance tracking, and participant fees.
 
 let eventFilters = {
   search: '',
   timing: 'All'
 };
 
-/**
- * Filter and Sort Events
- *
- * What it does:
- * Filters events by keyword (name, venue, description) and timing (All, Upcoming, or Past),
- * placing upcoming events nearest in time first.
- *
- * Backup plan if it breaks:
- * Safely includes events with missing venue or description text without causing errors.
- */
+// Filters and sorts events by keyword and timing.
 function filteredEvents(data) {
   const now = Date.now();
 
@@ -54,16 +38,7 @@ function filteredEvents(data) {
   });
 }
 
-/**
- * Count Total Event Attendees
- *
- * What it does:
- * Counts how many registered participants were marked as "Attended" for this event.
- *
- * Backup plan if it breaks:
- * If the event has no individual participant records, it safely falls back to the manual
- * attendance headcount entered when the event was created.
- */
+// Counts attended participants or falls back to the manual headcount.
 function eventAttendance(data, event) {
   const participants = data.participants.filter(
     participant => String(participant.eventId) === String(event.id)
@@ -78,17 +53,7 @@ function eventAttendance(data, event) {
     : Number(event.peopleAttended || 0);
 }
 
-/**
- * Display Events Management Screen
- *
- * What it does:
- * Renders the table of events showing date, venue, fee, status (Upcoming/Completed),
- * registered count, attended count, and management buttons.
- *
- * Backup plan if it breaks:
- * Restricts editing to Area-level leaders while letting Chapter Servants view events in read-only mode,
- * and displays an empty state if no events match your search.
- */
+// Renders the events management view and action toolbar.
 function renderEvents() {
   const data = db();
   const canManage = isAreaAdminSession();
@@ -227,17 +192,7 @@ function renderEvents() {
   };
 }
 
-/**
- * Add or Edit Event Form
- *
- * What it does:
- * Opens a popup form where leaders can enter event details (Name, Date & Time, Registration Fee,
- * Venue, and Description).
- *
- * Backup plan if it breaks:
- * Checks that name, date, and positive attendance numbers are entered before saving. If the cloud
- * server cannot be reached, displays an error toast and keeps the form open so work is not lost.
- */
+// Opens the modal form to create or edit an event.
 window.eventModal = function (id = null) {
   if (denyUnlessAreaAdmin('Only Area-level servant accounts can create or edit Area events.')) return;
 
@@ -315,16 +270,7 @@ window.eventModal = function (id = null) {
   );
 };
 
-/**
- * Delete Event
- *
- * What it does:
- * Deletes an event along with its associated participant signups after asking for confirmation.
- *
- * Backup plan if it breaks:
- * Asks for confirmation first, checks permissions, and unlinks reports rather than deleting reports
- * so historical activity documentation is never lost.
- */
+// Deletes an event and its linked participant records after confirmation.
 window.deleteEvent = async id => {
   if (denyUnlessAreaAdmin('Only Area-level servant accounts can delete Area events.')) return;
   if (!confirm('Delete this event and all of its participant records?')) return;
@@ -349,17 +295,7 @@ window.deleteEvent = async id => {
   }
 };
 
-/**
- * View Event Details & Participants Roster
- *
- * What it does:
- * Opens a modal window showing a summary of the event (Venue, Fee, Total Registered,
- * Paid, and Attended) along with a table of all registered participants.
- *
- * Backup plan if it breaks:
- * If the event cannot be found, it exits quietly without error. Shows an empty state
- * if no participants have registered yet.
- */
+// Shows event summary details and registered participant roster.
 window.viewEvent = id => {
   const data = db();
   const canManage = isAreaAdminSession();
@@ -464,17 +400,7 @@ window.viewEvent = id => {
   openModal(esc(event.name), body);
 };
 
-/**
- * Register or Edit Event Participant
- *
- * What it does:
- * Opens a modal to register an official youth member for the event, record payment status
- * (Paid/Unpaid), choose payment mode (Cash/GCash/Bank), and check whether they attended.
- *
- * Backup plan if it breaks:
- * Prevents adding the same member twice to the same event. If editing an older record whose member
- * was removed, it preserves historical participant data so financial records remain accurate.
- */
+// Opens the modal to register or edit an event participant.
 window.participantModal = (eventId, id = null) => {
   if (denyUnlessAreaAdmin('Only Area-level servant accounts can manage event participants.')) return;
 
@@ -706,16 +632,7 @@ window.participantModal = (eventId, id = null) => {
   }
 };
 
-/**
- * Remove Participant from Event
- *
- * What it does:
- * Deletes a participant registration record from an event after asking for confirmation.
- *
- * Backup plan if it breaks:
- * Confirms with the user first, verifies leader permissions, and re-renders the event view
- * safely even if the modal window was refreshed.
- */
+// Removes a participant record from the event after confirmation.
 window.deleteParticipant = async (eventId, id) => {
   if (denyUnlessAreaAdmin('Only Area-level servant accounts can manage event participants.')) return;
   if (!confirm('Delete this participant?')) return;
