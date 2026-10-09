@@ -1,5 +1,5 @@
 # ==========================================
-# Stage 1: Dependency resolution
+# Stage 1: Backend dependency resolution
 # ==========================================
 FROM node:24-alpine AS deps
 WORKDIR /app
@@ -12,7 +12,21 @@ COPY Backend/package.json ./Backend/
 RUN npm ci --omit=dev
 
 # ==========================================
-# Stage 2: Hardened Runtime
+# Stage 2: Modern React Frontend Build
+# ==========================================
+FROM node:24-alpine AS frontend-builder
+WORKDIR /app/frontend-react
+
+# Copy frontend lockfile and dependencies
+COPY frontend-react/package.json frontend-react/package-lock.json ./
+RUN npm ci
+
+# Copy frontend source and build production bundle
+COPY frontend-react/ ./
+RUN npm run build
+
+# ==========================================
+# Stage 3: Hardened Runtime
 # ==========================================
 FROM node:24-alpine AS runner
 WORKDIR /app
@@ -25,6 +39,9 @@ ENV PORT=3000
 
 # Copy production node_modules from deps stage
 COPY --from=deps --chown=node:node /app/node_modules ./node_modules
+
+# Copy built modern React frontend assets
+COPY --from=frontend-builder --chown=node:node /app/frontend-react/dist ./frontend-react/dist
 
 # Copy application source code with unprivileged user ownership
 COPY --chown=node:node package.json server.js ./

@@ -27,9 +27,9 @@ updates:
       - "dependencies"
       - "backend"
 
-  # Frontend web application npm dependencies
+  # Modern Frontend React SPA npm dependencies
   - package-ecosystem: "npm"
-    directory: "/Frontend"
+    directory: "/frontend-react"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10

@@ -5,6 +5,7 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -41,8 +42,17 @@ jobs:
           node-version: 24
           cache: 'npm'
 
-      - name: Install Dependencies
+      - name: Install Root & Backend Dependencies
         run: npm ci
+
+      - name: Install Modern Frontend Dependencies
+        run: npm --prefix frontend-react ci
+
+      - name: Build Modern React SPA (TypeScript & Vite)
+        run: npm run build
+
+      - name: Frontend Code Hygiene (Oxlint)
+        run: npm --prefix frontend-react run lint
 
       - name: Syntax & Configuration Validation
         run: |
@@ -98,14 +108,17 @@ jobs:
             -e NODE_ENV=production \
             mfc-youth-app:${{ github.sha }}
 
-          for i in {1..10}; do
+          for i in {1..15}; do
             if curl -s http://localhost:3000/api/health | grep -q "mfc-youth-web-api"; then
-              echo "✓ Container smoke test passed successfully."
-              docker stop test-app
-              docker rm test-app
-              exit 0
+              echo "✓ Container API health test passed."
+              if curl -s http://localhost:3000/ | grep -q "root"; then
+                echo "✓ Container modern SPA root verification passed."
+                docker stop test-app
+                docker rm test-app
+                exit 0
+              fi
             fi
-            echo "Waiting for container startup (attempt $i/10)..."
+            echo "Waiting for container startup and assets (attempt $i/15)..."
             sleep 2
           done
 
@@ -132,5 +145,7 @@ jobs:
             if (!Array.isArray(routes)) throw new Error('Missing routes in vercel.json');
             const apiRoute = routes.find(r => (r.src === '/api/(.*)' || r.source === '/api/(.*)'));
             if (!apiRoute) throw new Error('Invalid /api route destination in vercel.json');
+            const spaRoute = routes.find(r => (r.src === '/(.*)' || r.source === '/(.*)'));
+            if (!spaRoute) throw new Error('Missing catch-all SPA route in vercel.json');
             console.log('✓ Vercel PaaS single-project route configuration verified.');
           "

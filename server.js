@@ -104,3 +104,16 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`MFC Youth Area Management System running on port ${PORT}`);
 });
+
+const gracefulShutdown = () => {
+  server.close(() => {
+    process.exit(0);
+  });
+};
+
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
+
+export { server };
+export default server;
+

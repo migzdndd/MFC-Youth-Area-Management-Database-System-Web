@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/Input';
 import { BookOpen, Calendar, ExternalLink } from 'lucide-react';
 
 export const ReadingsPage: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState(
+  const [selectedDate, setSelectedDate] = useState(() =>
     new Intl.DateTimeFormat('en-CA', {
       timeZone: 'Asia/Manila',
       year: 'numeric',

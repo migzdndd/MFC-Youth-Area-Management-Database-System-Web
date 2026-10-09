@@ -18,7 +18,7 @@ export const GigPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [memberId, setMemberId] = useState('');
   const [amount, setAmount] = useState('');
-  const [contributionDate, setContributionDate] = useState(
+  const [contributionDate, setContributionDate] = useState(() =>
     new Date().toISOString().split('T')[0]
   );
   const [notes, setNotes] = useState('');
