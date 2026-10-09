@@ -26,14 +26,14 @@ export const MemberPortalPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-canvas">
       {/* Top Bar */}
-      <header className="bg-navy text-white px-4 sm:px-8 py-4 flex items-center justify-between">
+      <header className="bg-navy-deep text-white px-4 sm:px-8 py-4 flex items-center justify-between border-b border-navy-surface shadow-2xs">
         <div className="flex items-center gap-3">
           <img src="/img/logo-2.png" alt="MFC Youth" width={36} height={36} />
           <div>
             <h1 className="text-sm font-bold tracking-wider leading-tight text-white font-heading">
               MFC YOUTH
             </h1>
-            <p className="text-[10px] text-sky-300 font-semibold tracking-wider">
+            <p className="text-[10px] text-amber-300 font-semibold tracking-wider">
               MEMBER PORTAL
             </p>
           </div>
@@ -53,9 +53,9 @@ export const MemberPortalPage: React.FC = () => {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
         {/* Profile Card */}
-        <div className="bg-white border border-border-subtle rounded-xl p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-6 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-navy text-white font-bold text-xl flex items-center justify-center font-heading">
+            <div className="w-14 h-14 rounded-full bg-navy text-white font-bold text-xl ring-2 ring-amber-400/30 flex items-center justify-center font-heading shadow-2xs">
               {user?.first_name ? user.first_name[0].toUpperCase() : 'M'}
             </div>
             <div>

@@ -65,11 +65,11 @@ export const MemberLoginPage: React.FC = () => {
         </div>
 
         <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-sky-50 text-sky-800 text-xs font-semibold mb-2 border border-sky-100">
-            <UserCheck className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-900 text-xs font-semibold mb-2 border border-amber-200/80">
+            <UserCheck className="w-3.5 h-3.5 text-amber-700" />
             <span>MFC Youth Member Portal</span>
           </div>
-          <h1 className="text-2xl font-bold text-text-main font-heading tracking-tight">
+          <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
             Youth Member Sign In
           </h1>
           <p className="text-sm text-text-muted mt-1">

@@ -25,12 +25,12 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
         </button>
 
         <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 border border-slate-200 rounded-md text-xs font-semibold text-text-main">
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-md text-xs font-semibold text-slate-800 shadow-2xs">
             <MapPin className="w-3.5 h-3.5 text-navy" />
             <span>{currentAreaName}</span>
           </div>
           {user?.role === 'national_coordinator' && (
-            <span className="hidden md:inline-block text-[11px] font-semibold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
+            <span className="hidden md:inline-block text-[11px] font-semibold text-amber-900 bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200/80">
               National Context
             </span>
           )}
@@ -40,14 +40,14 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
       {/* Right: User identity tag */}
       <div className="flex items-center gap-3">
         <div className="flex flex-col text-right">
-          <span className="text-xs font-bold text-text-main leading-tight truncate max-w-[160px]">
+          <span className="text-xs font-bold text-slate-900 leading-tight truncate max-w-[160px]">
             {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.email}
           </span>
-          <span className="text-[11px] text-text-muted capitalize">
+          <span className="text-[11px] text-slate-500 capitalize font-medium">
             {user?.role ? user.role.replace(/_/g, ' ') : 'Servant'}
           </span>
         </div>
-        <div className="w-9 h-9 rounded-full bg-navy text-white text-xs font-bold flex items-center justify-center select-none shrink-0">
+        <div className="w-9 h-9 rounded-full bg-navy text-white text-xs font-bold ring-2 ring-amber-400/30 flex items-center justify-center select-none shrink-0 shadow-2xs">
           {user?.first_name ? user.first_name[0].toUpperCase() : 'U'}
         </div>
       </div>

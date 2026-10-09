@@ -56,7 +56,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
       {/* Sidebar container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-navy text-white flex flex-col transition-transform duration-200 lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-navy-deep text-white flex flex-col transition-transform duration-200 lg:translate-x-0 border-r border-navy-surface ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         aria-label="Main navigation"
@@ -75,7 +75,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               <h2 className="text-sm font-bold tracking-wider leading-tight text-white font-heading">
                 MFC YOUTH
               </h2>
-              <p className="text-[10px] text-sky-300 font-semibold tracking-wider">
+              <p className="text-[10px] text-amber-300 font-semibold tracking-wider">
                 AREA MANAGEMENT
               </p>
             </div>
@@ -91,7 +91,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Navigation links */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
           {filteredNavItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -102,8 +102,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors min-h-[44px] ${
                     isActive
-                      ? 'bg-white/15 text-white font-semibold'
-                      : 'text-white/80 hover:bg-white/10 hover:text-white'
+                      ? 'bg-white/10 text-white font-semibold border-l-[3px] border-amber-400 pl-2.5'
+                      : 'text-slate-300 hover:bg-white/5 hover:text-white'
                   }`
                 }
               >
@@ -115,16 +115,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </nav>
 
         {/* User status and logout */}
-        <div className="p-4 border-t border-white/10 space-y-3">
-          <div className="flex flex-col text-xs text-white/70">
+        <div className="p-4 border-t border-white/10 space-y-3 bg-navy-surface/40">
+          <div className="flex flex-col text-xs text-slate-300">
             <span className="font-semibold text-white truncate">
               {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.email}
             </span>
-            <span className="text-[11px] text-sky-300 capitalize">
+            <span className="text-[11px] text-amber-300 capitalize font-medium">
               {user?.role?.replace(/_/g, ' ')}
             </span>
             {user?.area_name && (
-              <span className="text-[11px] text-white/50 truncate">
+              <span className="text-[11px] text-slate-400 truncate">
                 Area: {user.area_name}
               </span>
             )}
@@ -133,13 +133,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <button
             type="button"
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-red-200 hover:text-white bg-white/5 hover:bg-red-950/40 rounded-md transition-colors min-h-[44px]"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-rose-200 hover:text-white bg-white/5 hover:bg-rose-950/40 border border-white/10 rounded-md transition-colors min-h-[44px]"
           >
             <LogOut className="w-4 h-4" />
             <span>Sign Out</span>
           </button>
 
-          <div className="text-[10px] text-white/40 text-center pt-1">
+          <div className="text-[10px] text-slate-500 text-center pt-1">
             MFC Youth AMS v1.1
           </div>
         </div>

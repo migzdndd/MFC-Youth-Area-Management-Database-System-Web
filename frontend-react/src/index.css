@@ -2,17 +2,35 @@
 
 @theme {
   --color-navy: #002847;
-  --color-navy-light: #003a66;
-  --color-navy-dark: #001a30;
-  --color-canvas: #f4f7fb;
+  --color-navy-deep: #001c33;
+  --color-navy-light: #0a3d66;
+  --color-navy-surface: #072540;
+
+  --color-canvas: #f8fafc;
   --color-surface: #ffffff;
+  --color-surface-hover: #f1f5f9;
+
   --color-text-main: #0f172a;
-  --color-text-muted: #64748b;
+  --color-text-muted: #475569;
+  --color-text-subtle: #64748b;
+
   --color-border-subtle: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+
+  /* Community Accent: Warm Gold / Amber */
+  --color-gold: #d97706;
+  --color-gold-light: #fef3c7;
+  --color-gold-dark: #b45309;
+
+  /* Status Tokens */
   --color-mfc-green: #15803d;
+  --color-mfc-green-light: #dcfce7;
   --color-mfc-amber: #b45309;
+  --color-mfc-amber-light: #fef3c7;
   --color-mfc-red: #b91c1c;
+  --color-mfc-red-light: #fee2e2;
   --color-mfc-blue: #0284c7;
+  --color-mfc-blue-light: #e0f2fe;
 
   --font-heading: 'Poppins', sans-serif;
   --font-body: 'Open Sans', sans-serif;

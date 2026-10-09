@@ -67,7 +67,7 @@ export const LoginPage: React.FC = () => {
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
         <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch bg-white border border-border-subtle rounded-2xl shadow-sm overflow-hidden">
           {/* Left Hero Overview */}
-          <section className="lg:col-span-6 bg-navy text-white p-6 sm:p-10 flex flex-col justify-between" aria-label="System overview">
+          <section className="lg:col-span-6 bg-navy-deep text-white p-6 sm:p-10 flex flex-col justify-between border-r border-navy-surface" aria-label="System overview">
             <div>
               <div className="flex items-center justify-between mb-8">
                 <img
@@ -77,14 +77,14 @@ export const LoginPage: React.FC = () => {
                   height={84}
                   className="object-contain"
                 />
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-white/10 text-sky-200 border border-white/10">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-white/10 text-slate-200 border border-white/10">
                   <span className="w-2 h-2 rounded-full bg-emerald-400" />
                   Cloud Connected
                 </span>
               </div>
 
               <div className="space-y-2 mb-8">
-                <span className="text-xs font-bold tracking-widest text-sky-300 font-heading">
+                <span className="text-xs font-bold tracking-widest text-amber-300 font-heading">
                   AREA MANAGEMENT SYSTEM
                 </span>
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight font-heading">
@@ -99,11 +99,11 @@ export const LoginPage: React.FC = () => {
               <div className="bg-white/10 border border-white/15 rounded-xl p-4 mb-6">
                 <div className="flex items-center justify-between mb-2 pb-2 border-b border-white/10">
                   <div className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-sky-300" />
+                    <BookOpen className="w-4 h-4 text-amber-300" />
                     <span className="text-xs font-bold text-white">Daily Scripture Readings</span>
                   </div>
                   {readingsData?.date && (
-                    <span className="text-[11px] text-sky-200">{readingsData.date}</span>
+                    <span className="text-[11px] text-amber-200/90 font-medium">{readingsData.date}</span>
                   )}
                 </div>
                 {readingsLoading ? (
@@ -115,7 +115,7 @@ export const LoginPage: React.FC = () => {
                     </p>
                     <div className="flex flex-wrap gap-2 pt-1">
                       {readingsData.readings?.slice(0, 3).map((r, i) => (
-                        <span key={i} className="text-[11px] bg-white/10 px-2 py-0.5 rounded text-sky-100">
+                        <span key={i} className="text-[11px] bg-white/10 px-2 py-0.5 rounded text-slate-200 border border-white/10">
                           {r.type}: {r.reference}
                         </span>
                       ))}
@@ -129,7 +129,7 @@ export const LoginPage: React.FC = () => {
 
             <div className="pt-6 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
               <span>Missionary Families for Christ Youth</span>
-              <Link to="/member-login" className="text-sky-300 hover:text-white font-semibold flex items-center gap-1">
+              <Link to="/member-login" className="text-amber-300 hover:text-white font-semibold flex items-center gap-1 transition-colors">
                 Member Portal <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -139,7 +139,7 @@ export const LoginPage: React.FC = () => {
           <section className="lg:col-span-6 p-6 sm:p-10 flex flex-col justify-center" aria-labelledby="signin-title">
             <div className="max-w-md w-full mx-auto space-y-6">
               <div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-100 text-slate-700 text-xs font-semibold mb-3">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-800 border border-slate-200/80 text-xs font-semibold mb-3">
                   <ShieldCheck className="w-3.5 h-3.5 text-navy" />
                   <span>Secure Leader Access</span>
                 </div>

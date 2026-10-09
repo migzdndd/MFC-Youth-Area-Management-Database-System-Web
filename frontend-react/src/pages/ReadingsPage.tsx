@@ -56,8 +56,8 @@ export const ReadingsPage: React.FC = () => {
       ) : (
         <div className="space-y-6">
           {/* Celebration Header */}
-          <div className="bg-navy text-white rounded-xl p-6 shadow-xs">
-            <span className="text-xs font-bold text-sky-300 uppercase tracking-wider font-heading">
+          <div className="bg-navy-deep text-white rounded-xl p-6 shadow-2xs border border-navy-surface">
+            <span className="text-xs font-bold text-amber-300 uppercase tracking-wider font-heading">
               {data.day}, {data.date}
             </span>
             <h2 className="text-xl sm:text-2xl font-bold font-heading text-white mt-1">
@@ -68,7 +68,7 @@ export const ReadingsPage: React.FC = () => {
                 href={data.source.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-sky-200 hover:text-white mt-3 underline"
+                className="inline-flex items-center gap-1.5 text-xs text-amber-200/90 hover:text-white mt-3 underline transition-colors"
               >
                 <span>Read source feed on EWTN</span>
                 <ExternalLink className="w-3 h-3" />

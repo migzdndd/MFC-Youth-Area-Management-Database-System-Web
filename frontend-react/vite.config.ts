@@ -16,7 +16,7 @@ export default defineConfig({
         short_name: 'MFC Youth AMS',
         description: 'Area Management and Operational System for MFC Youth servant leaders.',
         theme_color: '#002847',
-        background_color: '#f4f7fb',
+        background_color: '#f8fafc',
         display: 'standalone',
         start_url: '/dashboard',
         icons: [

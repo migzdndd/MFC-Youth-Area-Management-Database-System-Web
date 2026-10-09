@@ -26,8 +26,10 @@ export const MobileNav: React.FC<MobileNavProps> = ({ onOpenMenu }) => {
             key={link.path}
             to={link.path}
             className={({ isActive }) =>
-              `flex flex-col items-center justify-center flex-1 py-1 min-h-[48px] text-[11px] font-semibold transition-colors ${
-                isActive ? 'text-navy font-bold' : 'text-slate-500 hover:text-slate-900'
+              `flex flex-col items-center justify-center flex-1 py-1 min-h-[48px] text-[11px] font-semibold transition-colors relative ${
+                isActive
+                  ? 'text-navy font-bold after:absolute after:bottom-0 after:w-6 after:h-[2.5px] after:bg-amber-500 after:rounded-full'
+                  : 'text-slate-500 hover:text-slate-900'
               }`
             }
           >

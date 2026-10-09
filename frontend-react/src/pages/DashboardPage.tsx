@@ -65,23 +65,23 @@ export const DashboardPage: React.FC = () => {
       {/* Top Banner and Area Switcher */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-border-subtle">
         <div>
-          <span className="text-xs font-bold text-sky-700 tracking-wider font-heading">
+          <span className="text-xs font-bold text-amber-700 tracking-wider font-heading">
             COMMAND OVERVIEW
           </span>
-          <h1 className="text-2xl font-bold text-text-main font-heading tracking-tight mt-0.5">
+          <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight mt-0.5">
             Welcome, {user?.first_name || 'Servant Leader'}
           </h1>
-          <p className="text-sm text-text-muted">
+          <p className="text-sm text-slate-600">
             Managing community pastoral operations for{' '}
-            <strong className="text-navy">{effectiveAreaName}</strong>.
+            <strong className="text-navy font-semibold">{effectiveAreaName}</strong>.
           </p>
         </div>
 
         {/* National Coordinator Area Selector */}
         {isNationalCoordinator && areas && areas.length > 0 && (
-          <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-border-subtle">
+          <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-200 shadow-2xs">
             <MapPin className="w-4 h-4 text-navy shrink-0" />
-            <label htmlFor="areaSelect" className="text-xs font-semibold text-text-muted whitespace-nowrap">
+            <label htmlFor="areaSelect" className="text-xs font-semibold text-slate-600 whitespace-nowrap">
               Switch Area:
             </label>
             <select
@@ -91,7 +91,7 @@ export const DashboardPage: React.FC = () => {
                 const selected = areas.find((a: Area) => a.id === e.target.value);
                 setActiveArea(selected || null);
               }}
-              className="text-xs font-semibold text-text-main bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-navy"
+              className="text-xs font-semibold text-slate-900 bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-navy"
             >
               {areas.map((a: Area) => (
                 <option key={a.id} value={a.id}>
@@ -111,20 +111,20 @@ export const DashboardPage: React.FC = () => {
             <Link
               key={card.title}
               to={card.link}
-              className="p-5 bg-white border border-border-subtle rounded-xl hover:border-slate-300 transition-colors group flex flex-col justify-between"
+              className="p-5 bg-white border border-slate-200/90 rounded-xl hover:border-slate-300 hover:shadow-xs transition-all group flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold text-text-muted">{card.title}</span>
-                <div className="p-2 rounded-md bg-slate-100 text-navy group-hover:bg-navy group-hover:text-white transition-colors">
+                <span className="text-xs font-bold text-slate-600">{card.title}</span>
+                <div className="p-2 rounded-md bg-slate-100 text-navy group-hover:bg-navy group-hover:text-amber-300 transition-colors">
                   <Icon className="w-4 h-4" />
                 </div>
               </div>
 
               <div>
-                <div className="text-2xl font-bold text-text-main font-heading tracking-tight">
+                <div className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
                   {metricsLoading ? <Spinner size="sm" /> : card.count}
                 </div>
-                <p className="text-xs text-text-muted mt-1">{card.subtitle}</p>
+                <p className="text-xs text-slate-500 mt-1">{card.subtitle}</p>
               </div>
             </Link>
           );
@@ -132,14 +132,14 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* Quick Servant Actions */}
-      <div className="bg-white border border-border-subtle rounded-xl p-6">
-        <h2 className="text-base font-bold text-text-main font-heading mb-4">
+      <div className="bg-white border border-slate-200/90 rounded-xl p-6 shadow-2xs">
+        <h2 className="text-base font-bold text-slate-900 font-heading mb-4">
           Quick Servant Actions
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Button
             variant="secondary"
-            className="flex items-center gap-2 justify-start px-4"
+            className="flex items-center gap-2 justify-start px-4 text-slate-800 hover:border-slate-300"
             onClick={() => navigate('/members')}
           >
             <UserPlus className="w-4 h-4 text-navy shrink-0" />
@@ -148,7 +148,7 @@ export const DashboardPage: React.FC = () => {
 
           <Button
             variant="secondary"
-            className="flex items-center gap-2 justify-start px-4"
+            className="flex items-center gap-2 justify-start px-4 text-slate-800 hover:border-slate-300"
             onClick={() => navigate('/events')}
           >
             <CalendarPlus className="w-4 h-4 text-navy shrink-0" />
@@ -157,7 +157,7 @@ export const DashboardPage: React.FC = () => {
 
           <Button
             variant="secondary"
-            className="flex items-center gap-2 justify-start px-4"
+            className="flex items-center gap-2 justify-start px-4 text-slate-800 hover:border-slate-300"
             onClick={() => navigate('/reports')}
           >
             <FilePlus className="w-4 h-4 text-navy shrink-0" />
@@ -168,17 +168,17 @@ export const DashboardPage: React.FC = () => {
 
       {/* Liturgical Readings Snippet */}
       {readingsData && (
-        <div className="bg-white border border-border-subtle rounded-xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-6 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className="p-2.5 rounded-lg bg-sky-50 text-navy shrink-0">
-              <BookOpen className="w-5 h-5" />
+            <div className="p-2.5 rounded-lg bg-amber-50 text-amber-900 border border-amber-200/70 shrink-0">
+              <BookOpen className="w-5 h-5 text-amber-700" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-sky-700">Daily Catholic Readings</span>
-                <span className="text-xs text-text-muted">&middot; {readingsData.date}</span>
+                <span className="text-xs font-bold text-amber-800">Daily Catholic Readings</span>
+                <span className="text-xs text-slate-500">&middot; {readingsData.date}</span>
               </div>
-              <h3 className="text-sm font-bold text-text-main mt-0.5">
+              <h3 className="text-sm font-bold text-slate-900 mt-0.5">
                 {readingsData.celebration || 'Liturgical Readings for Today'}
               </h3>
             </div>
@@ -186,7 +186,7 @@ export const DashboardPage: React.FC = () => {
 
           <Link
             to="/readings"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-navy hover:underline shrink-0"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-navy hover:text-navy-light hover:underline shrink-0"
           >
             <span>Read Scriptures</span>
             <ArrowRight className="w-3.5 h-3.5" />

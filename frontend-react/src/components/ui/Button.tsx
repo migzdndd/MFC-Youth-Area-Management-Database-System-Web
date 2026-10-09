@@ -1,7 +1,7 @@
 import React from 'react';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'accent';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
 }
@@ -16,7 +16,7 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseClasses =
-    'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none rounded-md select-none';
+    'inline-flex items-center justify-center font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none rounded-md select-none';
 
   const sizeClasses = {
     sm: 'text-xs px-3 py-1.5 min-h-[36px] sm:min-h-[32px]',
@@ -25,10 +25,11 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const variantClasses = {
-    primary: 'bg-navy text-white hover:bg-navy-light focus-visible:ring-navy',
-    secondary: 'bg-white text-text-main border border-border-subtle hover:bg-slate-50 hover:border-slate-300 focus-visible:ring-slate-400',
-    danger: 'bg-mfc-red text-white hover:bg-red-800 focus-visible:ring-mfc-red',
-    ghost: 'text-text-muted hover:text-text-main hover:bg-slate-100 focus-visible:ring-slate-400',
+    primary: 'bg-navy text-white hover:bg-navy-light active:bg-navy-deep focus-visible:ring-navy shadow-2xs',
+    secondary: 'bg-white text-text-main border border-slate-200 hover:bg-slate-50 hover:border-slate-300 focus-visible:ring-slate-400 shadow-2xs',
+    danger: 'bg-mfc-red text-white hover:bg-red-800 focus-visible:ring-mfc-red shadow-2xs',
+    ghost: 'text-text-muted hover:text-text-main hover:bg-slate-100/80 focus-visible:ring-slate-400',
+    accent: 'bg-gold text-white hover:bg-gold-dark focus-visible:ring-gold shadow-2xs',
   };
 
   return (
