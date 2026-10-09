@@ -128,9 +128,13 @@ export default async function handler(req, res) {
 
     return sendJson(res, 200, {
       ok: true,
+      access_token: data.session.access_token,
+      refresh_token: data.session.refresh_token,
       session: {
         accessToken: data.session.access_token,
         refreshToken: data.session.refresh_token,
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
         expiresAt: data.session.expires_at
       },
       user: {
@@ -138,9 +142,12 @@ export default async function handler(req, res) {
         email: data.user.email,
         name: data.user.user_metadata?.display_name || data.user.email,
         memberId: linkedProfile.member_id,
+        member_id: linkedProfile.member_id,
         role: linkedProfile.role,
         areaId: linkedProfile.area_id,
+        area_id: linkedProfile.area_id,
         chapterId: linkedProfile.chapter_id,
+        chapter_id: linkedProfile.chapter_id,
         mustChangePassword: linkedProfile.must_change_password
       }
     });

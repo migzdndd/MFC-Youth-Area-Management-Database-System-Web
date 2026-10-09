@@ -22,21 +22,55 @@ export const MemberLoginPage: React.FC = () => {
 
     try {
       const res = await apiClient<{
-        ok: boolean;
-        access_token: string;
-        refresh_token: string;
-        user: UserProfile;
+        ok?: boolean;
+        access_token?: string;
+        refresh_token?: string;
+        session?: {
+          accessToken?: string;
+          refreshToken?: string;
+          access_token?: string;
+          refresh_token?: string;
+        };
+        user?: {
+          id: string;
+          email: string;
+          role?: string;
+          area_id?: string;
+          areaId?: string;
+          chapter_id?: string | null;
+          chapterId?: string | null;
+          member_id?: string | null;
+          memberId?: string | null;
+          name?: string;
+          first_name?: string;
+          last_name?: string;
+        };
         error?: string;
       }>('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password, portal: 'member' }),
       });
 
-      if (res.access_token && res.user) {
+      const accessToken = res.access_token || res.session?.accessToken || res.session?.access_token;
+      const refreshToken = res.refresh_token || res.session?.refreshToken || res.session?.refresh_token || '';
+
+      if (accessToken && res.user) {
+        const rawUser = res.user;
+        const normalizedUser: UserProfile = {
+          id: rawUser.id,
+          email: rawUser.email,
+          role: (rawUser.role as UserProfile['role']) || 'member',
+          area_id: rawUser.area_id || rawUser.areaId || '',
+          chapter_id: rawUser.chapter_id || rawUser.chapterId || null,
+          member_id: rawUser.member_id || rawUser.memberId || null,
+          first_name: rawUser.first_name || (rawUser.name ? rawUser.name.split(' ')[0] : ''),
+          last_name: rawUser.last_name || (rawUser.name ? rawUser.name.split(' ').slice(1).join(' ') : ''),
+        };
+
         setSession({
-          access_token: res.access_token,
-          refresh_token: res.refresh_token,
-          user: res.user,
+          access_token: accessToken,
+          refresh_token: refreshToken,
+          user: normalizedUser,
         });
         navigate('/member');
       } else {

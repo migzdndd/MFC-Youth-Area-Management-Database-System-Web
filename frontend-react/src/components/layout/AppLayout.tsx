@@ -5,7 +5,7 @@ import { Header } from './Header';
 import { MobileNav } from './MobileNav';
 import { OfflineBanner } from './OfflineBanner';
 
-export const AppLayout: React.FC = () => {
+export const AppLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -20,7 +20,7 @@ export const AppLayout: React.FC = () => {
         <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto pb-24 lg:pb-12 focus:outline-none" tabIndex={-1}>
-          <Outlet />
+          {children ?? <Outlet />}
         </main>
 
         {/* Mobile bottom navigation */}
