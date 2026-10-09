@@ -15,7 +15,7 @@ async function listServices(req, res) {
   const { admin, profile } = await requireAuthenticatedProfile(req);
   const areaId = requireArea(req, profile);
   const services = await ensureStandardServices(admin, areaId);
-  return sendJson(res, 200, { ok: true, services });
+  return sendJson(res, 200, { ok: true, services, data: services });
 }
 
 async function assignServices(req, res) {

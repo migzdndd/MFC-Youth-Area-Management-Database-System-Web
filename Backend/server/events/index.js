@@ -49,7 +49,7 @@ async function listEvents(req, res) {
     .eq('area_id', areaId)
     .order('starts_at', { ascending: false });
   if (error) throw error;
-  return sendJson(res, 200, { ok: true, events: data || [] });
+  return sendJson(res, 200, { ok: true, events: data || [], data: data || [] });
 }
 
 async function createEvent(req, res) {

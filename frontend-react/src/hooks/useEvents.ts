@@ -6,8 +6,8 @@ export function useEvents() {
   return useQuery({
     queryKey: ['events'],
     queryFn: async () => {
-      const res = await apiClient<{ ok: boolean; data: CommunityEvent[] }>('/events');
-      return res.data || [];
+      const res = await apiClient<{ ok: boolean; data?: CommunityEvent[]; events?: CommunityEvent[] }>('/events');
+      return res.data || res.events || [];
     },
   });
 }
@@ -32,10 +32,10 @@ export function useEventParticipants(eventId: string) {
     queryKey: ['event-participants', eventId],
     queryFn: async () => {
       if (!eventId) return [];
-      const res = await apiClient<{ ok: boolean; data: Participant[] }>(
+      const res = await apiClient<{ ok: boolean; data?: Participant[]; participants?: Participant[] }>(
         `/participants?event_id=${encodeURIComponent(eventId)}`
       );
-      return res.data || [];
+      return res.data || res.participants || [];
     },
     enabled: Boolean(eventId),
   });

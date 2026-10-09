@@ -48,9 +48,16 @@ export function nullableText(value, max = 255) {
  * If the user's account has no Area assigned, it stops immediately with a 409 error asking them to assign an area first.
  */
 export function requireArea(req, profile) {
+  const headerArea =
+    req.headers['x-mfc-area-id'] ||
+    req.headers['x-area-id'] ||
+    req.headers['X-MFC-Area-ID'] ||
+    req.headers['X-Area-ID'];
+
   if (profile?.role === 'national_coordinator') {
-    const override = req.headers['x-mfc-area-id'] || req.headers['X-MFC-Area-ID'];
-    if (override) return override;
+    if (headerArea) return headerArea;
+  } else if (headerArea && String(headerArea) === String(profile?.area_id)) {
+    return headerArea;
   }
   if (!profile?.area_id) {
     const error = new Error('Your account is not assigned to an Area.');

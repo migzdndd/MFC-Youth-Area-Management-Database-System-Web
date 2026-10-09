@@ -89,7 +89,7 @@ async function listMembers(req, res) {
   const { data, error } = await query;
   if (error) throw error;
 
-  return sendJson(res, 200, { ok: true, members: data || [] });
+  return sendJson(res, 200, { ok: true, members: data || [], data: data || [] });
 }
 
 async function createMember(req, res) {

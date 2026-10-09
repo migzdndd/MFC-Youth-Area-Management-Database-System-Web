@@ -7,8 +7,8 @@ export function useGigRecords(month?: string) {
     queryKey: ['gig', month],
     queryFn: async () => {
       const endpoint = month ? `/gig?month=${encodeURIComponent(month)}` : '/gig';
-      const res = await apiClient<{ ok: boolean; data: GigContribution[] }>(endpoint);
-      return res.data || [];
+      const res = await apiClient<{ ok: boolean; data?: GigContribution[]; gig?: GigContribution[] }>(endpoint);
+      return res.data || res.gig || [];
     },
   });
 }

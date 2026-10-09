@@ -46,6 +46,7 @@ export async function apiClient<T>(
   const effectiveAreaId = activeArea?.id || user?.area_id;
   if (effectiveAreaId) {
     headers['x-area-id'] = effectiveAreaId;
+    headers['x-mfc-area-id'] = effectiveAreaId;
   }
 
   const url = endpoint.startsWith('http') ? endpoint : `/api${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;

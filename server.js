@@ -2,7 +2,10 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadEnvFiles } from './Backend/server/_lib/env.js';
 import handler from './Backend/api/router.js';
+
+loadEnvFiles();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

@@ -42,7 +42,7 @@ async function listParticipants(req, res) {
   }
   const { data, error } = await query;
   if (error) throw error;
-  return sendJson(res, 200, { ok: true, participants: data || [] });
+  return sendJson(res, 200, { ok: true, participants: data || [], data: data || [] });
 }
 
 async function createParticipant(req, res) {

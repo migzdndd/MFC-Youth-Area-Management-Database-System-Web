@@ -14,8 +14,8 @@ export function useMembers(filters?: MemberFilter) {
 
       const qs = params.toString();
       const endpoint = qs ? `/members?${qs}` : '/members';
-      const res = await apiClient<{ ok: boolean; data: Member[] }>(endpoint);
-      return res.data || [];
+      const res = await apiClient<{ ok: boolean; data?: Member[]; members?: Member[] }>(endpoint);
+      return res.data || res.members || [];
     },
   });
 }

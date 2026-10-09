@@ -78,7 +78,7 @@ async function listAreas(req, res) {
     .order('name', { ascending: true });
   if (error) throw error;
 
-  return sendJson(res, 200, { ok: true, areas: data || [] });
+  return sendJson(res, 200, { ok: true, areas: data || [], data: data || [] });
 }
 
 /**

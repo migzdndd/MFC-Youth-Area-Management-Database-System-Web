@@ -6,8 +6,8 @@ export function useChapters() {
   return useQuery({
     queryKey: ['chapters'],
     queryFn: async () => {
-      const res = await apiClient<{ ok: boolean; data: Chapter[] }>('/chapters');
-      return res.data || [];
+      const res = await apiClient<{ ok: boolean; data?: Chapter[]; chapters?: Chapter[] }>('/chapters');
+      return res.data || res.chapters || [];
     },
   });
 }

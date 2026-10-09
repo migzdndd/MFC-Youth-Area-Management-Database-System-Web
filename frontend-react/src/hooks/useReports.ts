@@ -6,8 +6,8 @@ export function useReports() {
   return useQuery({
     queryKey: ['reports'],
     queryFn: async () => {
-      const res = await apiClient<{ ok: boolean; data: ActivityReport[] }>('/reports');
-      return res.data || [];
+      const res = await apiClient<{ ok: boolean; data?: ActivityReport[]; reports?: ActivityReport[] }>('/reports');
+      return res.data || res.reports || [];
     },
   });
 }

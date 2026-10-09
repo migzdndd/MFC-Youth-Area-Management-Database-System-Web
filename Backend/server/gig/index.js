@@ -35,7 +35,7 @@ async function listGig(req, res) {
   }
   const { data, error } = await query;
   if (error) throw error;
-  return sendJson(res, 200, { ok: true, gig: data || [] });
+  return sendJson(res, 200, { ok: true, gig: data || [], data: data || [] });
 }
 
 async function createGig(req, res) {

@@ -26,7 +26,7 @@ async function listReports(req, res) {
   }
   const { data, error } = await query;
   if (error) throw error;
-  return sendJson(res, 200, { ok: true, reports: data || [] });
+  return sendJson(res, 200, { ok: true, reports: data || [], data: data || [] });
 }
 
 async function saveReport(req, res, isUpdate) {

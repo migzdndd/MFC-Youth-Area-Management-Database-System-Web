@@ -7,6 +7,62 @@
  * from the environment and makes sure the server has all required credentials before starting up.
  */
 
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+let envLoaded = false;
+
+/**
+ * Automatically load environment variables from .env.local or .env files if not already populated.
+ */
+export function loadEnvFiles() {
+  if (envLoaded) return;
+  envLoaded = true;
+
+  const candidates = [
+    path.resolve(process.cwd(), '.env.local'),
+    path.resolve(process.cwd(), 'Backend', '.env.local'),
+    path.resolve(process.cwd(), '.env'),
+    path.resolve(process.cwd(), 'Backend', '.env'),
+    path.resolve(__dirname, '..', '..', '.env.local'),
+    path.resolve(__dirname, '..', '..', '..', '.env.local'),
+    path.resolve(__dirname, '..', '..', '.env'),
+    path.resolve(__dirname, '..', '..', '..', '.env')
+  ];
+
+  for (const filePath of candidates) {
+    try {
+      if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+        const content = fs.readFileSync(filePath, 'utf8');
+        content.split('\n').forEach(line => {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed.startsWith('#')) return;
+          const idx = trimmed.indexOf('=');
+          if (idx !== -1) {
+            const key = trimmed.slice(0, idx).trim();
+            let val = trimmed.slice(idx + 1).trim();
+            if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+              val = val.slice(1, -1);
+            }
+            if (process.env[key] === undefined || process.env[key] === '') {
+              process.env[key] = val;
+            }
+          }
+        });
+      }
+    } catch {
+      // Continue inspecting subsequent candidates
+    }
+  }
+}
+
+// Ensure environment is primed on module import
+loadEnvFiles();
+
 /**
  * Clean Environment Secret Text
  *
@@ -43,6 +99,7 @@ function cleanBaseUrl(value) {
  * Checks both modern and older alternative environment variable names so the system still connects even if settings use legacy naming.
  */
 export function backendConfig() {
+  loadEnvFiles();
   const publishableKey = cleanEnv(
     process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY
   );
