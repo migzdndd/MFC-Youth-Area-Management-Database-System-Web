@@ -574,7 +574,6 @@ function ensureOfflineUIElements() {
 function updateOfflineUI(detail = {}) {
   const statusBar = ensureOfflineUIElements();
   const mobileBadge = document.getElementById('mobileOfflineBadge');
-  const dot = document.getElementById('offlineStatusDot');
   const text = document.getElementById('offlineStatusText');
   const syncBtn = document.getElementById('offlineSyncBtn');
 

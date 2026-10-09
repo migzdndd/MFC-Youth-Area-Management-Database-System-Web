@@ -82,7 +82,7 @@ export function normalizeServiceName(value) {
  * Backup plan if it breaks:
  * If the role does not map to a standard ministry, it safely returns an empty string.
  */
-export function serviceForAccessRole(role) {
+function serviceForAccessRole(role) {
   return ROLE_SERVICE_MAP[String(role || '').trim().toLowerCase()] || '';
 }
 

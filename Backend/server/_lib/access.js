@@ -56,7 +56,7 @@ export function isChapterServantRole(role) {
  * Backup plan if it breaks:
  * If the security token is malformed, corrupted, or tampered with, it catches the error and safely returns null rather than throwing an unhandled exception.
  */
-export function parseJwtPayload(jwtToken) {
+function parseJwtPayload(jwtToken) {
   try {
     const parts = String(jwtToken || '').split('.');
     if (parts.length !== 3) return null;

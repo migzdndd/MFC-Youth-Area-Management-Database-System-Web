@@ -7,8 +7,7 @@
  */
 
 import {
-  isAreaAdminRole,
-  isChapterServantRole
+  isAreaAdminRole
 } from './access.js';
 
 /**
@@ -38,18 +37,6 @@ export function nullableText(value, max = 255) {
   return cleanText(value, max) || null;
 }
 
-/**
- * Validate Unique System ID Format
- *
- * What it does:
- * Verifies that a record's unique ID matches the official 36-character format used by the database.
- *
- * Backup plan if it breaks:
- * If the ID contains invalid symbols, letters, or wrong lengths, it safely returns false.
- */
-export function isUuid(value) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || '').trim());
-}
 
 /**
  * Determine Area Scope for Current Action
@@ -92,23 +79,6 @@ export function requireAreaAdmin(profile, message = 'Only Area-level servant acc
   }
 }
 
-/**
- * Ensure User Has General Leadership Privileges
- *
- * What it does:
- * Verifies that the user is either an Area servant or a Chapter servant before letting them manage chapter and activity records.
- *
- * Backup plan if it breaks:
- * If the user does not hold a recognized leadership role, it halts execution and issues a 403 Forbidden error.
- */
-export function requireLeadership(profile) {
-  if (!isAreaAdminRole(profile?.role) && !isChapterServantRole(profile?.role)) {
-    const error = new Error('You do not have permission to manage this data.');
-    error.statusCode = 403;
-    error.code = 'FORBIDDEN';
-    throw error;
-  }
-}
 
 /**
  * Validate Standard Date Format (YYYY-MM-DD)
@@ -204,17 +174,4 @@ export async function ensureChapterInArea(supabase, chapterId, areaId) {
     throw error;
   }
   return chapter;
-}
-
-/**
- * Retrieve Chapter Servant's Assigned Chapter ID
- *
- * What it does:
- * Inspects a leader's profile and returns their assigned chapter ID if they are a Chapter Servant, or null if they are an Area-wide leader.
- *
- * Backup plan if it breaks:
- * If the user's role is not a chapter servant or their profile has no chapter ID, it safely returns null.
- */
-export function scopedChapterId(profile) {
-  return isChapterServantRole(profile?.role) ? profile?.chapter_id || null : null;
 }

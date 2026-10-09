@@ -6,7 +6,7 @@
  * conferences, assemblies, and prayer meetings across their community Area.
  */
 
-import { requireAuthenticatedProfile, isAreaAdminRole } from '../_lib/access.js';
+import { requireAuthenticatedProfile } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { cleanText, nullableText, requireArea, requireAreaAdmin, asNonNegativeNumber, asNonNegativeInteger, loadAreaRow } from '../_lib/cloud-data.js';
 

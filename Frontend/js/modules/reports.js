@@ -2083,9 +2083,7 @@ function printReportSummary(
   win.document.close();
 }
 
-// =========================================================
-// EXPORT PDF
-// =========================================================
+// Export Activity Reports to PDF
 
 /**
  * Generate and Download Activity Reports PDF File

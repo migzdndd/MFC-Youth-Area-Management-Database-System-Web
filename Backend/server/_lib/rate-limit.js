@@ -19,7 +19,7 @@ import { sendJson, normalizeEmail } from './http.js';
  * Backup plan if it breaks:
  * If behind cloud proxies, it takes the first forwarded IP. If all headers are missing, it defaults to the local loopback address '127.0.0.1'.
  */
-export function getClientIp(req) {
+function getClientIp(req) {
   const forwarded = req.headers?.['x-forwarded-for'];
   if (forwarded) {
     return String(forwarded).split(',')[0].trim();

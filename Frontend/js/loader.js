@@ -7,18 +7,14 @@
  */
 
 (() => {
-  // --------------------------------------------------------------------------
   // Settings & Navigation State
-  // --------------------------------------------------------------------------
   const LOADER_ID = 'mfcPageLoader';
   const PREFETCH_DELAY_MS = 40;
   const NAVIGATION_TIMEOUT_MS = 5000;
   let navigating = false;
   let navigationTimer = null;
 
-  // --------------------------------------------------------------------------
   // Friendly Page Title Finder
-  // --------------------------------------------------------------------------
 
   /**
    * Get Friendly Page Name
@@ -57,10 +53,8 @@
     }
   }
 
-  // --------------------------------------------------------------------------
   // Placeholder Screen Outlines (Skeletons)
   // Shows gray placeholder shapes while live information is being fetched
-  // --------------------------------------------------------------------------
 
   /**
    * Build Header Placeholder
@@ -192,9 +186,7 @@
     }
   }
 
-  // --------------------------------------------------------------------------
   // Showing & Clearing Placeholder Screens
-  // --------------------------------------------------------------------------
 
   /**
    * Show Skeleton Screen
@@ -265,9 +257,7 @@
     }
   }
 
-  // --------------------------------------------------------------------------
   // Full-Screen Loading Curtain
-  // --------------------------------------------------------------------------
 
   /**
    * Build Loading Screen Curtain
@@ -354,9 +344,7 @@
     }
   }
 
-  // --------------------------------------------------------------------------
   // Moving Between Pages
-  // --------------------------------------------------------------------------
 
   /**
    * Move to Next Screen
@@ -399,9 +387,7 @@
     }
   }
 
-  // --------------------------------------------------------------------------
   // Link Click & Instant Background Pre-Loading
-  // --------------------------------------------------------------------------
 
   /**
    * Check If Link Can Be Pre-Loaded
@@ -497,9 +483,7 @@
     }
   }
 
-  // --------------------------------------------------------------------------
   // Setting Up Event Listeners
-  // --------------------------------------------------------------------------
   ensureLoader();
   showPageSkeleton();
   warmVisibleNavigation();
@@ -537,9 +521,7 @@
     window.addEventListener('load', hide);
   }
 
-  // --------------------------------------------------------------------------
   // Floating Help & Access Guide Button
-  // --------------------------------------------------------------------------
 
   /**
    * Build Floating Help Button & Guide
@@ -629,9 +611,7 @@
     ensureAccessGuideUI();
   }
 
-  // --------------------------------------------------------------------------
   // System Tools & Popup Toast Messages
-  // --------------------------------------------------------------------------
   window.MFCPageLoader = { show, hide, navigate };
   window.MFCPageSkeleton = { show: showPageSkeleton, clear: clearPageSkeleton };
   window.navigateWithLoader = (url, replace = false) => navigate(url, { replace });

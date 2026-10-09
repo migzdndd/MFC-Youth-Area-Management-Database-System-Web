@@ -64,7 +64,7 @@ export function parseCookies(cookieHeader = '') {
  * Backup plan if it breaks:
  * Automatically defaults to the website root path '/' and 'SameSite=Lax' if custom settings are omitted.
  */
-export function serializeCookie(name, val, options = {}) {
+function serializeCookie(name, val, options = {}) {
   let cookie = `${encodeURIComponent(name)}=${encodeURIComponent(val)}`;
   if (options.maxAge !== undefined) cookie += `; Max-Age=${Math.floor(options.maxAge)}`;
   if (options.domain) cookie += `; Domain=${options.domain}`;

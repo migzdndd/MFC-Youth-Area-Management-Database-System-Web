@@ -66,9 +66,7 @@ function normalizeEmail(value = '') {
 }
 
 
-// ---------------------------------------------------------------------------
 // Login Memory & Screen Directions
-// ---------------------------------------------------------------------------
 
 /**
  * Check Who Is Logged In
@@ -164,9 +162,7 @@ function destinationFor(session) {
   return '/dashboard';
 }
 
-// ---------------------------------------------------------------------------
 // Talking to the Server
-// ---------------------------------------------------------------------------
 
 /**
  * Send Message to Server
@@ -257,9 +253,7 @@ function backendSessionFromResponse(payload, remember = false) {
   return session;
 }
 
-// ---------------------------------------------------------------------------
 // On-Screen Alerts, Warnings & Visual Helpers
-// ---------------------------------------------------------------------------
 
 /**
  * Show Alert Banner
@@ -451,9 +445,7 @@ if (currentSession && isAuthPage && document.body.dataset.allowAuthenticated !==
 }
 
 
-// ---------------------------------------------------------------------------
 // Main Login Form Submission
-// ---------------------------------------------------------------------------
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
   loginForm.addEventListener('submit', async event => {
@@ -497,9 +489,7 @@ if (loginForm) {
   });
 }
 
-// ---------------------------------------------------------------------------
 // Servant Leader & Coordinator Sign-Up Form
-// ---------------------------------------------------------------------------
 const adminRegistrationForm = document.getElementById('adminRegistrationForm');
 if (adminRegistrationForm) {
   adminRegistrationForm.addEventListener('submit', async event => {
@@ -567,9 +557,7 @@ if (adminRegistrationForm) {
   });
 }
 
-// ---------------------------------------------------------------------------
 // Member Portal Account Activation (Claim Account)
-// ---------------------------------------------------------------------------
 const memberClaimForm = document.getElementById('memberClaimForm');
 if (memberClaimForm) {
   memberClaimForm.addEventListener('submit', async event => {
@@ -617,9 +605,7 @@ if (memberClaimForm) {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Password Change and Mandatory Account Update Form
-// ---------------------------------------------------------------------------
+// Sign-Out Action
 const backToLoginButton = document.getElementById('backToLoginButton');
 if (backToLoginButton) {
   backToLoginButton.addEventListener('click', async () => {
@@ -704,9 +690,7 @@ if (forcePasswordForm) {
   }
 }
 
-// ---------------------------------------------------------------------------
 // Email Address Change Request Form
-// ---------------------------------------------------------------------------
 const changeEmailForm = document.getElementById('changeEmailForm');
 if (changeEmailForm) {
   const emailSession = getSession();

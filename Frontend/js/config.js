@@ -9,10 +9,7 @@
 // Section 1: Storage Keys & Visual Smoothness
 
 // Storage labels for browser memory
-const DB_KEY = 'mfc_web_database_v1';
 window.SESSION_KEY = window.SESSION_KEY || 'mfc_auth_session';
-const DB_VERSION = 8;
-let activeModalCleanup = null;
 
 /**
  * Initializes Smooth Fade-in Animations
@@ -43,22 +40,6 @@ window.addEventListener('DOMContentLoaded', initializeMotionEffects);
 
 // Section 2: Standard Ministries & Access Roles
 
-// Official list of youth community services
-const SERVICES = [
-  'Unit Servant',
-  'Household Servant',
-  'Chapter Servant',
-  'Area Servant',
-  'Area LIT Servant',
-  'Campus Servant',
-  'Area Kids Servant',
-  'MFC High Servant',
-  'Music',
-  'Dance',
-  'Creative Writing',
-  'Graphics & Promo',
-  'Photography & Videography'
-];
 
 // Official leadership levels and user-friendly labels
 const ACCESS_LEVELS = [
