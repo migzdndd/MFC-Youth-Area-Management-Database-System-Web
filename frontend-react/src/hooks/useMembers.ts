@@ -24,13 +24,21 @@ export function useCreateMember() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (newMember: Partial<Member>) =>
-      apiClient<{ ok: boolean; data: Member }>('/members', {
+      apiClient<{ ok: boolean; data?: Member; member?: Member }>('/members', {
         method: 'POST',
         body: JSON.stringify(newMember),
       }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['members'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+    onSuccess: (res) => {
+      const created = res.data || (res as unknown as { member?: Member }).member;
+      if (created) {
+        queryClient.setQueriesData({ queryKey: ['members'] }, (old: Member[] | undefined) => {
+          if (!old || !Array.isArray(old)) return [created];
+          if (old.some((m) => m.id === created.id)) return old;
+          return [created, ...old];
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: ['members'], refetchType: 'all' });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'], refetchType: 'all' });
     },
   });
 }
@@ -39,13 +47,18 @@ export function useUpdateMember() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (member: Partial<Member> & { id: string }) =>
-      apiClient<{ ok: boolean; data: Member }>('/members', {
+      apiClient<{ ok: boolean; data?: Member; member?: Member }>('/members', {
         method: 'PUT',
         body: JSON.stringify(member),
       }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['members'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+    onSuccess: (res, variables) => {
+      const updated = res.data || (res as unknown as { member?: Member }).member || variables;
+      queryClient.setQueriesData({ queryKey: ['members'] }, (old: Member[] | undefined) => {
+        if (!old || !Array.isArray(old)) return old;
+        return old.map((m) => (m.id === variables.id ? { ...m, ...variables, ...updated } : m));
+      });
+      queryClient.invalidateQueries({ queryKey: ['members'], refetchType: 'all' });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'], refetchType: 'all' });
     },
   });
 }
@@ -58,9 +71,13 @@ export function useDeleteMember() {
         method: 'DELETE',
         body: JSON.stringify({ id }),
       }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['members'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+    onSuccess: (_res, id) => {
+      queryClient.setQueriesData({ queryKey: ['members'] }, (old: Member[] | undefined) => {
+        if (!old || !Array.isArray(old)) return old;
+        return old.filter((m) => m.id !== id);
+      });
+      queryClient.invalidateQueries({ queryKey: ['members'], refetchType: 'all' });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'], refetchType: 'all' });
     },
   });
 }

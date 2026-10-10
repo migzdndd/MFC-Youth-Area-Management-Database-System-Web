@@ -312,8 +312,7 @@ export const ReportsPage: React.FC = () => {
               options={[
                 { value: 'Chapter Assembly', label: 'Chapter Assembly' },
                 { value: 'Household Meeting', label: 'Household Meeting' },
-                { value: 'Community Service', label: 'Community Service' },
-                { value: 'Special Event', label: 'Special Event' },
+                { value: 'External Engagement', label: 'External Engagement' },
               ]}
             />
           </div>

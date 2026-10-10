@@ -67,15 +67,30 @@ export default async function handler(req, res) {
       }
     }
 
+    let areaName = null;
+    if (profile.area_id) {
+      const { data: areaData } = await admin
+        .from('areas')
+        .select('name')
+        .eq('id', profile.area_id)
+        .maybeSingle();
+      areaName = areaData?.name || null;
+    }
+
     return sendJson(res, 200, {
       ok: true,
       user: {
         id: user.id,
         email: user.email,
         memberId: profile.member_id,
+        member_id: profile.member_id,
         role: profile.role,
         areaId: profile.area_id,
+        area_id: profile.area_id,
+        areaName,
+        area_name: areaName,
         chapterId: profile.chapter_id,
+        chapter_id: profile.chapter_id,
         mustChangePassword: profile.must_change_password
       },
       member

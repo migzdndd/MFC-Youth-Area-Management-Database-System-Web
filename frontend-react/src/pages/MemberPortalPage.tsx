@@ -67,7 +67,7 @@ export const MemberPortalPage: React.FC = () => {
               </div>
               <p className="text-xs text-slate-500">{user?.email}</p>
               <div className="text-xs text-slate-600 mt-2 flex flex-wrap gap-2">
-                <span className="bg-slate-100 px-2.5 py-0.5 rounded-full font-medium">Area: <strong className="text-navy">{user?.area_name || 'My Area'}</strong></span>
+                <span className="bg-slate-100 px-2.5 py-0.5 rounded-full font-medium">Area: <strong className="text-navy">{user?.area_name || 'Area Community'}</strong></span>
                 {user?.chapter_name && (
                   <span className="bg-slate-100 px-2.5 py-0.5 rounded-full font-medium">Chapter: <strong className="text-navy">{user.chapter_name}</strong></span>
                 )}

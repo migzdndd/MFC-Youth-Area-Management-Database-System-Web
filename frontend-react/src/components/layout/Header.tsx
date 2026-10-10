@@ -9,7 +9,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const { user, activeArea } = useAuthStore();
 
-  const currentAreaName = activeArea?.name || user?.area_name || 'My Area';
+  const currentAreaName = activeArea?.name || user?.area_name || 'Area Community';
 
   return (
     <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-xs border-b border-border-subtle h-16 flex items-center justify-between px-4 sm:px-6 shadow-2xs">

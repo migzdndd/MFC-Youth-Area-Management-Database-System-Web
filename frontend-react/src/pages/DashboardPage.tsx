@@ -26,7 +26,8 @@ export const DashboardPage: React.FC = () => {
   const { data: readingsData } = useDailyReadings();
 
   const isNationalCoordinator = user?.role === 'national_coordinator';
-  const effectiveAreaName = activeArea?.name || user?.area_name || 'Assigned Area';
+  const matchedArea = areas?.find((a: Area) => a.id === (activeArea?.id || user?.area_id));
+  const effectiveAreaName = activeArea?.name || user?.area_name || matchedArea?.name || 'Area Community';
 
   const memberSubtitle = (() => {
     switch (user?.role) {
@@ -35,7 +36,7 @@ export const DashboardPage: React.FC = () => {
       case 'mfc_high_servant':
         return 'High School (JHS 7-10) roster';
       case 'area_kids_servant':
-        return 'Heartchamps roster';
+        return 'Kids Ministry roster';
       case 'lit_servant':
         return 'Creative Ministries roster';
       case 'chapter_servant':
@@ -44,45 +45,6 @@ export const DashboardPage: React.FC = () => {
         return 'Area-wide youth roster';
     }
   })();
-
-  const statCards = [
-    {
-      title: 'Total Members',
-      count: metrics?.totalMembers ?? 0,
-      icon: Users,
-      link: '/members',
-      subtitle: memberSubtitle,
-      color: 'text-navy',
-      bg: 'bg-navy/10',
-    },
-    {
-      title: 'Active Chapters',
-      count: metrics?.totalChapters ?? 0,
-      icon: Building2,
-      link: '/chapters',
-      subtitle: 'Area subdivisions',
-      color: 'text-amber-700',
-      bg: 'bg-amber-100',
-    },
-    {
-      title: 'Upcoming Events',
-      count: metrics?.upcomingEvents ?? 0,
-      icon: Calendar,
-      link: '/events',
-      subtitle: 'Assemblies & youth camps',
-      color: 'text-sky-700',
-      bg: 'bg-sky-100',
-    },
-    {
-      title: 'Activity Reports',
-      count: metrics?.totalReports ?? 0,
-      icon: FileText,
-      link: '/reports',
-      subtitle: 'Pastoral logs filed',
-      color: 'text-emerald-700',
-      bg: 'bg-emerald-100',
-    },
-  ];
 
   return (
     <div className="space-y-6">
@@ -97,7 +59,7 @@ export const DashboardPage: React.FC = () => {
           </h1>
           <p className="text-sm text-slate-600 mt-1">
             Managing community pastoral operations for{' '}
-            <strong className="text-navy font-semibold">{effectiveAreaName}</strong>.
+            <span className="text-navy font-semibold">{effectiveAreaName}</span>.
           </p>
         </div>
 
@@ -127,93 +89,186 @@ export const DashboardPage: React.FC = () => {
         )}
       </div>
 
-      {/* Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <Link
-              key={card.title}
-              to={card.link}
-              className="p-5 bg-white border border-slate-200/90 rounded-2xl shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-200 group flex flex-col justify-between"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">{card.title}</span>
-                <div className={`p-2.5 rounded-xl ${card.bg} ${card.color} group-hover:scale-105 transition-transform duration-150 shadow-2xs`}>
-                  <Icon className="w-4 h-4" />
-                </div>
+      {/* Primary & Secondary Metrics Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* Primary Card - Total Members */}
+        <Link
+          to="/members"
+          className="lg:col-span-6 p-6 sm:p-7 bg-white border-2 border-navy/20 hover:border-navy/50 rounded-2xl shadow-xs hover:shadow-md transition-all duration-200 group flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-bold text-navy uppercase tracking-wider">
+                Primary Focus &middot; Total Members
+              </span>
+              <div className="p-3 rounded-xl bg-navy text-white group-hover:scale-105 transition-transform duration-150 shadow-2xs">
+                <Users className="w-5 h-5" />
               </div>
+            </div>
 
-              <div>
-                <div className="text-3xl font-bold text-slate-900 font-heading tracking-tight">
-                  {metricsLoading ? <Spinner size="sm" /> : card.count}
-                </div>
-                <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
-                  <p className="text-xs text-slate-500 truncate">{card.subtitle}</p>
-                  <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-navy group-hover:translate-x-0.5 transition-all" />
-                </div>
+            <div className="text-4xl sm:text-5xl font-extrabold text-slate-900 font-heading tracking-tight mb-2">
+              {metricsLoading ? <Spinner size="md" /> : (metrics?.totalMembers ?? 0)}
+            </div>
+            <p className="text-xs sm:text-sm text-slate-600">
+              {memberSubtitle}
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between mt-6 pt-3 border-t border-slate-100">
+            <span className="text-xs font-semibold text-navy group-hover:underline">
+              View Community Directory
+            </span>
+            <ArrowRight className="w-4 h-4 text-navy group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+
+        {/* Secondary Cards Column */}
+        <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Active Chapters */}
+          <Link
+            to="/chapters"
+            className="p-5 bg-white border border-slate-200/90 rounded-2xl shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-200 group flex flex-col justify-between"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                Active Chapters
+              </span>
+              <div className="p-2.5 rounded-xl bg-amber-100 text-amber-800 group-hover:scale-105 transition-transform duration-150 shadow-2xs">
+                <Building2 className="w-4 h-4" />
               </div>
-            </Link>
-          );
-        })}
+            </div>
+
+            <div>
+              <div className="text-3xl font-bold text-slate-900 font-heading tracking-tight">
+                {metricsLoading ? <Spinner size="sm" /> : (metrics?.totalChapters ?? 0)}
+              </div>
+              <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
+                <p className="text-xs text-slate-500">Area subdivisions</p>
+                <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-navy group-hover:translate-x-0.5 transition-all" />
+              </div>
+            </div>
+          </Link>
+
+          {/* Activity Reports */}
+          <Link
+            to="/reports"
+            className="p-5 bg-white border border-slate-200/90 rounded-2xl shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-200 group flex flex-col justify-between"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                Activity Reports
+              </span>
+              <div className="p-2.5 rounded-xl bg-emerald-100 text-emerald-800 group-hover:scale-105 transition-transform duration-150 shadow-2xs">
+                <FileText className="w-4 h-4" />
+              </div>
+            </div>
+
+            <div>
+              <div className="text-3xl font-bold text-slate-900 font-heading tracking-tight">
+                {metricsLoading ? <Spinner size="sm" /> : (metrics?.totalReports ?? 0)}
+              </div>
+              <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
+                <p className="text-xs text-slate-500">Pastoral logs filed</p>
+                <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-navy group-hover:translate-x-0.5 transition-all" />
+              </div>
+            </div>
+          </Link>
+        </div>
       </div>
 
-      {/* Quick Servant Actions */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-2xs">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-bold text-slate-900 font-heading">
-            Quick Servant Actions
-          </h2>
-          <span className="text-xs text-slate-500">One-tap operational shortcuts</span>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <button
-            type="button"
-            onClick={() => navigate('/members')}
-            className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
-          >
-            <div className="p-2.5 rounded-lg bg-navy text-white shadow-2xs group-hover:scale-105 transition-transform">
-              <UserPlus className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-sm font-bold text-slate-900 group-hover:text-navy transition-colors">
-                Register Member
+      {/* Bottom Section: Upcoming Events Card + Quick Servant Actions Card */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Upcoming Events Card */}
+        <Link
+          to="/events"
+          className="lg:col-span-5 bg-white border border-slate-200/90 rounded-2xl p-6 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-200 group flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="p-2.5 rounded-xl bg-sky-100 text-sky-800 group-hover:scale-105 transition-transform shadow-2xs">
+                  <Calendar className="w-4 h-4" />
+                </div>
+                <h2 className="text-base font-bold text-slate-900 font-heading">
+                  Upcoming Events
+                </h2>
               </div>
-              <div className="text-xs text-slate-500">Add to youth area roster</div>
+              <span className="text-2xl font-bold text-sky-800 font-heading">
+                {metricsLoading ? <Spinner size="sm" /> : (metrics?.upcomingEvents ?? 0)}
+              </span>
             </div>
-          </button>
 
-          <button
-            type="button"
-            onClick={() => navigate('/events')}
-            className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
-          >
-            <div className="p-2.5 rounded-lg bg-amber-600 text-white shadow-2xs group-hover:scale-105 transition-transform">
-              <CalendarPlus className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-sm font-bold text-slate-900 group-hover:text-amber-800 transition-colors">
-                Schedule Event
-              </div>
-              <div className="text-xs text-slate-500">Assembly or youth camp</div>
-            </div>
-          </button>
+            <p className="text-xs text-slate-600 leading-relaxed mb-4">
+              Track area assemblies, youth camps, conferences, and member attendance check-ins.
+            </p>
+          </div>
 
-          <button
-            type="button"
-            onClick={() => navigate('/reports')}
-            className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
-          >
-            <div className="p-2.5 rounded-lg bg-emerald-700 text-white shadow-2xs group-hover:scale-105 transition-transform">
-              <FilePlus className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-sm font-bold text-slate-900 group-hover:text-emerald-800 transition-colors">
-                File Report
+          <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+            <span className="text-xs font-semibold text-sky-800 group-hover:underline">
+              Open Events Calendar & Attendance
+            </span>
+            <ArrowRight className="w-4 h-4 text-sky-800 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+
+        {/* Quick Servant Actions Card */}
+        <div className="lg:col-span-7 bg-white border border-slate-200/90 rounded-2xl p-6 shadow-2xs">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-bold text-slate-900 font-heading">
+              Quick Servant Actions
+            </h2>
+            <span className="text-xs text-slate-500">One-tap operational shortcuts</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <button
+              type="button"
+              onClick={() => navigate('/members')}
+              className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
+            >
+              <div className="p-2.5 rounded-lg bg-navy text-white shadow-2xs group-hover:scale-105 transition-transform">
+                <UserPlus className="w-4 h-4" />
               </div>
-              <div className="text-xs text-slate-500">Log pastoral gathering</div>
-            </div>
-          </button>
+              <div>
+                <div className="text-sm font-bold text-slate-900 group-hover:text-navy transition-colors">
+                  Register Member
+                </div>
+                <div className="text-xs text-slate-500">Add to youth roster</div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/events')}
+              className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
+            >
+              <div className="p-2.5 rounded-lg bg-amber-600 text-white shadow-2xs group-hover:scale-105 transition-transform">
+                <CalendarPlus className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="text-sm font-bold text-slate-900 group-hover:text-amber-800 transition-colors">
+                  Schedule Event
+                </div>
+                <div className="text-xs text-slate-500">Assembly or camp</div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/reports')}
+              className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
+            >
+              <div className="p-2.5 rounded-lg bg-emerald-700 text-white shadow-2xs group-hover:scale-105 transition-transform">
+                <FilePlus className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="text-sm font-bold text-slate-900 group-hover:text-emerald-800 transition-colors">
+                  File Report
+                </div>
+                <div className="text-xs text-slate-500">Log gathering</div>
+              </div>
+            </button>
+          </div>
         </div>
       </div>
 

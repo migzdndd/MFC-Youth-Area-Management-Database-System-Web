@@ -1,6 +1,5 @@
 import React from 'react';
 import { Music, Camera, Palette, PenTool, Flame } from 'lucide-react';
-import { Badge } from '@/components/ui/Badge';
 import { useMembers } from '@/hooks/useMembers';
 
 export const ServicesPage: React.FC = () => {
@@ -59,11 +58,10 @@ export const ServicesPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs">
-        <div className="flex items-center gap-2 mb-1">
+        <div className="mb-1">
           <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
             Creative Ministry Services
           </h1>
-          <Badge variant="gold">5 Pillars</Badge>
         </div>
         <p className="text-sm text-slate-600">
           The 5 official creative ministries overseen by LIT Servants for youth talents and evangelization.
@@ -81,24 +79,20 @@ export const ServicesPage: React.FC = () => {
               className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between shadow-2xs group"
             >
               <div>
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-3">
                   <div className="p-3 rounded-xl bg-navy/10 text-navy group-hover:scale-105 transition-transform duration-150">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <Badge variant="navy">{service.tag}</Badge>
                 </div>
 
-                <h3 className="font-bold text-base text-slate-900 font-heading mb-2 group-hover:text-navy transition-colors">
+                <h3 className="font-bold text-base text-slate-900 font-heading group-hover:text-navy transition-colors">
                   {service.title}
                 </h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  {service.description}
-                </p>
               </div>
 
               <div className="pt-3 mt-4 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
                 <span>LIT Creative Pillar</span>
-                <span className="font-bold text-navy bg-navy/10 px-2.5 py-0.5 rounded-full">
+                <span className="font-semibold text-navy text-xs">
                   {servantCount} {servantCount === 1 ? 'Servant' : 'Servants'}
                 </span>
               </div>

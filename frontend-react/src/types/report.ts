@@ -6,7 +6,7 @@ export interface ActivityReport {
   title: string;
   activity_date: string;
   participant_count: number;
-  report_type: 'Chapter Assembly' | 'Household Meeting' | 'Community Service' | 'Special Event' | string;
+  report_type: 'Chapter Assembly' | 'Household Meeting' | 'External Engagement' | string;
   notes?: string | null;
   prepared_by?: string | null;
   location?: string | null;
