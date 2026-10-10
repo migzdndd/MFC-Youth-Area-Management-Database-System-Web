@@ -83,6 +83,9 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  build: {
+    modulePreload: false,
+  },
   server: {
     port: 5173,
     proxy: {
