@@ -46,7 +46,6 @@ COPY --from=frontend-builder --chown=node:node /app/frontend-react/dist ./fronte
 # Copy application source code with unprivileged user ownership
 COPY --chown=node:node package.json server.js ./
 COPY --chown=node:node Backend/ ./Backend/
-COPY --chown=node:node Frontend/ ./Frontend/
 
 # Run as non-root user
 USER node
