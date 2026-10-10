@@ -1,6 +1,6 @@
 # MFC Youth Area Management System - Setup & Deployment Guide
 
-This step-by-step guide walks you through setting up Supabase, running local environments, and deploying your entire application (Frontend + Backend API) into **one single Vercel project** using the **Vercel Web Dashboard**.
+This step-by-step guide walks you through setting up Supabase, running local environments, and deploying your entire application (React 19 Frontend + Serverless API) into a single Vercel project using the Vercel Web Dashboard.
 
 ---
 
@@ -8,6 +8,7 @@ This step-by-step guide walks you through setting up Supabase, running local env
 
 Ensure you have access to the following:
 - **Git** installed on your computer (`git --version`)
+- **Node.js** (v20+ recommended)
 - **GitHub Account** ([github.com](https://github.com))
 - **Supabase Account** ([supabase.com](https://supabase.com))
 - **Vercel Account** ([vercel.com](https://vercel.com))
@@ -58,6 +59,11 @@ git branch -M main
    - `009_national_coordinator_and_school_fields.sql`
    - `010_mfc_high_servant.sql`
    - `011_lit_creative_ministries.sql`
+   - `012_rate_limits_and_lockouts.sql`
+   - `013_member_avatar.sql`
+   - `014_authenticated_role_permissions.sql`
+   - `015_disable_legacy_recursive_policies.sql`
+   - `016_domain_moderator_rls_scoping.sql`
 
 ---
 
@@ -75,10 +81,9 @@ In the **Configure Project** screen:
 
 1. **Project Name**: `mfc-youth-area-management-system`
 2. **Framework Preset**: Select **Other** / **No Framework**.
-3. **Root Directory**: Leave as `./` (do NOT set to `Frontend` or `Backend`).
+3. **Root Directory**: Leave as `./` (do not set to `frontend-react` or `Backend`).
 4. Expand **Build and Output Settings**:
-   - **Build Command**: Leave empty / default.
-   - **Output Directory**: Leave default (the root `vercel.json` handles static file and serverless API routing).
+   - Leave default settings. The root `vercel.json` coordinates building `frontend-react` with `@vercel/static-build` and `Backend/api/router.js` with `@vercel/node`.
 
 ### Step 3.3: Set Environment Variables in Vercel
 In the **Environment Variables** section (or go to **Project Settings** > **Environment Variables** in Vercel):
@@ -93,7 +98,7 @@ Add the following keys (available for Production, Preview, and Development):
 | `ADMIN_REGISTRATION_CODE` | **Secret (Sensitive)** | Private code for Servant Leader registration | Private passcode |
 
 > [!IMPORTANT]
-> If these variables are not configured in Vercel, auth login and cloud sync endpoints will return `503 Backend is not configured` / `Backend request failed`. After adding or updating variables in Vercel Settings, remember to click **Redeploy** on your latest deployment.
+> If these variables are not configured in Vercel, auth login and cloud sync endpoints will return `503 Backend is not configured` / `Backend request failed`. After adding or updating variables in Vercel Settings, click **Redeploy** on your latest deployment.
 
 ---
 
@@ -101,9 +106,8 @@ Add the following keys (available for Production, Preview, and Development):
 
 The repository includes a root `vercel.json` that routes:
 - `/api/*` requests directly to `Backend/api/router.js` (as a Vercel Serverless Function).
-- All other routes (`/*`) to the static website files inside `Frontend/`.
-
-Make sure `vercel.json` exists in your repository root before pushing to GitHub.
+- `/assets/*` and static assets to `frontend-react/dist`.
+- All other routes (`/*`) to `frontend-react/index.html` for single-page client routing.
 
 ---
 
@@ -114,7 +118,8 @@ Make sure `vercel.json` exists in your repository root before pushing to GitHub.
 3. Set **Site URL**: `https://mfc-youth-area-management-system.vercel.app` (replace with your live production URL).
 4. Under **Redirect URLs**, add:
    - `https://mfc-youth-area-management-system.vercel.app/**`
-   - `http://localhost:5500/**`
+   - `http://localhost:5173/**`
+   - `http://localhost:3000/**`
 5. Click **Save**.
 
 ---
@@ -122,7 +127,7 @@ Make sure `vercel.json` exists in your repository root before pushing to GitHub.
 ## 6. Post-Deployment Verification
 
 1. Open your Vercel URL in your browser: `https://mfc-youth-area-management-system.vercel.app`.
-2. Test user registration (`register.html`) and login (`index.html`).
+2. Test user registration (`/register`) and login (`/login`).
 3. Verify backend API health by opening: `https://mfc-youth-area-management-system.vercel.app/api/health`.
 4. Open browser DevTools (F12) to ensure there are no network or CORS errors.
 
@@ -143,7 +148,7 @@ Make sure `vercel.json` exists in your repository root before pushing to GitHub.
 ## 8. Containerized Deployment & CI/CD Pipelines
 
 ### 8.1 Docker Container Setup
-To run the application locally or deploy to containerized hosts (Cloud Run, AWS ECS, Azure App Service):
+To run the application locally or deploy to containerized hosts:
 
 ```bash
 # Build Docker image
@@ -157,20 +162,7 @@ Access the application at `http://localhost:3000` and API health check at `http:
 
 ### 8.2 GitHub Actions CI/CD Pipeline
 The repository includes automated CI/CD (`.github/workflows/ci-cd.yml`):
-1. **Lint & Syntax Check**: Automatically runs node syntax validation on code changes.
+1. **Lint & Syntax Check**: Automatically runs node syntax and TypeScript validation.
 2. **Security Audit**: Runs `npm audit` on backend dependencies.
 3. **Docker Build Verification**: Validates container image build integrity.
 4. **PaaS Deployment Trigger**: Connects seamlessly with Vercel git-backed deployments.
-
----
-
-## 9. Git Commands for Committing & Pushing
-
-Run these commands in PowerShell or Terminal to keep your repository updated:
-
-```bash
-git status
-git add .
-git commit -m "feat(infra): add containerization, CI/CD pipeline, and PaaS/load balancing alignment"
-git push origin main
-```

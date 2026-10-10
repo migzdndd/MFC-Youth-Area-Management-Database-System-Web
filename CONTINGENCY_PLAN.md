@@ -13,8 +13,8 @@ The application has been designed with built-in fault tolerance:
 **Symptoms:** Users cannot log in, load profiles, or fetch lists. Network tabs show `500 Internal Server Error` or timeout responses for data-heavy endpoints.
 **Contingency Steps:**
 1. Check the [Supabase Status Page](https://status.supabase.com/) for ongoing incidents.
-2. If it is a known outage, display a global maintenance banner on the frontend using Vercel Edge Config (if available) or by deploying a quick temporary commit to `index.html`.
-3. Inform stakeholders that data input is temporarily paused. Provide paper/spreadsheet fallback forms for any ongoing live events (e.g., Youth Camps).
+2. If it is a known outage, display a global maintenance banner on the frontend using Vercel Edge Config (if available) or by toggling a maintenance banner in the React frontend.
+3. Inform stakeholders that data input is temporarily paused. Provide paper or spreadsheet fallback forms for any ongoing live events (e.g., Youth Camps).
 
 ### B. Vercel Function Errors (Timeouts/Limits)
 **Symptoms:** Specific actions (like exporting a large CSV report) fail repeatedly with `504 Gateway Timeout` or `429 Too Many Requests`.

@@ -48,11 +48,11 @@ export const MembersPage: React.FC = () => {
 
   const ministryOptions = useMemo(() => {
     const defaultServices = [
-      'Music Ministry',
-      'Technical & Media (LIT)',
-      'Logistics & Setup',
-      'Liturgical Servants',
-      'Mission Volunteers',
+      'Music',
+      'Dance',
+      'Graphics & Promo',
+      'Creative Writing',
+      'Photography & Videography',
     ];
     const loadedNames = servicesList.map((s) => s.name);
     return Array.from(new Set([...defaultServices, ...loadedNames])).filter(Boolean);
