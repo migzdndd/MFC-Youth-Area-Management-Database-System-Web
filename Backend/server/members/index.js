@@ -89,7 +89,12 @@ async function listMembers(req, res) {
   const { data, error } = await query;
   if (error) throw error;
 
-  return sendJson(res, 200, { ok: true, members: data || [], data: data || [] });
+  const formatted = (data || []).map((m) => ({
+    ...m,
+    contact: m.contact_number || null
+  }));
+
+  return sendJson(res, 200, { ok: true, members: formatted, data: formatted });
 }
 
 async function createMember(req, res) {
@@ -99,17 +104,17 @@ async function createMember(req, res) {
   }
 
   const input = req.body || {};
-  const firstName = cleanText(input.firstName, 100);
-  const middleName = cleanText(input.middleName, 100) || null;
-  const lastName = cleanText(input.lastName, 100);
+  const firstName = cleanText(input.firstName ?? input.first_name, 100);
+  const middleName = cleanText(input.middleName ?? input.middle_name, 100) || null;
+  const lastName = cleanText(input.lastName ?? input.last_name, 100);
   const email = normalizeEmail(input.email);
-  const contactNumber = cleanText(input.contactNumber, 50) || null;
+  const contactNumber = cleanText(input.contactNumber ?? input.contact ?? input.contact_number, 50) || null;
   const address = cleanText(input.address, 1000) || null;
-  const birthDate = input.birthDate || null;
-  const firstAttendedYouthCamp = input.firstAttendedYouthCamp || null;
-  const status = String(input.status || 'Active') === 'Inactive' ? 'Inactive' : 'Active';
-  const academicTrack = cleanText(input.academicTrack, 100) || null;
-  const gradeLevel = cleanText(input.gradeLevel, 50) || null;
+  const birthDate = input.birthDate ?? input.birth_date ?? input.birthdate ?? null;
+  const firstAttendedYouthCamp = input.firstAttendedYouthCamp ?? input.first_attended_youth_camp ?? null;
+  const status = String(input.status || 'Active').toLowerCase() === 'inactive' ? 'Inactive' : 'Active';
+  const academicTrack = cleanText(input.academicTrack ?? input.academic_track ?? input.track, 100) || null;
+  const gradeLevel = cleanText(input.gradeLevel ?? input.grade_level, 50) || null;
   const school = cleanText(input.school, 255) || null;
 
   if (!firstName || !lastName) {
@@ -117,10 +122,10 @@ async function createMember(req, res) {
   }
   if (!isValidEmail(email)) return sendJson(res, 400, { ok: false, error: 'A valid email is required.' });
 
-  const requestedRole = String(input.accessLevel || 'member').trim().toLowerCase();
+  const requestedRole = String(input.accessLevel ?? input.access_level ?? input.role ?? 'member').trim().toLowerCase();
   let accessLevel = ACCESS_LEVELS.has(requestedRole) ? requestedRole : 'member';
   const areaId = requireArea(req, profile);
-  let chapterId = input.chapterId || null;
+  let chapterId = input.chapterId ?? input.chapter_id ?? null;
 
   if (isChapterServantRole(profile.role)) {
     accessLevel = 'member';
@@ -179,7 +184,12 @@ async function createMember(req, res) {
     role: accessLevel
   });
 
-  return sendJson(res, 201, { ok: true, member: createdMember });
+  const memberResult = {
+    ...createdMember,
+    contact: createdMember.contact_number || null
+  };
+
+  return sendJson(res, 201, { ok: true, member: memberResult, data: memberResult });
 }
 
 async function updateMember(req, res) {
@@ -197,27 +207,33 @@ async function updateMember(req, res) {
   const existing = await loadAreaMember(supabase, memberId, areaId);
   if (!existing) return sendJson(res, 404, { ok: false, error: 'Member not found in your Area.' });
 
-  const firstName = cleanText(input.firstName ?? existing.first_name, 100);
-  const middleName = cleanText(input.middleName ?? existing.middle_name, 100) || null;
-  const lastName = cleanText(input.lastName ?? existing.last_name, 100);
+  const firstName = cleanText(input.firstName ?? input.first_name ?? existing.first_name, 100);
+  const middleName = cleanText(input.middleName ?? input.middle_name ?? existing.middle_name, 100) || null;
+  const lastName = cleanText(input.lastName ?? input.last_name ?? existing.last_name, 100);
   const email = normalizeEmail(input.email ?? existing.email);
-  const contactNumber = cleanText(input.contactNumber ?? existing.contact_number, 50) || null;
+  const contactNumber = cleanText(input.contactNumber ?? input.contact ?? input.contact_number ?? existing.contact_number, 50) || null;
   const address = cleanText(input.address ?? existing.address, 1000) || null;
-  const birthDate = input.birthDate ?? existing.birth_date ?? null;
-  const firstAttendedYouthCamp = input.firstAttendedYouthCamp ?? existing.first_attended_youth_camp ?? null;
-  const status = isAreaAdminRole(profile.role)
-    ? (String(input.status ?? existing.status) === 'Inactive' ? 'Inactive' : 'Active')
+  const birthDate = input.birthDate ?? input.birth_date ?? input.birthdate ?? existing.birth_date ?? null;
+  const firstAttendedYouthCamp = input.firstAttendedYouthCamp ?? input.first_attended_youth_camp ?? existing.first_attended_youth_camp ?? null;
+  const statusInput = input.status !== undefined
+    ? (String(input.status).toLowerCase() === 'inactive' ? 'Inactive' : 'Active')
     : existing.status;
-  const academicTrack = cleanText(input.academicTrack ?? existing.academic_track, 100) || null;
-  const gradeLevel = cleanText(input.gradeLevel ?? existing.grade_level, 50) || null;
+  const status = isAreaAdminRole(profile.role)
+    ? statusInput
+    : existing.status;
+  const academicTrack = cleanText(input.academicTrack ?? input.academic_track ?? input.track ?? existing.academic_track, 100) || null;
+  const gradeLevel = cleanText(input.gradeLevel ?? input.grade_level ?? existing.grade_level, 50) || null;
   const school = cleanText(input.school ?? existing.school, 255) || null;
-  const avatarUrl = input.avatarUrl !== undefined ? input.avatarUrl : (existing.avatar_url || null);
-  const requestedRole = String(input.accessLevel ?? existing.access_level ?? 'member').trim().toLowerCase();
+  const avatarUrl = input.avatarUrl !== undefined
+    ? input.avatarUrl
+    : (input.avatar_url !== undefined ? input.avatar_url : (existing.avatar_url || null));
+  const requestedRole = String(input.accessLevel ?? input.access_level ?? input.role ?? existing.access_level ?? 'member').trim().toLowerCase();
   const accessLevel = isAreaAdminRole(profile.role)
     ? (ACCESS_LEVELS.has(requestedRole) ? requestedRole : 'member')
     : existing.access_level;
+  const rawChapterId = input.chapterId !== undefined ? input.chapterId : input.chapter_id;
   const chapterId = isAreaAdminRole(profile.role)
-    ? (input.chapterId || null)
+    ? (rawChapterId !== undefined ? (rawChapterId || null) : existing.chapter_id)
     : existing.chapter_id;
 
   if (!firstName || !lastName) {
@@ -345,7 +361,12 @@ async function updateMember(req, res) {
     });
   }
 
-  return sendJson(res, 200, { ok: true, member: updated });
+  const memberResult = {
+    ...updated,
+    contact: updated.contact_number || null
+  };
+
+  return sendJson(res, 200, { ok: true, member: memberResult, data: memberResult });
 }
 
 async function deleteMember(req, res) {
@@ -413,9 +434,9 @@ export default async function handler(req, res) {
   try {
     if (req.method === 'GET') return await listMembers(req, res);
     if (req.method === 'POST') return await createMember(req, res);
-    if (req.method === 'PATCH') return await updateMember(req, res);
+    if (req.method === 'PATCH' || req.method === 'PUT') return await updateMember(req, res);
     if (req.method === 'DELETE') return await deleteMember(req, res);
-    return methodNotAllowed(res, ['GET', 'POST', 'PATCH', 'DELETE']);
+    return methodNotAllowed(res, ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']);
   } catch (error) {
     return apiError(res, error);
   }

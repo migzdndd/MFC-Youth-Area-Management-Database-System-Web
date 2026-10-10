@@ -11,7 +11,7 @@ import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { cleanText, nullableText, requireArea, requireAreaAdmin, asNonNegativeNumber, asNonNegativeInteger, loadAreaRow } from '../_lib/cloud-data.js';
 
 function eventPayload(input, areaId, userId) {
-  const rawDate = String(input.date || '').trim();
+  const rawDate = String(input.date || input.starts_at || input.startsAt || '').trim();
   const name = cleanText(input.name, 160);
   const localDatePattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
   const date = localDatePattern.test(rawDate)
@@ -35,7 +35,7 @@ function eventPayload(input, areaId, userId) {
     starts_at: date.toISOString(),
     ends_at: null,
     fee: asNonNegativeNumber(input.fee, 0),
-    manual_attendance: asNonNegativeInteger(input.peopleAttended, 0),
+    manual_attendance: asNonNegativeInteger(input.peopleAttended ?? input.manual_attendance ?? input.manualAttendance, 0),
     ...(userId ? { created_by: userId } : {})
   };
 }
@@ -94,9 +94,9 @@ export default async function handler(req, res) {
   try {
     if (req.method === 'GET') return await listEvents(req, res);
     if (req.method === 'POST') return await createEvent(req, res);
-    if (req.method === 'PATCH') return await updateEvent(req, res);
+    if (req.method === 'PATCH' || req.method === 'PUT') return await updateEvent(req, res);
     if (req.method === 'DELETE') return await deleteEvent(req, res);
-    return methodNotAllowed(res, ['GET', 'POST', 'PATCH', 'DELETE']);
+    return methodNotAllowed(res, ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']);
   } catch (error) {
     return apiError(res, error);
   }

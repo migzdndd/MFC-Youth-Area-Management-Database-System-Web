@@ -125,9 +125,9 @@ export default async function handler(req, res) {
   try {
     if (req.method === 'GET') return await listChapters(req, res);
     if (req.method === 'POST') return await createChapter(req, res);
-    if (req.method === 'PATCH') return await updateChapter(req, res);
+    if (req.method === 'PATCH' || req.method === 'PUT') return await updateChapter(req, res);
     if (req.method === 'DELETE') return await deleteChapter(req, res);
-    return methodNotAllowed(res, ['GET', 'POST', 'PATCH', 'DELETE']);
+    return methodNotAllowed(res, ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']);
   } catch (error) {
     return apiError(res, error);
   }

@@ -49,8 +49,8 @@ async function createParticipant(req, res) {
   const { supabase, admin, profile, user } = await requireAuthenticatedProfile(req);
   if (!isAreaAdminRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'Only Area-level servant accounts can register event participants.' });
   const areaId = requireArea(req, profile);
-  const eventId = req.body?.eventId;
-  const memberId = req.body?.memberId;
+  const eventId = req.body?.eventId ?? req.body?.event_id;
+  const memberId = req.body?.memberId ?? req.body?.member_id;
   if (!eventId || !memberId) return sendJson(res, 400, { ok: false, error: 'Event and member are required.' });
   if (!(await eventInArea(admin, eventId, areaId)) || !(await memberInArea(supabase, memberId, areaId))) {
     return sendJson(res, 400, { ok: false, error: 'Event or member does not belong to your Area.' });
@@ -62,8 +62,8 @@ async function createParticipant(req, res) {
   const { data, error } = await admin.from('event_participants').insert({
     event_id: eventId,
     member_id: memberId,
-    mode_of_payment: cleanText(req.body?.paymentMode, 80) || null,
-    payment_status: cleanText(req.body?.paymentStatus, 80) || 'Unpaid',
+    mode_of_payment: cleanText(req.body?.paymentMode ?? req.body?.mode_of_payment, 80) || null,
+    payment_status: cleanText(req.body?.paymentStatus ?? req.body?.payment_status, 80) || 'Unpaid',
     attended: Boolean(req.body?.attended),
     registered_by: user.id
   }).select('*').single();
@@ -81,8 +81,8 @@ async function updateParticipant(req, res) {
   if (existingError) throw existingError;
   if (!existing || !(await eventInArea(admin, existing.event_id, areaId))) return sendJson(res, 404, { ok: false, error: 'Participant record not found in your Area.' });
   const { data, error } = await admin.from('event_participants').update({
-    mode_of_payment: cleanText(req.body?.paymentMode, 80) || null,
-    payment_status: cleanText(req.body?.paymentStatus, 80) || 'Unpaid',
+    mode_of_payment: cleanText(req.body?.paymentMode ?? req.body?.mode_of_payment, 80) || null,
+    payment_status: cleanText(req.body?.paymentStatus ?? req.body?.payment_status, 80) || 'Unpaid',
     attended: Boolean(req.body?.attended)
   }).eq('id', id).select('*').single();
   if (error) throw error;
@@ -107,9 +107,9 @@ export default async function handler(req, res) {
   try {
     if (req.method === 'GET') return await listParticipants(req, res);
     if (req.method === 'POST') return await createParticipant(req, res);
-    if (req.method === 'PATCH') return await updateParticipant(req, res);
+    if (req.method === 'PATCH' || req.method === 'PUT') return await updateParticipant(req, res);
     if (req.method === 'DELETE') return await deleteParticipant(req, res);
-    return methodNotAllowed(res, ['GET', 'POST', 'PATCH', 'DELETE']);
+    return methodNotAllowed(res, ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']);
   } catch (error) {
     return apiError(res, error);
   }

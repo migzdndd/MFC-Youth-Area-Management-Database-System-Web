@@ -46,33 +46,34 @@ async function saveReport(req, res, isUpdate) {
     }
   }
 
-  let chapterId = input.chapterId || null;
-  if (isUpdate && input.chapterId === undefined && existing) {
+  let chapterId = input.chapterId ?? input.chapter_id ?? null;
+  if (isUpdate && input.chapterId === undefined && input.chapter_id === undefined && existing) {
     chapterId = existing.chapter_id;
   }
   if (isChapterServantRole(profile.role)) chapterId = profile.chapter_id;
   if (chapterId) await ensureChapterInArea(admin, chapterId, areaId);
-  if (input.eventId) {
-    const event = await loadAreaRow(admin, 'events', input.eventId, areaId, 'id');
+  const eventId = input.eventId ?? input.event_id ?? null;
+  if (eventId) {
+    const event = await loadAreaRow(admin, 'events', eventId, areaId, 'id');
     if (!event) return sendJson(res, 400, { ok: false, error: 'The linked event does not belong to your Area.' });
   }
-  const reportType = cleanText(input.type, 100);
-  const date = validateIsoDate(input.date, { required: true });
+  const reportType = cleanText(input.type ?? input.report_type, 100);
+  const date = validateIsoDate(input.date ?? input.activity_date, { required: true });
   if (!reportType) return sendJson(res, 400, { ok: false, error: 'Report type is required.' });
   const payload = {
     area_id: areaId,
     chapter_id: chapterId,
-    prepared_by_member_id: isChapterServantRole(profile.role) ? profile.member_id : (input.preparedByMemberId || profile.member_id || null),
-    prepared_by_name: nullableText(input.preparedBy, 160),
-    chapter_name_snapshot: nullableText(input.chapterName, 160),
+    prepared_by_member_id: isChapterServantRole(profile.role) ? profile.member_id : (input.preparedByMemberId ?? input.prepared_by_member_id ?? profile.member_id ?? null),
+    prepared_by_name: nullableText(input.preparedBy ?? input.prepared_by, 160),
+    chapter_name_snapshot: nullableText(input.chapterName ?? input.chapter_name, 160),
     report_type: reportType,
     activity_date: date,
     title: nullableText(input.title, 160),
     activity: nullableText(input.activity, 160),
-    participant_count: asNonNegativeInteger(input.participants, 0),
+    participant_count: asNonNegativeInteger(input.participants ?? input.participant_count, 0),
     location: nullableText(input.location, 255),
-    event_id: input.eventId || null,
-    notes: nullableText(input.description, 4000),
+    event_id: eventId,
+    notes: nullableText(input.description ?? input.notes, 4000),
     created_by: user.id
   };
   if (!isUpdate) {
@@ -104,9 +105,9 @@ export default async function handler(req, res) {
   try {
     if (req.method === 'GET') return await listReports(req, res);
     if (req.method === 'POST') return await saveReport(req, res, false);
-    if (req.method === 'PATCH') return await saveReport(req, res, true);
+    if (req.method === 'PATCH' || req.method === 'PUT') return await saveReport(req, res, true);
     if (req.method === 'DELETE') return await deleteReport(req, res);
-    return methodNotAllowed(res, ['GET', 'POST', 'PATCH', 'DELETE']);
+    return methodNotAllowed(res, ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']);
   } catch (error) {
     return apiError(res, error);
   }

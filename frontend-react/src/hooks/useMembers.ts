@@ -45,6 +45,7 @@ export function useUpdateMember() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['members'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
     },
   });
 }

@@ -50,11 +50,11 @@ export const MembersPage: React.FC = () => {
         m.first_name.toLowerCase().includes(q) ||
         m.last_name.toLowerCase().includes(q) ||
         (m.email && m.email.toLowerCase().includes(q)) ||
-        (m.contact && m.contact.includes(q));
+        ((m.contact || m.contact_number) && (m.contact || m.contact_number)!.includes(q));
 
       const matchesChapter = !chapterFilter || m.chapter_id === chapterFilter;
       const matchesTrack = !trackFilter || m.academic_track === trackFilter;
-      const matchesStatus = !statusFilter || m.status === statusFilter;
+      const matchesStatus = !statusFilter || m.status?.toLowerCase() === statusFilter.toLowerCase();
 
       return matchesSearch && matchesChapter && matchesTrack && matchesStatus;
     });
@@ -85,9 +85,9 @@ export const MembersPage: React.FC = () => {
     setGender(member.gender === 'Female' ? 'Female' : 'Male');
     setChapterId(member.chapter_id || '');
     setTrack(member.academic_track || 'College');
-    setContact(member.contact || '');
+    setContact(member.contact || member.contact_number || '');
     setEmail(member.email || '');
-    setStatus(member.status || 'active');
+    setStatus(member.status?.toLowerCase() === 'inactive' ? 'inactive' : 'active');
     setGuardianName(member.guardian_name || '');
     setGuardianContact(member.guardian_contact || '');
     setFormError('');
@@ -262,12 +262,12 @@ export const MembersPage: React.FC = () => {
                         'Unassigned'}
                     </td>
                     <td className="px-5 py-4 text-xs text-text-muted">
-                      <div>{member.contact || '-'}</div>
+                      <div>{member.contact || member.contact_number || '-'}</div>
                       <div className="text-[11px] text-slate-400">{member.email || ''}</div>
                     </td>
                     <td className="px-5 py-4">
-                      <Badge variant={member.status === 'active' ? 'success' : 'default'}>
-                        {member.status === 'active' ? 'Active' : 'Inactive'}
+                      <Badge variant={member.status?.toLowerCase() === 'active' ? 'success' : 'default'}>
+                        {member.status?.toLowerCase() === 'active' ? 'Active' : 'Inactive'}
                       </Badge>
                     </td>
                     <td className="px-5 py-4 text-right">

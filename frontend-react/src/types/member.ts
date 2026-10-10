@@ -11,11 +11,13 @@ export interface Member {
   nickname?: string | null;
   gender?: 'Male' | 'Female' | null;
   birthdate?: string | null;
+  birth_date?: string | null;
   contact?: string | null;
+  contact_number?: string | null;
   email?: string | null;
   address?: string | null;
   academic_track?: AcademicTrack | null;
-  status: MemberStatus;
+  status: MemberStatus | string;
   guardian_name?: string | null;
   guardian_contact?: string | null;
   assigned_services?: string[] | null;

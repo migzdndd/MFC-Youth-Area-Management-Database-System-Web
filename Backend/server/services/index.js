@@ -22,8 +22,9 @@ async function assignServices(req, res) {
   const { supabase, admin, profile } = await requireAuthenticatedProfile(req);
   if (!isAreaAdminRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'Only Area-level servant accounts can assign services.' });
   const areaId = requireArea(req, profile);
-  const memberId = req.body?.memberId;
-  const serviceNames = [...new Set((Array.isArray(req.body?.serviceNames) ? req.body.serviceNames : []).map(normalizeServiceName).filter(Boolean))];
+  const memberId = req.body?.memberId ?? req.body?.member_id;
+  const rawServices = req.body?.serviceNames ?? req.body?.service_names ?? req.body?.services;
+  const serviceNames = [...new Set((Array.isArray(rawServices) ? rawServices : []).map(normalizeServiceName).filter(Boolean))];
   if (serviceNames.length > 1) return sendJson(res, 400, { ok: false, error: 'A member can only be assigned to one service.' });
   if (!memberId) return sendJson(res, 400, { ok: false, error: 'Member ID is required.' });
   const member = await loadAreaRow(supabase, 'members', memberId, areaId, 'id');
@@ -67,8 +68,8 @@ async function assignServices(req, res) {
 export default async function handler(req, res) {
   try {
     if (req.method === 'GET') return await listServices(req, res);
-    if (req.method === 'PATCH') return await assignServices(req, res);
-    return methodNotAllowed(res, ['GET', 'PATCH']);
+    if (req.method === 'PATCH' || req.method === 'PUT') return await assignServices(req, res);
+    return methodNotAllowed(res, ['GET', 'PATCH', 'PUT']);
   } catch (error) {
     return apiError(res, error);
   }
