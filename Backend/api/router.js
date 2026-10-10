@@ -98,6 +98,45 @@ function normalizeRoute(value) {
   return String(route || '').replace(/^\/+|\/+$/g, '');
 }
 
+async function parseRequestBody(req) {
+  if (req.body !== undefined) return;
+  if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+    req.body = {};
+    return;
+  }
+  return new Promise((resolve) => {
+    let data = '';
+    req.on('data', (chunk) => {
+      data += chunk;
+      if (data.length > 5 * 1024 * 1024) {
+        req.destroy();
+        req.body = {};
+        resolve();
+      }
+    });
+    req.on('end', () => {
+      if (!data) {
+        req.body = {};
+        return resolve();
+      }
+      try {
+        req.body = JSON.parse(data);
+      } catch {
+        try {
+          req.body = Object.fromEntries(new URLSearchParams(data));
+        } catch {
+          req.body = {};
+        }
+      }
+      resolve();
+    });
+    req.on('error', () => {
+      req.body = {};
+      resolve();
+    });
+  });
+}
+
 /**
  * Main Central Server Route Dispatcher
  *
@@ -112,6 +151,7 @@ export default async function handler(req, res) {
   if (!verifyRequestOrigin(req, res)) return;
 
   try {
+    await parseRequestBody(req);
     const route = normalizeRoute(req.query?.route);
     const routeHandler = ROUTES.get(route);
 
