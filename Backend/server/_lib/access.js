@@ -11,40 +11,38 @@
 import { createSupabaseAdmin, createSupabaseUserClient } from './supabase.js';
 import { readBearerToken } from './http.js';
 
-export const AREA_ADMIN_ROLES = new Set([
+export const FULL_AREA_ADMIN_ROLES = new Set([
   'national_coordinator',
   'couple_coordinator',
-  'area_servant',
+  'area_servant'
+]);
+
+export const DOMAIN_MODERATOR_ROLES = new Set([
   'lit_servant',
   'campus_servant',
   'mfc_high_servant',
   'area_kids_servant'
 ]);
 
-/**
- * Check If Leadership Role Has Area-Wide Authority
- *
- * What it does:
- * Tests whether a leader's role belongs to the high-level Area leadership team (such as National, Area, or Ministry servants).
- *
- * Backup plan if it breaks:
- * If a role name has irregular spacing or uppercase letters, it cleans and trims it first. If the role is missing or not in the authorized list, it safely returns false.
- */
+export const AREA_ADMIN_ROLES = FULL_AREA_ADMIN_ROLES;
+
 export function isAreaAdminRole(role) {
-  return AREA_ADMIN_ROLES.has(String(role || '').trim().toLowerCase());
+  return FULL_AREA_ADMIN_ROLES.has(String(role || '').trim().toLowerCase());
 }
 
-/**
- * Check If User is a Chapter Servant
- *
- * What it does:
- * Determines if the current user is a local chapter leader rather than an area-wide administrator.
- *
- * Backup plan if it breaks:
- * Cleans the input text and safely returns false if the role is missing or invalid.
- */
+export function isDomainModeratorRole(role) {
+  return DOMAIN_MODERATOR_ROLES.has(String(role || '').trim().toLowerCase());
+}
+
 export function isChapterServantRole(role) {
   return String(role || '').trim().toLowerCase() === 'chapter_servant';
+}
+
+export function isLeaderRole(role) {
+  const normalized = String(role || '').trim().toLowerCase();
+  return FULL_AREA_ADMIN_ROLES.has(normalized) ||
+    DOMAIN_MODERATOR_ROLES.has(normalized) ||
+    normalized === 'chapter_servant';
 }
 
 /**

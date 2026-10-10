@@ -6,14 +6,14 @@
  * to view their personal giving history and leaders to review chapter or area totals.
  */
 
-import { requireAuthenticatedProfile, isAreaAdminRole, isChapterServantRole } from '../_lib/access.js';
+import { requireAuthenticatedProfile, isAreaAdminRole, isChapterServantRole, isDomainModeratorRole, isLeaderRole } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { cleanText, requireArea, validateIsoDate, asNonNegativeNumber, loadAreaRow } from '../_lib/cloud-data.js';
 
 async function canManageMember(supabase, profile, memberId, areaId) {
   const member = await loadAreaRow(supabase, 'members', memberId, areaId, 'id, chapter_id');
   if (!member) return null;
-  if (isAreaAdminRole(profile.role)) return member;
+  if (isAreaAdminRole(profile.role) || isDomainModeratorRole(profile.role)) return member;
   if (isChapterServantRole(profile.role) && profile.chapter_id && String(member.chapter_id || '') === String(profile.chapter_id)) return member;
   return null;
 }
@@ -29,7 +29,7 @@ async function listGig(req, res) {
   if (isChapterServantRole(profile.role)) {
     if (!profile.chapter_id) return sendJson(res, 200, { ok: true, gig: [] });
     query = query.eq('chapter_id', profile.chapter_id);
-  } else if (!isAreaAdminRole(profile.role)) {
+  } else if (!isLeaderRole(profile.role)) {
     if (!profile.member_id) return sendJson(res, 200, { ok: true, gig: [] });
     query = query.eq('member_id', profile.member_id);
   }

@@ -6,21 +6,28 @@
  * a single download package so the app can work smoothly even when internet is slow or offline.
  */
 
-import { requireAuthenticatedProfile, isAreaAdminRole, isChapterServantRole } from '../_lib/access.js';
+import {
+  requireAuthenticatedProfile,
+  isAreaAdminRole,
+  isChapterServantRole,
+  isLeaderRole
+} from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { requireArea } from '../_lib/cloud-data.js';
+import { isLitService } from '../_lib/service-catalog.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return methodNotAllowed(res, ['GET']);
   try {
     const { supabase, admin, profile } = await requireAuthenticatedProfile(req);
     const areaId = requireArea(req, profile);
+    const role = String(profile.role || '').trim().toLowerCase();
 
     let chaptersQuery = admin.from('chapters').select('id, area_id, name, is_active, created_at, updated_at').eq('area_id', areaId).eq('is_active', true).order('name');
     let reportsQuery = admin.from('activity_reports').select('id, area_id, chapter_id, prepared_by_member_id, prepared_by_name, chapter_name_snapshot, report_type, activity_date, title, activity, participant_count, location, event_id, notes, created_at, updated_at').eq('area_id', areaId).order('activity_date', { ascending: false });
     let gigQuery = admin.from('gig_contributions').select('id, area_id, chapter_id, member_id, amount, contribution_date, notes, created_at').eq('area_id', areaId).order('contribution_date', { ascending: false });
 
-    if (isChapterServantRole(profile.role)) {
+    if (isChapterServantRole(role)) {
       if (profile.chapter_id) {
         chaptersQuery = chaptersQuery.eq('id', profile.chapter_id);
         reportsQuery = reportsQuery.eq('chapter_id', profile.chapter_id);
@@ -30,7 +37,7 @@ export default async function handler(req, res) {
         reportsQuery = reportsQuery.eq('chapter_id', '00000000-0000-0000-0000-000000000000');
         gigQuery = gigQuery.eq('chapter_id', '00000000-0000-0000-0000-000000000000');
       }
-    } else if (!isAreaAdminRole(profile.role)) {
+    } else if (!isLeaderRole(role)) {
       chaptersQuery = profile.chapter_id
         ? chaptersQuery.eq('id', profile.chapter_id)
         : chaptersQuery.eq('id', '00000000-0000-0000-0000-000000000000');
@@ -40,12 +47,47 @@ export default async function handler(req, res) {
         : gigQuery.eq('member_id', '00000000-0000-0000-0000-000000000000');
     }
 
-    let membersQuery = admin.from('members').select('id, area_id, chapter_id, status').eq('area_id', areaId);
-    if (isChapterServantRole(profile.role)) {
+    let membersQuery = admin.from('members').select('id, area_id, chapter_id, status, academic_track').eq('area_id', areaId);
+    if (isAreaAdminRole(role)) {
+      // Area-wide members
+    } else if (role === 'campus_servant') {
+      membersQuery = membersQuery.in('academic_track', ['College', 'Senior High School']);
+    } else if (role === 'mfc_high_servant') {
+      membersQuery = membersQuery.eq('academic_track', 'High School');
+    } else if (role === 'area_kids_servant') {
+      membersQuery = membersQuery.in('academic_track', ['Heartchamp', 'Heartchamps']);
+    } else if (role === 'lit_servant') {
+      const { data: litServices } = await admin
+        .from('services')
+        .select('id, name')
+        .eq('area_id', areaId)
+        .eq('is_active', true);
+      const creativeServiceIds = (litServices || [])
+        .filter((s) => isLitService(s.name))
+        .map((s) => s.id);
+      const litMemberIds = new Set();
+      if (creativeServiceIds.length > 0) {
+        const { data: memberServiceRows } = await admin
+          .from('member_services')
+          .select('member_id')
+          .in('service_id', creativeServiceIds);
+        for (const row of (memberServiceRows || [])) {
+          if (row.member_id) litMemberIds.add(String(row.member_id));
+        }
+      }
+      if (profile.member_id) litMemberIds.add(String(profile.member_id));
+      if (litMemberIds.size > 0) {
+        membersQuery = membersQuery.in('id', Array.from(litMemberIds));
+      } else {
+        membersQuery = profile.member_id
+          ? membersQuery.eq('id', profile.member_id)
+          : membersQuery.eq('id', '00000000-0000-0000-0000-000000000000');
+      }
+    } else if (isChapterServantRole(role)) {
       membersQuery = profile.chapter_id
         ? membersQuery.eq('chapter_id', profile.chapter_id)
         : membersQuery.eq('id', profile.member_id || '00000000-0000-0000-0000-000000000000');
-    } else if (!isAreaAdminRole(profile.role)) {
+    } else {
       membersQuery = membersQuery.eq('id', profile.member_id || '00000000-0000-0000-0000-000000000000');
     }
 

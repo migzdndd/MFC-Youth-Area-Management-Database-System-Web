@@ -29,13 +29,30 @@ export const DashboardPage: React.FC = () => {
   const isNationalCoordinator = user?.role === 'national_coordinator';
   const effectiveAreaName = activeArea?.name || user?.area_name || 'Assigned Area';
 
+  const memberSubtitle = (() => {
+    switch (user?.role) {
+      case 'campus_servant':
+        return 'College & SHS roster';
+      case 'mfc_high_servant':
+        return 'High School (JHS 7-10) roster';
+      case 'area_kids_servant':
+        return 'Heartchamps roster';
+      case 'lit_servant':
+        return 'Creative Ministries roster';
+      case 'chapter_servant':
+        return 'Assigned chapter roster';
+      default:
+        return 'Area-wide youth roster';
+    }
+  })();
+
   const statCards = [
     {
       title: 'Total Members',
       count: metrics?.totalMembers ?? 0,
       icon: Users,
       link: '/members',
-      subtitle: 'Registered youth profiles',
+      subtitle: memberSubtitle,
     },
     {
       title: 'Active Chapters',

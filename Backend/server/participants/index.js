@@ -6,7 +6,7 @@
  * and marks their attendance when they arrive at the venue.
  */
 
-import { requireAuthenticatedProfile, isAreaAdminRole, isChapterServantRole } from '../_lib/access.js';
+import { requireAuthenticatedProfile, isAreaAdminRole, isChapterServantRole, isLeaderRole } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { cleanText, requireArea, loadAreaRow } from '../_lib/cloud-data.js';
 
@@ -37,7 +37,7 @@ async function listParticipants(req, res) {
     if (memberError) throw memberError;
     const ids = (chapterMembers || []).map(item => item.id);
     query = ids.length ? query.in('member_id', ids) : query.eq('member_id', '00000000-0000-0000-0000-000000000000');
-  } else if (!isAreaAdminRole(profile.role)) {
+  } else if (!isLeaderRole(profile.role)) {
     query = query.eq('member_id', profile.member_id || '00000000-0000-0000-0000-000000000000');
   }
   const { data, error } = await query;
@@ -47,7 +47,7 @@ async function listParticipants(req, res) {
 
 async function createParticipant(req, res) {
   const { supabase, admin, profile, user } = await requireAuthenticatedProfile(req);
-  if (!isAreaAdminRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'Only Area-level servant accounts can register event participants.' });
+  if (!isLeaderRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'Only leadership accounts can register event participants.' });
   const areaId = requireArea(req, profile);
   const eventId = req.body?.eventId ?? req.body?.event_id;
   const memberId = req.body?.memberId ?? req.body?.member_id;
@@ -73,7 +73,7 @@ async function createParticipant(req, res) {
 
 async function updateParticipant(req, res) {
   const { admin, profile } = await requireAuthenticatedProfile(req);
-  if (!isAreaAdminRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'Only Area-level servant accounts can edit event participants.' });
+  if (!isLeaderRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'Only leadership accounts can edit event participants.' });
   const areaId = requireArea(req, profile);
   const id = req.body?.id;
   if (!id) return sendJson(res, 400, { ok: false, error: 'Participant ID is required.' });
@@ -91,7 +91,7 @@ async function updateParticipant(req, res) {
 
 async function deleteParticipant(req, res) {
   const { admin, profile } = await requireAuthenticatedProfile(req);
-  if (!isAreaAdminRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'Only Area-level servant accounts can delete event participants.' });
+  if (!isLeaderRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'Only leadership accounts can delete event participants.' });
   const areaId = requireArea(req, profile);
   const id = req.query?.id || req.body?.id;
   if (!id) return sendJson(res, 400, { ok: false, error: 'Participant ID is required.' });

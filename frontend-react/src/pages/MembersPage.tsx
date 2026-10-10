@@ -220,6 +220,7 @@ export const MembersPage: React.FC = () => {
             onChange={(e) => setTrackFilter(e.target.value)}
             options={[
               { value: '', label: 'All Academic Tracks' },
+              { value: 'Heartchamp', label: 'Heartchamp' },
               { value: 'High School', label: 'High School' },
               { value: 'Senior High School', label: 'Senior High School' },
               { value: 'College', label: 'College' },
@@ -414,6 +415,7 @@ export const MembersPage: React.FC = () => {
               value={track}
               onChange={(e) => setTrack(e.target.value as AcademicTrack)}
               options={[
+                { value: 'Heartchamp', label: 'Heartchamp' },
                 { value: 'High School', label: 'High School' },
                 { value: 'Senior High School', label: 'Senior High School' },
                 { value: 'College', label: 'College' },

@@ -9,7 +9,9 @@
 import {
   requireAuthenticatedProfile,
   isAreaAdminRole,
-  isChapterServantRole
+  isChapterServantRole,
+  isDomainModeratorRole,
+  isLeaderRole
 } from '../_lib/access.js';
 import {
   sendJson,
@@ -21,7 +23,8 @@ import {
 import {
   ensureRoleServiceAssignment,
   ensureStandardServices,
-  normalizeServiceName
+  normalizeServiceName,
+  isLitService
 } from '../_lib/service-catalog.js';
 import { requireArea } from '../_lib/cloud-data.js';
 
@@ -79,15 +82,54 @@ async function listMembers(req, res) {
     .order('first_name', { ascending: true });
 
   const areaId = requireArea(req, profile);
+  const role = String(profile.role || '').trim().toLowerCase();
 
-  if (isAreaAdminRole(profile.role)) {
+  if (isAreaAdminRole(role)) {
     query = query.eq('area_id', areaId);
-  } else if (isChapterServantRole(profile.role)) {
+  } else if (role === 'campus_servant') {
+    query = query.eq('area_id', areaId).in('academic_track', ['College', 'Senior High School']);
+  } else if (role === 'mfc_high_servant') {
+    query = query.eq('area_id', areaId).eq('academic_track', 'High School');
+  } else if (role === 'area_kids_servant') {
+    query = query.eq('area_id', areaId).in('academic_track', ['Heartchamp', 'Heartchamps']);
+  } else if (role === 'lit_servant') {
+    const { data: litServices } = await admin
+      .from('services')
+      .select('id, name')
+      .eq('area_id', areaId)
+      .eq('is_active', true);
+
+    const creativeServiceIds = (litServices || [])
+      .filter((s) => isLitService(s.name))
+      .map((s) => s.id);
+
+    const litMemberIds = new Set();
+    if (creativeServiceIds.length > 0) {
+      const { data: memberServiceRows } = await admin
+        .from('member_services')
+        .select('member_id')
+        .in('service_id', creativeServiceIds);
+      for (const row of (memberServiceRows || [])) {
+        if (row.member_id) litMemberIds.add(String(row.member_id));
+      }
+    }
+    if (profile.member_id) {
+      litMemberIds.add(String(profile.member_id));
+    }
+
+    if (litMemberIds.size > 0) {
+      query = query.eq('area_id', areaId).in('id', Array.from(litMemberIds));
+    } else {
+      query = profile.member_id
+        ? query.eq('id', profile.member_id)
+        : query.eq('id', '00000000-0000-0000-0000-000000000000');
+    }
+  } else if (isChapterServantRole(role)) {
     query = profile.chapter_id
       ? query.eq('chapter_id', profile.chapter_id)
-      : query.eq('id', profile.member_id);
+      : query.eq('id', profile.member_id || '00000000-0000-0000-0000-000000000000');
   } else {
-    query = query.eq('id', profile.member_id);
+    query = query.eq('id', profile.member_id || '00000000-0000-0000-0000-000000000000');
   }
 
   const { data, error } = await query;
@@ -134,7 +176,7 @@ async function listMembers(req, res) {
 
 async function createMember(req, res) {
   const { admin, profile, user } = await requireAuthenticatedProfile(req);
-  if (!isAreaAdminRole(profile.role) && !isChapterServantRole(profile.role)) {
+  if (!isLeaderRole(profile.role)) {
     return sendJson(res, 403, { ok: false, error: 'You do not have permission to add members.' });
   }
 
@@ -162,9 +204,11 @@ async function createMember(req, res) {
   const areaId = requireArea(req, profile);
   let chapterId = input.chapterId ?? input.chapter_id ?? null;
 
-  if (isChapterServantRole(profile.role)) {
+  if (!isAreaAdminRole(profile.role)) {
     accessLevel = 'member';
-    chapterId = profile.chapter_id;
+    if (isChapterServantRole(profile.role)) {
+      chapterId = profile.chapter_id;
+    }
   }
 
   if (!areaId) {
@@ -265,13 +309,32 @@ async function updateMember(req, res) {
   if (!memberId) return sendJson(res, 400, { ok: false, error: 'Member ID is required.' });
 
   const isSelf = profile.member_id && String(profile.member_id) === String(memberId);
-  if (!isAreaAdminRole(profile.role) && !isSelf) {
-    return sendJson(res, 403, { ok: false, error: 'Only Area-level servant accounts can edit member records.' });
+  if (!isLeaderRole(profile.role) && !isSelf) {
+    return sendJson(res, 403, { ok: false, error: 'Only leadership accounts can edit member records.' });
   }
 
   const areaId = requireArea(req, profile);
   const existing = await loadAreaMember(admin, memberId, areaId);
   if (!existing) return sendJson(res, 404, { ok: false, error: 'Member not found in your Area.' });
+
+  const role = String(profile.role || '').trim().toLowerCase();
+  if (isChapterServantRole(role) && !isSelf) {
+    if (String(existing.chapter_id || '') !== String(profile.chapter_id || '')) {
+      return sendJson(res, 403, { ok: false, error: 'You can only edit members in your assigned chapter.' });
+    }
+  } else if (role === 'campus_servant' && !isSelf) {
+    if (!['college', 'senior high school'].includes(String(existing.academic_track || '').trim().toLowerCase())) {
+      return sendJson(res, 403, { ok: false, error: 'Campus Servants can only edit College and Senior High School members.' });
+    }
+  } else if (role === 'mfc_high_servant' && !isSelf) {
+    if (String(existing.academic_track || '').trim().toLowerCase() !== 'high school') {
+      return sendJson(res, 403, { ok: false, error: 'MFC High Servants can only edit High School members.' });
+    }
+  } else if (role === 'area_kids_servant' && !isSelf) {
+    if (!['heartchamp', 'heartchamps'].includes(String(existing.academic_track || '').trim().toLowerCase())) {
+      return sendJson(res, 403, { ok: false, error: 'Area Kids Servants can only edit Heartchamp members.' });
+    }
+  }
 
   const firstName = cleanText(input.firstName ?? input.first_name ?? existing.first_name, 100);
   const middleName = cleanText(input.middleName ?? input.middle_name ?? existing.middle_name, 100) || null;
@@ -284,7 +347,7 @@ async function updateMember(req, res) {
   const statusInput = input.status !== undefined
     ? (String(input.status).toLowerCase() === 'inactive' ? 'Inactive' : 'Active')
     : existing.status;
-  const status = isAreaAdminRole(profile.role)
+  const status = isLeaderRole(profile.role)
     ? statusInput
     : existing.status;
   const academicTrack = cleanText(input.academicTrack ?? input.academic_track ?? input.track ?? existing.academic_track, 100) || null;
@@ -298,7 +361,7 @@ async function updateMember(req, res) {
     ? (ACCESS_LEVELS.has(requestedRole) ? requestedRole : 'member')
     : existing.access_level;
   const rawChapterId = input.chapterId !== undefined ? input.chapterId : input.chapter_id;
-  const chapterId = isAreaAdminRole(profile.role)
+  const chapterId = (isAreaAdminRole(profile.role) || isChapterServantRole(profile.role))
     ? (rawChapterId !== undefined ? (rawChapterId || null) : existing.chapter_id)
     : existing.chapter_id;
 

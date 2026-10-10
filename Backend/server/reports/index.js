@@ -6,7 +6,7 @@
  * events, household attendance, service meetings, and youth activities.
  */
 
-import { requireAuthenticatedProfile, isAreaAdminRole, isChapterServantRole } from '../_lib/access.js';
+import { requireAuthenticatedProfile, isAreaAdminRole, isChapterServantRole, isLeaderRole } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { cleanText, nullableText, requireArea, validateIsoDate, asNonNegativeInteger, ensureChapterInArea, loadAreaRow } from '../_lib/cloud-data.js';
 
@@ -21,7 +21,7 @@ async function listReports(req, res) {
   if (isChapterServantRole(profile.role)) {
     if (!profile.chapter_id) return sendJson(res, 200, { ok: true, reports: [] });
     query = query.eq('chapter_id', profile.chapter_id);
-  } else if (!isAreaAdminRole(profile.role)) {
+  } else if (!isLeaderRole(profile.role)) {
     return sendJson(res, 200, { ok: true, reports: [] });
   }
   const { data, error } = await query;
@@ -31,7 +31,7 @@ async function listReports(req, res) {
 
 async function saveReport(req, res, isUpdate) {
   const { supabase, admin, profile, user } = await requireAuthenticatedProfile(req);
-  if (!isAreaAdminRole(profile.role) && !isChapterServantRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'You do not have permission to manage activity reports.' });
+  if (!isLeaderRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'You do not have permission to manage activity reports.' });
   const areaId = requireArea(req, profile);
   const input = req.body || {};
 
@@ -89,7 +89,7 @@ async function saveReport(req, res, isUpdate) {
 
 async function deleteReport(req, res) {
   const { supabase, profile } = await requireAuthenticatedProfile(req);
-  if (!isAreaAdminRole(profile.role) && !isChapterServantRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'You do not have permission to delete activity reports.' });
+  if (!isLeaderRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'You do not have permission to delete activity reports.' });
   const areaId = requireArea(req, profile);
   const id = req.query?.id || req.body?.id;
   if (!id) return sendJson(res, 400, { ok: false, error: 'Report ID is required.' });

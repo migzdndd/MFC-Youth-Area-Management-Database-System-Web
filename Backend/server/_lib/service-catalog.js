@@ -27,6 +27,29 @@ export const STANDARD_SERVICES = Object.freeze([
   'Photography & Videography'
 ]);
 
+export const LIT_CREATIVE_SERVICES = Object.freeze([
+  'Music',
+  'Dance',
+  'Creative Writing',
+  'Graphics & Promo',
+  'Photography & Videography'
+]);
+
+export function isLitService(name) {
+  const normalized = String(name || '').trim().toLowerCase();
+  const litSet = new Set([
+    'music',
+    'music ministry',
+    'technical & media (lit)',
+    'area lit servant',
+    'dance',
+    'creative writing',
+    'graphics & promo',
+    'photography & videography'
+  ]);
+  return litSet.has(normalized);
+}
+
 const SERVICE_ALIASES = new Map([
   ['music ministry', 'Music Ministry'],
   ['music', 'Music Ministry'],

@@ -9,7 +9,7 @@
 import { requireAuthenticatedProfile, isAreaAdminRole } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { requireArea, loadAreaRow } from '../_lib/cloud-data.js';
-import { ensureStandardServices, normalizeServiceName } from '../_lib/service-catalog.js';
+import { ensureStandardServices, normalizeServiceName, isLitService } from '../_lib/service-catalog.js';
 
 async function listServices(req, res) {
   const { admin, profile } = await requireAuthenticatedProfile(req);
@@ -20,7 +20,10 @@ async function listServices(req, res) {
 
 async function assignServices(req, res) {
   const { supabase, admin, profile } = await requireAuthenticatedProfile(req);
-  if (!isAreaAdminRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'Only Area-level servant accounts can assign services.' });
+  const role = String(profile.role || '').trim().toLowerCase();
+  if (!isAreaAdminRole(role) && role !== 'lit_servant') {
+    return sendJson(res, 403, { ok: false, error: 'Only Area-level servant accounts or LIT Servants can assign services.' });
+  }
   const areaId = requireArea(req, profile);
   const memberId = req.body?.memberId ?? req.body?.member_id;
   const rawServices = req.body?.serviceNames ?? req.body?.service_names ?? req.body?.services;
