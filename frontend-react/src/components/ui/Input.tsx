@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -7,8 +7,10 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, helperText, className = '', id, ...props }, ref) => {
-    const inputId = id || props.name;
+  ({ label, error, helperText, className = '', id, name, ...props }, ref) => {
+    const generatedId = useId();
+    const inputId = id || (name ? String(name) : `input-${generatedId}`);
+    const inputName = name || inputId;
 
     return (
       <div className="w-full flex flex-col gap-1.5">
@@ -20,6 +22,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         <input
           id={inputId}
+          name={inputName}
           ref={ref}
           className={`w-full px-3.5 py-2.5 text-sm bg-white text-text-main border rounded-md min-h-[44px] transition-colors placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy disabled:bg-slate-100 disabled:cursor-not-allowed ${
             error ? 'border-mfc-red focus:border-mfc-red focus:ring-red-100' : 'border-slate-300'

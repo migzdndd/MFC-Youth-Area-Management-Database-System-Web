@@ -32,7 +32,7 @@ async function listParticipants(req, res) {
     .order('registered_at', { ascending: false });
   if (req.query?.eventId) query = query.eq('event_id', req.query.eventId);
   if (isChapterServantRole(profile.role)) {
-    const { data: chapterMembers, error: memberError } = await supabase
+    const { data: chapterMembers, error: memberError } = await admin
       .from('members').select('id').eq('area_id', areaId).eq('chapter_id', profile.chapter_id || '00000000-0000-0000-0000-000000000000');
     if (memberError) throw memberError;
     const ids = (chapterMembers || []).map(item => item.id);

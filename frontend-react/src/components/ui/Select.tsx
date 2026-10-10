@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 
 export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
@@ -7,8 +7,10 @@ export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElemen
 }
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, options, children, className = '', id, ...props }, ref) => {
-    const selectId = id || props.name;
+  ({ label, error, options, children, className = '', id, name, ...props }, ref) => {
+    const generatedId = useId();
+    const selectId = id || (name ? String(name) : `select-${generatedId}`);
+    const selectName = name || selectId;
 
     return (
       <div className="w-full flex flex-col gap-1.5">
@@ -20,6 +22,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         )}
         <select
           id={selectId}
+          name={selectName}
           ref={ref}
           className={`w-full px-3.5 py-2.5 text-sm bg-white text-text-main border rounded-md min-h-[44px] transition-colors focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy disabled:bg-slate-100 disabled:cursor-not-allowed ${
             error ? 'border-mfc-red focus:border-mfc-red focus:ring-red-100' : 'border-slate-300'

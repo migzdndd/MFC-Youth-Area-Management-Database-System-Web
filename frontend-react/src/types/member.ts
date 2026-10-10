@@ -20,6 +20,7 @@ export interface Member {
   status: MemberStatus | string;
   guardian_name?: string | null;
   guardian_contact?: string | null;
+  service?: string | null;
   assigned_services?: string[] | null;
   created_at?: string;
   updated_at?: string;

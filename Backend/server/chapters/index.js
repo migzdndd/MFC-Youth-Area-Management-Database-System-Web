@@ -106,7 +106,7 @@ async function deleteChapter(req, res) {
   const existing = await loadAreaRow(admin, 'chapters', id, areaId, 'id');
   if (!existing) return sendJson(res, 404, { ok: false, error: 'Chapter not found in your Area.' });
 
-  const { count, error: countError } = await supabase
+  const { count, error: countError } = await admin
     .from('members')
     .select('id', { count: 'exact', head: true })
     .eq('area_id', areaId)

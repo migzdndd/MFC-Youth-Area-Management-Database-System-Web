@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useMembers, useCreateMember, useUpdateMember, useDeleteMember } from '@/hooks/useMembers';
 import { useChapters } from '@/hooks/useChapters';
+import { useServices } from '@/hooks/useServices';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
@@ -16,9 +17,11 @@ export const MembersPage: React.FC = () => {
   const [chapterFilter, setChapterFilter] = useState('');
   const [trackFilter, setTrackFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [serviceFilter, setServiceFilter] = useState('');
 
   const { data: members = [], isLoading } = useMembers();
   const { data: chapters = [] } = useChapters();
+  const { data: servicesList = [] } = useServices();
 
   const createMember = useCreateMember();
   const updateMember = useUpdateMember();
@@ -35,12 +38,25 @@ export const MembersPage: React.FC = () => {
   const [gender, setGender] = useState<'Male' | 'Female'>('Male');
   const [chapterId, setChapterId] = useState('');
   const [track, setTrack] = useState<AcademicTrack>('College');
+  const [service, setService] = useState('');
   const [contact, setContact] = useState('');
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<MemberStatus>('active');
   const [guardianName, setGuardianName] = useState('');
   const [guardianContact, setGuardianContact] = useState('');
   const [formError, setFormError] = useState('');
+
+  const ministryOptions = useMemo(() => {
+    const defaultServices = [
+      'Music Ministry',
+      'Technical & Media (LIT)',
+      'Logistics & Setup',
+      'Liturgical Servants',
+      'Mission Volunteers',
+    ];
+    const loadedNames = servicesList.map((s) => s.name);
+    return Array.from(new Set([...defaultServices, ...loadedNames])).filter(Boolean);
+  }, [servicesList]);
 
   const filteredMembers = useMemo(() => {
     return members.filter((m) => {
@@ -55,10 +71,15 @@ export const MembersPage: React.FC = () => {
       const matchesChapter = !chapterFilter || m.chapter_id === chapterFilter;
       const matchesTrack = !trackFilter || m.academic_track === trackFilter;
       const matchesStatus = !statusFilter || m.status?.toLowerCase() === statusFilter.toLowerCase();
+      const matchesService =
+        !serviceFilter ||
+        (m.service && m.service.toLowerCase() === serviceFilter.toLowerCase()) ||
+        (Array.isArray(m.assigned_services) &&
+          m.assigned_services.some((s) => s.toLowerCase() === serviceFilter.toLowerCase()));
 
-      return matchesSearch && matchesChapter && matchesTrack && matchesStatus;
+      return matchesSearch && matchesChapter && matchesTrack && matchesStatus && matchesService;
     });
-  }, [members, search, chapterFilter, trackFilter, statusFilter]);
+  }, [members, search, chapterFilter, trackFilter, statusFilter, serviceFilter]);
 
   const openCreateModal = () => {
     setEditingMember(null);
@@ -68,6 +89,7 @@ export const MembersPage: React.FC = () => {
     setGender('Male');
     setChapterId(chapters[0]?.id || '');
     setTrack('College');
+    setService('');
     setContact('');
     setEmail('');
     setStatus('active');
@@ -85,6 +107,7 @@ export const MembersPage: React.FC = () => {
     setGender(member.gender === 'Female' ? 'Female' : 'Male');
     setChapterId(member.chapter_id || '');
     setTrack(member.academic_track || 'College');
+    setService(member.service || (member.assigned_services && member.assigned_services[0]) || '');
     setContact(member.contact || member.contact_number || '');
     setEmail(member.email || '');
     setStatus(member.status?.toLowerCase() === 'inactive' ? 'inactive' : 'active');
@@ -113,6 +136,7 @@ export const MembersPage: React.FC = () => {
           gender,
           chapter_id: chapterId || null,
           academic_track: track,
+          service: service || null,
           contact,
           email,
           status,
@@ -127,6 +151,7 @@ export const MembersPage: React.FC = () => {
           gender,
           chapter_id: chapterId || null,
           academic_track: track,
+          service: service || null,
           contact,
           email,
           status,
@@ -174,12 +199,13 @@ export const MembersPage: React.FC = () => {
 
       {/* Filter and Search Bar */}
       <div className="bg-white border border-border-subtle rounded-xl p-4 space-y-3">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-          <div className="md:col-span-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <div className="sm:col-span-2 lg:col-span-1">
             <SearchBar value={search} onChange={setSearch} placeholder="Search by name, email..." />
           </div>
 
           <Select
+            name="chapterFilter"
             value={chapterFilter}
             onChange={(e) => setChapterFilter(e.target.value)}
             options={[
@@ -189,6 +215,7 @@ export const MembersPage: React.FC = () => {
           />
 
           <Select
+            name="trackFilter"
             value={trackFilter}
             onChange={(e) => setTrackFilter(e.target.value)}
             options={[
@@ -201,6 +228,17 @@ export const MembersPage: React.FC = () => {
           />
 
           <Select
+            name="serviceFilter"
+            value={serviceFilter}
+            onChange={(e) => setServiceFilter(e.target.value)}
+            options={[
+              { value: '', label: 'All Ministry Services' },
+              ...ministryOptions.map((s) => ({ value: s, label: s })),
+            ]}
+          />
+
+          <Select
+            name="statusFilter"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             options={[
@@ -224,7 +262,7 @@ export const MembersPage: React.FC = () => {
             <Filter className="w-8 h-8 text-slate-300 mx-auto mb-2" />
             <h3 className="text-sm font-bold text-text-main">No members found</h3>
             <p className="text-xs text-text-muted mt-1">
-              {search || chapterFilter || trackFilter
+              {search || chapterFilter || trackFilter || serviceFilter
                 ? 'Try adjusting your search filters to find what you are looking for.'
                 : 'No members registered yet. Add your first member to get started.'}
             </p>
@@ -237,6 +275,7 @@ export const MembersPage: React.FC = () => {
                   <th className="px-5 py-3.5">Name</th>
                   <th className="px-5 py-3.5">Track</th>
                   <th className="px-5 py-3.5">Chapter</th>
+                  <th className="px-5 py-3.5">Service</th>
                   <th className="px-5 py-3.5">Contact</th>
                   <th className="px-5 py-3.5">Status</th>
                   <th className="px-5 py-3.5 text-right">Actions</th>
@@ -260,6 +299,13 @@ export const MembersPage: React.FC = () => {
                       {member.chapter_name ||
                         chapters.find((c) => c.id === member.chapter_id)?.name ||
                         'Unassigned'}
+                    </td>
+                    <td className="px-5 py-4 text-xs font-medium">
+                      {member.service || (member.assigned_services && member.assigned_services[0]) ? (
+                        <Badge variant="navy">{member.service || member.assigned_services![0]}</Badge>
+                      ) : (
+                        <span className="text-slate-400">Unassigned</span>
+                      )}
                     </td>
                     <td className="px-5 py-4 text-xs text-text-muted">
                       <div>{member.contact || member.contact_number || '-'}</div>
@@ -315,12 +361,14 @@ export const MembersPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="First Name"
+              name="firstName"
               required
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
             />
             <Input
               label="Last Name"
+              name="lastName"
               required
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
@@ -330,11 +378,13 @@ export const MembersPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Nickname"
+              name="nickname"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
             />
             <Select
               label="Gender"
+              name="gender"
               value={gender}
               onChange={(e) => setGender(e.target.value as 'Male' | 'Female')}
               options={[
@@ -347,6 +397,7 @@ export const MembersPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Select
               label="Assigned Chapter"
+              name="chapterId"
               value={chapterId}
               onChange={(e) => setChapterId(e.target.value)}
               options={[
@@ -356,6 +407,7 @@ export const MembersPage: React.FC = () => {
             />
             <Select
               label="Academic Track"
+              name="academicTrack"
               value={track}
               onChange={(e) => setTrack(e.target.value as AcademicTrack)}
               options={[
@@ -368,14 +420,39 @@ export const MembersPage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Select
+              label="Ministry Service Track"
+              name="service"
+              value={service}
+              onChange={(e) => setService(e.target.value)}
+              options={[
+                { value: '', label: 'Unassigned / None' },
+                ...ministryOptions.map((s) => ({ value: s, label: s })),
+              ]}
+            />
+            <Select
+              label="Membership Status"
+              name="status"
+              value={status}
+              onChange={(e) => setStatus(e.target.value as MemberStatus)}
+              options={[
+                { value: 'active', label: 'Active' },
+                { value: 'inactive', label: 'Inactive' },
+              ]}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Mobile Number"
+              name="contact"
               value={contact}
               onChange={(e) => setContact(e.target.value)}
               placeholder="09123456789"
             />
             <Input
               label="Email Address"
+              name="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -386,27 +463,19 @@ export const MembersPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Guardian Name"
+              name="guardianName"
               value={guardianName}
               onChange={(e) => setGuardianName(e.target.value)}
               placeholder="Parent or Guardian"
             />
             <Input
               label="Guardian Contact"
+              name="guardianContact"
               value={guardianContact}
               onChange={(e) => setGuardianContact(e.target.value)}
               placeholder="Emergency phone number"
             />
           </div>
-
-          <Select
-            label="Membership Status"
-            value={status}
-            onChange={(e) => setStatus(e.target.value as MemberStatus)}
-            options={[
-              { value: 'active', label: 'Active' },
-              { value: 'inactive', label: 'Inactive' },
-            ]}
-          />
 
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-border-subtle">
             <Button

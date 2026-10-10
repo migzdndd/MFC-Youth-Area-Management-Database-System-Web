@@ -18,7 +18,11 @@ import {
   isValidEmail,
   apiError
 } from '../_lib/http.js';
-import { ensureRoleServiceAssignment } from '../_lib/service-catalog.js';
+import {
+  ensureRoleServiceAssignment,
+  ensureStandardServices,
+  normalizeServiceName
+} from '../_lib/service-catalog.js';
 import { requireArea } from '../_lib/cloud-data.js';
 
 const ACCESS_LEVELS = new Set([
@@ -37,9 +41,9 @@ function cleanText(value, max = 255) {
   return String(value || '').trim().slice(0, max);
 }
 
-async function loadAreaMember(supabase, memberId, areaId) {
+async function loadAreaMember(admin, memberId, areaId) {
   if (!memberId || !areaId) return null;
-  const { data, error } = await supabase
+  const { data, error } = await admin
     .from('members')
     .select('*')
     .eq('id', memberId)
@@ -49,9 +53,9 @@ async function loadAreaMember(supabase, memberId, areaId) {
   return data || null;
 }
 
-async function validateChapter(supabase, chapterId, areaId) {
+async function validateChapter(admin, chapterId, areaId) {
   if (!chapterId) return null;
-  const { data: chapter, error } = await supabase
+  const { data: chapter, error } = await admin
     .from('chapters')
     .select('id, area_id')
     .eq('id', chapterId)
@@ -89,16 +93,47 @@ async function listMembers(req, res) {
   const { data, error } = await query;
   if (error) throw error;
 
-  const formatted = (data || []).map((m) => ({
-    ...m,
-    contact: m.contact_number || null
-  }));
+  const memberIds = (data || []).map((m) => m.id);
+  const memberServicesMap = new Map();
+  if (memberIds.length > 0) {
+    const { data: msRows } = await admin
+      .from('member_services')
+      .select('member_id, service_id')
+      .in('member_id', memberIds);
+    if (msRows && msRows.length > 0) {
+      const serviceIds = [...new Set(msRows.map((r) => r.service_id))];
+      const { data: sRows } = await admin
+        .from('services')
+        .select('id, name')
+        .in('id', serviceIds);
+      const serviceNameById = new Map((sRows || []).map((s) => [s.id, s.name]));
+      for (const ms of msRows) {
+        const name = serviceNameById.get(ms.service_id);
+        if (name) {
+          if (!memberServicesMap.has(ms.member_id)) {
+            memberServicesMap.set(ms.member_id, []);
+          }
+          memberServicesMap.get(ms.member_id).push(name);
+        }
+      }
+    }
+  }
+
+  const formatted = (data || []).map((m) => {
+    const assigned = memberServicesMap.get(m.id) || [];
+    return {
+      ...m,
+      contact: m.contact_number || null,
+      service: assigned[0] || null,
+      assigned_services: assigned
+    };
+  });
 
   return sendJson(res, 200, { ok: true, members: formatted, data: formatted });
 }
 
 async function createMember(req, res) {
-  const { supabase, admin, profile, user } = await requireAuthenticatedProfile(req);
+  const { admin, profile, user } = await requireAuthenticatedProfile(req);
   if (!isAreaAdminRole(profile.role) && !isChapterServantRole(profile.role)) {
     return sendJson(res, 403, { ok: false, error: 'You do not have permission to add members.' });
   }
@@ -144,7 +179,7 @@ async function createMember(req, res) {
 
   await validateChapter(admin, chapterId, areaId);
 
-  const { data: existingMember, error: existingError } = await supabase
+  const { data: existingMember, error: existingError } = await admin
     .from('members')
     .select('id')
     .ilike('email', email)
@@ -154,7 +189,7 @@ async function createMember(req, res) {
     return sendJson(res, 409, { ok: false, error: 'A member with that email already exists.' });
   }
 
-  const { data: createdMember, error: memberError } = await supabase
+  const { data: createdMember, error: memberError } = await admin
     .from('members')
     .insert({
       area_id: areaId,
@@ -178,22 +213,53 @@ async function createMember(req, res) {
     .single();
   if (memberError) throw memberError;
 
-  await ensureRoleServiceAssignment(admin, {
-    memberId: createdMember.id,
-    areaId,
-    role: accessLevel
-  });
+  const requestedService = input.service ?? input.serviceName ?? input.assigned_service ?? (Array.isArray(input.assigned_services) ? input.assigned_services[0] : null);
+  const normalizedService = requestedService ? normalizeServiceName(requestedService) : '';
+  if (normalizedService) {
+    const services = await ensureStandardServices(admin, areaId);
+    const targetService = services.find(
+      (s) => normalizeServiceName(s.name).toLowerCase() === normalizedService.toLowerCase()
+    );
+    if (targetService?.id) {
+      await admin.from('member_services').insert({
+        member_id: createdMember.id,
+        service_id: targetService.id
+      });
+    }
+  } else {
+    await ensureRoleServiceAssignment(admin, {
+      memberId: createdMember.id,
+      areaId,
+      role: accessLevel
+    });
+  }
+
+  const { data: memberServiceRows } = await admin
+    .from('member_services')
+    .select('service_id')
+    .eq('member_id', createdMember.id);
+  let assignedServices = [];
+  if (memberServiceRows && memberServiceRows.length > 0) {
+    const sIds = memberServiceRows.map((r) => r.service_id);
+    const { data: sRows } = await admin
+      .from('services')
+      .select('name')
+      .in('id', sIds);
+    assignedServices = (sRows || []).map((s) => s.name);
+  }
 
   const memberResult = {
     ...createdMember,
-    contact: createdMember.contact_number || null
+    contact: createdMember.contact_number || null,
+    service: assignedServices[0] || null,
+    assigned_services: assignedServices
   };
 
   return sendJson(res, 201, { ok: true, member: memberResult, data: memberResult });
 }
 
 async function updateMember(req, res) {
-  const { supabase, admin, profile } = await requireAuthenticatedProfile(req);
+  const { admin, profile } = await requireAuthenticatedProfile(req);
   const input = req.body || {};
   const memberId = input.id;
   if (!memberId) return sendJson(res, 400, { ok: false, error: 'Member ID is required.' });
@@ -204,7 +270,7 @@ async function updateMember(req, res) {
   }
 
   const areaId = requireArea(req, profile);
-  const existing = await loadAreaMember(supabase, memberId, areaId);
+  const existing = await loadAreaMember(admin, memberId, areaId);
   if (!existing) return sendJson(res, 404, { ok: false, error: 'Member not found in your Area.' });
 
   const firstName = cleanText(input.firstName ?? input.first_name ?? existing.first_name, 100);
@@ -260,7 +326,7 @@ async function updateMember(req, res) {
   }
   if (emailChanged) {
     preflightChecks.push(
-      supabase
+      admin
         .from('members')
         .select('id')
         .ilike('email', email)
@@ -280,7 +346,7 @@ async function updateMember(req, res) {
     await Promise.all(preflightChecks);
   }
 
-  const { data: updated, error: updateError } = await supabase
+  const { data: updated, error: updateError } = await admin
     .from('members')
     .update({
       chapter_id: chapterId,
@@ -353,7 +419,26 @@ async function updateMember(req, res) {
     }
   }
 
-  if (roleChanged) {
+  const hasServiceInput = input.service !== undefined || input.serviceName !== undefined || input.assigned_services !== undefined || input.assigned_service !== undefined;
+  if (hasServiceInput) {
+    const rawService = input.service ?? input.serviceName ?? input.assigned_service ?? (Array.isArray(input.assigned_services) ? input.assigned_services[0] : null);
+    const normalizedService = rawService ? normalizeServiceName(rawService) : '';
+
+    await admin.from('member_services').delete().eq('member_id', memberId);
+
+    if (normalizedService) {
+      const services = await ensureStandardServices(admin, areaId);
+      const targetService = services.find(
+        (s) => normalizeServiceName(s.name).toLowerCase() === normalizedService.toLowerCase()
+      );
+      if (targetService?.id) {
+        await admin.from('member_services').insert({
+          member_id: memberId,
+          service_id: targetService.id
+        });
+      }
+    }
+  } else if (roleChanged) {
     await ensureRoleServiceAssignment(admin, {
       memberId: updated.id,
       areaId,
@@ -361,16 +446,32 @@ async function updateMember(req, res) {
     });
   }
 
+  const { data: memberServiceRows } = await admin
+    .from('member_services')
+    .select('service_id')
+    .eq('member_id', updated.id);
+  let assignedServices = [];
+  if (memberServiceRows && memberServiceRows.length > 0) {
+    const sIds = memberServiceRows.map((r) => r.service_id);
+    const { data: sRows } = await admin
+      .from('services')
+      .select('name')
+      .in('id', sIds);
+    assignedServices = (sRows || []).map((s) => s.name);
+  }
+
   const memberResult = {
     ...updated,
-    contact: updated.contact_number || null
+    contact: updated.contact_number || null,
+    service: assignedServices[0] || null,
+    assigned_services: assignedServices
   };
 
   return sendJson(res, 200, { ok: true, member: memberResult, data: memberResult });
 }
 
 async function deleteMember(req, res) {
-  const { supabase, admin, profile } = await requireAuthenticatedProfile(req);
+  const { admin, profile } = await requireAuthenticatedProfile(req);
   if (!isAreaAdminRole(profile.role)) {
     return sendJson(res, 403, { ok: false, error: 'Only Area-level servant accounts can delete member records.' });
   }
@@ -379,12 +480,9 @@ async function deleteMember(req, res) {
   if (!memberId) return sendJson(res, 400, { ok: false, error: 'Member ID is required.' });
 
   const areaId = requireArea(req, profile);
-  const member = await loadAreaMember(supabase, memberId, areaId);
+  const member = await loadAreaMember(admin, memberId, areaId);
   if (!member) return sendJson(res, 404, { ok: false, error: 'Member not found in your Area.' });
 
-  // A signed-in leader must never be able to remove their own member record
-  // through the Members management endpoint. Full self-deletion is handled
-  // separately by /api/auth/account so it is an explicit account action.
   if (String(profile.member_id || '') === String(memberId)) {
     return sendJson(res, 403, {
       ok: false,
@@ -399,8 +497,6 @@ async function deleteMember(req, res) {
     .maybeSingle();
   if (profileError) throw profileError;
 
-  // Defense in depth for legacy profiles whose member_id may not have been
-  // hydrated yet: never delete the profile/auth user making this request.
   if (linkedProfile?.id && String(linkedProfile.id) === String(profile.id)) {
     return sendJson(res, 403, {
       ok: false,
@@ -415,7 +511,7 @@ async function deleteMember(req, res) {
     });
   }
 
-  const { error: memberDeleteError } = await supabase
+  const { error: memberDeleteError } = await admin
     .from('members')
     .delete()
     .eq('id', memberId)

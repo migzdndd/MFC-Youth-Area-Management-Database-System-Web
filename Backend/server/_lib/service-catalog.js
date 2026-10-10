@@ -7,6 +7,11 @@
  */
 
 export const STANDARD_SERVICES = Object.freeze([
+  'Music Ministry',
+  'Technical & Media (LIT)',
+  'Logistics & Setup',
+  'Liturgical Servants',
+  'Mission Volunteers',
   'Unit Servant',
   'Household Servant',
   'Chapter Servant',
@@ -23,13 +28,27 @@ export const STANDARD_SERVICES = Object.freeze([
 ]);
 
 const SERVICE_ALIASES = new Map([
+  ['music ministry', 'Music Ministry'],
+  ['music', 'Music Ministry'],
+  ['technical & media (lit)', 'Technical & Media (LIT)'],
+  ['technical & media', 'Technical & Media (LIT)'],
+  ['lit', 'Technical & Media (LIT)'],
+  ['area lit servant', 'Technical & Media (LIT)'],
+  ['lit_servant', 'Technical & Media (LIT)'],
+  ['logistics & setup', 'Logistics & Setup'],
+  ['logistics and setup', 'Logistics & Setup'],
+  ['logistics', 'Logistics & Setup'],
+  ['liturgical servants', 'Liturgical Servants'],
+  ['liturgical servant', 'Liturgical Servants'],
+  ['liturgy', 'Liturgical Servants'],
+  ['liturgical', 'Liturgical Servants'],
+  ['mission volunteers', 'Mission Volunteers'],
+  ['mission volunteer', 'Mission Volunteers'],
+  ['mission', 'Mission Volunteers'],
   ['unit servant', 'Unit Servant'],
   ['household servant', 'Household Servant'],
   ['chapter servant', 'Chapter Servant'],
   ['area servant', 'Area Servant'],
-  ['lit servant', 'Area LIT Servant'],
-  ['area lit servant', 'Area LIT Servant'],
-  ['lit_servant', 'Area LIT Servant'],
   ['campus servant', 'Campus Servant'],
   ['campus_servant', 'Campus Servant'],
   ['kids servant', 'Area Kids Servant'],
@@ -37,7 +56,6 @@ const SERVICE_ALIASES = new Map([
   ['area_kids_servant', 'Area Kids Servant'],
   ['mfc high servant', 'MFC High Servant'],
   ['mfc_high_servant', 'MFC High Servant'],
-  ['music', 'Music'],
   ['dance', 'Dance'],
   ['creative writing', 'Creative Writing'],
   ['creative_writing', 'Creative Writing'],
@@ -51,7 +69,7 @@ const SERVICE_ALIASES = new Map([
 
 const ROLE_SERVICE_MAP = Object.freeze({
   area_servant: 'Area Servant',
-  lit_servant: 'Area LIT Servant',
+  lit_servant: 'Technical & Media (LIT)',
   campus_servant: 'Campus Servant',
   mfc_high_servant: 'MFC High Servant',
   area_kids_servant: 'Area Kids Servant',

@@ -19,6 +19,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       <Search className="absolute left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
       <input
         type="text"
+        id="member-search-input"
+        name="search"
+        aria-label={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}

@@ -43,7 +43,7 @@ async function listUnassigned(req, res) {
   const chapterId = req.query?.chapterId;
   await validateAssignmentScope(admin, profile, chapterId, areaId);
 
-  const { data, error } = await supabase
+  const { data, error } = await admin
     .from('members')
     .select('id, first_name, middle_name, last_name, email, contact_number, status')
     .eq('area_id', areaId)
@@ -57,14 +57,14 @@ async function listUnassigned(req, res) {
 }
 
 async function assignMembers(req, res) {
-  const { supabase, admin, profile } = await requireAuthenticatedProfile(req);
+  const { admin, profile } = await requireAuthenticatedProfile(req);
   const areaId = requireArea(req, profile);
   const chapterId = req.body?.chapterId;
   const memberIds = [...new Set((Array.isArray(req.body?.memberIds) ? req.body.memberIds : []).map(String).filter(Boolean))].slice(0, 250);
   await validateAssignmentScope(admin, profile, chapterId, areaId);
   if (!memberIds.length) return sendJson(res, 400, { ok: false, error: 'Select at least one member.' });
 
-  const { data: available, error: loadError } = await supabase
+  const { data: available, error: loadError } = await admin
     .from('members')
     .select('id')
     .eq('area_id', areaId)
@@ -74,7 +74,7 @@ async function assignMembers(req, res) {
   const availableIds = (available || []).map(item => item.id);
   if (!availableIds.length) return sendJson(res, 409, { ok: false, error: 'The selected members are no longer unassigned.' });
 
-  const { data: updated, error: updateError } = await supabase
+  const { data: updated, error: updateError } = await admin
     .from('members')
     .update({ chapter_id: chapterId })
     .eq('area_id', areaId)

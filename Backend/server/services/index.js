@@ -27,7 +27,7 @@ async function assignServices(req, res) {
   const serviceNames = [...new Set((Array.isArray(rawServices) ? rawServices : []).map(normalizeServiceName).filter(Boolean))];
   if (serviceNames.length > 1) return sendJson(res, 400, { ok: false, error: 'A member can only be assigned to one service.' });
   if (!memberId) return sendJson(res, 400, { ok: false, error: 'Member ID is required.' });
-  const member = await loadAreaRow(supabase, 'members', memberId, areaId, 'id');
+  const member = await loadAreaRow(admin, 'members', memberId, areaId, 'id');
   if (!member) return sendJson(res, 404, { ok: false, error: 'Member not found in your Area.' });
 
   const services = await ensureStandardServices(admin, areaId);
