@@ -11,11 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const PORT = process.env.PORT || 3000;
-const MODERN_DIST_DIR = path.join(__dirname, 'frontend-react', 'dist');
-const LEGACY_FRONTEND_DIR = path.join(__dirname, 'Frontend');
-const FRONTEND_DIR = (process.env.SERVE_LEGACY !== 'true' && fs.existsSync(MODERN_DIST_DIR))
-  ? MODERN_DIST_DIR
-  : LEGACY_FRONTEND_DIR;
+const FRONTEND_DIR = path.join(__dirname, 'frontend-react', 'dist');
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -72,13 +68,7 @@ const server = http.createServer(async (req, res) => {
 
   try {
     if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
-      if (FRONTEND_DIR === MODERN_DIST_DIR) {
-        filePath = path.join(MODERN_DIST_DIR, 'index.html');
-      } else if (fs.existsSync(filePath + '.html')) {
-        filePath = filePath + '.html';
-      } else {
-        filePath = path.join(FRONTEND_DIR, '404.html');
-      }
+      filePath = path.join(FRONTEND_DIR, 'index.html');
     }
 
     const ext = path.extname(filePath).toLowerCase();
