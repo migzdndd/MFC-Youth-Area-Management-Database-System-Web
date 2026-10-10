@@ -122,14 +122,14 @@ export default async function handler(req, res) {
     if (eventIds.length) {
       let participantQuery = admin
         .from('event_participants')
-        .select('id, event_id, member_id, mode_of_payment, payment_status, attended, registered_at, updated_at')
+        .select('id, event_id, member_id, non_member_name, mode_of_payment, payment_status, attended, registered_at, updated_at')
         .in('event_id', eventIds)
         .order('registered_at', { ascending: false });
       if (!isAreaAdminRole(profile.role)) {
         if (!scopedMemberIds.length) {
-          participantQuery = participantQuery.eq('member_id', '00000000-0000-0000-0000-000000000000');
+          participantQuery = participantQuery.is('member_id', null);
         } else {
-          participantQuery = participantQuery.in('member_id', scopedMemberIds);
+          participantQuery = participantQuery.or(`member_id.in.(${scopedMemberIds.join(',')}),member_id.is.null`);
         }
       }
       const participantResult = await participantQuery;

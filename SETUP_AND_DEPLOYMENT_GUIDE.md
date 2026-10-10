@@ -64,6 +64,7 @@ git branch -M main
    - `014_authenticated_role_permissions.sql`
    - `015_disable_legacy_recursive_policies.sql`
    - `016_domain_moderator_rls_scoping.sql`
+   - `017_event_participants_non_members.sql`
 
 ---
 

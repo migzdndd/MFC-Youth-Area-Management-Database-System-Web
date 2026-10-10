@@ -36,7 +36,7 @@ MFC-Youth-Area-Management-System-Web/
 │   │   ├── chapters/ # Chapter administration handlers
 │   │   ├── events/   # Event scheduling and attendance handlers
 │   │   └── sync/     # Area hydration payload for offline caching
-│   ├── supabase/     # Migrations (001_initial_schema.sql to 016_domain_moderator_rls_scoping.sql)
+│   ├── supabase/     # Migrations (001_initial_schema.sql to 017_event_participants_non_members.sql)
 │   └── package.json
 └── frontend-react/   # React 19 + TypeScript + Vite + Tailwind CSS Single-Page Application
 ```
@@ -101,7 +101,7 @@ All legacy unmentioned service categories have been removed.
 
 1. Create a Supabase project.
 2. In Supabase SQL Editor, run all migrations in numerical order:
-   - `001_initial_schema.sql` to `016_domain_moderator_rls_scoping.sql`
+   - `001_initial_schema.sql` to `017_event_participants_non_members.sql`
 3. Configure environment variables in `.env` or Vercel:
    - `SUPABASE_URL`
    - `SUPABASE_PUBLISHABLE_KEY`

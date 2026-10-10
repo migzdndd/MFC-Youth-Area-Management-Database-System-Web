@@ -3,7 +3,9 @@ import {
   useEvents,
   useCreateEvent,
   useEventParticipants,
-  useUpdateParticipantAttendance,
+  useRegisterParticipant,
+  useUpdateParticipant,
+  useDeleteParticipant,
 } from '@/hooks/useEvents';
 import { useMembers } from '@/hooks/useMembers';
 import { Button } from '@/components/ui/Button';
@@ -12,20 +14,33 @@ import { Modal } from '@/components/ui/Modal';
 import { Badge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/Spinner';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
-import { CalendarPlus, MapPin, Clock, Users, CheckCircle, Circle } from 'lucide-react';
-import type { CommunityEvent } from '@/types/event';
+import {
+  CalendarPlus,
+  MapPin,
+  Clock,
+  Users,
+  CheckCircle,
+  Circle,
+  UserPlus,
+  Trash2,
+  Search,
+  CreditCard
+} from 'lucide-react';
+import type { CommunityEvent, Participant } from '@/types/event';
 
 export const EventsPage: React.FC = () => {
   const { data: events = [], isLoading } = useEvents();
   const { data: members = [] } = useMembers();
 
   const createEvent = useCreateEvent();
-  const updateAttendance = useUpdateParticipantAttendance();
+  const registerParticipant = useRegisterParticipant();
+  const updateParticipant = useUpdateParticipant();
+  const deleteParticipant = useDeleteParticipant();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CommunityEvent | null>(null);
 
-  // Form state
+  // Event creation form state
   const [name, setName] = useState('');
   const [startsAt, setStartsAt] = useState('');
   const [venue, setVenue] = useState('');
@@ -37,6 +52,14 @@ export const EventsPage: React.FC = () => {
   const { data: participants = [], isLoading: participantsLoading } = useEventParticipants(
     selectedEvent?.id || ''
   );
+
+  // Non-community participant form state
+  const [guestName, setGuestName] = useState('');
+  const [guestPaymentStatus, setGuestPaymentStatus] = useState<'Paid' | 'Not Paid'>('Not Paid');
+  const [guestError, setGuestError] = useState('');
+
+  // Attendee search query inside modal
+  const [attendeeSearch, setAttendeeSearch] = useState('');
 
   const openCreateModal = () => {
     setName('');
@@ -75,18 +98,125 @@ export const EventsPage: React.FC = () => {
     }
   };
 
-  const toggleCheckIn = async (memberId: string, currentStatus: boolean) => {
+  // Add non-community participant
+  const handleAddGuest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setGuestError('');
+    if (!selectedEvent) return;
+
+    const trimmedName = guestName.trim();
+    if (!trimmedName) {
+      setGuestError('Please enter the participant name.');
+      return;
+    }
+
+    try {
+      await registerParticipant.mutateAsync({
+        event_id: selectedEvent.id,
+        non_member_name: trimmedName,
+        payment_status: guestPaymentStatus,
+        attended: true,
+      });
+      setGuestName('');
+      setGuestPaymentStatus(selectedEvent.fee > 0 ? 'Not Paid' : 'Paid');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setGuestError(err.message);
+      } else {
+        setGuestError('Failed to record participant.');
+      }
+    }
+  };
+
+  // Toggle Attendance
+  const handleToggleAttendance = async (
+    participant: Participant | undefined,
+    memberId?: string
+  ) => {
     if (!selectedEvent) return;
     try {
-      await updateAttendance.mutateAsync({
-        event_id: selectedEvent.id,
-        member_id: memberId,
-        attended: !currentStatus,
-      });
+      if (participant?.id) {
+        await updateParticipant.mutateAsync({
+          id: participant.id,
+          event_id: selectedEvent.id,
+          attended: !participant.attended,
+        });
+      } else if (memberId) {
+        await registerParticipant.mutateAsync({
+          event_id: selectedEvent.id,
+          member_id: memberId,
+          attended: true,
+          payment_status: selectedEvent.fee > 0 ? 'Not Paid' : 'Paid',
+        });
+      }
     } catch {
       alert('Failed to update attendance.');
     }
   };
+
+  // Toggle Payment Status (Paid <-> Not Paid)
+  const handleTogglePayment = async (
+    participant: Participant | undefined,
+    memberId?: string
+  ) => {
+    if (!selectedEvent) return;
+    try {
+      if (participant?.id) {
+        const nextStatus = participant.payment_status === 'Paid' ? 'Not Paid' : 'Paid';
+        await updateParticipant.mutateAsync({
+          id: participant.id,
+          event_id: selectedEvent.id,
+          payment_status: nextStatus,
+        });
+      } else if (memberId) {
+        await registerParticipant.mutateAsync({
+          event_id: selectedEvent.id,
+          member_id: memberId,
+          attended: false,
+          payment_status: 'Paid',
+        });
+      }
+    } catch {
+      alert('Failed to update payment status.');
+    }
+  };
+
+  // Remove Guest participant
+  const handleDeleteGuest = async (participantId: string) => {
+    if (!selectedEvent) return;
+    if (!confirm('Remove this participant from the event attendance list?')) return;
+    try {
+      await deleteParticipant.mutateAsync({
+        id: participantId,
+        event_id: selectedEvent.id,
+      });
+    } catch {
+      alert('Failed to delete participant.');
+    }
+  };
+
+  // Compute metrics for selected event
+  const presentCount = participants.filter((p) => p.attended).length;
+  const paidCount = participants.filter((p) => p.payment_status === 'Paid').length;
+  const notPaidCount = participants.filter((p) => p.payment_status !== 'Paid').length;
+
+  // Filter non-community participants
+  const nonMemberParticipants = participants.filter((p) => !p.member_id && p.non_member_name);
+
+  // Search query filter
+  const query = attendeeSearch.trim().toLowerCase();
+  const filteredMembers = members.filter((m) => {
+    if (!query) return true;
+    const fullName = `${m.first_name} ${m.last_name}`.toLowerCase();
+    const track = (m.academic_track || '').toLowerCase();
+    const chapter = (m.chapter_name || '').toLowerCase();
+    return fullName.includes(query) || track.includes(query) || chapter.includes(query);
+  });
+
+  const filteredGuests = nonMemberParticipants.filter((g) => {
+    if (!query) return true;
+    return (g.non_member_name || '').toLowerCase().includes(query);
+  });
 
   return (
     <div className="space-y-6">
@@ -97,7 +227,7 @@ export const EventsPage: React.FC = () => {
             Events & Gatherings
           </h1>
           <p className="text-sm text-text-muted">
-            Assemblies, youth camps, and rapid one-tap attendance check-ins.
+            Assemblies, youth camps, payment status tracking, and rapid one-tap attendance check-ins.
           </p>
         </div>
 
@@ -157,15 +287,20 @@ export const EventsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pt-4 mt-4 border-t border-border-subtle flex items-center justify-between">
+              <div className="pt-4 mt-4 border-t border-border-subtle">
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => setSelectedEvent(event)}
-                  className="w-full flex items-center justify-center gap-2"
+                  onClick={() => {
+                    setSelectedEvent(event);
+                    setGuestName('');
+                    setGuestPaymentStatus(event.fee > 0 ? 'Not Paid' : 'Paid');
+                    setAttendeeSearch('');
+                  }}
+                  className="w-full flex items-center justify-center gap-2 min-h-[44px]"
                 >
-                  <Users className="w-3.5 h-3.5" />
-                  <span>Attendance Check-in</span>
+                  <Users className="w-4 h-4" />
+                  <span>Attendance & Payments</span>
                 </Button>
               </div>
             </div>
@@ -243,29 +378,191 @@ export const EventsPage: React.FC = () => {
         </form>
       </Modal>
 
-      {/* Rapid Attendance Check-in Modal */}
+      {/* Attendance & Payment Status Check-in Modal */}
       <Modal
         isOpen={Boolean(selectedEvent)}
         onClose={() => setSelectedEvent(null)}
         title={selectedEvent ? `Attendance: ${selectedEvent.name}` : 'Attendance'}
-        description="One-tap check-in for registered area youth members."
+        description={
+          selectedEvent
+            ? `Fee: ${selectedEvent.fee > 0 ? formatCurrency(selectedEvent.fee) : 'Free'} | Manage attendance & payment status.`
+            : ''
+        }
         maxWidth="lg"
       >
-        <div className="space-y-4">
+        <div className="space-y-5">
+          {/* Summary Stat Pills */}
+          <div className="grid grid-cols-3 gap-2 p-3 bg-slate-50 border border-slate-200 rounded-lg text-center">
+            <div>
+              <div className="text-xs text-text-muted font-medium">Present</div>
+              <div className="text-lg font-bold text-emerald-700">{presentCount}</div>
+            </div>
+            <div>
+              <div className="text-xs text-text-muted font-medium">Paid</div>
+              <div className="text-lg font-bold text-emerald-600">{paidCount}</div>
+            </div>
+            <div>
+              <div className="text-xs text-text-muted font-medium">Not Paid</div>
+              <div className="text-lg font-bold text-amber-600">{notPaidCount}</div>
+            </div>
+          </div>
+
+          {/* Section: Add Participant Not in Community Database */}
+          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
+            <div className="flex items-center gap-2">
+              <UserPlus className="w-4 h-4 text-navy" />
+              <h4 className="text-sm font-bold text-text-main">
+                Add Participant (Not in Community Database)
+              </h4>
+            </div>
+            <p className="text-xs text-text-muted">
+              Record a walk-in, guest, or visiting youth without needing a member profile.
+            </p>
+
+            {guestError && (
+              <div className="p-2 text-xs text-mfc-red bg-red-50 border border-red-200 rounded-md font-medium">
+                {guestError}
+              </div>
+            )}
+
+            <form onSubmit={handleAddGuest} className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+              <input
+                type="text"
+                placeholder="Participant / Guest full name"
+                className="flex-1 px-3.5 py-2.5 text-sm bg-white text-text-main border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy min-h-[44px]"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+              />
+
+              {/* Payment Status Dropdown for guest */}
+              <select
+                aria-label="Payment status"
+                className="px-3 py-2.5 text-sm bg-white text-text-main border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy min-h-[44px]"
+                value={guestPaymentStatus}
+                onChange={(e) => setGuestPaymentStatus(e.target.value as 'Paid' | 'Not Paid')}
+              >
+                <option value="Not Paid">Not Paid</option>
+                <option value="Paid">Paid</option>
+              </select>
+
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm"
+                isLoading={registerParticipant.isPending}
+                className="shrink-0 min-h-[44px]"
+              >
+                Add Guest
+              </Button>
+            </form>
+          </div>
+
+          {/* Search attendee roster */}
+          <div className="relative">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search participants by name, track, or chapter..."
+              className="w-full pl-9 pr-4 py-2 text-sm bg-white text-text-main border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy min-h-[44px]"
+              value={attendeeSearch}
+              onChange={(e) => setAttendeeSearch(e.target.value)}
+            />
+          </div>
+
+          {/* Attendee Roster */}
           {participantsLoading ? (
             <div className="p-8 flex justify-center">
               <Spinner />
             </div>
           ) : (
-            <div className="space-y-2 max-h-[60vh] overflow-y-auto divide-y divide-border-subtle">
-              {members.map((member) => {
+            <div className="space-y-2 max-h-[50vh] overflow-y-auto divide-y divide-border-subtle pr-1">
+              {/* 1. Render Non-Community Guests First */}
+              {filteredGuests.map((guest) => {
+                const isPaid = guest.payment_status === 'Paid';
+                const isAttended = guest.attended;
+
+                return (
+                  <div
+                    key={guest.id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-3 px-1 hover:bg-slate-50 transition-colors rounded-md"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-sm text-text-main">
+                          {guest.non_member_name}
+                        </span>
+                        <span className="px-1.5 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-800 rounded">
+                          Guest / Non-Member
+                        </span>
+                      </div>
+                      <div className="text-xs text-text-muted mt-0.5">
+                        Recorded walk-in participant
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      {/* Payment Status Toggle Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleTogglePayment(guest)}
+                        title="Click to toggle Payment Status"
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold min-h-[44px] transition-colors border ${
+                          isPaid
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
+                            : 'bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100'
+                        }`}
+                      >
+                        <CreditCard className="w-3.5 h-3.5" />
+                        <span>{isPaid ? 'Paid' : 'Not Paid'}</span>
+                      </button>
+
+                      {/* Attendance Toggle Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleToggleAttendance(guest)}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold min-h-[44px] transition-colors ${
+                          isAttended
+                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        {isAttended ? (
+                          <>
+                            <CheckCircle className="w-4 h-4 text-emerald-600" />
+                            <span>Present</span>
+                          </>
+                        ) : (
+                          <>
+                            <Circle className="w-4 h-4 text-slate-400" />
+                            <span>Mark Present</span>
+                          </>
+                        )}
+                      </button>
+
+                      {/* Delete Guest Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteGuest(guest.id)}
+                        className="p-2 text-slate-400 hover:text-mfc-red rounded-md min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
+                        title="Remove guest"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* 2. Render Community Members */}
+              {filteredMembers.map((member) => {
                 const participant = participants.find((p) => p.member_id === member.id);
+                const isPaid = participant?.payment_status === 'Paid';
                 const isAttended = participant?.attended ?? false;
 
                 return (
                   <div
                     key={member.id}
-                    className="flex items-center justify-between py-2.5 px-1 hover:bg-slate-50 transition-colors"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-3 px-1 hover:bg-slate-50 transition-colors rounded-md"
                   >
                     <div>
                       <div className="font-semibold text-sm text-text-main">
@@ -277,30 +574,54 @@ export const EventsPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => toggleCheckIn(member.id, isAttended)}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold min-h-[44px] transition-colors ${
-                        isAttended
-                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      }`}
-                    >
-                      {isAttended ? (
-                        <>
-                          <CheckCircle className="w-4 h-4 text-emerald-600" />
-                          <span>Present</span>
-                        </>
-                      ) : (
-                        <>
-                          <Circle className="w-4 h-4 text-slate-400" />
-                          <span>Mark Present</span>
-                        </>
-                      )}
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {/* Payment Status Toggle Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleTogglePayment(participant, member.id)}
+                        title="Click to toggle Payment Status"
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold min-h-[44px] transition-colors border ${
+                          isPaid
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
+                            : 'bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100'
+                        }`}
+                      >
+                        <CreditCard className="w-3.5 h-3.5" />
+                        <span>{isPaid ? 'Paid' : 'Not Paid'}</span>
+                      </button>
+
+                      {/* Attendance Toggle Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleToggleAttendance(participant, member.id)}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold min-h-[44px] transition-colors ${
+                          isAttended
+                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        {isAttended ? (
+                          <>
+                            <CheckCircle className="w-4 h-4 text-emerald-600" />
+                            <span>Present</span>
+                          </>
+                        ) : (
+                          <>
+                            <Circle className="w-4 h-4 text-slate-400" />
+                            <span>Mark Present</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 );
               })}
+
+              {filteredGuests.length === 0 && filteredMembers.length === 0 && (
+                <div className="py-8 text-center text-xs text-text-muted">
+                  No participants matching &quot;{attendeeSearch}&quot;.
+                </div>
+              )}
             </div>
           )}
 
