@@ -15,7 +15,6 @@ import {
   ArrowRight,
   MapPin,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 import type { Area } from '@/types/auth';
 
@@ -53,6 +52,8 @@ export const DashboardPage: React.FC = () => {
       icon: Users,
       link: '/members',
       subtitle: memberSubtitle,
+      color: 'text-navy',
+      bg: 'bg-navy/10',
     },
     {
       title: 'Active Chapters',
@@ -60,13 +61,17 @@ export const DashboardPage: React.FC = () => {
       icon: Building2,
       link: '/chapters',
       subtitle: 'Area subdivisions',
+      color: 'text-amber-700',
+      bg: 'bg-amber-100',
     },
     {
       title: 'Upcoming Events',
       count: metrics?.upcomingEvents ?? 0,
       icon: Calendar,
       link: '/events',
-      subtitle: 'Assemblies & camps',
+      subtitle: 'Assemblies & youth camps',
+      color: 'text-sky-700',
+      bg: 'bg-sky-100',
     },
     {
       title: 'Activity Reports',
@@ -74,21 +79,23 @@ export const DashboardPage: React.FC = () => {
       icon: FileText,
       link: '/reports',
       subtitle: 'Pastoral logs filed',
+      color: 'text-emerald-700',
+      bg: 'bg-emerald-100',
     },
   ];
 
   return (
     <div className="space-y-6">
       {/* Top Banner and Area Switcher */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-border-subtle">
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <span className="text-xs font-bold text-amber-700 tracking-wider font-heading">
-            COMMAND OVERVIEW
-          </span>
-          <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight mt-0.5">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-200/90 mb-2">
+            <span>COMMAND OVERVIEW</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading tracking-tight">
             Welcome, {user?.first_name || 'Servant Leader'}
           </h1>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-slate-600 mt-1">
             Managing community pastoral operations for{' '}
             <strong className="text-navy font-semibold">{effectiveAreaName}</strong>.
           </p>
@@ -96,9 +103,9 @@ export const DashboardPage: React.FC = () => {
 
         {/* National Coordinator Area Selector */}
         {isNationalCoordinator && areas && areas.length > 0 && (
-          <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-200 shadow-2xs">
+          <div className="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-2xs shrink-0">
             <MapPin className="w-4 h-4 text-navy shrink-0" />
-            <label htmlFor="areaSelect" className="text-xs font-semibold text-slate-600 whitespace-nowrap">
+            <label htmlFor="areaSelect" className="text-xs font-semibold text-slate-700 whitespace-nowrap">
               Switch Area:
             </label>
             <select
@@ -108,7 +115,7 @@ export const DashboardPage: React.FC = () => {
                 const selected = areas.find((a: Area) => a.id === e.target.value);
                 setActiveArea(selected || null);
               }}
-              className="text-xs font-semibold text-slate-900 bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-navy"
+              className="text-xs font-semibold text-slate-900 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-navy/20 cursor-pointer shadow-2xs"
             >
               {areas.map((a: Area) => (
                 <option key={a.id} value={a.id}>
@@ -128,20 +135,23 @@ export const DashboardPage: React.FC = () => {
             <Link
               key={card.title}
               to={card.link}
-              className="p-5 bg-white border border-slate-200/90 rounded-xl hover:border-slate-300 hover:shadow-xs transition-all group flex flex-col justify-between"
+              className="p-5 bg-white border border-slate-200/90 rounded-2xl shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-200 group flex flex-col justify-between"
             >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold text-slate-600">{card.title}</span>
-                <div className="p-2 rounded-md bg-slate-100 text-navy group-hover:bg-navy group-hover:text-amber-300 transition-colors">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">{card.title}</span>
+                <div className={`p-2.5 rounded-xl ${card.bg} ${card.color} group-hover:scale-105 transition-transform duration-150 shadow-2xs`}>
                   <Icon className="w-4 h-4" />
                 </div>
               </div>
 
               <div>
-                <div className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
+                <div className="text-3xl font-bold text-slate-900 font-heading tracking-tight">
                   {metricsLoading ? <Spinner size="sm" /> : card.count}
                 </div>
-                <p className="text-xs text-slate-500 mt-1">{card.subtitle}</p>
+                <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
+                  <p className="text-xs text-slate-500 truncate">{card.subtitle}</p>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-navy group-hover:translate-x-0.5 transition-all" />
+                </div>
               </div>
             </Link>
           );
@@ -149,53 +159,77 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* Quick Servant Actions */}
-      <div className="bg-white border border-slate-200/90 rounded-xl p-6 shadow-2xs">
-        <h2 className="text-base font-bold text-slate-900 font-heading mb-4">
-          Quick Servant Actions
-        </h2>
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-2xs">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-bold text-slate-900 font-heading">
+            Quick Servant Actions
+          </h2>
+          <span className="text-xs text-slate-500">One-tap operational shortcuts</span>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <Button
-            variant="secondary"
-            className="flex items-center gap-2 justify-start px-4 text-slate-800 hover:border-slate-300"
+          <button
+            type="button"
             onClick={() => navigate('/members')}
+            className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
           >
-            <UserPlus className="w-4 h-4 text-navy shrink-0" />
-            <span>Register New Member</span>
-          </Button>
+            <div className="p-2.5 rounded-lg bg-navy text-white shadow-2xs group-hover:scale-105 transition-transform">
+              <UserPlus className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-slate-900 group-hover:text-navy transition-colors">
+                Register Member
+              </div>
+              <div className="text-xs text-slate-500">Add to youth area roster</div>
+            </div>
+          </button>
 
-          <Button
-            variant="secondary"
-            className="flex items-center gap-2 justify-start px-4 text-slate-800 hover:border-slate-300"
+          <button
+            type="button"
             onClick={() => navigate('/events')}
+            className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
           >
-            <CalendarPlus className="w-4 h-4 text-navy shrink-0" />
-            <span>Schedule Community Event</span>
-          </Button>
+            <div className="p-2.5 rounded-lg bg-amber-600 text-white shadow-2xs group-hover:scale-105 transition-transform">
+              <CalendarPlus className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-slate-900 group-hover:text-amber-800 transition-colors">
+                Schedule Event
+              </div>
+              <div className="text-xs text-slate-500">Assembly or youth camp</div>
+            </div>
+          </button>
 
-          <Button
-            variant="secondary"
-            className="flex items-center gap-2 justify-start px-4 text-slate-800 hover:border-slate-300"
+          <button
+            type="button"
             onClick={() => navigate('/reports')}
+            className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
           >
-            <FilePlus className="w-4 h-4 text-navy shrink-0" />
-            <span>File Activity Report</span>
-          </Button>
+            <div className="p-2.5 rounded-lg bg-emerald-700 text-white shadow-2xs group-hover:scale-105 transition-transform">
+              <FilePlus className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-slate-900 group-hover:text-emerald-800 transition-colors">
+                File Report
+              </div>
+              <div className="text-xs text-slate-500">Log pastoral gathering</div>
+            </div>
+          </button>
         </div>
       </div>
 
       {/* Liturgical Readings Snippet */}
       {readingsData && (
-        <div className="bg-white border border-slate-200/90 rounded-xl p-6 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className="p-2.5 rounded-lg bg-amber-50 text-amber-900 border border-amber-200/70 shrink-0">
-              <BookOpen className="w-5 h-5 text-amber-700" />
+        <div className="bg-gradient-to-r from-amber-50/60 to-white border border-amber-200/80 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div className="p-3 rounded-xl bg-amber-100 text-amber-900 border border-amber-300/80 shrink-0 shadow-2xs">
+              <BookOpen className="w-5 h-5 text-amber-800" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-amber-800">Daily Catholic Readings</span>
+                <span className="text-xs font-bold text-amber-900 uppercase tracking-wide">Daily Liturgical Readings</span>
                 <span className="text-xs text-slate-500">&middot; {readingsData.date}</span>
               </div>
-              <h3 className="text-sm font-bold text-slate-900 mt-0.5">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 mt-0.5">
                 {readingsData.celebration || 'Liturgical Readings for Today'}
               </h3>
             </div>
@@ -203,7 +237,7 @@ export const DashboardPage: React.FC = () => {
 
           <Link
             to="/readings"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-navy hover:text-navy-light hover:underline shrink-0"
+            className="inline-flex items-center gap-2 px-3.5 py-2 bg-navy text-white text-xs font-bold rounded-lg hover:bg-navy-light transition-all shadow-2xs hover:shadow-xs shrink-0 select-none min-h-[40px]"
           >
             <span>Read Scriptures</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -213,3 +247,4 @@ export const DashboardPage: React.FC = () => {
     </div>
   );
 };
+

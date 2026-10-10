@@ -2,13 +2,14 @@
 
 @theme {
   --color-navy: #002847;
-  --color-navy-deep: #001c33;
+  --color-navy-deep: #00182c;
   --color-navy-light: #0a3d66;
-  --color-navy-surface: #072540;
+  --color-navy-surface: #06233b;
 
   --color-canvas: #f8fafc;
   --color-surface: #ffffff;
   --color-surface-hover: #f1f5f9;
+  --color-surface-subtle: #f8fafc;
 
   --color-text-main: #0f172a;
   --color-text-muted: #475569;
@@ -17,12 +18,12 @@
   --color-border-subtle: #e2e8f0;
   --color-border-strong: #cbd5e1;
 
-  /* Community Accent: Warm Gold / Amber */
+  /* Community Accent: Dignified Warm Gold / Amber */
   --color-gold: #d97706;
   --color-gold-light: #fef3c7;
   --color-gold-dark: #b45309;
 
-  /* Status Tokens */
+  /* Status Tokens (WCAG AA Compliant) */
   --color-mfc-green: #15803d;
   --color-mfc-green-light: #dcfce7;
   --color-mfc-amber: #b45309;
@@ -66,4 +67,20 @@ h1, h2, h3, h4, h5, h6 {
   button, input, select, textarea, [role="button"], a.btn {
     min-height: 44px;
   }
+}
+
+/* Refined custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }

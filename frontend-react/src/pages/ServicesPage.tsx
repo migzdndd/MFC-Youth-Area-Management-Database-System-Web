@@ -58,14 +58,14 @@ export const ServicesPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="pb-4 border-b border-border-subtle">
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold text-text-main font-heading tracking-tight">
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs">
+        <div className="flex items-center gap-2 mb-1">
+          <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
             Creative Ministry Services
           </h1>
-          <Badge variant="navy">5 Pillars</Badge>
+          <Badge variant="gold">5 Pillars</Badge>
         </div>
-        <p className="text-sm text-text-muted mt-1">
+        <p className="text-sm text-slate-600">
           The 5 official creative ministries overseen by LIT Servants for youth talents and evangelization.
         </p>
       </div>
@@ -78,27 +78,27 @@ export const ServicesPage: React.FC = () => {
           return (
             <div
               key={service.title}
-              className="bg-white border border-border-subtle rounded-xl p-5 hover:border-slate-300 transition-colors flex flex-col justify-between shadow-2xs"
+              className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between shadow-2xs group"
             >
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="p-2.5 rounded-lg bg-navy/10 text-navy">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 rounded-xl bg-navy/10 text-navy group-hover:scale-105 transition-transform duration-150">
                     <Icon className="w-5 h-5" />
                   </div>
                   <Badge variant="navy">{service.tag}</Badge>
                 </div>
 
-                <h3 className="font-bold text-base text-text-main font-heading mb-1.5">
+                <h3 className="font-bold text-base text-slate-900 font-heading mb-2 group-hover:text-navy transition-colors">
                   {service.title}
                 </h3>
-                <p className="text-xs text-text-muted leading-relaxed">
+                <p className="text-xs text-slate-600 leading-relaxed">
                   {service.description}
                 </p>
               </div>
 
-              <div className="pt-3 mt-4 border-t border-border-subtle text-xs text-slate-400 flex items-center justify-between">
+              <div className="pt-3 mt-4 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
                 <span>LIT Creative Pillar</span>
-                <span className="font-semibold text-navy">
+                <span className="font-bold text-navy bg-navy/10 px-2.5 py-0.5 rounded-full">
                   {servantCount} {servantCount === 1 ? 'Servant' : 'Servants'}
                 </span>
               </div>

@@ -178,30 +178,45 @@ export const MembersPage: React.FC = () => {
     }
   };
 
+  const hasActiveFilters = Boolean(search || chapterFilter || trackFilter || statusFilter || serviceFilter);
+
+  const clearAllFilters = () => {
+    setSearch('');
+    setChapterFilter('');
+    setTrackFilter('');
+    setStatusFilter('');
+    setServiceFilter('');
+  };
+
   return (
     <div className="space-y-6">
       {/* Header and Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-border-subtle">
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-text-main font-heading tracking-tight">
-            Members Directory
-          </h1>
-          <p className="text-sm text-text-muted">
-            Manage youth rosters, pastoral contacts, and track assignments.
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
+              Members Directory
+            </h1>
+            <Badge variant="navy">
+              {filteredMembers.length} {filteredMembers.length === 1 ? 'Record' : 'Records'}
+            </Badge>
+          </div>
+          <p className="text-sm text-slate-600">
+            Manage youth rosters, pastoral contacts, and ministry track assignments.
           </p>
         </div>
 
         <Button onClick={openCreateModal} className="flex items-center gap-2 shrink-0">
           <UserPlus className="w-4 h-4" />
-          <span>Add Member</span>
+          <span>Register Member</span>
         </Button>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white border border-border-subtle rounded-xl p-4 space-y-3">
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-2xs space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <div className="sm:col-span-2 lg:col-span-1">
-            <SearchBar value={search} onChange={setSearch} placeholder="Search by name, email..." />
+            <SearchBar value={search} onChange={setSearch} placeholder="Search by name, email, phone..." />
           </div>
 
           <Select
@@ -249,99 +264,195 @@ export const MembersPage: React.FC = () => {
             ]}
           />
         </div>
+
+        {hasActiveFilters && (
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+            <span className="text-slate-500 font-medium">
+              Filtered results ({filteredMembers.length} of {members.length} total)
+            </span>
+            <button
+              type="button"
+              onClick={clearAllFilters}
+              className="text-navy font-semibold hover:underline cursor-pointer"
+            >
+              Reset all filters
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Data Table */}
-      <div className="bg-white border border-border-subtle rounded-xl overflow-hidden shadow-xs">
+      {/* Data Container */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs">
         {isLoading ? (
           <div className="p-12 flex flex-col items-center justify-center gap-3">
             <Spinner size="lg" />
-            <span className="text-xs text-text-muted">Loading members list...</span>
+            <span className="text-xs text-slate-500 font-medium">Loading members list...</span>
           </div>
         ) : filteredMembers.length === 0 ? (
           <div className="p-12 text-center">
             <Filter className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-            <h3 className="text-sm font-bold text-text-main">No members found</h3>
-            <p className="text-xs text-text-muted mt-1">
-              {search || chapterFilter || trackFilter || serviceFilter
-                ? 'Try adjusting your search filters to find what you are looking for.'
-                : 'No members registered yet. Add your first member to get started.'}
+            <h3 className="text-sm font-bold text-slate-900">No members match your criteria</h3>
+            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+              {hasActiveFilters
+                ? 'Try adjusting or clearing your search filters to find what you are looking for.'
+                : 'No members registered yet in this roster. Add your first member to get started.'}
             </p>
+            {hasActiveFilters && (
+              <Button variant="secondary" size="sm" onClick={clearAllFilters} className="mt-4">
+                Clear Filters
+              </Button>
+            )}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-xs font-bold text-text-muted uppercase border-b border-border-subtle tracking-wider">
-                <tr>
-                  <th className="px-5 py-3.5">Name</th>
-                  <th className="px-5 py-3.5">Track</th>
-                  <th className="px-5 py-3.5">Chapter</th>
-                  <th className="px-5 py-3.5">Service</th>
-                  <th className="px-5 py-3.5">Contact</th>
-                  <th className="px-5 py-3.5">Status</th>
-                  <th className="px-5 py-3.5 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border-subtle">
-                {filteredMembers.map((member) => (
-                  <tr key={member.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="px-5 py-4">
-                      <div className="font-semibold text-text-main">
-                        {member.first_name} {member.last_name}
-                      </div>
-                      {member.nickname && (
-                        <div className="text-xs text-text-muted">"{member.nickname}"</div>
-                      )}
-                    </td>
-                    <td className="px-5 py-4 text-xs font-medium text-text-muted">
-                      {member.academic_track || '-'}
-                    </td>
-                    <td className="px-5 py-4 text-xs font-medium text-text-muted">
-                      {member.chapter_name ||
-                        chapters.find((c) => c.id === member.chapter_id)?.name ||
-                        'Unassigned'}
-                    </td>
-                    <td className="px-5 py-4 text-xs font-medium">
-                      {member.service || (member.assigned_services && member.assigned_services[0]) ? (
-                        <Badge variant="navy">{member.service || member.assigned_services![0]}</Badge>
-                      ) : (
-                        <span className="text-slate-400">Unassigned</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-4 text-xs text-text-muted">
-                      <div>{member.contact || member.contact_number || '-'}</div>
-                      <div className="text-[11px] text-slate-400">{member.email || ''}</div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <Badge variant={member.status?.toLowerCase() === 'active' ? 'success' : 'default'}>
-                        {member.status?.toLowerCase() === 'active' ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </td>
-                    <td className="px-5 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => openEditModal(member)}
-                          className="p-1.5 text-text-muted hover:text-navy rounded hover:bg-slate-100 transition-colors"
-                          aria-label={`Edit ${member.first_name} ${member.last_name}`}
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeletingId(member.id)}
-                          className="p-1.5 text-text-muted hover:text-mfc-red rounded hover:bg-red-50 transition-colors"
-                          aria-label={`Delete ${member.first_name} ${member.last_name}`}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-slate-50/80 text-xs font-bold text-slate-600 uppercase border-b border-border-subtle tracking-wider">
+                  <tr>
+                    <th className="px-5 py-3.5">Member</th>
+                    <th className="px-5 py-3.5">Track</th>
+                    <th className="px-5 py-3.5">Chapter</th>
+                    <th className="px-5 py-3.5">Ministry Service</th>
+                    <th className="px-5 py-3.5">Contact</th>
+                    <th className="px-5 py-3.5">Status</th>
+                    <th className="px-5 py-3.5 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-border-subtle">
+                  {filteredMembers.map((member) => (
+                    <tr key={member.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-navy/10 text-navy font-bold text-xs flex items-center justify-center shrink-0 border border-navy/15 shadow-2xs">
+                            {member.first_name ? member.first_name[0].toUpperCase() : 'M'}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-slate-900">
+                              {member.first_name} {member.last_name}
+                            </div>
+                            {member.nickname && (
+                              <div className="text-xs text-slate-500">"{member.nickname}"</div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 text-xs font-medium text-slate-600">
+                        {member.academic_track || '-'}
+                      </td>
+                      <td className="px-5 py-4 text-xs font-medium text-slate-600">
+                        {member.chapter_name ||
+                          chapters.find((c) => c.id === member.chapter_id)?.name ||
+                          'Unassigned'}
+                      </td>
+                      <td className="px-5 py-4 text-xs font-medium">
+                        {member.service || (member.assigned_services && member.assigned_services[0]) ? (
+                          <Badge variant="navy">{member.service || member.assigned_services![0]}</Badge>
+                        ) : (
+                          <span className="text-slate-400">Unassigned</span>
+                        )}
+                      </td>
+                      <td className="px-5 py-4 text-xs text-slate-600">
+                        <div>{member.contact || member.contact_number || '-'}</div>
+                        <div className="text-[11px] text-slate-400">{member.email || ''}</div>
+                      </td>
+                      <td className="px-5 py-4">
+                        <Badge variant={member.status?.toLowerCase() === 'active' ? 'success' : 'default'}>
+                          {member.status?.toLowerCase() === 'active' ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </td>
+                      <td className="px-5 py-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(member)}
+                            className="p-2 text-slate-500 hover:text-navy rounded-lg hover:bg-slate-100 transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
+                            aria-label={`Edit ${member.first_name} ${member.last_name}`}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDeletingId(member.id)}
+                            className="p-2 text-slate-500 hover:text-mfc-red rounded-lg hover:bg-rose-50 transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
+                            aria-label={`Delete ${member.first_name} ${member.last_name}`}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards View */}
+            <div className="md:hidden divide-y divide-border-subtle p-3 space-y-3">
+              {filteredMembers.map((member) => (
+                <div key={member.id} className="p-4 bg-slate-50/60 rounded-xl border border-slate-200/80 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-full bg-navy/10 text-navy font-bold text-sm flex items-center justify-center shrink-0 border border-navy/15 shadow-2xs">
+                        {member.first_name ? member.first_name[0].toUpperCase() : 'M'}
+                      </div>
+                      <div>
+                        <div className="font-bold text-slate-900 text-sm">
+                          {member.first_name} {member.last_name}
+                        </div>
+                        {member.nickname && (
+                          <div className="text-xs text-slate-500">"{member.nickname}"</div>
+                        )}
+                      </div>
+                    </div>
+                    <Badge variant={member.status?.toLowerCase() === 'active' ? 'success' : 'default'}>
+                      {member.status?.toLowerCase() === 'active' ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5 text-xs">
+                    <span className="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-medium">
+                      {member.academic_track || 'Track unassigned'}
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-medium">
+                      {member.chapter_name || chapters.find((c) => c.id === member.chapter_id)?.name || 'No chapter'}
+                    </span>
+                    {(member.service || (member.assigned_services && member.assigned_services[0])) && (
+                      <Badge variant="navy">
+                        {member.service || member.assigned_services![0]}
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="text-xs text-slate-600 bg-white p-2.5 rounded-lg border border-slate-200/70 space-y-0.5">
+                    <div>Phone: <strong className="text-slate-800">{member.contact || member.contact_number || 'N/A'}</strong></div>
+                    {member.email && <div className="text-slate-500 truncate">{member.email}</div>}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => openEditModal(member)}
+                      className="w-full flex items-center justify-center gap-1.5 min-h-[44px]"
+                    >
+                      <Edit2 className="w-3.5 h-3.5 text-navy" />
+                      <span>Edit</span>
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => setDeletingId(member.id)}
+                      className="w-full flex items-center justify-center gap-1.5 min-h-[44px]"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Delete</span>
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 

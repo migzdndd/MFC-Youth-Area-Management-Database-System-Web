@@ -221,12 +221,17 @@ export const EventsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-border-subtle">
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-text-main font-heading tracking-tight">
-            Events & Gatherings
-          </h1>
-          <p className="text-sm text-text-muted">
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
+              Events & Gatherings
+            </h1>
+            <Badge variant="navy">
+              {events.length} {events.length === 1 ? 'Gathering' : 'Gatherings'}
+            </Badge>
+          </div>
+          <p className="text-sm text-slate-600">
             Assemblies, youth camps, payment status tracking, and rapid one-tap attendance check-ins.
           </p>
         </div>
@@ -239,28 +244,31 @@ export const EventsPage: React.FC = () => {
 
       {/* Events List */}
       {isLoading ? (
-        <div className="p-12 flex flex-col items-center justify-center gap-3">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-12 flex flex-col items-center justify-center gap-3 shadow-2xs">
           <Spinner size="lg" />
-          <span className="text-xs text-text-muted">Loading gatherings...</span>
+          <span className="text-xs text-slate-500 font-medium">Loading gatherings...</span>
         </div>
       ) : events.length === 0 ? (
-        <div className="bg-white border border-border-subtle rounded-xl p-12 text-center">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-12 text-center shadow-2xs">
           <CalendarPlus className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-          <h3 className="text-sm font-bold text-text-main">No upcoming events</h3>
-          <p className="text-xs text-text-muted mt-1">
-            Schedule a chapter assembly or camp gathering to start tracking attendance.
+          <h3 className="text-sm font-bold text-slate-900">No upcoming events</h3>
+          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+            Schedule a chapter assembly or youth camp gathering to start tracking community attendance.
           </p>
+          <Button onClick={openCreateModal} className="mt-4" size="sm">
+            Schedule First Event
+          </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {events.map((event) => (
             <div
               key={event.id}
-              className="bg-white border border-border-subtle rounded-xl p-5 hover:border-slate-300 transition-colors flex flex-col justify-between"
+              className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group"
             >
               <div>
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <h3 className="font-bold text-text-main text-base font-heading">
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <h3 className="font-bold text-slate-900 text-base font-heading group-hover:text-navy transition-colors">
                     {event.name}
                   </h3>
                   <Badge variant={event.fee > 0 ? 'warning' : 'success'}>
@@ -269,25 +277,25 @@ export const EventsPage: React.FC = () => {
                 </div>
 
                 {event.description && (
-                  <p className="text-xs text-text-muted mb-4 line-clamp-2">
+                  <p className="text-xs text-slate-600 mb-4 line-clamp-2 leading-relaxed">
                     {event.description}
                   </p>
                 )}
 
-                <div className="space-y-2 py-1">
-                  <div className="flex items-center gap-2 text-xs text-text-muted">
-                    <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>{formatDateTime(event.starts_at)}</span>
+                <div className="space-y-2 py-2 bg-slate-50/70 p-3 rounded-xl border border-slate-200/70">
+                  <div className="flex items-center gap-2 text-xs text-slate-700">
+                    <Clock className="w-3.5 h-3.5 text-navy shrink-0" />
+                    <span className="font-medium">{formatDateTime(event.starts_at)}</span>
                   </div>
 
-                  <div className="flex items-center gap-2 text-xs text-text-muted">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span className="truncate">{event.venue}</span>
+                  <div className="flex items-center gap-2 text-xs text-slate-700">
+                    <MapPin className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    <span className="truncate font-medium">{event.venue}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 mt-4 border-t border-border-subtle">
+              <div className="pt-4 mt-4 border-t border-slate-100">
                 <Button
                   variant="secondary"
                   size="sm"
@@ -299,7 +307,7 @@ export const EventsPage: React.FC = () => {
                   }}
                   className="w-full flex items-center justify-center gap-2 min-h-[44px]"
                 >
-                  <Users className="w-4 h-4" />
+                  <Users className="w-4 h-4 text-navy" />
                   <span>Attendance & Payments</span>
                 </Button>
               </div>

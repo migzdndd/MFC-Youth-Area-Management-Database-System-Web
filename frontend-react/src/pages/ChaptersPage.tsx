@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useChapters, useCreateChapter, useDeleteChapter } from '@/hooks/useChapters';
 import { useMembers } from '@/hooks/useMembers';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
@@ -66,13 +67,18 @@ export const ChaptersPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-border-subtle">
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-text-main font-heading tracking-tight">
-            Chapters & Households
-          </h1>
-          <p className="text-sm text-text-muted">
-            Manage geographic chapters, servant heads, and cell groups.
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
+              Chapters & Households
+            </h1>
+            <Badge variant="navy">
+              {chapters.length} {chapters.length === 1 ? 'Chapter' : 'Chapters'}
+            </Badge>
+          </div>
+          <p className="text-sm text-slate-600">
+            Manage geographic chapters, servant heads, and pastoral cell groups.
           </p>
         </div>
 
@@ -84,17 +90,20 @@ export const ChaptersPage: React.FC = () => {
 
       {/* Chapters Grid */}
       {isLoading ? (
-        <div className="p-12 flex flex-col items-center justify-center gap-3">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-12 flex flex-col items-center justify-center gap-3 shadow-2xs">
           <Spinner size="lg" />
-          <span className="text-xs text-text-muted">Loading chapters...</span>
+          <span className="text-xs text-slate-500 font-medium">Loading chapters...</span>
         </div>
       ) : chapters.length === 0 ? (
-        <div className="bg-white border border-border-subtle rounded-xl p-12 text-center">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-12 text-center shadow-2xs">
           <Building2 className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-          <h3 className="text-sm font-bold text-text-main">No chapters established</h3>
-          <p className="text-xs text-text-muted mt-1">
-            Create your first area chapter to start organizing households and members.
+          <h3 className="text-sm font-bold text-slate-900">No chapters established</h3>
+          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+            Create your first area chapter to start organizing households and community members.
           </p>
+          <Button onClick={openCreateModal} className="mt-4" size="sm">
+            Add First Chapter
+          </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -105,15 +114,15 @@ export const ChaptersPage: React.FC = () => {
             return (
               <div
                 key={chapter.id}
-                className="bg-white border border-border-subtle rounded-xl p-5 hover:border-slate-300 transition-colors flex flex-col justify-between"
+                className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group"
               >
                 <div>
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2 rounded-lg bg-navy/10 text-navy">
-                        <Building2 className="w-4 h-4" />
+                  <div className="flex items-start justify-between gap-2 mb-4">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2.5 rounded-xl bg-navy/10 text-navy group-hover:scale-105 transition-transform">
+                        <Building2 className="w-5 h-5" />
                       </div>
-                      <h3 className="font-bold text-text-main text-base font-heading">
+                      <h3 className="font-bold text-slate-900 text-base font-heading group-hover:text-navy transition-colors">
                         {chapter.name}
                       </h3>
                     </div>
@@ -121,19 +130,19 @@ export const ChaptersPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleDelete(chapter)}
-                      className="p-1.5 text-slate-400 hover:text-mfc-red rounded hover:bg-red-50 transition-colors"
+                      className="p-2 text-slate-400 hover:text-mfc-red rounded-lg hover:bg-rose-50 transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
                       aria-label={`Delete chapter ${chapter.name}`}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
 
-                  <div className="space-y-2 py-2">
-                    <div className="flex items-center gap-2 text-xs text-text-muted">
-                      <User className="w-3.5 h-3.5 text-slate-400" />
-                      <span>
+                  <div className="space-y-2 py-2 bg-slate-50/70 p-3 rounded-xl border border-slate-200/70">
+                    <div className="flex items-center gap-2 text-xs text-slate-600">
+                      <User className="w-3.5 h-3.5 text-navy shrink-0" />
+                      <span className="truncate">
                         Head:{' '}
-                        <strong className="text-text-main">
+                        <strong className="text-slate-900 font-semibold">
                           {headMember
                             ? `${headMember.first_name} ${headMember.last_name}`
                             : 'Not assigned'}
@@ -141,19 +150,19 @@ export const ChaptersPage: React.FC = () => {
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-xs text-text-muted">
-                      <Users className="w-3.5 h-3.5 text-slate-400" />
+                    <div className="flex items-center gap-2 text-xs text-slate-600">
+                      <Users className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                       <span>
-                        Registered Members:{' '}
-                        <strong className="text-text-main">{chapterMembers.length}</strong>
+                        Youth Roster:{' '}
+                        <strong className="text-slate-900 font-semibold">{chapterMembers.length} members</strong>
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-3 mt-3 border-t border-border-subtle text-xs text-slate-400 flex items-center justify-between">
+                <div className="pt-3 mt-4 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
                   <span>Geographic Chapter</span>
-                  <span className="font-semibold text-navy">Active</span>
+                  <Badge variant="success">Active</Badge>
                 </div>
               </div>
             );
