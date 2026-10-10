@@ -21,6 +21,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         type="text"
         id="member-search-input"
         name="search"
+        autoComplete="off"
         aria-label={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}

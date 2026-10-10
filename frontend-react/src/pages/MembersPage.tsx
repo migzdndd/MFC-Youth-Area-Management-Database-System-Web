@@ -362,6 +362,7 @@ export const MembersPage: React.FC = () => {
             <Input
               label="First Name"
               name="firstName"
+              autoComplete="given-name"
               required
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
@@ -369,6 +370,7 @@ export const MembersPage: React.FC = () => {
             <Input
               label="Last Name"
               name="lastName"
+              autoComplete="family-name"
               required
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
@@ -379,6 +381,7 @@ export const MembersPage: React.FC = () => {
             <Input
               label="Nickname"
               name="nickname"
+              autoComplete="nickname"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
             />
@@ -446,6 +449,7 @@ export const MembersPage: React.FC = () => {
             <Input
               label="Mobile Number"
               name="contact"
+              autoComplete="tel"
               value={contact}
               onChange={(e) => setContact(e.target.value)}
               placeholder="09123456789"
@@ -454,6 +458,7 @@ export const MembersPage: React.FC = () => {
               label="Email Address"
               name="email"
               type="email"
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@example.com"
@@ -464,6 +469,7 @@ export const MembersPage: React.FC = () => {
             <Input
               label="Guardian Name"
               name="guardianName"
+              autoComplete="name"
               value={guardianName}
               onChange={(e) => setGuardianName(e.target.value)}
               placeholder="Parent or Guardian"
@@ -471,6 +477,7 @@ export const MembersPage: React.FC = () => {
             <Input
               label="Guardian Contact"
               name="guardianContact"
+              autoComplete="tel"
               value={guardianContact}
               onChange={(e) => setGuardianContact(e.target.value)}
               placeholder="Emergency phone number"

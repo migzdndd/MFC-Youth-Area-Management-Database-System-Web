@@ -199,6 +199,8 @@ export const LoginPage: React.FC = () => {
                 <Input
                   label="Email Address"
                   type="email"
+                  name="email"
+                  id="login-email"
                   required
                   autoComplete="email"
                   placeholder="servant@example.com"
@@ -209,6 +211,8 @@ export const LoginPage: React.FC = () => {
                 <Input
                   label="Password"
                   type="password"
+                  name="password"
+                  id="login-password"
                   required
                   autoComplete="current-password"
                   placeholder="Enter your password"
