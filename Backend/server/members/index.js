@@ -66,9 +66,9 @@ async function validateChapter(supabase, chapterId, areaId) {
 }
 
 async function listMembers(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const { admin, profile } = await requireAuthenticatedProfile(req);
 
-  let query = supabase
+  let query = admin
     .from('members')
     .select('id, area_id, chapter_id, first_name, middle_name, last_name, birth_date, contact_number, email, address, status, first_attended_youth_camp, access_level, academic_track, grade_level, school, avatar_url, created_at, updated_at')
     .order('last_name', { ascending: true })

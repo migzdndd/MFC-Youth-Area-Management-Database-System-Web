@@ -185,13 +185,13 @@ async function renderNationalCoordinatorDashboard(data) {
     console.warn('Loaded canonical area count for National Coordinator:', err);
   }
 
-  const membersCount = data.members?.length || 0;
-  const activeMembers = data.members.filter(m => m.status === 'Active').length;
-  const servicesCount = 5;
-  const reportsCount = data.reports?.length || 0;
-  const eventsCount = data.events?.length || 0;
-  const registrationsCount = data.participants?.length || 0;
-  const attendedCount = data.participants?.filter(p => p.attended).length || 0;
+  const membersCount = data.cloudDashboard?.members ?? (data.members?.length || 0);
+  const activeMembers = data.cloudDashboard?.activeMembers ?? (data.members?.filter(m => m.status === 'Active').length || 0);
+  const servicesCount = data.cloudDashboard?.services ?? 5;
+  const reportsCount = data.cloudDashboard?.reports ?? (data.reports?.length || 0);
+  const eventsCount = data.cloudDashboard?.events ?? (data.events?.length || 0);
+  const registrationsCount = data.cloudDashboard?.registrations ?? (data.participants?.length || 0);
+  const attendedCount = data.cloudDashboard?.attended ?? (data.participants?.filter(p => p.attended).length || 0);
 
   const chapterCounts = (data.chapters || [])
     .map(chapter => ({

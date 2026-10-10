@@ -41,9 +41,9 @@ function eventPayload(input, areaId, userId) {
 }
 
 async function listEvents(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const { admin, profile } = await requireAuthenticatedProfile(req);
   const areaId = requireArea(req, profile);
-  const { data, error } = await supabase
+  const { data, error } = await admin
     .from('events')
     .select('id, area_id, name, description, venue, starts_at, ends_at, fee, manual_attendance, created_at, updated_at')
     .eq('area_id', areaId)

@@ -17,8 +17,8 @@ export default async function handler(req, res) {
     const areaId = requireArea(req, profile);
 
     let chaptersQuery = admin.from('chapters').select('id, area_id, name, is_active, created_at, updated_at').eq('area_id', areaId).eq('is_active', true).order('name');
-    let reportsQuery = supabase.from('activity_reports').select('id, area_id, chapter_id, prepared_by_member_id, prepared_by_name, chapter_name_snapshot, report_type, activity_date, title, activity, participant_count, location, event_id, notes, created_at, updated_at').eq('area_id', areaId).order('activity_date', { ascending: false });
-    let gigQuery = supabase.from('gig_contributions').select('id, area_id, chapter_id, member_id, amount, contribution_date, notes, created_at').eq('area_id', areaId).order('contribution_date', { ascending: false });
+    let reportsQuery = admin.from('activity_reports').select('id, area_id, chapter_id, prepared_by_member_id, prepared_by_name, chapter_name_snapshot, report_type, activity_date, title, activity, participant_count, location, event_id, notes, created_at, updated_at').eq('area_id', areaId).order('activity_date', { ascending: false });
+    let gigQuery = admin.from('gig_contributions').select('id, area_id, chapter_id, member_id, amount, contribution_date, notes, created_at').eq('area_id', areaId).order('contribution_date', { ascending: false });
 
     if (isChapterServantRole(profile.role)) {
       if (profile.chapter_id) {
@@ -40,7 +40,7 @@ export default async function handler(req, res) {
         : gigQuery.eq('member_id', '00000000-0000-0000-0000-000000000000');
     }
 
-    let membersQuery = supabase.from('members').select('id, area_id, chapter_id, status').eq('area_id', areaId);
+    let membersQuery = admin.from('members').select('id, area_id, chapter_id, status').eq('area_id', areaId);
     if (isChapterServantRole(profile.role)) {
       membersQuery = profile.chapter_id
         ? membersQuery.eq('chapter_id', profile.chapter_id)

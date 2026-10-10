@@ -8,6 +8,24 @@
 
 // Section 1: Leader Permissions & Chapter Boundaries
 
+const DB_KEY = (typeof window !== 'undefined' && window.DB_KEY) || 'mfc_web_database_v1';
+const DB_VERSION = (typeof window !== 'undefined' && window.DB_VERSION) || 1;
+const SERVICES = (typeof window !== 'undefined' && window.SERVICES) || [
+  'Unit Servant',
+  'Household Servant',
+  'Chapter Servant',
+  'Area Servant',
+  'Area LIT Servant',
+  'Campus Servant',
+  'Area Kids Servant',
+  'MFC High Servant',
+  'Music',
+  'Dance',
+  'Creative Writing',
+  'Graphics & Promo',
+  'Photography & Videography'
+];
+
 /**
  * Checks Area Admin Status
  *

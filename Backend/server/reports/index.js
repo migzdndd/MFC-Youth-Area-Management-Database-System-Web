@@ -11,9 +11,9 @@ import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { cleanText, nullableText, requireArea, validateIsoDate, asNonNegativeInteger, ensureChapterInArea, loadAreaRow } from '../_lib/cloud-data.js';
 
 async function listReports(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const { admin, profile } = await requireAuthenticatedProfile(req);
   const areaId = requireArea(req, profile);
-  let query = supabase
+  let query = admin
     .from('activity_reports')
     .select('id, area_id, chapter_id, prepared_by_member_id, prepared_by_name, chapter_name_snapshot, report_type, activity_date, title, activity, participant_count, location, event_id, notes, created_at, updated_at')
     .eq('area_id', areaId)

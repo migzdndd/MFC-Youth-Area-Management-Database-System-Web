@@ -19,9 +19,9 @@ async function canManageMember(supabase, profile, memberId, areaId) {
 }
 
 async function listGig(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const { admin, profile } = await requireAuthenticatedProfile(req);
   const areaId = requireArea(req, profile);
-  let query = supabase
+  let query = admin
     .from('gig_contributions')
     .select('id, area_id, chapter_id, member_id, amount, contribution_date, notes, created_at')
     .eq('area_id', areaId)

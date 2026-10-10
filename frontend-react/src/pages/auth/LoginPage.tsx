@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth-store';
 import { apiClient } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
@@ -10,6 +11,7 @@ import type { UserProfile } from '@/types/auth';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { setSession } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -76,6 +78,8 @@ export const LoginPage: React.FC = () => {
           refresh_token: refreshToken,
           user: normalizedUser,
         });
+
+        queryClient.clear();
 
         if (normalizedUser.role === 'member') {
           navigate('/member');

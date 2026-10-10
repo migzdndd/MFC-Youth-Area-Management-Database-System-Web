@@ -10,6 +10,23 @@
 
 // Storage labels for browser memory
 window.SESSION_KEY = window.SESSION_KEY || 'mfc_auth_session';
+window.DB_KEY = window.DB_KEY || 'mfc_web_database_v1';
+window.DB_VERSION = window.DB_VERSION || 1;
+window.SERVICES = window.SERVICES || [
+  'Unit Servant',
+  'Household Servant',
+  'Chapter Servant',
+  'Area Servant',
+  'Area LIT Servant',
+  'Campus Servant',
+  'Area Kids Servant',
+  'MFC High Servant',
+  'Music',
+  'Dance',
+  'Creative Writing',
+  'Graphics & Promo',
+  'Photography & Videography'
+];
 
 /**
  * Initializes Smooth Fade-in Animations

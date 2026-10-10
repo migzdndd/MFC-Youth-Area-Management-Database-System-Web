@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
 import type { Area } from '@/types/auth';
 
+import { useAuthStore } from '@/stores/auth-store';
+
 export interface DashboardMetrics {
   totalMembers: number;
   totalChapters: number;
@@ -10,10 +12,37 @@ export interface DashboardMetrics {
 }
 
 export function useDashboardMetrics() {
+  const { user, activeArea } = useAuthStore();
+  const currentAreaId = activeArea?.id || user?.area_id || '';
+
   return useQuery({
-    queryKey: ['dashboard-metrics'],
+    queryKey: ['dashboard-metrics', currentAreaId],
     queryFn: async () => {
-      // Fetch aggregate lists concurrently
+      // 1. First attempt: fetch pre-aggregated dashboard counts from /sync
+      try {
+        const syncRes = await apiClient<{
+          ok?: boolean;
+          dashboard?: {
+            members?: number;
+            chapters?: number;
+            events?: number;
+            reports?: number;
+          };
+        }>('/sync');
+
+        if (syncRes?.dashboard) {
+          return {
+            totalMembers: Number(syncRes.dashboard.members ?? 0),
+            totalChapters: Number(syncRes.dashboard.chapters ?? 0),
+            upcomingEvents: Number(syncRes.dashboard.events ?? 0),
+            totalReports: Number(syncRes.dashboard.reports ?? 0),
+          };
+        }
+      } catch {
+        // Fall back to individual collection fetches
+      }
+
+      // 2. Fallback: Fetch aggregate lists concurrently
       const [membersRes, chaptersRes, eventsRes, reportsRes] = await Promise.allSettled([
         apiClient<{ data?: unknown[]; members?: unknown[] }>('/members'),
         apiClient<{ data?: unknown[]; chapters?: unknown[] }>('/chapters'),

@@ -62,6 +62,16 @@ export default async function handler(req, res) {
       return sendJson(res, 403, { ok: false, error: 'This account is not active.' });
     }
 
+    let areaName = null;
+    if (linkedProfile.area_id) {
+      const { data: areaRow } = await admin
+        .from('areas')
+        .select('name')
+        .eq('id', linkedProfile.area_id)
+        .maybeSingle();
+      areaName = areaRow?.name || null;
+    }
+
     let verifiedFactors = (data.user?.factors || []).filter(f => f.factor_type === 'totp' && f.status === 'verified');
     if (!verifiedFactors.length) {
       try {
@@ -146,6 +156,8 @@ export default async function handler(req, res) {
         role: linkedProfile.role,
         areaId: linkedProfile.area_id,
         area_id: linkedProfile.area_id,
+        areaName,
+        area_name: areaName,
         chapterId: linkedProfile.chapter_id,
         chapter_id: linkedProfile.chapter_id,
         mustChangePassword: linkedProfile.must_change_password
