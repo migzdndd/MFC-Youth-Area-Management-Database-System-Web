@@ -9,15 +9,56 @@ import { useDailyReadings } from '@/hooks/useReadings';
 import { ShieldCheck, BookOpen, ExternalLink, ArrowRight } from 'lucide-react';
 import type { UserProfile } from '@/types/auth';
 
+const REMEMBERED_EMAIL_KEY = 'mfc_remembered_leader_email';
+const EMAIL_DRAFT_KEY = 'mfc_leader_email_draft';
+
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { setSession } = useAuthStore();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => {
+    try {
+      return localStorage.getItem(REMEMBERED_EMAIL_KEY) || sessionStorage.getItem(EMAIL_DRAFT_KEY) || '';
+    } catch {
+      return '';
+    }
+  });
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(true);
+  const [rememberMe, setRememberMe] = useState(() => {
+    try {
+      const stored = localStorage.getItem(REMEMBERED_EMAIL_KEY);
+      return stored !== null ? true : true;
+    } catch {
+      return true;
+    }
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  const handleEmailChange = (val: string) => {
+    setEmail(val);
+    try {
+      sessionStorage.setItem(EMAIL_DRAFT_KEY, val);
+      if (rememberMe) {
+        localStorage.setItem(REMEMBERED_EMAIL_KEY, val);
+      }
+    } catch {
+      // Ignore storage errors in restrictive modes
+    }
+  };
+
+  const handleRememberChange = (checked: boolean) => {
+    setRememberMe(checked);
+    try {
+      if (checked && email) {
+        localStorage.setItem(REMEMBERED_EMAIL_KEY, email);
+      } else if (!checked) {
+        localStorage.removeItem(REMEMBERED_EMAIL_KEY);
+      }
+    } catch {
+      // Ignore storage errors in restrictive modes
+    }
+  };
 
   const { data: readingsData, isLoading: readingsLoading } = useDailyReadings();
 
@@ -78,6 +119,17 @@ export const LoginPage: React.FC = () => {
           refresh_token: refreshToken,
           user: normalizedUser,
         });
+
+        try {
+          sessionStorage.removeItem(EMAIL_DRAFT_KEY);
+          if (rememberMe && email.trim()) {
+            localStorage.setItem(REMEMBERED_EMAIL_KEY, email.trim());
+          } else {
+            localStorage.removeItem(REMEMBERED_EMAIL_KEY);
+          }
+        } catch {
+          // Ignore storage errors
+        }
 
         queryClient.clear();
 
@@ -205,7 +257,7 @@ export const LoginPage: React.FC = () => {
                   autoComplete="email"
                   placeholder="servant@example.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => handleEmailChange(e.target.value)}
                 />
 
                 <Input
@@ -225,7 +277,7 @@ export const LoginPage: React.FC = () => {
                     <input
                       type="checkbox"
                       checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
+                      onChange={(e) => handleRememberChange(e.target.checked)}
                       className="rounded border-slate-300 text-navy focus:ring-navy w-4 h-4"
                     />
                     <span className="text-xs text-text-muted font-medium">Remember me</span>

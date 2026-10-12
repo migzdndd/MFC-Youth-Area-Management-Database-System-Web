@@ -7,13 +7,32 @@ import { Input } from '@/components/ui/Input';
 import { UserCheck, ArrowLeft } from 'lucide-react';
 import type { UserProfile } from '@/types/auth';
 
+const REMEMBERED_MEMBER_EMAIL_KEY = 'mfc_remembered_member_email';
+const MEMBER_EMAIL_DRAFT_KEY = 'mfc_member_email_draft';
+
 export const MemberLoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { setSession } = useAuthStore();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => {
+    try {
+      return localStorage.getItem(REMEMBERED_MEMBER_EMAIL_KEY) || sessionStorage.getItem(MEMBER_EMAIL_DRAFT_KEY) || '';
+    } catch {
+      return '';
+    }
+  });
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  const handleEmailChange = (val: string) => {
+    setEmail(val);
+    try {
+      sessionStorage.setItem(MEMBER_EMAIL_DRAFT_KEY, val);
+      localStorage.setItem(REMEMBERED_MEMBER_EMAIL_KEY, val);
+    } catch {
+      // Storage unavailable fallback
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,6 +91,16 @@ export const MemberLoginPage: React.FC = () => {
           refresh_token: refreshToken,
           user: normalizedUser,
         });
+
+        try {
+          sessionStorage.removeItem(MEMBER_EMAIL_DRAFT_KEY);
+          if (email.trim()) {
+            localStorage.setItem(REMEMBERED_MEMBER_EMAIL_KEY, email.trim());
+          }
+        } catch {
+          // Ignore storage error
+        }
+
         navigate('/member');
       } else {
         setErrorMessage(res.error || 'Invalid credentials for Member Portal.');
@@ -125,7 +154,7 @@ export const MemberLoginPage: React.FC = () => {
             autoComplete="email"
             placeholder="member@example.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => handleEmailChange(e.target.value)}
           />
 
           <Input

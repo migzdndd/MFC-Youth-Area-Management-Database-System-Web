@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['favicon.svg', 'img/logo-2.png', 'img/logo.png', 'Icons/*.svg'],
       manifest: {
         name: 'MFC Youth Area Management System',
