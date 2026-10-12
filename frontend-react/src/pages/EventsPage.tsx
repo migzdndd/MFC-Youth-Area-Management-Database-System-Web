@@ -8,6 +8,7 @@ import {
   useDeleteParticipant,
 } from '@/hooks/useEvents';
 import { useMembers } from '@/hooks/useMembers';
+import { useToast } from '@/hooks/useToast';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
@@ -27,12 +28,14 @@ import {
   CreditCard,
   AlertCircle,
   ChevronRight,
+  X,
 } from 'lucide-react';
 import type { CommunityEvent, Participant } from '@/types/event';
 
 export const EventsPage: React.FC = () => {
   const { data: events = [], isLoading } = useEvents();
   const { data: members = [] } = useMembers();
+  const toast = useToast();
 
   const createEvent = useCreateEvent();
   const registerParticipant = useRegisterParticipant();
@@ -55,8 +58,15 @@ export const EventsPage: React.FC = () => {
     selectedEvent?.id || ''
   );
 
-  // Non-community participant form state
+  // Add Guest Modal state
+  const [isAddGuestModalOpen, setIsAddGuestModalOpen] = useState(false);
   const [guestName, setGuestName] = useState('');
+  const [guestAge, setGuestAge] = useState('');
+  const [guestEmail, setGuestEmail] = useState('');
+  const [guestDob, setGuestDob] = useState('');
+  const [guestInvitedByMemberId, setGuestInvitedByMemberId] = useState('');
+  const [invitedBySearch, setInvitedBySearch] = useState('');
+  const [isInvitedDropdownOpen, setIsInvitedDropdownOpen] = useState(false);
   const [guestPaymentStatus, setGuestPaymentStatus] = useState<'Paid' | 'Not Paid'>('Not Paid');
   const [guestError, setGuestError] = useState('');
 
@@ -120,10 +130,29 @@ export const EventsPage: React.FC = () => {
   const openEventDetails = (event: CommunityEvent) => {
     setSelectedEvent(event);
     setGuestName('');
+    setGuestAge('');
+    setGuestEmail('');
+    setGuestDob('');
+    setGuestInvitedByMemberId('');
+    setInvitedBySearch('');
+    setIsInvitedDropdownOpen(false);
     setGuestPaymentStatus(event.fee > 0 ? 'Not Paid' : 'Paid');
     setAttendeeSearch('');
     setGuestError('');
     setPaymentPrompt(null);
+  };
+
+  const openAddGuestModal = () => {
+    setGuestName('');
+    setGuestAge('');
+    setGuestEmail('');
+    setGuestDob('');
+    setGuestInvitedByMemberId('');
+    setInvitedBySearch('');
+    setIsInvitedDropdownOpen(false);
+    setGuestPaymentStatus(selectedEvent && selectedEvent.fee > 0 ? 'Not Paid' : 'Paid');
+    setGuestError('');
+    setIsAddGuestModalOpen(true);
   };
 
   // Add non-community participant
@@ -134,7 +163,9 @@ export const EventsPage: React.FC = () => {
 
     const trimmedName = guestName.trim();
     if (!trimmedName) {
-      setGuestError('Please enter the participant name.');
+      const err = 'Please enter the participant name.';
+      setGuestError(err);
+      toast.error(err, 'Validation Failed');
       return;
     }
 
@@ -145,14 +176,12 @@ export const EventsPage: React.FC = () => {
         payment_status: guestPaymentStatus,
         attended: true,
       });
-      setGuestName('');
-      setGuestPaymentStatus(selectedEvent.fee > 0 ? 'Not Paid' : 'Paid');
+      toast.success(`${trimmedName} registered as guest!`, 'Guest Added');
+      setIsAddGuestModalOpen(false);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setGuestError(err.message);
-      } else {
-        setGuestError('Failed to record participant.');
-      }
+      const msg = err instanceof Error ? err.message : 'Failed to record participant.';
+      setGuestError(msg);
+      toast.error(msg, 'Registration Failed');
     }
   };
 
@@ -263,6 +292,15 @@ export const EventsPage: React.FC = () => {
     return (g.non_member_name || '').toLowerCase().includes(query);
   });
 
+  const selectedInviter = members.find((m) => m.id === guestInvitedByMemberId);
+  const inviterQuery = invitedBySearch.trim().toLowerCase();
+  const filteredInviterMembers = members.filter((m) => {
+    if (!inviterQuery) return true;
+    const fullName = `${m.first_name} ${m.last_name}`.toLowerCase();
+    const nickname = (m.nickname || '').toLowerCase();
+    return fullName.includes(inviterQuery) || nickname.includes(inviterQuery);
+  });
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -276,9 +314,6 @@ export const EventsPage: React.FC = () => {
               {events.length} {events.length === 1 ? 'Gathering' : 'Gatherings'}
             </Badge>
           </div>
-          <p className="text-sm text-slate-600">
-            Assemblies, youth camps, payment tracking, and area member attendance check-ins.
-          </p>
         </div>
 
         <Button onClick={openCreateModal} className="flex items-center gap-2 shrink-0">
@@ -600,60 +635,33 @@ export const EventsPage: React.FC = () => {
             )}
           </div>
 
-          {/* SECTION 2: Bottom Section for Adding Guests (Not in Area Database) */}
+          {/* SECTION 2: Bottom Section for Guests */}
           <div className="bg-slate-50/80 border border-slate-200 rounded-xl p-4 sm:p-5 space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-navy/10 text-navy">
-                <UserPlus className="w-4 h-4" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-navy/10 text-navy">
+                  <UserPlus className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">
+                    Guests & Visiting Youth
+                  </h4>
+                  <p className="text-xs text-slate-500">
+                    Quick check-in for walk-ins, companions, and non-registered guests.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h4 className="text-sm font-bold text-slate-900">
-                  Add Guests & Visiting Youth (Not inside Area Database)
-                </h4>
-                <p className="text-xs text-slate-500">
-                  Quick check-in for walk-ins, companions, and non-registered guests.
-                </p>
-              </div>
-            </div>
-
-            {guestError && (
-              <div className="p-2.5 text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-md font-medium flex items-center gap-1.5">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{guestError}</span>
-              </div>
-            )}
-
-            {/* Guest Registration Form */}
-            <form onSubmit={handleAddGuest} className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center">
-              <input
-                type="text"
-                placeholder="Guest Full Name..."
-                className="flex-1 px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy min-h-[44px]"
-                value={guestName}
-                onChange={(e) => setGuestName(e.target.value)}
-              />
-
-              <select
-                aria-label="Guest payment status"
-                className="px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy min-h-[44px]"
-                value={guestPaymentStatus}
-                onChange={(e) => setGuestPaymentStatus(e.target.value as 'Paid' | 'Not Paid')}
-              >
-                <option value="Not Paid">Not Paid</option>
-                <option value="Paid">Paid</option>
-              </select>
 
               <Button
-                type="submit"
-                variant="primary"
+                type="button"
+                onClick={openAddGuestModal}
+                className="shrink-0 flex items-center gap-1.5 font-bold"
                 size="sm"
-                isLoading={registerParticipant.isPending}
-                className="shrink-0 min-h-[44px] flex items-center gap-1.5 font-bold"
               >
                 <UserPlus className="w-4 h-4" />
                 <span>Add Guest</span>
               </Button>
-            </form>
+            </div>
 
             {/* Registered Guests Sub-Grid */}
             {nonMemberParticipants.length > 0 && (
@@ -758,6 +766,164 @@ export const EventsPage: React.FC = () => {
             </Button>
           </div>
         </div>
+      </Modal>
+
+      {/* Add Guest Modal */}
+      <Modal
+        isOpen={isAddGuestModalOpen}
+        onClose={() => setIsAddGuestModalOpen(false)}
+        title="Add Guest / Visiting Youth"
+        maxWidth="md"
+      >
+        <form onSubmit={handleAddGuest} className="space-y-4">
+          {guestError && (
+            <div className="p-2.5 text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-md font-medium flex items-center gap-1.5">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{guestError}</span>
+            </div>
+          )}
+
+          <Input
+            label="Name"
+            required
+            placeholder="Guest Full Name..."
+            value={guestName}
+            onChange={(e) => setGuestName(e.target.value)}
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input
+              label="Age"
+              type="number"
+              min="1"
+              max="120"
+              placeholder="e.g. 18"
+              value={guestAge}
+              onChange={(e) => setGuestAge(e.target.value)}
+            />
+            <Input
+              label="Date of Birth"
+              type="date"
+              value={guestDob}
+              onChange={(e) => setGuestDob(e.target.value)}
+            />
+          </div>
+
+          <Input
+            label="Email"
+            type="email"
+            placeholder="guest@example.com"
+            value={guestEmail}
+            onChange={(e) => setGuestEmail(e.target.value)}
+          />
+
+          {/* Invited by Searchable Dropdown */}
+          <div className="space-y-1.5 relative">
+            <label className="text-sm font-semibold text-text-main">
+              Invited by (MFC Youth Member)
+            </label>
+            {selectedInviter ? (
+              <div className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-xs">
+                <div>
+                  <span className="font-bold text-slate-900">
+                    {selectedInviter.first_name} {selectedInviter.last_name}
+                  </span>
+                  {selectedInviter.nickname && (
+                    <span className="text-slate-500 ml-1">("{selectedInviter.nickname}")</span>
+                  )}
+                  <span className="text-slate-400 ml-2">
+                    • {selectedInviter.chapter_name || 'Member'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGuestInvitedByMemberId('');
+                    setInvitedBySearch('');
+                  }}
+                  className="text-slate-400 hover:text-rose-600 p-1 rounded"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div>
+                <div className="relative">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder="Search registered members..."
+                    value={invitedBySearch}
+                    onFocus={() => setIsInvitedDropdownOpen(true)}
+                    onChange={(e) => {
+                      setInvitedBySearch(e.target.value);
+                      setIsInvitedDropdownOpen(true);
+                    }}
+                    className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-white text-slate-900 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy"
+                  />
+                </div>
+                {isInvitedDropdownOpen && (
+                  <div className="absolute left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white border border-slate-200 rounded-lg shadow-lg z-50 divide-y divide-slate-100">
+                    {filteredInviterMembers.length === 0 ? (
+                      <div className="p-3 text-center text-xs text-slate-400">
+                        No registered members matched.
+                      </div>
+                    ) : (
+                      filteredInviterMembers.slice(0, 20).map((m) => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => {
+                            setGuestInvitedByMemberId(m.id);
+                            setIsInvitedDropdownOpen(false);
+                          }}
+                          className="w-full text-left p-2.5 hover:bg-slate-50 transition-colors text-xs flex items-center justify-between"
+                        >
+                          <div>
+                            <span className="font-semibold text-slate-900">
+                              {m.first_name} {m.last_name}
+                            </span>
+                            {m.nickname && (
+                              <span className="text-slate-500 ml-1">("{m.nickname}")</span>
+                            )}
+                          </div>
+                          <span className="text-[11px] text-slate-400">
+                            {m.chapter_name || 'Member'}
+                          </span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {selectedEvent && selectedEvent.fee > 0 && (
+            <div className="w-full flex flex-col gap-1.5">
+              <label className="text-sm font-semibold text-text-main">
+                Payment Status
+              </label>
+              <select
+                className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy min-h-[44px]"
+                value={guestPaymentStatus}
+                onChange={(e) => setGuestPaymentStatus(e.target.value as 'Paid' | 'Not Paid')}
+              >
+                <option value="Not Paid">Not Paid</option>
+                <option value="Paid">Paid</option>
+              </select>
+            </div>
+          )}
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-border-subtle">
+            <Button type="button" variant="secondary" onClick={() => setIsAddGuestModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" isLoading={registerParticipant.isPending}>
+              Add Guest
+            </Button>
+          </div>
+        </form>
       </Modal>
 
       {/* Payment Status Confirmation Prompt Modal */}

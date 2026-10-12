@@ -18,6 +18,7 @@ export const ChaptersPage: React.FC = () => {
   const deleteChapter = useDeleteChapter();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedChapterForMembers, setSelectedChapterForMembers] = useState<Chapter | null>(null);
   const [name, setName] = useState('');
   const [headMemberId, setHeadMemberId] = useState('');
   const [formError, setFormError] = useState('');
@@ -69,7 +70,7 @@ export const ChaptersPage: React.FC = () => {
       {/* Header */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
               Chapters & Households
             </h1>
@@ -77,9 +78,6 @@ export const ChaptersPage: React.FC = () => {
               {chapters.length} {chapters.length === 1 ? 'Chapter' : 'Chapters'}
             </Badge>
           </div>
-          <p className="text-sm text-slate-600">
-            Manage geographic chapters, servant heads, and pastoral cell groups.
-          </p>
         </div>
 
         <Button onClick={openCreateModal} className="flex items-center gap-2 shrink-0">
@@ -114,7 +112,8 @@ export const ChaptersPage: React.FC = () => {
             return (
               <div
                 key={chapter.id}
-                className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group"
+                onClick={() => setSelectedChapterForMembers(chapter)}
+                className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group cursor-pointer"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-4">
@@ -129,7 +128,10 @@ export const ChaptersPage: React.FC = () => {
 
                     <button
                       type="button"
-                      onClick={() => handleDelete(chapter)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(chapter);
+                      }}
                       className="p-2 text-slate-400 hover:text-mfc-red rounded-lg hover:bg-rose-50 transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
                       aria-label={`Delete chapter ${chapter.name}`}
                     >
@@ -161,7 +163,7 @@ export const ChaptersPage: React.FC = () => {
                 </div>
 
                 <div className="pt-3 mt-4 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
-                  <span>Geographic Chapter</span>
+                  <span className="text-navy font-medium group-hover:underline">Click to view members &rarr;</span>
                   <Badge variant="success">Active</Badge>
                 </div>
               </div>
@@ -169,6 +171,82 @@ export const ChaptersPage: React.FC = () => {
           })}
         </div>
       )}
+
+      {/* Chapter Members Roster Modal */}
+      <Modal
+        isOpen={!!selectedChapterForMembers}
+        onClose={() => setSelectedChapterForMembers(null)}
+        title={selectedChapterForMembers ? `${selectedChapterForMembers.name} - Assigned Members` : 'Chapter Members'}
+        maxWidth="xl"
+      >
+        {selectedChapterForMembers && (() => {
+          const assignedMembers = members.filter((m) => m.chapter_id === selectedChapterForMembers.id);
+          return (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <span className="text-xs text-slate-500 font-medium">
+                  Roster of youth assigned to {selectedChapterForMembers.name}
+                </span>
+                <Badge variant="navy">
+                  {assignedMembers.length} {assignedMembers.length === 1 ? 'Member' : 'Members'}
+                </Badge>
+              </div>
+
+              {assignedMembers.length === 0 ? (
+                <div className="py-10 text-center text-slate-500 text-xs bg-slate-50 rounded-xl border border-slate-200">
+                  No members are currently assigned to this chapter.
+                </div>
+              ) : (
+                <div className="max-h-[55vh] overflow-y-auto divide-y divide-slate-100 pr-1">
+                  {assignedMembers.map((m) => (
+                    <div
+                      key={m.id}
+                      className="py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 hover:bg-slate-50/80 px-2 rounded-lg transition-colors"
+                    >
+                      <div>
+                        <div className="font-bold text-sm text-slate-900">
+                          {m.first_name} {m.last_name}
+                          {m.nickname && (
+                            <span className="text-xs font-normal text-slate-500 ml-1.5">
+                              &ldquo;{m.nickname}&rdquo;
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-slate-500 mt-0.5 flex flex-wrap gap-2 items-center">
+                          <span>{m.contact || m.contact_number || 'No phone'}</span>
+                          {m.email && (
+                            <>
+                              <span>&bull;</span>
+                              <span>{m.email}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium">
+                          {m.academic_track || 'Member'}
+                        </span>
+                        {m.service && (
+                          <Badge variant="navy">{m.service}</Badge>
+                        )}
+                        <Badge variant={m.status?.toLowerCase() === 'active' ? 'success' : 'default'}>
+                          {m.status?.toLowerCase() === 'active' ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="pt-3 border-t border-slate-100 flex justify-end">
+                <Button variant="secondary" onClick={() => setSelectedChapterForMembers(null)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          );
+        })()}
+      </Modal>
 
       {/* Add Chapter Modal */}
       <Modal

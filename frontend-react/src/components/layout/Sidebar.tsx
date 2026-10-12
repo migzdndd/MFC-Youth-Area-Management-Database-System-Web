@@ -8,7 +8,6 @@ import {
   FileText,
   Calendar,
   BookOpen,
-  History,
   LogOut,
   X,
   MapPin,
@@ -38,7 +37,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { name: 'Activity Reports', path: '/reports', pageKey: 'reports', icon: FileText },
     { name: 'Events', path: '/events', pageKey: 'events', icon: Calendar },
     { name: 'Daily Readings', path: '/readings', pageKey: 'readings', icon: BookOpen },
-    { name: 'Changelogs', path: '/changelogs', pageKey: 'changelogs', icon: History },
   ];
 
   const allowedPages = user?.role ? ROLE_ALLOWED_PAGES[user.role] || [] : [];

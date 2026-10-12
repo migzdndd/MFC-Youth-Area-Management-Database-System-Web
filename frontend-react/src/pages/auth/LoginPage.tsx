@@ -324,10 +324,6 @@ export const LoginPage: React.FC = () => {
           <a href="https://mfcyouth.org" target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
             Official MFC Youth <ExternalLink className="w-3 h-3" />
           </a>
-          <span>&middot;</span>
-          <Link to="/changelogs" className="hover:underline">
-            System Changelogs
-          </Link>
         </div>
       </footer>
     </div>

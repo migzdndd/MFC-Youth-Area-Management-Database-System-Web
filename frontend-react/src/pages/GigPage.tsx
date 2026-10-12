@@ -74,9 +74,6 @@ export const GigPage: React.FC = () => {
             </h1>
             <Badge variant="gold">Tithes & Mission</Badge>
           </div>
-          <p className="text-sm text-slate-600">
-            Voluntary tithes and mission stewardship supporting youth gatherings and evangelization.
-          </p>
         </div>
 
         <Button onClick={openModal} className="flex items-center gap-2 shrink-0">

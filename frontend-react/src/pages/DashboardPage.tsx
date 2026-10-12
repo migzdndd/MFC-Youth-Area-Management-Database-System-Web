@@ -26,8 +26,6 @@ export const DashboardPage: React.FC = () => {
   const { data: readingsData } = useDailyReadings();
 
   const isNationalCoordinator = user?.role === 'national_coordinator';
-  const matchedArea = areas?.find((a: Area) => a.id === (activeArea?.id || user?.area_id));
-  const effectiveAreaName = activeArea?.name || user?.area_name || matchedArea?.name || 'Area Community';
 
   const memberSubtitle = (() => {
     switch (user?.role) {
@@ -57,10 +55,6 @@ export const DashboardPage: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading tracking-tight">
             Welcome, {user?.first_name || 'Servant Leader'}
           </h1>
-          <p className="text-sm text-slate-600 mt-1">
-            Managing community pastoral operations for{' '}
-            <span className="text-navy font-semibold">{effectiveAreaName}</span>.
-          </p>
         </div>
 
         {/* National Coordinator Area Selector */}

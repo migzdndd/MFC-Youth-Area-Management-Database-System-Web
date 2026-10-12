@@ -24,7 +24,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
 
   try {
-    const { supabase, profile, user } = await requireAuthenticatedProfile(req);
+    const { admin, profile, user } = await requireAuthenticatedProfile(req);
     if (!LEADERSHIP_ROLES.has(String(profile.role || '').toLowerCase())) {
       return sendJson(res, 403, { ok: false, error: 'You do not have permission to select an Area.' });
     }
@@ -37,7 +37,7 @@ export default async function handler(req, res) {
       return sendJson(res, 400, { ok: false, error: 'Select an Area.' });
     }
 
-    const { data: area, error: areaError } = await supabase
+    const { data: area, error: areaError } = await admin
       .from('areas')
       .select('id, name, code, is_active')
       .eq('id', areaId)
@@ -48,7 +48,7 @@ export default async function handler(req, res) {
     }
 
     const memberLink = await ensureLeadershipMemberRecord({
-      supabase,
+      supabase: admin,
       user,
       profile,
       areaId: area.id

@@ -1,6 +1,8 @@
 import React from 'react';
 import { Menu, MapPin } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
+import { useAreas } from '@/hooks/useDashboard';
+import type { Area } from '@/types/auth';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -8,8 +10,10 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const { user, activeArea } = useAuthStore();
+  const { data: areas = [] } = useAreas();
 
-  const currentAreaName = activeArea?.name || user?.area_name || 'Area Community';
+  const matchedArea = areas.find((a: Area) => a.id === (activeArea?.id || user?.area_id));
+  const currentAreaName = activeArea?.name || user?.area_name || matchedArea?.name || 'MFC Youth Area Database';
 
   return (
     <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-xs border-b border-border-subtle h-16 flex items-center justify-between px-4 sm:px-6 shadow-2xs">

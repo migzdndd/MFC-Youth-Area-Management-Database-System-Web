@@ -50,13 +50,13 @@ export const ROLE_LABELS: Record<UserRole, string> = {
 };
 
 export const ROLE_ALLOWED_PAGES: Record<UserRole, string[]> = {
-  national_coordinator: ['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings', 'changelogs'],
-  area_servant: ['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings', 'changelogs'],
-  couple_coordinator: ['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings', 'changelogs'],
-  lit_servant: ['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings', 'changelogs'],
-  campus_servant: ['dashboard', 'members', 'services', 'reports', 'events', 'readings', 'changelogs'],
-  mfc_high_servant: ['dashboard', 'members', 'services', 'reports', 'events', 'readings', 'changelogs'],
-  area_kids_servant: ['dashboard', 'members', 'reports', 'events', 'readings', 'changelogs'],
-  chapter_servant: ['dashboard', 'chapters', 'reports', 'events', 'readings', 'changelogs'],
+  national_coordinator: ['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings'],
+  area_servant: ['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings'],
+  couple_coordinator: ['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings'],
+  lit_servant: ['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings'],
+  campus_servant: ['dashboard', 'members', 'services', 'reports', 'events', 'readings'],
+  mfc_high_servant: ['dashboard', 'members', 'services', 'reports', 'events', 'readings'],
+  area_kids_servant: ['dashboard', 'members', 'reports', 'events', 'readings'],
+  chapter_servant: ['dashboard', 'chapters', 'reports', 'events', 'readings'],
   member: ['member'],
 };

@@ -66,12 +66,12 @@ function areaCodeFromName(name) {
  * Restricts access to servant leader accounts. If no areas exist yet, it returns an empty list without error.
  */
 async function listAreas(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const { admin, profile } = await requireAuthenticatedProfile(req);
   if (!LEADERSHIP_ROLES.has(String(profile.role || '').toLowerCase())) {
     return sendJson(res, 403, { ok: false, error: 'Area setup is available only to Servant Leader accounts.' });
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await admin
     .from('areas')
     .select('id, name, code, is_active')
     .eq('is_active', true)
@@ -91,7 +91,7 @@ async function listAreas(req, res) {
  * Checks for duplicate names before saving. If an error happens while setting up services or linking the leader, it deletes the partially-created area to avoid orphaned data.
  */
 async function createArea(req, res) {
-  const { supabase, profile, user } = await requireAuthenticatedProfile(req);
+  const { admin, profile, user } = await requireAuthenticatedProfile(req);
   if (!LEADERSHIP_ROLES.has(String(profile.role || '').toLowerCase())) {
     return sendJson(res, 403, { ok: false, error: 'You do not have permission to create an Area.' });
   }
@@ -104,7 +104,7 @@ async function createArea(req, res) {
     return sendJson(res, 400, { ok: false, error: 'Enter a valid Area name.' });
   }
 
-  const { data: existingByName, error: nameError } = await supabase
+  const { data: existingByName, error: nameError } = await admin
     .from('areas')
     .select('id, name, code')
     .ilike('name', name)
@@ -120,7 +120,7 @@ async function createArea(req, res) {
   }
 
   let code = areaCodeFromName(name);
-  const { data: codeConflict, error: codeConflictError } = await supabase
+  const { data: codeConflict, error: codeConflictError } = await admin
     .from('areas')
     .select('id')
     .eq('code', code)
@@ -132,7 +132,7 @@ async function createArea(req, res) {
 
   let createdArea = null;
   try {
-    const { data: area, error: areaError } = await supabase
+    const { data: area, error: areaError } = await admin
       .from('areas')
       .insert({ name, code, is_active: true })
       .select('id, name, code, is_active')
@@ -140,13 +140,13 @@ async function createArea(req, res) {
     if (areaError) throw areaError;
     createdArea = area;
 
-    const { error: serviceError } = await supabase
+    const { error: serviceError } = await admin
       .from('services')
       .insert(STANDARD_SERVICES.map(serviceName => ({ area_id: area.id, name: serviceName, is_active: true })));
     if (serviceError) throw serviceError;
 
     const memberLink = await ensureLeadershipMemberRecord({
-      supabase,
+      supabase: admin,
       user,
       profile,
       areaId: area.id
@@ -163,7 +163,7 @@ async function createArea(req, res) {
     });
   } catch (error) {
     if (createdArea?.id) {
-      await supabase.from('areas').delete().eq('id', createdArea.id).catch(() => {});
+      await admin.from('areas').delete().eq('id', createdArea.id).catch(() => {});
     }
     throw error;
   }

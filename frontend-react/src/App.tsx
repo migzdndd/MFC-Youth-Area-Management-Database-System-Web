@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth-store';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -23,7 +23,6 @@ const ServicesPage = lazy(() => import('@/pages/ServicesPage').then((m) => ({ de
 const GigPage = lazy(() => import('@/pages/GigPage').then((m) => ({ default: m.GigPage })));
 const ReadingsPage = lazy(() => import('@/pages/ReadingsPage').then((m) => ({ default: m.ReadingsPage })));
 const MemberPortalPage = lazy(() => import('@/pages/MemberPortalPage').then((m) => ({ default: m.MemberPortalPage })));
-const ChangelogsPage = lazy(() => import('@/pages/ChangelogsPage').then((m) => ({ default: m.ChangelogsPage })));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 
 const queryClient = new QueryClient({
@@ -54,46 +53,6 @@ const RootRedirect: React.FC = () => {
   return <Navigate to="/dashboard" replace />;
 };
 
-const ChangelogsRoute: React.FC = () => {
-  const { token, user } = useAuthStore();
-  const isServant = Boolean(token && user && user.role !== 'member');
-
-  if (isServant) {
-    return (
-      <AppLayout>
-        <ChangelogsPage />
-      </AppLayout>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-canvas flex flex-col justify-between">
-      <header className="bg-white border-b border-border-subtle sticky top-0 z-30">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link to="/login" className="flex items-center gap-2">
-            <img src="/img/logo-2.png" alt="MFC Youth" width={32} height={32} className="object-contain" />
-            <span className="font-heading font-bold text-navy text-sm sm:text-base">MFC Youth AMS</span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <Link
-              to="/login"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-navy hover:bg-slate-50 border border-border-subtle transition-colors"
-            >
-              &larr; Back to Sign In
-            </Link>
-          </div>
-        </div>
-      </header>
-      <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-        <ChangelogsPage />
-      </main>
-      <footer className="text-center py-4 text-xs text-text-muted border-t border-border-subtle bg-white">
-        Missionary Families for Christ Youth &middot; Area Management System
-      </footer>
-    </div>
-  );
-};
-
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -106,7 +65,7 @@ export default function App() {
               <Route path="/member-login" element={<MemberLoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/changelogs" element={<ChangelogsRoute />} />
+              <Route path="/changelogs" element={<Navigate to="/" replace />} />
 
               {/* Member Portal Dedicated Route */}
               <Route

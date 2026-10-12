@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useReports, useCreateReport } from '@/hooks/useReports';
 import { useChapters } from '@/hooks/useChapters';
+import { useAuthStore } from '@/stores/auth-store';
+import { useToast } from '@/hooks/useToast';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
@@ -12,26 +14,42 @@ import { FilePlus, FileText, Download } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
+const REPORT_CATEGORIES = [
+  'Household',
+  'Chapter Assembly',
+  'Fellowship',
+  'External Engagement',
+];
+
 export const ReportsPage: React.FC = () => {
   const { data: reports = [], isLoading } = useReports();
   const { data: chapters = [] } = useChapters();
+  const { user } = useAuthStore();
+  const toast = useToast();
   const createReport = useCreateReport();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [chapterId, setChapterId] = useState('');
+  const [preparedBy, setPreparedBy] = useState('');
   const [activityDate, setActivityDate] = useState('');
   const [participantCount, setParticipantCount] = useState('0');
-  const [reportType, setReportType] = useState('Chapter Assembly');
+  const [reportType, setReportType] = useState('Household');
   const [notes, setNotes] = useState('');
   const [formError, setFormError] = useState('');
 
+  const getUserFullName = () => {
+    if (!user) return '';
+    return [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email || '';
+  };
+
   const openCreateModal = () => {
     setTitle('');
-    setChapterId(chapters[0]?.id || '');
+    setChapterId(user?.chapter_id || chapters[0]?.id || '');
+    setPreparedBy(getUserFullName());
     setActivityDate(new Date().toISOString().split('T')[0]);
     setParticipantCount('0');
-    setReportType('Chapter Assembly');
+    setReportType('Household');
     setNotes('');
     setFormError('');
     setIsModalOpen(true);
@@ -41,8 +59,24 @@ export const ReportsPage: React.FC = () => {
     e.preventDefault();
     setFormError('');
 
-    if (!title.trim() || !activityDate) {
-      setFormError('Activity title and date are required.');
+    if (!title.trim()) {
+      const err = 'Activity title is required.';
+      setFormError(err);
+      toast.error(err, 'Validation Failed');
+      return;
+    }
+
+    if (!activityDate) {
+      const err = 'Activity date is required.';
+      setFormError(err);
+      toast.error(err, 'Validation Failed');
+      return;
+    }
+
+    if (!preparedBy.trim()) {
+      const err = 'Prepared by field is required.';
+      setFormError(err);
+      toast.error(err, 'Validation Failed');
       return;
     }
 
@@ -54,14 +88,14 @@ export const ReportsPage: React.FC = () => {
         participant_count: parseInt(participantCount, 10) || 0,
         report_type: reportType,
         notes: notes.trim(),
+        prepared_by: preparedBy.trim(),
       });
+      toast.success('Activity report filed successfully!', 'Report Saved');
       setIsModalOpen(false);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setFormError(err.message);
-      } else {
-        setFormError('Failed to record activity report.');
-      }
+      const message = err instanceof Error ? err.message : 'Failed to record activity report.';
+      setFormError(message);
+      toast.error(message, 'Report Failed');
     }
   };
 
@@ -107,9 +141,6 @@ export const ReportsPage: React.FC = () => {
               {reports.length} {reports.length === 1 ? 'Report' : 'Reports'}
             </Badge>
           </div>
-          <p className="text-sm text-slate-600">
-            Documentation for chapter assemblies, household cells, and community pastoral missions.
-          </p>
         </div>
 
         <div className="flex items-center gap-2.5 shrink-0">
@@ -309,13 +340,20 @@ export const ReportsPage: React.FC = () => {
               label="Report Category"
               value={reportType}
               onChange={(e) => setReportType(e.target.value)}
-              options={[
-                { value: 'Chapter Assembly', label: 'Chapter Assembly' },
-                { value: 'Household Meeting', label: 'Household Meeting' },
-                { value: 'External Engagement', label: 'External Engagement' },
-              ]}
+              options={REPORT_CATEGORIES.map((cat) => ({
+                value: cat,
+                label: cat,
+              }))}
             />
           </div>
+
+          <Input
+            label="Prepared by"
+            required
+            placeholder="Full name of reporter"
+            value={preparedBy}
+            onChange={(e) => setPreparedBy(e.target.value)}
+          />
 
           <div className="w-full flex flex-col gap-1.5">
             <label className="text-sm font-semibold text-text-main">
