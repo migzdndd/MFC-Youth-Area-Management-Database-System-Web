@@ -9,7 +9,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
-  const { user, activeArea } = useAuthStore();
+  const { user, activeArea, setActiveArea } = useAuthStore();
   const { data: areas = [] } = useAreas();
 
   const matchedArea = areas.find((a: Area) => a.id === (activeArea?.id || user?.area_id));
@@ -25,16 +25,39 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           className="lg:hidden p-2 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors cursor-pointer"
           aria-label="Open navigation menu"
         >
-          <Menu className="w-5 h-5" />
+          <Menu className="w-5 h-5" aria-hidden="true" />
         </button>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200/90 rounded-full text-xs font-semibold text-slate-800 shadow-2xs">
-            <MapPin className="w-3.5 h-3.5 text-navy" />
-            <span className="truncate max-w-[140px] sm:max-w-[200px]">{currentAreaName}</span>
-          </div>
+          {user?.role === 'national_coordinator' && areas.length > 0 ? (
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-200/90 rounded-lg text-xs font-semibold text-slate-800 shadow-2xs">
+              <MapPin className="w-3.5 h-3.5 text-navy shrink-0" aria-hidden="true" />
+              <label htmlFor="headerAreaSelect" className="sr-only">Switch active area</label>
+              <select
+                id="headerAreaSelect"
+                value={activeArea?.id || user?.area_id || ''}
+                onChange={(e) => {
+                  const selected = areas.find((a: Area) => a.id === e.target.value);
+                  setActiveArea(selected || null);
+                }}
+                className="bg-transparent text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer max-w-[140px] sm:max-w-[220px] truncate"
+              >
+                {areas.map((a: Area) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200/90 rounded-full text-xs font-semibold text-slate-800 shadow-2xs">
+              <MapPin className="w-3.5 h-3.5 text-navy shrink-0" aria-hidden="true" />
+              <span className="truncate max-w-[140px] sm:max-w-[200px]">{currentAreaName}</span>
+            </div>
+          )}
+
           {user?.role === 'national_coordinator' && (
-            <span className="hidden sm:inline-block text-[11px] font-semibold text-amber-900 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/90">
+            <span className="hidden md:inline-block text-[11px] font-semibold text-amber-900 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/90">
               National Context
             </span>
           )}

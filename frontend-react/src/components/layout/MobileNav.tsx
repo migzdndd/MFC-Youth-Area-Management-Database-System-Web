@@ -16,7 +16,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ onOpenMenu }) => {
 
   return (
     <nav
-      className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-border-subtle flex items-center justify-around px-2 py-1 shadow-lg"
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-border-subtle flex items-center justify-around px-2 pt-1 pb-[calc(0.35rem+env(safe-area-inset-bottom,0px))] shadow-lg"
       aria-label="Mobile navigation"
     >
       {links.map((link) => {

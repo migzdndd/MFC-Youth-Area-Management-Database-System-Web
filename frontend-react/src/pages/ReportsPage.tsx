@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useReports, useCreateReport } from '@/hooks/useReports';
 import { useChapters } from '@/hooks/useChapters';
 import { useAuthStore } from '@/stores/auth-store';
@@ -22,6 +23,7 @@ const REPORT_CATEGORIES = [
 ];
 
 export const ReportsPage: React.FC = () => {
+  const location = useLocation();
   const { data: reports = [], isLoading } = useReports();
   const { data: chapters = [] } = useChapters();
   const { user } = useAuthStore();
@@ -54,6 +56,13 @@ export const ReportsPage: React.FC = () => {
     setFormError('');
     setIsModalOpen(true);
   };
+
+  useEffect(() => {
+    if ((location.state as { openCreate?: boolean })?.openCreate) {
+      openCreateModal();
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();

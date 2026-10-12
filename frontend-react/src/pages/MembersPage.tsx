@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useMembers, useCreateMember, useUpdateMember, useDeleteMember } from '@/hooks/useMembers';
 import { useChapters } from '@/hooks/useChapters';
 import { useServices } from '@/hooks/useServices';
@@ -14,6 +15,7 @@ import { UserPlus, Edit2, Trash2, Filter, AlertTriangle } from 'lucide-react';
 import type { Member, AcademicTrack, MemberStatus } from '@/types/member';
 
 export const MembersPage: React.FC = () => {
+  const location = useLocation();
   const [search, setSearch] = useState('');
   const [chapterFilter, setChapterFilter] = useState('');
   const [trackFilter, setTrackFilter] = useState('');
@@ -32,6 +34,14 @@ export const MembersPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if ((location.state as { openCreate?: boolean })?.openCreate) {
+      setEditingMember(null);
+      setIsModalOpen(true);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // Form state
   const [firstName, setFirstName] = useState('');

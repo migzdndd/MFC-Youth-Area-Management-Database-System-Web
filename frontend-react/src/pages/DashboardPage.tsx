@@ -26,6 +26,8 @@ export const DashboardPage: React.FC = () => {
   const { data: readingsData } = useDailyReadings();
 
   const isNationalCoordinator = user?.role === 'national_coordinator';
+  const matchedArea = areas?.find((a: Area) => a.id === (activeArea?.id || user?.area_id));
+  const effectiveAreaName = activeArea?.name || user?.area_name || matchedArea?.name || 'Assigned Area';
 
   const memberSubtitle = (() => {
     switch (user?.role) {
@@ -49,18 +51,27 @@ export const DashboardPage: React.FC = () => {
       {/* Top Banner and Area Switcher */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-200/90 mb-2">
-            <span>COMMAND OVERVIEW</span>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-semibold text-amber-700 uppercase tracking-wider">
+              {user?.role ? user.role.replace(/_/g, ' ') : 'Servant Leader'}
+            </span>
+            <span className="text-slate-300" aria-hidden="true">&middot;</span>
+            <span className="text-xs text-slate-500 font-medium">
+              {effectiveAreaName}
+            </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading tracking-tight">
             Welcome, {user?.first_name || 'Servant Leader'}
           </h1>
+          <p className="text-xs sm:text-sm text-slate-600 mt-1">
+            Pastoral operations and community leadership overview.
+          </p>
         </div>
 
         {/* National Coordinator Area Selector */}
         {isNationalCoordinator && areas && areas.length > 0 && (
           <div className="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-2xs shrink-0">
-            <MapPin className="w-4 h-4 text-navy shrink-0" />
+            <MapPin className="w-4 h-4 text-navy shrink-0" aria-hidden="true" />
             <label htmlFor="areaSelect" className="text-xs font-semibold text-slate-700 whitespace-nowrap">
               Switch Area:
             </label>
@@ -217,49 +228,49 @@ export const DashboardPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <button
               type="button"
-              onClick={() => navigate('/members')}
+              onClick={() => navigate('/members', { state: { openCreate: true } })}
               className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
             >
               <div className="p-2.5 rounded-lg bg-navy text-white shadow-2xs group-hover:scale-105 transition-transform">
-                <UserPlus className="w-4 h-4" />
+                <UserPlus className="w-4 h-4" aria-hidden="true" />
               </div>
               <div>
                 <div className="text-sm font-bold text-slate-900 group-hover:text-navy transition-colors">
                   Register Member
                 </div>
-                <div className="text-xs text-slate-500">Add to Area roster</div>
+                <div className="text-xs text-slate-500">Open registration form</div>
               </div>
             </button>
 
             <button
               type="button"
-              onClick={() => navigate('/events')}
+              onClick={() => navigate('/events', { state: { openCreate: true } })}
               className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
             >
               <div className="p-2.5 rounded-lg bg-amber-600 text-white shadow-2xs group-hover:scale-105 transition-transform">
-                <CalendarPlus className="w-4 h-4" />
+                <CalendarPlus className="w-4 h-4" aria-hidden="true" />
               </div>
               <div>
                 <div className="text-sm font-bold text-slate-900 group-hover:text-amber-800 transition-colors">
                   Schedule Event
                 </div>
-                <div className="text-xs text-slate-500">Schedule an Area-Wide Event</div>
+                <div className="text-xs text-slate-500">Create new event</div>
               </div>
             </button>
 
             <button
               type="button"
-              onClick={() => navigate('/reports')}
+              onClick={() => navigate('/reports', { state: { openCreate: true } })}
               className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
             >
               <div className="p-2.5 rounded-lg bg-emerald-700 text-white shadow-2xs group-hover:scale-105 transition-transform">
-                <FilePlus className="w-4 h-4" />
+                <FilePlus className="w-4 h-4" aria-hidden="true" />
               </div>
               <div>
                 <div className="text-sm font-bold text-slate-900 group-hover:text-emerald-800 transition-colors">
                   File Report
                 </div>
-                <div className="text-xs text-slate-500">Log gathering</div>
+                <div className="text-xs text-slate-500">Log activity report</div>
               </div>
             </button>
           </div>

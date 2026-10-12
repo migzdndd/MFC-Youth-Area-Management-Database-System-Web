@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   useEvents,
   useCreateEvent,
@@ -33,6 +34,7 @@ import {
 import type { CommunityEvent, Participant } from '@/types/event';
 
 export const EventsPage: React.FC = () => {
+  const location = useLocation();
   const { data: events = [], isLoading } = useEvents();
   const { data: members = [] } = useMembers();
   const toast = useToast();
@@ -44,6 +46,13 @@ export const EventsPage: React.FC = () => {
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CommunityEvent | null>(null);
+
+  useEffect(() => {
+    if ((location.state as { openCreate?: boolean })?.openCreate) {
+      setIsCreateOpen(true);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // Event creation form state
   const [name, setName] = useState('');
