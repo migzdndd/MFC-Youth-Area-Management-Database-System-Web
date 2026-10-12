@@ -7,18 +7,24 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+# Apply least-privilege permissions globally
 permissions:
   contents: read
-  security-events: write
 
+# Cancel redundant in-progress PR builds, but preserve full runs on main
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   static-analysis-and-security:
     name: Code Hygiene, Secrets & Security Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -29,6 +35,14 @@ jobs:
         uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify No Committed Environment Secrets
+        run: |
+          if git ls-files | grep -E '(^|/)\.env($|\..*)' | grep -v '\.env\.example'; then
+            echo "Error: Tracked .env secret file detected in repository!"
+            exit 1
+          fi
+          echo "✓ No tracked .env files detected."
 
       - name: Lint Dockerfile (Hadolint)
         uses: hadolint/hadolint-action@v3.5.0
@@ -41,18 +55,21 @@ jobs:
         with:
           node-version: 24
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            frontend-react/package-lock.json
 
-      - name: Install Root & Backend Dependencies
+      - name: Install Root & Workspace Dependencies
         run: npm ci
 
-      - name: Install Modern Frontend Dependencies
+      - name: Install Frontend Dependencies
         run: npm --prefix frontend-react ci
-
-      - name: Build Modern React SPA (TypeScript & Vite)
-        run: npm run build
 
       - name: Frontend Code Hygiene (Oxlint)
         run: npm --prefix frontend-react run lint
+
+      - name: Build Modern React SPA (TypeScript & Vite)
+        run: npm --prefix frontend-react run build
 
       - name: Syntax & Configuration Validation
         run: |
@@ -60,16 +77,44 @@ jobs:
           node -e "JSON.parse(require('fs').readFileSync('package.json', 'utf8'));"
           node -e "JSON.parse(require('fs').readFileSync('vercel.json', 'utf8'));"
 
-      - name: Strict Dependency Audit
+      - name: Strict Dependency Audit (Root & Workspaces)
         run: npm audit --audit-level=high
+
+      - name: Strict Dependency Audit (Frontend React SPA)
+        run: npm --prefix frontend-react audit --audit-level=high
 
       - name: Standalone API Server Health Test
         run: npm run test:health
 
+  codeql-analysis:
+    name: CodeQL Static Security Analysis (SAST)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:javascript-typescript'
+
   container-security-and-build:
-    name: Container Build, Scan & Verification
+    name: Container Build, Scan & Smoke Test
     runs-on: ubuntu-latest
     needs: static-analysis-and-security
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -78,7 +123,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker Container with Cache
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
@@ -88,7 +133,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Scan Image for Vulnerabilities (Trivy)
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@0.29.0
         with:
           image-ref: mfc-youth-app:${{ github.sha }}
           format: 'sarif'
@@ -97,10 +142,11 @@ jobs:
           ignore-unfixed: true
 
       - name: Upload Vulnerability Scan Results
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@v3
         if: always() && hashFiles('trivy-results.sarif') != ''
         with:
           sarif_file: 'trivy-results.sarif'
+          category: 'container-trivy'
 
       - name: Container Smoke Test
         run: |
@@ -132,6 +178,7 @@ jobs:
     name: PaaS Routing & Deployment Check
     runs-on: ubuntu-latest
     needs: static-analysis-and-security
+    timeout-minutes: 10
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
