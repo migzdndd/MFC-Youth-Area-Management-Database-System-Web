@@ -9,6 +9,7 @@
 import {
   requireAuthenticatedProfile,
   isAreaAdminRole,
+  isDomainModeratorRole,
   isChapterServantRole
 } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
@@ -28,7 +29,10 @@ async function listChapters(req, res) {
   if (isChapterServantRole(profile.role)) {
     if (!profile.chapter_id) return sendJson(res, 200, { ok: true, chapters: [] });
     query = query.eq('id', profile.chapter_id);
-  } else if (!isAreaAdminRole(profile.role)) {
+  } else if (isAreaAdminRole(profile.role) || isDomainModeratorRole(profile.role)) {
+    // Area administrators and domain moderators can see all active chapters in the Area
+  } else {
+    // Regular members only see their assigned chapter
     query = profile.chapter_id
       ? query.eq('id', profile.chapter_id)
       : query.eq('id', '00000000-0000-0000-0000-000000000000');

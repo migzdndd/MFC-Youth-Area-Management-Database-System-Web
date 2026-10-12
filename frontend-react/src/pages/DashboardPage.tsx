@@ -233,7 +233,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="text-sm font-bold text-slate-900 group-hover:text-navy transition-colors">
                   Register Member
                 </div>
-                <div className="text-xs text-slate-500">Add to youth roster</div>
+                <div className="text-xs text-slate-500">Add to Area roster</div>
               </div>
             </button>
 
@@ -249,7 +249,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="text-sm font-bold text-slate-900 group-hover:text-amber-800 transition-colors">
                   Schedule Event
                 </div>
-                <div className="text-xs text-slate-500">Assembly or camp</div>
+                <div className="text-xs text-slate-500">Schedule an Area-Wide Event</div>
               </div>
             </button>
 

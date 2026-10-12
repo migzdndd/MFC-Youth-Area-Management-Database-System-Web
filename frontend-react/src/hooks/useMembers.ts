@@ -38,6 +38,7 @@ export function useCreateMember() {
         });
       }
       queryClient.invalidateQueries({ queryKey: ['members'], refetchType: 'all' });
+      queryClient.invalidateQueries({ queryKey: ['chapters'], refetchType: 'all' });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'], refetchType: 'all' });
     },
   });
@@ -58,6 +59,7 @@ export function useUpdateMember() {
         return old.map((m) => (m.id === variables.id ? { ...m, ...variables, ...updated } : m));
       });
       queryClient.invalidateQueries({ queryKey: ['members'], refetchType: 'all' });
+      queryClient.invalidateQueries({ queryKey: ['chapters'], refetchType: 'all' });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'], refetchType: 'all' });
     },
   });
@@ -77,6 +79,7 @@ export function useDeleteMember() {
         return old.filter((m) => m.id !== id);
       });
       queryClient.invalidateQueries({ queryKey: ['members'], refetchType: 'all' });
+      queryClient.invalidateQueries({ queryKey: ['chapters'], refetchType: 'all' });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'], refetchType: 'all' });
     },
   });

@@ -161,10 +161,18 @@ async function listMembers(req, res) {
     }
   }
 
+  const { data: chaptersData } = await admin
+    .from('chapters')
+    .select('id, name')
+    .eq('area_id', areaId);
+  const chapterNameMap = new Map((chaptersData || []).map((c) => [c.id, c.name]));
+
   const formatted = (data || []).map((m) => {
     const assigned = memberServicesMap.get(m.id) || [];
     return {
       ...m,
+      chapter_id: m.chapter_id || null,
+      chapter_name: m.chapter_id ? (chapterNameMap.get(m.chapter_id) || null) : null,
       contact: m.contact_number || null,
       service: assigned[0] || null,
       assigned_services: assigned
@@ -202,12 +210,23 @@ async function createMember(req, res) {
   const requestedRole = String(input.accessLevel ?? input.access_level ?? input.role ?? 'member').trim().toLowerCase();
   let accessLevel = ACCESS_LEVELS.has(requestedRole) ? requestedRole : 'member';
   const areaId = requireArea(req, profile);
-  let chapterId = input.chapterId ?? input.chapter_id ?? null;
+
+  const rawChapterInput = input.chapterId !== undefined ? input.chapterId : input.chapter_id;
+  let chapterId = null;
+  if (
+    rawChapterInput &&
+    typeof rawChapterInput === 'string' &&
+    rawChapterInput.trim() &&
+    rawChapterInput.trim().toLowerCase() !== 'null' &&
+    rawChapterInput.trim().toLowerCase() !== 'undefined'
+  ) {
+    chapterId = rawChapterInput.trim();
+  }
 
   if (!isAreaAdminRole(profile.role)) {
     accessLevel = 'member';
     if (isChapterServantRole(profile.role)) {
-      chapterId = profile.chapter_id;
+      chapterId = profile.chapter_id || null;
     }
   }
 
@@ -221,7 +240,9 @@ async function createMember(req, res) {
     return sendJson(res, 400, { ok: false, error: 'A Chapter Servant must be assigned to a chapter.' });
   }
 
-  await validateChapter(admin, chapterId, areaId);
+  if (chapterId) {
+    await validateChapter(admin, chapterId, areaId);
+  }
 
   const { data: existingMember, error: existingError } = await admin
     .from('members')
@@ -360,10 +381,39 @@ async function updateMember(req, res) {
   const accessLevel = isAreaAdminRole(profile.role)
     ? (ACCESS_LEVELS.has(requestedRole) ? requestedRole : 'member')
     : existing.access_level;
-  const rawChapterId = input.chapterId !== undefined ? input.chapterId : input.chapter_id;
-  const chapterId = (isAreaAdminRole(profile.role) || isChapterServantRole(profile.role))
-    ? (rawChapterId !== undefined ? (rawChapterId || null) : existing.chapter_id)
-    : existing.chapter_id;
+
+  // Cleanly sanitize and normalize requested chapter input
+  const rawChapterInput = input.chapterId !== undefined ? input.chapterId : input.chapter_id;
+  let normalizedChapterId = existing.chapter_id || null;
+  if (rawChapterInput !== undefined) {
+    if (
+      rawChapterInput === null ||
+      rawChapterInput === '' ||
+      rawChapterInput === false ||
+      String(rawChapterInput).trim() === '' ||
+      String(rawChapterInput).trim().toLowerCase() === 'null' ||
+      String(rawChapterInput).trim().toLowerCase() === 'undefined'
+    ) {
+      normalizedChapterId = null;
+    } else {
+      normalizedChapterId = String(rawChapterInput).trim();
+    }
+  }
+
+  // Leadership accounts authorized to edit this member record can assign or reassign chapters
+  const canEditChapter = isLeaderRole(profile.role);
+  let chapterId = existing.chapter_id || null;
+  if (canEditChapter && rawChapterInput !== undefined) {
+    if (
+      isChapterServantRole(profile.role) &&
+      !isAreaAdminRole(profile.role) &&
+      normalizedChapterId &&
+      String(normalizedChapterId) !== String(profile.chapter_id || '')
+    ) {
+      return sendJson(res, 403, { ok: false, error: 'Chapter Servants can only assign members to their own chapter.' });
+    }
+    chapterId = normalizedChapterId;
+  }
 
   if (!firstName || !lastName) {
     return sendJson(res, 400, { ok: false, error: 'First name and last name are required.' });
@@ -375,7 +425,7 @@ async function updateMember(req, res) {
     return sendJson(res, 400, { ok: false, error: 'A Chapter Servant must be assigned to a chapter.' });
   }
 
-  const chapterChanged = chapterId !== existing.chapter_id;
+  const chapterChanged = String(chapterId || '') !== String(existing.chapter_id || '');
   const emailChanged = email.toLowerCase() !== String(existing.email || '').toLowerCase();
   const roleChanged = accessLevel !== existing.access_level;
   const statusChanged = status !== existing.status;
@@ -435,14 +485,13 @@ async function updateMember(req, res) {
   if (updateError) throw updateError;
 
   if (roleChanged || chapterChanged || statusChanged || nameChanged || emailChanged) {
-    const { data: linkedProfile, error: linkedProfileError } = await admin
+    const { data: linkedProfiles, error: linkedProfileError } = await admin
       .from('profiles')
       .select('id')
-      .eq('member_id', memberId)
-      .maybeSingle();
+      .eq('member_id', memberId);
     if (linkedProfileError) throw linkedProfileError;
 
-    if (linkedProfile?.id) {
+    if (linkedProfiles && linkedProfiles.length > 0) {
       const syncTasks = [];
 
       if (roleChanged || chapterChanged || statusChanged) {
@@ -454,7 +503,7 @@ async function updateMember(req, res) {
               chapter_id: chapterId,
               is_active: status !== 'Inactive'
             })
-            .eq('id', linkedProfile.id)
+            .eq('member_id', memberId)
             .then(({ error: profileUpdateError }) => {
               if (profileUpdateError) throw profileUpdateError;
             })
@@ -469,11 +518,13 @@ async function updateMember(req, res) {
         };
         if (emailChanged) authChanges.email = email;
 
-        syncTasks.push(
-          admin.auth.admin.updateUserById(linkedProfile.id, authChanges).then(({ error: authUpdateError }) => {
-            if (authUpdateError) throw authUpdateError;
-          })
-        );
+        for (const lp of linkedProfiles) {
+          syncTasks.push(
+            admin.auth.admin.updateUserById(lp.id, authChanges).then(({ error: authUpdateError }) => {
+              if (authUpdateError) throw authUpdateError;
+            })
+          );
+        }
       }
 
       if (syncTasks.length > 0) {
@@ -523,8 +574,20 @@ async function updateMember(req, res) {
     assignedServices = (sRows || []).map((s) => s.name);
   }
 
+  let chapterName = null;
+  if (updated.chapter_id) {
+    const { data: ch } = await admin
+      .from('chapters')
+      .select('name')
+      .eq('id', updated.chapter_id)
+      .maybeSingle();
+    chapterName = ch?.name || null;
+  }
+
   const memberResult = {
     ...updated,
+    chapter_id: updated.chapter_id || null,
+    chapter_name: chapterName,
     contact: updated.contact_number || null,
     service: assignedServices[0] || null,
     assigned_services: assignedServices

@@ -9,6 +9,7 @@ import { SearchBar } from '@/components/ui/SearchBar';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { Spinner } from '@/components/ui/Spinner';
+import { useToast } from '@/hooks/useToast';
 import { UserPlus, Edit2, Trash2, Filter, AlertTriangle } from 'lucide-react';
 import type { Member, AcademicTrack, MemberStatus } from '@/types/member';
 
@@ -22,6 +23,7 @@ export const MembersPage: React.FC = () => {
   const { data: members = [], isLoading } = useMembers();
   const { data: chapters = [] } = useChapters();
   const { data: servicesList = [] } = useServices();
+  const toast = useToast();
 
   const createMember = useCreateMember();
   const updateMember = useUpdateMember();
@@ -45,6 +47,7 @@ export const MembersPage: React.FC = () => {
   const [guardianName, setGuardianName] = useState('');
   const [guardianContact, setGuardianContact] = useState('');
   const [formError, setFormError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const ministryOptions = useMemo(() => {
     const defaultServices = [
@@ -96,6 +99,7 @@ export const MembersPage: React.FC = () => {
     setGuardianName('');
     setGuardianContact('');
     setFormError('');
+    setFieldErrors({});
     setIsModalOpen(true);
   };
 
@@ -114,6 +118,7 @@ export const MembersPage: React.FC = () => {
     setGuardianName(member.guardian_name || '');
     setGuardianContact(member.guardian_contact || '');
     setFormError('');
+    setFieldErrors({});
     setIsModalOpen(true);
   };
 
@@ -121,51 +126,89 @@ export const MembersPage: React.FC = () => {
     e.preventDefault();
     setFormError('');
 
-    if (!firstName.trim() || !lastName.trim()) {
-      setFormError('First and last name are required.');
+    // Field-level validation
+    const errors: Record<string, string> = {};
+    const cleanFirst = firstName.trim();
+    const cleanLast = lastName.trim();
+    const cleanEmail = email.trim();
+    const cleanContact = contact.trim();
+    const cleanGuardianContact = guardianContact.trim();
+
+    if (!cleanFirst) {
+      errors.firstName = 'First name is required.';
+    } else if (cleanFirst.length < 2) {
+      errors.firstName = 'First name must be at least 2 characters.';
+    }
+
+    if (!cleanLast) {
+      errors.lastName = 'Last name is required.';
+    } else if (cleanLast.length < 2) {
+      errors.lastName = 'Last name must be at least 2 characters.';
+    }
+
+    if (cleanEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      errors.email = 'Please provide a valid email address (e.g., name@example.com).';
+    }
+
+    if (cleanContact && !/^[0-9+()\-\s]{7,20}$/.test(cleanContact)) {
+      errors.contact = 'Please enter a valid phone number (at least 7 digits).';
+    }
+
+    if (cleanGuardianContact && !/^[0-9+()\-\s]{7,20}$/.test(cleanGuardianContact)) {
+      errors.guardianContact = 'Please enter a valid emergency contact phone number.';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      const firstErrorMessage = Object.values(errors)[0];
+      setFormError(firstErrorMessage);
+      toast.error('Failed', `Validation error: ${firstErrorMessage}`);
       return;
     }
+
+    setFieldErrors({});
 
     try {
       if (editingMember) {
         await updateMember.mutateAsync({
           id: editingMember.id,
-          first_name: firstName,
-          last_name: lastName,
-          nickname,
+          first_name: cleanFirst,
+          last_name: cleanLast,
+          nickname: nickname.trim(),
           gender,
           chapter_id: chapterId || null,
           academic_track: track,
           service: service || null,
-          contact,
-          email,
+          contact: cleanContact,
+          email: cleanEmail,
           status,
-          guardian_name: guardianName,
-          guardian_contact: guardianContact,
+          guardian_name: guardianName.trim(),
+          guardian_contact: cleanGuardianContact,
         });
+        setIsModalOpen(false);
+        toast.success('Successful', `Information for ${cleanFirst} ${cleanLast} has been updated successfully.`);
       } else {
         await createMember.mutateAsync({
-          first_name: firstName,
-          last_name: lastName,
-          nickname,
+          first_name: cleanFirst,
+          last_name: cleanLast,
+          nickname: nickname.trim(),
           gender,
           chapter_id: chapterId || null,
           academic_track: track,
           service: service || null,
-          contact,
-          email,
+          contact: cleanContact,
+          email: cleanEmail,
           status,
-          guardian_name: guardianName,
-          guardian_contact: guardianContact,
+          guardian_name: guardianName.trim(),
+          guardian_contact: cleanGuardianContact,
         });
+        setIsModalOpen(false);
+        toast.success('Successful', `Member ${cleanFirst} ${cleanLast} has been registered successfully.`);
       }
-      setIsModalOpen(false);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setFormError(err.message);
-      } else {
-        setFormError('Failed to save member record.');
-      }
+      const errorMsg = err instanceof Error ? err.message : 'Failed to save member record.';
+      setFormError(errorMsg);
+      toast.error('Failed', errorMsg);
     }
   };
 
@@ -173,8 +216,10 @@ export const MembersPage: React.FC = () => {
     try {
       await deleteMember.mutateAsync(id);
       setDeletingId(null);
-    } catch {
-      alert('Failed to delete member.');
+      toast.success('Successful', 'Member record was removed successfully.');
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to delete member.';
+      toast.error('Failed', errorMsg);
     }
   };
 
@@ -476,7 +521,11 @@ export const MembersPage: React.FC = () => {
               autoComplete="given-name"
               required
               value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              onChange={(e) => {
+                setFirstName(e.target.value);
+                if (fieldErrors.firstName) setFieldErrors((prev) => ({ ...prev, firstName: '' }));
+              }}
+              error={fieldErrors.firstName}
             />
             <Input
               label="Last Name"
@@ -484,7 +533,11 @@ export const MembersPage: React.FC = () => {
               autoComplete="family-name"
               required
               value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              onChange={(e) => {
+                setLastName(e.target.value);
+                if (fieldErrors.lastName) setFieldErrors((prev) => ({ ...prev, lastName: '' }));
+              }}
+              error={fieldErrors.lastName}
             />
           </div>
 
@@ -562,8 +615,12 @@ export const MembersPage: React.FC = () => {
               name="contact"
               autoComplete="tel"
               value={contact}
-              onChange={(e) => setContact(e.target.value)}
+              onChange={(e) => {
+                setContact(e.target.value);
+                if (fieldErrors.contact) setFieldErrors((prev) => ({ ...prev, contact: '' }));
+              }}
               placeholder="09123456789"
+              error={fieldErrors.contact}
             />
             <Input
               label="Email Address"
@@ -571,8 +628,12 @@ export const MembersPage: React.FC = () => {
               type="email"
               autoComplete="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: '' }));
+              }}
               placeholder="name@example.com"
+              error={fieldErrors.email}
             />
           </div>
 
@@ -590,8 +651,12 @@ export const MembersPage: React.FC = () => {
               name="guardianContact"
               autoComplete="tel"
               value={guardianContact}
-              onChange={(e) => setGuardianContact(e.target.value)}
+              onChange={(e) => {
+                setGuardianContact(e.target.value);
+                if (fieldErrors.guardianContact) setFieldErrors((prev) => ({ ...prev, guardianContact: '' }));
+              }}
               placeholder="Emergency phone number"
+              error={fieldErrors.guardianContact}
             />
           </div>
 

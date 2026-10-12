@@ -9,13 +9,14 @@
 import {
   requireAuthenticatedProfile,
   isAreaAdminRole,
+  isDomainModeratorRole,
   isChapterServantRole
 } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { requireArea, ensureChapterInArea } from '../_lib/cloud-data.js';
 
 function canAssign(profile) {
-  return isAreaAdminRole(profile.role) || isChapterServantRole(profile.role);
+  return isAreaAdminRole(profile.role) || isDomainModeratorRole(profile.role) || isChapterServantRole(profile.role);
 }
 
 async function validateAssignmentScope(supabase, profile, chapterId, areaId) {
@@ -64,15 +65,21 @@ async function assignMembers(req, res) {
   await validateAssignmentScope(admin, profile, chapterId, areaId);
   if (!memberIds.length) return sendJson(res, 400, { ok: false, error: 'Select at least one member.' });
 
-  const { data: available, error: loadError } = await admin
+  let query = admin
     .from('members')
-    .select('id')
+    .select('id, chapter_id')
     .eq('area_id', areaId)
-    .is('chapter_id', null)
     .in('id', memberIds);
+
+  // Chapter servants may only claim unassigned members or members already in their chapter
+  if (isChapterServantRole(profile.role) && !isAreaAdminRole(profile.role)) {
+    query = query.or(`chapter_id.is.null,chapter_id.eq.${chapterId}`);
+  }
+
+  const { data: available, error: loadError } = await query;
   if (loadError) throw loadError;
   const availableIds = (available || []).map(item => item.id);
-  if (!availableIds.length) return sendJson(res, 409, { ok: false, error: 'The selected members are no longer unassigned.' });
+  if (!availableIds.length) return sendJson(res, 409, { ok: false, error: 'No eligible members found in your area to assign.' });
 
   const { data: updated, error: updateError } = await admin
     .from('members')

@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Spinner } from '@/components/ui/Spinner';
+import { ToastProvider } from '@/components/ui/Toast';
 
 // Lazy-loaded Auth Pages
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage').then((m) => ({ default: m.LoginPage })));
@@ -96,50 +97,52 @@ const ChangelogsRoute: React.FC = () => {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Suspense fallback={<LoadingFallback />}>
-          <Routes>
-            {/* Public Auth Routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/member-login" element={<MemberLoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/changelogs" element={<ChangelogsRoute />} />
+      <ToastProvider>
+        <BrowserRouter>
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+              {/* Public Auth Routes */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/member-login" element={<MemberLoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/changelogs" element={<ChangelogsRoute />} />
 
-            {/* Member Portal Dedicated Route */}
-            <Route
-              path="/member"
-              element={
-                <ProtectedRoute>
-                  <MemberPortalPage />
-                </ProtectedRoute>
-              }
-            />
+              {/* Member Portal Dedicated Route */}
+              <Route
+                path="/member"
+                element={
+                  <ProtectedRoute>
+                    <MemberPortalPage />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Servant Leader Protected App Shell Routes */}
-            <Route
-              element={
-                <ProtectedRoute>
-                  <AppLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/members" element={<MembersPage />} />
-              <Route path="/chapters" element={<ChaptersPage />} />
-              <Route path="/events" element={<EventsPage />} />
-              <Route path="/reports" element={<ReportsPage />} />
-              <Route path="/services" element={<ServicesPage />} />
-              <Route path="/gig" element={<GigPage />} />
-              <Route path="/readings" element={<ReadingsPage />} />
-            </Route>
+              {/* Servant Leader Protected App Shell Routes */}
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <AppLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/members" element={<MembersPage />} />
+                <Route path="/chapters" element={<ChaptersPage />} />
+                <Route path="/events" element={<EventsPage />} />
+                <Route path="/reports" element={<ReportsPage />} />
+                <Route path="/services" element={<ServicesPage />} />
+                <Route path="/gig" element={<GigPage />} />
+                <Route path="/readings" element={<ReadingsPage />} />
+              </Route>
 
-            {/* Root and Fallback */}
-            <Route path="/" element={<RootRedirect />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
+              {/* Root and Fallback */}
+              <Route path="/" element={<RootRedirect />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </ToastProvider>
     </QueryClientProvider>
   );
 }
