@@ -1,8 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth-store';
 import type { Member, MemberFilter } from '@/types/member';
 
 export function useMembers(filters?: MemberFilter) {
+  const { token, user } = useAuthStore();
   return useQuery({
     queryKey: ['members', filters],
     queryFn: async () => {
@@ -17,6 +19,8 @@ export function useMembers(filters?: MemberFilter) {
       const res = await apiClient<{ ok: boolean; data?: Member[]; members?: Member[] }>(endpoint);
       return res.data || res.members || [];
     },
+    enabled: Boolean(token && user),
+    retry: false,
   });
 }
 

@@ -1,8 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth-store';
 import type { GigContribution } from '@/types/gig';
 
 export function useGigRecords(month?: string) {
+  const { token, user } = useAuthStore();
   return useQuery({
     queryKey: ['gig', month],
     queryFn: async () => {
@@ -10,6 +12,8 @@ export function useGigRecords(month?: string) {
       const res = await apiClient<{ ok: boolean; data?: GigContribution[]; gig?: GigContribution[] }>(endpoint);
       return res.data || res.gig || [];
     },
+    enabled: Boolean(token && user),
+    retry: false,
   });
 }
 

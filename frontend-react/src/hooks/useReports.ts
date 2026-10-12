@@ -1,14 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth-store';
 import type { ActivityReport } from '@/types/report';
 
 export function useReports() {
+  const { token, user } = useAuthStore();
   return useQuery({
     queryKey: ['reports'],
     queryFn: async () => {
       const res = await apiClient<{ ok: boolean; data?: ActivityReport[]; reports?: ActivityReport[] }>('/reports');
       return res.data || res.reports || [];
     },
+    enabled: Boolean(token && user),
+    retry: false,
   });
 }
 

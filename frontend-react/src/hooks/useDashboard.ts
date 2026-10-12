@@ -12,7 +12,7 @@ export interface DashboardMetrics {
 }
 
 export function useDashboardMetrics() {
-  const { user, activeArea } = useAuthStore();
+  const { user, token, activeArea } = useAuthStore();
   const currentAreaId = activeArea?.id || user?.area_id || '';
 
   return useQuery({
@@ -62,15 +62,20 @@ export function useDashboardMetrics() {
         totalReports: reports.length,
       };
     },
+    enabled: Boolean(token && user && currentAreaId),
+    retry: false,
   });
 }
 
 export function useAreas() {
+  const { token, user } = useAuthStore();
   return useQuery({
     queryKey: ['areas'],
     queryFn: async () => {
       const res = await apiClient<{ ok: boolean; data?: Area[]; areas?: Area[] }>('/areas');
       return res.data || res.areas || [];
     },
+    enabled: Boolean(token && user),
+    retry: false,
   });
 }

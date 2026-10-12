@@ -1,14 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth-store';
 import type { Chapter } from '@/types/chapter';
 
 export function useChapters() {
+  const { token, user } = useAuthStore();
   return useQuery({
     queryKey: ['chapters'],
     queryFn: async () => {
       const res = await apiClient<{ ok: boolean; data?: Chapter[]; chapters?: Chapter[] }>('/chapters');
       return res.data || res.chapters || [];
     },
+    enabled: Boolean(token && user),
+    retry: false,
   });
 }
 

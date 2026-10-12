@@ -1,14 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth-store';
 import type { CommunityEvent, Participant } from '@/types/event';
 
 export function useEvents() {
+  const { token, user } = useAuthStore();
   return useQuery({
     queryKey: ['events'],
     queryFn: async () => {
       const res = await apiClient<{ ok: boolean; data?: CommunityEvent[]; events?: CommunityEvent[] }>('/events');
       return res.data || res.events || [];
     },
+    enabled: Boolean(token && user),
+    retry: false,
   });
 }
 
