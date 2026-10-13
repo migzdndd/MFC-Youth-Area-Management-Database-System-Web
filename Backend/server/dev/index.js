@@ -46,9 +46,12 @@ async function getDeveloperMetrics(req, res) {
     });
   }
 
-  const startTime = Date.now();
+  // Measure true single-query connection latency
+  const pingStart = Date.now();
+  await admin.from('areas').select('id').limit(1);
+  const dbLatencyMs = Date.now() - pingStart;
 
-  // Run table counts in parallel via Supabase admin
+  // Run table counts and recent activity in parallel via Supabase admin
   const [
     membersRes,
     chaptersRes,
@@ -74,8 +77,6 @@ async function getDeveloperMetrics(req, res) {
     admin.from('events').select('id, name, venue, fee, starts_at, created_at, created_by').order('created_at', { ascending: false }).limit(6),
     admin.from('activity_reports').select('id, report_type, status, created_at, chapter_id').order('created_at', { ascending: false }).limit(6),
   ]);
-
-  const dbLatencyMs = Date.now() - startTime;
   const memoryUsage = process.memoryUsage();
 
   const metrics = {
