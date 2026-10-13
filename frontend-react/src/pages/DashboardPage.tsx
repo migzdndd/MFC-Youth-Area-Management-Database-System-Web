@@ -204,7 +204,7 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             <p className="text-xs text-slate-600 leading-relaxed mb-4">
-              Track area assemblies, youth camps, conferences, and member attendance check-ins.
+              Track Area, Regional, and National Events.
             </p>
           </div>
 
