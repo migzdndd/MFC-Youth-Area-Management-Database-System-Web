@@ -31,9 +31,10 @@ RUN npm run build
 FROM node:24-alpine AS runner
 WORKDIR /app
 
-# Install tini for init signal handling and remove package managers to harden container & resolve CVE-2026-19534
-RUN apk add --no-cache tini && \
-    rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
+# Upgrade OS packages for CVE patches (e.g. zlib), install tini, and strip package managers/corepack to eliminate bundled libraries
+RUN apk upgrade --no-cache && \
+    apk add --no-cache tini && \
+    rm -rf /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /opt/yarn*
 
 ENV NODE_ENV=production
 ENV PORT=3000

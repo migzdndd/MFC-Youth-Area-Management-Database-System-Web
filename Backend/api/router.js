@@ -95,7 +95,12 @@ const ROUTES = new Map([
  */
 function normalizeRoute(value) {
   const route = Array.isArray(value) ? value[0] : value;
-  return String(route || '').replace(/^\/+|\/+$/g, '');
+  const str = String(route || '');
+  let start = 0;
+  let end = str.length;
+  while (start < end && str.charCodeAt(start) === 47 /* '/' */) start++;
+  while (end > start && str.charCodeAt(end - 1) === 47 /* '/' */) end--;
+  return str.slice(start, end);
 }
 
 async function parseRequestBody(req) {
