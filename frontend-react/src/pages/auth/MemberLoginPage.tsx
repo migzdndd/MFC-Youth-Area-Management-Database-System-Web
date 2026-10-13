@@ -63,6 +63,9 @@ export const MemberLoginPage: React.FC = () => {
           name?: string;
           first_name?: string;
           last_name?: string;
+          area_name?: string;
+          areaName?: string;
+          is_developer?: boolean;
         };
         error?: string;
       }>('/auth/login', {
@@ -80,10 +83,12 @@ export const MemberLoginPage: React.FC = () => {
           email: rawUser.email,
           role: (rawUser.role as UserProfile['role']) || 'member',
           area_id: rawUser.area_id || rawUser.areaId || '',
+          area_name: rawUser.area_name || rawUser.areaName,
           chapter_id: rawUser.chapter_id || rawUser.chapterId || null,
           member_id: rawUser.member_id || rawUser.memberId || null,
           first_name: rawUser.first_name || (rawUser.name ? rawUser.name.split(' ')[0] : ''),
           last_name: rawUser.last_name || (rawUser.name ? rawUser.name.split(' ').slice(1).join(' ') : ''),
+          is_developer: Boolean(rawUser.is_developer),
         };
 
         setSession({
