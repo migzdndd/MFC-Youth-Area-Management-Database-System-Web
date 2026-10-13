@@ -40,6 +40,7 @@ import mfaChallenge from '../server/auth/mfa/challenge.js';
 import mfaVerify from '../server/auth/mfa/verify.js';
 import mfaFactors from '../server/auth/mfa/factors.js';
 import mfaUnenroll from '../server/auth/mfa/unenroll.js';
+import dev from '../server/dev/index.js';
 import { applySecurityHeaders, verifyRequestOrigin, sanitizeLogData } from '../server/_lib/http.js';
 
 const ROUTES = new Map([
@@ -81,7 +82,9 @@ const ROUTES = new Map([
   ['services', services],
   ['sync', sync],
   ['daily-readings', dailyReadings],
-  ['changelogs', changelogs]
+  ['changelogs', changelogs],
+  ['dev', dev],
+  ['dev/metrics', dev]
 ]);
 
 /**

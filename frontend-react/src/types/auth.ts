@@ -28,6 +28,7 @@ export interface UserProfile {
   first_name?: string;
   last_name?: string;
   is_mfa_enabled?: boolean;
+  is_developer?: boolean;
 }
 
 export interface AuthSession {

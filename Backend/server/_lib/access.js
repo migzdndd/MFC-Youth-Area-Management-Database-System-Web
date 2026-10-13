@@ -144,3 +144,21 @@ export async function requireAuthenticatedProfile(req) {
 
   return { supabase: userClient, userClient, admin, user, profile, token };
 }
+
+/**
+ * Verify whether an authenticated account has designated developer credentials in Supabase
+ */
+export async function isSystemDeveloper(admin, user, profile) {
+  if (profile?.is_developer === true) return true;
+  if (!user?.id) return false;
+  try {
+    const { data } = await admin
+      .from('system_developers')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    return Boolean(data);
+  } catch {
+    return false;
+  }
+}

@@ -91,7 +91,8 @@ export default async function handler(req, res) {
         area_name: areaName,
         chapterId: profile.chapter_id,
         chapter_id: profile.chapter_id,
-        mustChangePassword: profile.must_change_password
+        mustChangePassword: profile.must_change_password,
+        is_developer: Boolean(profile.is_developer)
       },
       member
     });

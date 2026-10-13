@@ -22,6 +22,7 @@ const ReportsPage = lazy(() => import('@/pages/ReportsPage').then((m) => ({ defa
 const ServicesPage = lazy(() => import('@/pages/ServicesPage').then((m) => ({ default: m.ServicesPage })));
 const GigPage = lazy(() => import('@/pages/GigPage').then((m) => ({ default: m.GigPage })));
 const ReadingsPage = lazy(() => import('@/pages/ReadingsPage').then((m) => ({ default: m.ReadingsPage })));
+const DeveloperDashboardPage = lazy(() => import('@/pages/DeveloperDashboardPage').then((m) => ({ default: m.DeveloperDashboardPage })));
 const MemberPortalPage = lazy(() => import('@/pages/MemberPortalPage').then((m) => ({ default: m.MemberPortalPage })));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 
@@ -98,6 +99,14 @@ export default function App() {
                 <Route path="/services" element={<ServicesPage />} />
                 <Route path="/gig" element={<GigPage />} />
                 <Route path="/readings" element={<ReadingsPage />} />
+                <Route
+                  path="/dev"
+                  element={
+                    <ProtectedRoute developerOnly>
+                      <DeveloperDashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
               </Route>
 
               {/* Root and Fallback */}

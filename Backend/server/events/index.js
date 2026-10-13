@@ -6,9 +6,9 @@
  * conferences, assemblies, and prayer meetings across their community Area.
  */
 
-import { requireAuthenticatedProfile } from '../_lib/access.js';
+import { requireAuthenticatedProfile, isLeaderRole, FULL_AREA_ADMIN_ROLES } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
-import { cleanText, nullableText, requireArea, requireAreaAdmin, asNonNegativeNumber, asNonNegativeInteger, loadAreaRow } from '../_lib/cloud-data.js';
+import { cleanText, nullableText, requireArea, asNonNegativeNumber, asNonNegativeInteger, loadAreaRow } from '../_lib/cloud-data.js';
 
 function eventPayload(input, areaId, userId) {
   const rawDate = String(input.date || input.starts_at || input.startsAt || '').trim();
@@ -45,16 +45,50 @@ async function listEvents(req, res) {
   const areaId = requireArea(req, profile);
   const { data, error } = await admin
     .from('events')
-    .select('id, area_id, name, description, venue, starts_at, ends_at, fee, manual_attendance, created_at, updated_at')
+    .select('id, area_id, name, description, venue, starts_at, ends_at, fee, manual_attendance, created_by, created_at, updated_at')
     .eq('area_id', areaId)
     .order('starts_at', { ascending: false });
   if (error) throw error;
-  return sendJson(res, 200, { ok: true, events: data || [], data: data || [] });
+
+  const events = data || [];
+  const creatorIds = Array.from(new Set(events.map((e) => e.created_by).filter(Boolean)));
+  const creatorsMap = {};
+  if (creatorIds.length > 0) {
+    try {
+      const { data: profiles } = await admin
+        .from('profiles')
+        .select('id, role, member_id, members(first_name, last_name, email)')
+        .in('id', creatorIds);
+      if (profiles) {
+        for (const p of profiles) {
+          const mem = p.members;
+          const fullName = mem ? `${mem.first_name || ''} ${mem.last_name || ''}`.trim() : '';
+          creatorsMap[p.id] = {
+            role: p.role,
+            name: fullName || 'Area Servant',
+            email: mem?.email || null,
+          };
+        }
+      }
+    } catch {
+      // Silently fall back if profile enrichment query fails
+    }
+  }
+
+  const enriched = events.map((event) => ({
+    ...event,
+    creator_name: event.created_by && creatorsMap[event.created_by]?.name ? creatorsMap[event.created_by].name : null,
+    creator_role: event.created_by && creatorsMap[event.created_by]?.role ? creatorsMap[event.created_by].role : null,
+  }));
+
+  return sendJson(res, 200, { ok: true, events: enriched, data: enriched });
 }
 
 async function createEvent(req, res) {
   const { supabase, profile, user } = await requireAuthenticatedProfile(req);
-  requireAreaAdmin(profile, 'Only Area-level servant accounts can add Area events.');
+  if (!isLeaderRole(profile?.role)) {
+    return sendJson(res, 403, { ok: false, error: 'Only core leadership servants can add community events.' });
+  }
   const areaId = requireArea(req, profile);
   const payload = eventPayload(req.body || {}, areaId, user.id);
   const { data, error } = await supabase.from('events').insert(payload).select('*').single();
@@ -63,13 +97,22 @@ async function createEvent(req, res) {
 }
 
 async function updateEvent(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
-  requireAreaAdmin(profile, 'Only Area-level servant accounts can edit Area events.');
+  const { supabase, profile, user } = await requireAuthenticatedProfile(req);
+  if (!isLeaderRole(profile?.role)) {
+    return sendJson(res, 403, { ok: false, error: 'Only core leadership servants can edit community events.' });
+  }
   const areaId = requireArea(req, profile);
   const id = req.body?.id;
   if (!id) return sendJson(res, 400, { ok: false, error: 'Event ID is required.' });
-  const existing = await loadAreaRow(supabase, 'events', id, areaId, 'id');
+  const existing = await loadAreaRow(supabase, 'events', id, areaId, 'id, created_by');
   if (!existing) return sendJson(res, 404, { ok: false, error: 'Event not found in your Area.' });
+
+  // Event creator or Area Leadership (Area Servants & Coordinators) can edit this event
+  const isAreaAdmin = FULL_AREA_ADMIN_ROLES.has(String(profile?.role || '').toLowerCase());
+  if (!isAreaAdmin && existing.created_by && existing.created_by !== user.id) {
+    return sendJson(res, 403, { ok: false, error: 'Only the event creator or Area Leadership can edit this event.' });
+  }
+
   const payload = eventPayload(req.body || {}, areaId, null);
   delete payload.created_by;
   const { data, error } = await supabase.from('events').update(payload).eq('id', id).eq('area_id', areaId).select('*').single();
@@ -78,13 +121,22 @@ async function updateEvent(req, res) {
 }
 
 async function deleteEvent(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
-  requireAreaAdmin(profile, 'Only Area-level servant accounts can delete Area events.');
+  const { supabase, profile, user } = await requireAuthenticatedProfile(req);
+  if (!isLeaderRole(profile?.role)) {
+    return sendJson(res, 403, { ok: false, error: 'Only core leadership servants can delete community events.' });
+  }
   const areaId = requireArea(req, profile);
   const id = req.query?.id || req.body?.id;
   if (!id) return sendJson(res, 400, { ok: false, error: 'Event ID is required.' });
-  const existing = await loadAreaRow(supabase, 'events', id, areaId, 'id');
+  const existing = await loadAreaRow(supabase, 'events', id, areaId, 'id, created_by');
   if (!existing) return sendJson(res, 404, { ok: false, error: 'Event not found in your Area.' });
+
+  // Event creator or Area Leadership (Area Servants & Coordinators) can delete this event
+  const isAreaAdmin = FULL_AREA_ADMIN_ROLES.has(String(profile?.role || '').toLowerCase());
+  if (!isAreaAdmin && existing.created_by && existing.created_by !== user.id) {
+    return sendJson(res, 403, { ok: false, error: 'Only the event creator or Area Leadership can delete this event.' });
+  }
+
   const { error } = await supabase.from('events').delete().eq('id', id).eq('area_id', areaId);
   if (error) throw error;
   return sendJson(res, 200, { ok: true, deleted: true, id });

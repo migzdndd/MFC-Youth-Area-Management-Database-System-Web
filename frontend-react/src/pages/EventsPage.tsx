@@ -33,7 +33,15 @@ import {
   AlertCircle,
   ChevronRight,
   X,
+  Eye,
+  Copy,
+  Calendar,
+  FileText,
+  User,
+  Check,
 } from 'lucide-react';
+import { useAuthStore } from '@/stores/auth-store';
+import { ROLE_LABELS, type UserRole } from '@/types/auth';
 import type { CommunityEvent, Participant } from '@/types/event';
 
 export const EventsPage: React.FC = () => {
@@ -49,16 +57,39 @@ export const EventsPage: React.FC = () => {
   const updateParticipant = useUpdateParticipant();
   const deleteParticipant = useDeleteParticipant();
 
+  const { user, activeArea } = useAuthStore();
+  const isCoreRole = Boolean(user && user.role !== 'member');
+  const isAreaAdmin =
+    user?.role === 'national_coordinator' ||
+    user?.role === 'area_servant' ||
+    user?.role === 'couple_coordinator';
+
+  const canUserEditEvent = (event?: CommunityEvent | null): boolean => {
+    if (!event || !user) return false;
+    if (!isCoreRole) return false;
+    if (isAreaAdmin) return true;
+    if (!event.created_by) return true;
+    return event.created_by === user.id;
+  };
+
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CommunityEvent | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CommunityEvent | null>(null);
+  const [viewSummaryEvent, setViewSummaryEvent] = useState<CommunityEvent | null>(null);
+  const [hasCopiedBriefing, setHasCopiedBriefing] = useState(false);
+
+  // Hook to fetch participants for the comprehensive summary modal
+  const { data: summaryParticipants = [], isLoading: summaryParticipantsLoading } =
+    useEventParticipants(viewSummaryEvent?.id || '');
 
   useEffect(() => {
     if ((location.state as { openCreate?: boolean })?.openCreate) {
-      setIsCreateOpen(true);
+      if (isCoreRole) {
+        setIsCreateOpen(true);
+      }
       window.history.replaceState({}, document.title);
     }
-  }, [location.state]);
+  }, [location.state, isCoreRole]);
 
   // Event creation form state
   const [name, setName] = useState('');
@@ -96,6 +127,69 @@ export const EventsPage: React.FC = () => {
     currentStatus: 'Paid' | 'Not Paid';
     targetStatus: 'Paid' | 'Not Paid';
   } | null>(null);
+
+  const getEventRelativeTime = (startsAt: string) => {
+    const now = new Date();
+    const eventDate = new Date(startsAt);
+    const diffMs = eventDate.getTime() - now.getTime();
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+    const diffHours = Math.round(diffMs / (1000 * 60 * 60));
+
+    if (diffMs < -1000 * 60 * 60 * 24) {
+      const daysAgo = Math.abs(diffDays);
+      return `Concluded ${daysAgo} day${daysAgo === 1 ? '' : 's'} ago`;
+    }
+    if (diffMs < 0) {
+      return 'Happening today / Concluding';
+    }
+    if (diffHours < 24) {
+      return diffHours <= 1 ? 'Starting shortly' : `Starts in ${diffHours} hours`;
+    }
+    return `In ${diffDays} day${diffDays === 1 ? '' : 's'}`;
+  };
+
+  const getEventStatusBadge = (startsAt: string) => {
+    const now = new Date();
+    const eventDate = new Date(startsAt);
+    const diffHours = (eventDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+    if (diffHours < -24) {
+      return { label: 'Past Gathering', variant: 'default' as const };
+    }
+    if (diffHours >= -24 && diffHours <= 12) {
+      return { label: 'Active / Today', variant: 'warning' as const };
+    }
+    return { label: 'Upcoming', variant: 'success' as const };
+  };
+
+  const handleCopyBriefing = (event: CommunityEvent) => {
+    const relative = getEventRelativeTime(event.starts_at);
+    const feeText = event.fee > 0 ? formatCurrency(event.fee) : 'Free';
+    const creatorRoleText = event.creator_role
+      ? (ROLE_LABELS[event.creator_role as UserRole] || event.creator_role)
+      : 'Area Servant';
+    const organizer = event.creator_name
+      ? `${event.creator_name} (${creatorRoleText})`
+      : 'Area Leadership';
+
+    const lines = [
+      `*${event.name}*`,
+      `Date & Time: ${formatDateTime(event.starts_at)} (${relative})`,
+      `Venue: ${event.venue}`,
+      `Registration Fee: ${feeText}`,
+      `Organized By: ${organizer}`,
+      `Area: ${activeArea?.name || 'Area Community'}`,
+    ];
+
+    if (event.description?.trim()) {
+      lines.push('', 'Briefing & Description:', event.description.trim());
+    }
+
+    navigator.clipboard.writeText(lines.join('\n'));
+    setHasCopiedBriefing(true);
+    toast.success('Event briefing copied to clipboard.', 'Copied');
+    setTimeout(() => setHasCopiedBriefing(false), 2500);
+  };
 
   const formatForDateTimeInput = (dateString?: string | null) => {
     if (!dateString) return '';
@@ -398,12 +492,19 @@ export const EventsPage: React.FC = () => {
               {events.length} {events.length === 1 ? 'Gathering' : 'Gatherings'}
             </Badge>
           </div>
+          <p className="text-xs text-slate-500">
+            {isCoreRole
+              ? 'Schedule, manage, and coordinate community events and youth assemblies.'
+              : 'View community event schedules, briefings, and attendance rosters.'}
+          </p>
         </div>
 
-        <Button onClick={openCreateModal} className="flex items-center gap-2 shrink-0">
-          <CalendarPlus className="w-4 h-4" />
-          <span>Schedule Event</span>
-        </Button>
+        {isCoreRole && (
+          <Button onClick={openCreateModal} className="flex items-center gap-2 shrink-0">
+            <CalendarPlus className="w-4 h-4" />
+            <span>Schedule Event</span>
+          </Button>
+        )}
       </div>
 
       {/* Events List */}
@@ -419,91 +520,146 @@ export const EventsPage: React.FC = () => {
           <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
             Schedule a chapter assembly or youth camp gathering to start tracking community attendance.
           </p>
-          <Button onClick={openCreateModal} className="mt-4" size="sm">
-            Schedule First Event
-          </Button>
+          {isCoreRole && (
+            <Button onClick={openCreateModal} className="mt-4" size="sm">
+              Schedule First Event
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {events.map((event) => (
-            <div
-              key={event.id}
-              role="button"
-              tabIndex={0}
-              onClick={() => openEventDetails(event)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  openEventDetails(event);
-                }
-              }}
-              className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-navy/40 transition-all duration-200 flex flex-col justify-between group cursor-pointer text-left focus:outline-none focus:ring-2 focus:ring-navy/30"
-              title="Click to view Attendance & Payments Data Grid"
-            >
-              <div>
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  <h3 className="font-bold text-slate-900 text-base font-heading group-hover:text-navy transition-colors">
-                    {event.name}
-                  </h3>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openEditModal(event);
-                      }}
-                      className="p-1.5 text-slate-400 hover:text-navy hover:bg-slate-100 rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
-                      title={`Edit ${event.name}`}
-                      aria-label={`Edit ${event.name}`}
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteEvent(event);
-                      }}
-                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
-                      title={`Delete ${event.name}`}
-                      aria-label={`Delete ${event.name}`}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                    <Badge variant={event.fee > 0 ? 'warning' : 'success'}>
-                      {event.fee > 0 ? formatCurrency(event.fee) : 'Free'}
+          {events.map((event) => {
+            const canEdit = canUserEditEvent(event);
+            const statusInfo = getEventStatusBadge(event.starts_at);
+
+            return (
+              <div
+                key={event.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  if (canEdit) {
+                    openEventDetails(event);
+                  } else {
+                    setViewSummaryEvent(event);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    if (canEdit) {
+                      openEventDetails(event);
+                    } else {
+                      setViewSummaryEvent(event);
+                    }
+                  }
+                }}
+                className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-navy/40 transition-all duration-200 flex flex-col justify-between group cursor-pointer text-left focus:outline-none focus:ring-2 focus:ring-navy/30"
+                title={canEdit ? 'Click to view Attendance & Payments Data Grid' : 'Click to view Event Comprehensive Briefing'}
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h3 className="font-bold text-slate-900 text-base font-heading group-hover:text-navy transition-colors line-clamp-2">
+                      {event.name}
+                    </h3>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setViewSummaryEvent(event);
+                        }}
+                        className="p-1.5 text-slate-400 hover:text-navy hover:bg-slate-100 rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+                        title="View Event Summary"
+                        aria-label="View Event Summary"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
+
+                      {canEdit && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEditModal(event);
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-navy hover:bg-slate-100 rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+                            title={`Edit ${event.name}`}
+                            aria-label={`Edit ${event.name}`}
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteEvent(event);
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+                            title={`Delete ${event.name}`}
+                            aria-label={`Delete ${event.name}`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </>
+                      )}
+
+                      <Badge variant={event.fee > 0 ? 'warning' : 'success'}>
+                        {event.fee > 0 ? formatCurrency(event.fee) : 'Free'}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 mb-3">
+                    <Badge variant={statusInfo.variant}>
+                      {statusInfo.label}
                     </Badge>
+                    {event.creator_name && (
+                      <span className="text-[11px] text-slate-500 truncate">
+                        By {event.creator_name}
+                      </span>
+                    )}
+                  </div>
+
+                  {event.description && (
+                    <p className="text-xs text-slate-600 mb-4 line-clamp-2 leading-relaxed">
+                      {event.description}
+                    </p>
+                  )}
+
+                  <div className="space-y-2 py-2 bg-slate-50/70 p-3 rounded-xl border border-slate-200/70">
+                    <div className="flex items-center gap-2 text-xs text-slate-700">
+                      <Clock className="w-3.5 h-3.5 text-navy shrink-0" />
+                      <span className="font-medium">{formatDateTime(event.starts_at)}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs text-slate-700">
+                      <MapPin className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                      <span className="truncate font-medium">{event.venue}</span>
+                    </div>
                   </div>
                 </div>
 
-                {event.description && (
-                  <p className="text-xs text-slate-600 mb-4 line-clamp-2 leading-relaxed">
-                    {event.description}
-                  </p>
-                )}
-
-                <div className="space-y-2 py-2 bg-slate-50/70 p-3 rounded-xl border border-slate-200/70">
-                  <div className="flex items-center gap-2 text-xs text-slate-700">
-                    <Clock className="w-3.5 h-3.5 text-navy shrink-0" />
-                    <span className="font-medium">{formatDateTime(event.starts_at)}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-xs text-slate-700">
-                    <MapPin className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                    <span className="truncate font-medium">{event.venue}</span>
-                  </div>
+                <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-navy group-hover:text-navy-light">
+                  <span className="flex items-center gap-1.5">
+                    {canEdit ? (
+                      <>
+                        <Users className="w-4 h-4 text-navy" />
+                        <span>View Attendance Grid</span>
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="w-4 h-4 text-navy" />
+                        <span>View Comprehensive Summary</span>
+                      </>
+                    )}
+                  </span>
+                  <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
-
-              <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-navy group-hover:text-navy-light">
-                <span className="flex items-center gap-1.5">
-                  <Users className="w-4 h-4 text-navy" />
-                  <span>View Attendance Grid</span>
-                </span>
-                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -612,20 +768,38 @@ export const EventsPage: React.FC = () => {
           {/* Event Quick Actions Bar */}
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <span className="text-xs text-slate-500 font-medium">Event Operations</span>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                if (selectedEvent) {
-                  openEditModal(selectedEvent);
-                }
-              }}
-              className="flex items-center gap-1.5"
-            >
-              <Edit2 className="w-3.5 h-3.5 text-navy" />
-              <span>Edit Event Details</span>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  if (selectedEvent) {
+                    setViewSummaryEvent(selectedEvent);
+                  }
+                }}
+                className="flex items-center gap-1.5 min-h-[36px]"
+              >
+                <Eye className="w-3.5 h-3.5 text-navy" />
+                <span>View Event Summary</span>
+              </Button>
+              {canUserEditEvent(selectedEvent) && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    if (selectedEvent) {
+                      openEditModal(selectedEvent);
+                    }
+                  }}
+                  className="flex items-center gap-1.5 min-h-[36px]"
+                >
+                  <Edit2 className="w-3.5 h-3.5 text-navy" />
+                  <span>Edit Event Details</span>
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Summary Stat Counters */}
@@ -1098,6 +1272,259 @@ export const EventsPage: React.FC = () => {
               >
                 Confirm Update
               </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+      {/* Comprehensive View-Only Event Summary Modal */}
+      <Modal
+        isOpen={Boolean(viewSummaryEvent)}
+        onClose={() => setViewSummaryEvent(null)}
+        title="Event Comprehensive Briefing"
+        description={viewSummaryEvent ? `Official overview and details for ${viewSummaryEvent.name}` : ''}
+        maxWidth="lg"
+      >
+        {viewSummaryEvent && (
+          <div className="space-y-6">
+            {/* Hero / Header Card */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-navy/5 via-slate-50 to-white border border-slate-200/80 shadow-2xs">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant={getEventStatusBadge(viewSummaryEvent.starts_at).variant}>
+                    {getEventStatusBadge(viewSummaryEvent.starts_at).label}
+                  </Badge>
+                  <Badge variant={viewSummaryEvent.fee > 0 ? 'warning' : 'success'}>
+                    {viewSummaryEvent.fee > 0 ? `${formatCurrency(viewSummaryEvent.fee)} Registration` : 'Free Gathering'}
+                  </Badge>
+                </div>
+                <span className="text-xs text-slate-500 font-medium">
+                  {getEventRelativeTime(viewSummaryEvent.starts_at)}
+                </span>
+              </div>
+
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading tracking-tight mb-2">
+                {viewSummaryEvent.name}
+              </h2>
+
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Area-wide community gathering organized under {activeArea?.name || 'Area Community'}.
+              </p>
+            </div>
+
+            {/* Core Event Specifications Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              {/* Date & Time */}
+              <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200/80 flex items-start gap-3">
+                <div className="p-2.5 rounded-lg bg-navy/10 text-navy shrink-0 mt-0.5">
+                  <Calendar className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    Schedule & Timing
+                  </div>
+                  <div className="text-sm font-bold text-slate-900 mt-0.5">
+                    {formatDateTime(viewSummaryEvent.starts_at)}
+                  </div>
+                  <div className="text-xs text-slate-600 mt-0.5">
+                    {getEventRelativeTime(viewSummaryEvent.starts_at)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Venue */}
+              <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200/80 flex items-start gap-3">
+                <div className="p-2.5 rounded-lg bg-amber-500/10 text-amber-700 shrink-0 mt-0.5">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    Venue Location
+                  </div>
+                  <div className="text-sm font-bold text-slate-900 mt-0.5 truncate">
+                    {viewSummaryEvent.venue}
+                  </div>
+                  <div className="text-xs text-slate-600 mt-0.5">
+                    Designated gathering venue
+                  </div>
+                </div>
+              </div>
+
+              {/* Host & Creator */}
+              <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200/80 flex items-start gap-3">
+                <div className="p-2.5 rounded-lg bg-sky-500/10 text-sky-800 shrink-0 mt-0.5">
+                  <User className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    Event Organizer
+                  </div>
+                  <div className="text-sm font-bold text-slate-900 mt-0.5 truncate">
+                    {viewSummaryEvent.creator_name || 'Area Leadership'}
+                  </div>
+                  <div className="text-xs text-slate-600 mt-0.5">
+                    {viewSummaryEvent.creator_role
+                      ? (ROLE_LABELS[viewSummaryEvent.creator_role as UserRole] || viewSummaryEvent.creator_role)
+                      : 'Area Servant'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Fee & Payment Policy */}
+              <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200/80 flex items-start gap-3">
+                <div className="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-800 shrink-0 mt-0.5">
+                  <CreditCard className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    Registration Fee
+                  </div>
+                  <div className="text-sm font-bold text-slate-900 mt-0.5">
+                    {viewSummaryEvent.fee > 0 ? formatCurrency(viewSummaryEvent.fee) : 'Free Admission'}
+                  </div>
+                  <div className="text-xs text-slate-600 mt-0.5">
+                    {viewSummaryEvent.fee > 0 ? 'Remittance upon check-in' : 'No registration charge'}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Event Description / Agenda */}
+            <div className="p-4 rounded-xl border border-slate-200/90 bg-white shadow-2xs space-y-2">
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-900 font-heading uppercase tracking-wider">
+                <FileText className="w-4 h-4 text-navy" />
+                <span>Program Briefing & Details</span>
+              </div>
+              {viewSummaryEvent.description?.trim() ? (
+                <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200/60 text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+                  {viewSummaryEvent.description}
+                </div>
+              ) : (
+                <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200/60 text-xs text-slate-500 italic">
+                  No additional briefing notes or description were provided for this gathering.
+                </div>
+              )}
+            </div>
+
+            {/* Attendance & Participation Snapshot */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-900 font-heading uppercase tracking-wider">
+                  <Users className="w-4 h-4 text-navy" />
+                  <span>Attendance & Registration Snapshot</span>
+                </div>
+                {summaryParticipantsLoading && <Spinner size="sm" />}
+              </div>
+
+              {/* Metric Counters */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center">
+                  <div className="text-[11px] text-slate-500 font-medium">Registered</div>
+                  <div className="text-lg font-bold text-slate-900 mt-0.5">
+                    {summaryParticipants.length}
+                  </div>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center">
+                  <div className="text-[11px] text-slate-500 font-medium">Attended</div>
+                  <div className="text-lg font-bold text-emerald-700 mt-0.5">
+                    {summaryParticipants.filter((p) => p.attended).length}
+                  </div>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center">
+                  <div className="text-[11px] text-slate-500 font-medium">Paid Fees</div>
+                  <div className="text-lg font-bold text-sky-700 mt-0.5">
+                    {summaryParticipants.filter((p) => p.payment_status === 'Paid').length}
+                  </div>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center">
+                  <div className="text-[11px] text-slate-500 font-medium">Attendance Rate</div>
+                  <div className="text-lg font-bold text-navy mt-0.5">
+                    {summaryParticipants.length > 0
+                      ? `${Math.round((summaryParticipants.filter((p) => p.attended).length / summaryParticipants.length) * 100)}%`
+                      : '0%'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Participating Chapters */}
+              {summaryParticipants.length > 0 && (
+                <div className="p-3 bg-slate-50/70 rounded-xl border border-slate-200/70 text-xs">
+                  <span className="font-semibold text-slate-700 mr-2">Chapters Represented:</span>
+                  <div className="inline-flex flex-wrap gap-1.5 mt-1 sm:mt-0">
+                    {Array.from(
+                      new Set(
+                        summaryParticipants
+                          .map((p) => p.member?.chapter_name)
+                          .filter((c): c is string => Boolean(c))
+                      )
+                    ).map((chapterName) => (
+                      <span
+                        key={chapterName}
+                        className="px-2 py-0.5 bg-white border border-slate-200 rounded-md text-[11px] font-medium text-slate-700"
+                      >
+                        {chapterName}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Actions Footer */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-slate-200">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => handleCopyBriefing(viewSummaryEvent)}
+                className="flex items-center justify-center gap-1.5 min-h-[44px]"
+              >
+                {hasCopiedBriefing ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-slate-500" />}
+                <span>{hasCopiedBriefing ? 'Briefing Copied!' : 'Copy Event Briefing'}</span>
+              </Button>
+
+              <div className="flex flex-wrap items-center justify-end gap-2.5">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setViewSummaryEvent(null)}
+                  className="min-h-[44px]"
+                >
+                  Close
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    const evt = viewSummaryEvent;
+                    setViewSummaryEvent(null);
+                    openEventDetails(evt);
+                  }}
+                  className="flex items-center gap-1.5 min-h-[44px]"
+                >
+                  <Users className="w-4 h-4 text-navy" />
+                  <span>View Attendance Roster</span>
+                </Button>
+
+                {canUserEditEvent(viewSummaryEvent) && (
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    onClick={() => {
+                      const evt = viewSummaryEvent;
+                      setViewSummaryEvent(null);
+                      openEditModal(evt);
+                    }}
+                    className="flex items-center gap-1.5 min-h-[44px]"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                    <span>Edit Event</span>
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         )}

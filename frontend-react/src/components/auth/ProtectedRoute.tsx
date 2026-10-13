@@ -6,17 +6,24 @@ import type { UserRole } from '@/types/auth';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   allowedRoles?: UserRole[];
+  developerOnly?: boolean;
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   allowedRoles,
+  developerOnly,
 }) => {
   const { user, token } = useAuthStore();
   const location = useLocation();
 
   if (!token || !user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Developer dashboard is restricted strictly via Supabase developer flag
+  if (developerOnly && !user.is_developer) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   // If member tries to access servant views, redirect to /member portal

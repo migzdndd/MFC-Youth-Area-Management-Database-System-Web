@@ -8,6 +8,9 @@ export interface CommunityEvent {
   fee: number;
   manual_attendance?: number | null;
   description?: string | null;
+  created_by?: string | null;
+  creator_name?: string | null;
+  creator_role?: string | null;
   created_at?: string;
   updated_at?: string;
 }

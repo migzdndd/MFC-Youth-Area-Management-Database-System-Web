@@ -160,7 +160,8 @@ export default async function handler(req, res) {
         area_name: areaName,
         chapterId: linkedProfile.chapter_id,
         chapter_id: linkedProfile.chapter_id,
-        mustChangePassword: linkedProfile.must_change_password
+        mustChangePassword: linkedProfile.must_change_password,
+        is_developer: Boolean(linkedProfile.is_developer)
       }
     });
   } catch (error) {

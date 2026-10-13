@@ -11,6 +11,7 @@ import {
   LogOut,
   X,
   MapPin,
+  Terminal,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { useAreas } from '@/hooks/useDashboard';
@@ -57,6 +58,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   const allowedPages = user?.role ? ROLE_ALLOWED_PAGES[user.role] || [] : [];
   const filteredNavItems = navItems.filter((item) => allowedPages.includes(item.pageKey));
+  const isDeveloper = Boolean(user?.is_developer);
 
   return (
     <>
@@ -129,6 +131,33 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               </NavLink>
             );
           })}
+
+          {isDeveloper && (
+            <div className="pt-2 mt-2 border-t border-white/10">
+              <span className="px-3 text-[10px] font-bold text-amber-300 uppercase tracking-widest">
+                Developer Deck
+              </span>
+              <NavLink
+                to="/dev"
+                onClick={() => onClose()}
+                className={({ isActive }) =>
+                  `flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 min-h-[44px] select-none mt-1 ${
+                    isActive
+                      ? 'bg-amber-400/20 text-amber-300 font-semibold border-l-[3px] border-amber-400 pl-2.5 shadow-2xs'
+                      : 'text-amber-200/90 hover:bg-white/7 hover:text-amber-100'
+                  }`
+                }
+              >
+                <div className="flex items-center gap-3">
+                  <Terminal className="w-5 h-5 shrink-0 opacity-90 text-amber-400" />
+                  <span>Developer Console</span>
+                </div>
+                <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-amber-400/30 text-amber-300 border border-amber-400/40">
+                  Dev
+                </span>
+              </NavLink>
+            </div>
+          )}
         </nav>
 
         {/* User status and logout */}
