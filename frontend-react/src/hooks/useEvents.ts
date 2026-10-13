@@ -31,6 +31,36 @@ export function useCreateEvent() {
   });
 }
 
+export function useUpdateEvent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (updatedEvent: Partial<CommunityEvent> & { id: string }) =>
+      apiClient<{ ok: boolean; event: CommunityEvent }>('/events', {
+        method: 'PATCH',
+        body: JSON.stringify(updatedEvent),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+    },
+  });
+}
+
+export function useDeleteEvent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiClient<{ ok: boolean; deleted: boolean }>('/events', {
+        method: 'DELETE',
+        body: JSON.stringify({ id }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+    },
+  });
+}
+
 export function useEventParticipants(eventId: string) {
   return useQuery({
     queryKey: ['event-participants', eventId],

@@ -3,6 +3,8 @@ import { useLocation } from 'react-router-dom';
 import {
   useEvents,
   useCreateEvent,
+  useUpdateEvent,
+  useDeleteEvent,
   useEventParticipants,
   useRegisterParticipant,
   useUpdateParticipant,
@@ -25,6 +27,7 @@ import {
   XCircle,
   UserPlus,
   Trash2,
+  Edit2,
   Search,
   CreditCard,
   AlertCircle,
@@ -40,11 +43,14 @@ export const EventsPage: React.FC = () => {
   const toast = useToast();
 
   const createEvent = useCreateEvent();
+  const updateEvent = useUpdateEvent();
+  const deleteEventHook = useDeleteEvent();
   const registerParticipant = useRegisterParticipant();
   const updateParticipant = useUpdateParticipant();
   const deleteParticipant = useDeleteParticipant();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<CommunityEvent | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CommunityEvent | null>(null);
 
   useEffect(() => {
@@ -91,7 +97,21 @@ export const EventsPage: React.FC = () => {
     targetStatus: 'Paid' | 'Not Paid';
   } | null>(null);
 
+  const formatForDateTimeInput = (dateString?: string | null) => {
+    if (!dateString) return '';
+    const d = new Date(dateString);
+    if (Number.isNaN(d.getTime())) return '';
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const year = d.getFullYear();
+    const month = pad(d.getMonth() + 1);
+    const day = pad(d.getDate());
+    const hours = pad(d.getHours());
+    const minutes = pad(d.getMinutes());
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
   const openCreateModal = () => {
+    setEditingEvent(null);
     setName('');
     setStartsAt('');
     setVenue('');
@@ -101,7 +121,18 @@ export const EventsPage: React.FC = () => {
     setIsCreateOpen(true);
   };
 
-  const handleCreateEvent = async (e: React.FormEvent) => {
+  const openEditModal = (event: CommunityEvent) => {
+    setEditingEvent(event);
+    setName(event.name);
+    setStartsAt(formatForDateTimeInput(event.starts_at));
+    setVenue(event.venue || '');
+    setFee(String(event.fee ?? 0));
+    setDescription(event.description || '');
+    setFormError('');
+    setIsCreateOpen(true);
+  };
+
+  const handleSaveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
 
@@ -119,20 +150,64 @@ export const EventsPage: React.FC = () => {
     }
 
     try {
-      await createEvent.mutateAsync({
-        name: name.trim(),
-        starts_at: startsAt,
-        venue: venue.trim(),
-        fee: parseFloat(fee) || 0,
-        description: description.trim(),
-      });
-      setIsCreateOpen(false);
+      if (editingEvent) {
+        await updateEvent.mutateAsync({
+          id: editingEvent.id,
+          name: name.trim(),
+          starts_at: startsAt,
+          venue: venue.trim(),
+          fee: parseFloat(fee) || 0,
+          description: description.trim(),
+        });
+        if (selectedEvent?.id === editingEvent.id) {
+          setSelectedEvent((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  name: name.trim(),
+                  starts_at: startsAt,
+                  venue: venue.trim(),
+                  fee: parseFloat(fee) || 0,
+                  description: description.trim(),
+                }
+              : null
+          );
+        }
+        setIsCreateOpen(false);
+        setEditingEvent(null);
+        toast.success('Event details have been updated successfully.', 'Event Updated');
+      } else {
+        await createEvent.mutateAsync({
+          name: name.trim(),
+          starts_at: startsAt,
+          venue: venue.trim(),
+          fee: parseFloat(fee) || 0,
+          description: description.trim(),
+        });
+        setIsCreateOpen(false);
+        toast.success('Community gathering has been scheduled.', 'Event Created');
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         setFormError(err.message);
       } else {
-        setFormError('Failed to schedule event.');
+        setFormError(editingEvent ? 'Failed to update event.' : 'Failed to schedule event.');
       }
+    }
+  };
+
+  const handleDeleteEvent = async (event: CommunityEvent) => {
+    if (!window.confirm(`Are you sure you want to delete event "${event.name}"?`)) {
+      return;
+    }
+    try {
+      await deleteEventHook.mutateAsync(event.id);
+      if (selectedEvent?.id === event.id) {
+        setSelectedEvent(null);
+      }
+      toast.success(`Event "${event.name}" was removed.`, 'Event Deleted');
+    } catch {
+      toast.error('Failed to delete event.', 'Error');
     }
   };
 
@@ -370,9 +445,35 @@ export const EventsPage: React.FC = () => {
                   <h3 className="font-bold text-slate-900 text-base font-heading group-hover:text-navy transition-colors">
                     {event.name}
                   </h3>
-                  <Badge variant={event.fee > 0 ? 'warning' : 'success'}>
-                    {event.fee > 0 ? formatCurrency(event.fee) : 'Free'}
-                  </Badge>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEditModal(event);
+                      }}
+                      className="p-1.5 text-slate-400 hover:text-navy hover:bg-slate-100 rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+                      title={`Edit ${event.name}`}
+                      aria-label={`Edit ${event.name}`}
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteEvent(event);
+                      }}
+                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+                      title={`Delete ${event.name}`}
+                      aria-label={`Delete ${event.name}`}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                    <Badge variant={event.fee > 0 ? 'warning' : 'success'}>
+                      {event.fee > 0 ? formatCurrency(event.fee) : 'Free'}
+                    </Badge>
+                  </div>
                 </div>
 
                 {event.description && (
@@ -406,14 +507,17 @@ export const EventsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Schedule Event Modal */}
+      {/* Schedule / Edit Event Modal */}
       <Modal
         isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
-        title="Schedule Community Event"
+        onClose={() => {
+          setIsCreateOpen(false);
+          setEditingEvent(null);
+        }}
+        title={editingEvent ? 'Edit Community Event' : 'Schedule Community Event'}
         maxWidth="md"
       >
-        <form onSubmit={handleCreateEvent} className="space-y-4">
+        <form onSubmit={handleSaveEvent} className="space-y-4">
           {formError && (
             <div className="p-3 text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-md font-medium flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
@@ -471,11 +575,22 @@ export const EventsPage: React.FC = () => {
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
-            <Button type="button" variant="secondary" onClick={() => setIsCreateOpen(false)}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setIsCreateOpen(false);
+                setEditingEvent(null);
+              }}
+            >
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={createEvent.isPending}>
-              Schedule Event
+            <Button
+              type="submit"
+              variant="primary"
+              isLoading={editingEvent ? updateEvent.isPending : createEvent.isPending}
+            >
+              {editingEvent ? 'Save Changes' : 'Schedule Event'}
             </Button>
           </div>
         </form>
@@ -494,6 +609,25 @@ export const EventsPage: React.FC = () => {
         maxWidth="xl"
       >
         <div className="space-y-6">
+          {/* Event Quick Actions Bar */}
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <span className="text-xs text-slate-500 font-medium">Event Operations</span>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                if (selectedEvent) {
+                  openEditModal(selectedEvent);
+                }
+              }}
+              className="flex items-center gap-1.5"
+            >
+              <Edit2 className="w-3.5 h-3.5 text-navy" />
+              <span>Edit Event Details</span>
+            </Button>
+          </div>
+
           {/* Summary Stat Counters */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-slate-50 border border-slate-200/90 rounded-xl text-center">
             <div className="p-2 bg-white rounded-lg border border-slate-200/80 shadow-2xs">
