@@ -1,5 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { useAuthStore } from '@/stores/auth-store';
+import { apiClient } from '@/lib/api';
+import type { UserProfile } from '@/types/auth';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { MobileNav } from './MobileNav';
@@ -7,6 +11,20 @@ import { OfflineBanner } from './OfflineBanner';
 
 export const AppLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { token, updateUser } = useAuthStore();
+
+  const { data: meData } = useQuery({
+    queryKey: ['auth', 'me'],
+    queryFn: () => apiClient<{ ok: boolean; user: UserProfile }>('/auth/me'),
+    enabled: Boolean(token),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  useEffect(() => {
+    if (meData?.user) {
+      updateUser(meData.user);
+    }
+  }, [meData, updateUser]);
 
   return (
     <div className="min-h-screen bg-canvas flex flex-col">

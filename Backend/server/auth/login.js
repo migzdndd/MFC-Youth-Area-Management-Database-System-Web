@@ -46,7 +46,7 @@ export default async function handler(req, res) {
     const admin = createSupabaseAdmin();
     const { data: profile, error: profileError } = await admin
       .from('profiles')
-      .select('id, member_id, role, area_id, chapter_id, must_change_password, is_active')
+      .select('id, member_id, role, area_id, chapter_id, must_change_password, is_active, is_developer')
       .eq('id', data.user.id)
       .maybeSingle();
 

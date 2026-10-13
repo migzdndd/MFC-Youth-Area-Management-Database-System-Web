@@ -57,7 +57,7 @@ export default async function handler(req, res) {
     const userId = verifyData.user?.id;
     const { data: profile, error: profileError } = await admin
       .from('profiles')
-      .select('id, member_id, role, area_id, chapter_id, must_change_password, is_active')
+      .select('id, member_id, role, area_id, chapter_id, must_change_password, is_active, is_developer')
       .eq('id', userId)
       .maybeSingle();
 
@@ -87,7 +87,8 @@ export default async function handler(req, res) {
         role: profile?.role || 'member',
         areaId: profile?.area_id || null,
         chapterId: profile?.chapter_id || null,
-        mustChangePassword: profile?.must_change_password ?? false
+        mustChangePassword: profile?.must_change_password ?? false,
+        is_developer: Boolean(profile?.is_developer)
       }
     });
   } catch (error) {
