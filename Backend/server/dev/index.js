@@ -11,6 +11,9 @@
 import { requireAuthenticatedProfile, isSystemDeveloper } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 
+let devMetricsCache = null;
+let devMetricsCacheExpiry = 0;
+
 async function ensureDeveloperAccess(admin, user, profile) {
   const isDev = await isSystemDeveloper(admin, user, profile);
   if (!isDev) {
@@ -24,6 +27,24 @@ async function ensureDeveloperAccess(admin, user, profile) {
 async function getDeveloperMetrics(req, res) {
   const { admin, user, profile } = await requireAuthenticatedProfile(req);
   await ensureDeveloperAccess(admin, user, profile);
+
+  if (devMetricsCache && Date.now() < devMetricsCacheExpiry && req.query?.refresh !== 'true') {
+    const memoryUsage = process.memoryUsage();
+    return sendJson(res, 200, {
+      ...devMetricsCache,
+      timestamp: new Date().toISOString(),
+      system: {
+        ...devMetricsCache.system,
+        uptimeSeconds: Math.floor(process.uptime()),
+        memory: {
+          rssMb: Math.round((memoryUsage.rss / 1024 / 1024) * 100) / 100,
+          heapTotalMb: Math.round((memoryUsage.heapTotal / 1024 / 1024) * 100) / 100,
+          heapUsedMb: Math.round((memoryUsage.heapUsed / 1024 / 1024) * 100) / 100,
+          externalMb: Math.round((memoryUsage.external / 1024 / 1024) * 100) / 100,
+        },
+      },
+    });
+  }
 
   const startTime = Date.now();
 
@@ -92,6 +113,9 @@ async function getDeveloperMetrics(req, res) {
       reports: recentReportsRes.data || [],
     },
   };
+
+  devMetricsCache = metrics;
+  devMetricsCacheExpiry = Date.now() + 20000;
 
   return sendJson(res, 200, metrics);
 }

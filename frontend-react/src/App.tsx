@@ -26,6 +26,30 @@ const DeveloperDashboardPage = lazy(() => import('@/pages/DeveloperDashboardPage
 const MemberPortalPage = lazy(() => import('@/pages/MemberPortalPage').then((m) => ({ default: m.MemberPortalPage })));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 
+// Prefetch core routes during idle browser cycles to eliminate transition lag
+if (typeof window !== 'undefined') {
+  const schedulePrefetch = () => {
+    const prefetchRoutes = () => {
+      import('@/pages/EventsPage');
+      import('@/pages/MembersPage');
+      import('@/pages/ChaptersPage');
+      import('@/pages/DeveloperDashboardPage');
+    };
+
+    if ('requestIdleCallback' in window) {
+      (window as unknown as { requestIdleCallback: (cb: () => void, opts: { timeout: number }) => void }).requestIdleCallback(prefetchRoutes, { timeout: 3000 });
+    } else {
+      setTimeout(prefetchRoutes, 1500);
+    }
+  };
+
+  if (document.readyState === 'complete') {
+    schedulePrefetch();
+  } else {
+    window.addEventListener('load', schedulePrefetch, { once: true });
+  }
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

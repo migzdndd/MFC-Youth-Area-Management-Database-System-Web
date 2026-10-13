@@ -65,8 +65,8 @@ export function useDeveloperMetrics() {
   return useQuery({
     queryKey: ['developer-metrics'],
     queryFn: () => apiClient<DeveloperMetrics>('/dev'),
-    staleTime: 1000 * 30, // 30 seconds
-    refetchInterval: 1000 * 30, // 30 seconds auto-refresh
+    staleTime: 1000 * 60, // 60 seconds
+    refetchInterval: false,
   });
 }
 
