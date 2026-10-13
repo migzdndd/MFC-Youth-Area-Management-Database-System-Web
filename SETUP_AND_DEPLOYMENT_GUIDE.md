@@ -61,10 +61,12 @@ git branch -M main
    - `011_lit_creative_ministries.sql`
    - `012_rate_limits_and_lockouts.sql`
    - `013_member_avatar.sql`
+   - `013_b_app_private_schema.sql`
    - `014_authenticated_role_permissions.sql`
    - `015_disable_legacy_recursive_policies.sql`
    - `016_domain_moderator_rls_scoping.sql`
    - `017_event_participants_non_members.sql`
+   - `018_system_developers.sql`
 
 ---
 

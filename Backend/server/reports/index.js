@@ -30,7 +30,7 @@ async function listReports(req, res) {
 }
 
 async function saveReport(req, res, isUpdate) {
-  const { supabase, admin, profile, user } = await requireAuthenticatedProfile(req);
+  const { admin, profile, user } = await requireAuthenticatedProfile(req);
   if (!isLeaderRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'You do not have permission to manage activity reports.' });
   const areaId = requireArea(req, profile);
   const input = req.body || {};
@@ -39,7 +39,7 @@ async function saveReport(req, res, isUpdate) {
   if (isUpdate) {
     const id = input.id;
     if (!id) return sendJson(res, 400, { ok: false, error: 'Report ID is required.' });
-    existing = await loadAreaRow(supabase, 'activity_reports', id, areaId, 'id, chapter_id');
+    existing = await loadAreaRow(admin, 'activity_reports', id, areaId, 'id, chapter_id');
     if (!existing) return sendJson(res, 404, { ok: false, error: 'Report not found in your Area.' });
     if (isChapterServantRole(profile.role) && String(existing.chapter_id || '') !== String(profile.chapter_id || '')) {
       return sendJson(res, 403, { ok: false, error: 'You can only edit reports for your assigned chapter.' });
@@ -77,26 +77,26 @@ async function saveReport(req, res, isUpdate) {
     created_by: user.id
   };
   if (!isUpdate) {
-    const { data, error } = await supabase.from('activity_reports').insert(payload).select('*').single();
+    const { data, error } = await admin.from('activity_reports').insert(payload).select('*').single();
     if (error) throw error;
-    return sendJson(res, 201, { ok: true, report: data });
+    return sendJson(res, 201, { ok: true, report: data, data });
   }
   delete payload.created_by;
-  const { data, error } = await supabase.from('activity_reports').update(payload).eq('id', input.id).eq('area_id', areaId).select('*').single();
+  const { data, error } = await admin.from('activity_reports').update(payload).eq('id', input.id).eq('area_id', areaId).select('*').single();
   if (error) throw error;
-  return sendJson(res, 200, { ok: true, report: data });
+  return sendJson(res, 200, { ok: true, report: data, data });
 }
 
 async function deleteReport(req, res) {
-  const { supabase, profile } = await requireAuthenticatedProfile(req);
+  const { admin, profile } = await requireAuthenticatedProfile(req);
   if (!isLeaderRole(profile.role)) return sendJson(res, 403, { ok: false, error: 'You do not have permission to delete activity reports.' });
   const areaId = requireArea(req, profile);
   const id = req.query?.id || req.body?.id;
   if (!id) return sendJson(res, 400, { ok: false, error: 'Report ID is required.' });
-  const existing = await loadAreaRow(supabase, 'activity_reports', id, areaId, 'id, chapter_id');
+  const existing = await loadAreaRow(admin, 'activity_reports', id, areaId, 'id, chapter_id');
   if (!existing) return sendJson(res, 404, { ok: false, error: 'Report not found in your Area.' });
   if (isChapterServantRole(profile.role) && String(existing.chapter_id || '') !== String(profile.chapter_id || '')) return sendJson(res, 403, { ok: false, error: 'You can only delete reports for your assigned chapter.' });
-  const { error } = await supabase.from('activity_reports').delete().eq('id', id).eq('area_id', areaId);
+  const { error } = await admin.from('activity_reports').delete().eq('id', id).eq('area_id', areaId);
   if (error) throw error;
   return sendJson(res, 200, { ok: true, deleted: true, id });
 }
