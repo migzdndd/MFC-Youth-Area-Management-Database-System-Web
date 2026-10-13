@@ -49,12 +49,6 @@ export const DeveloperDashboardPage: React.FC = () => {
   const toast = useToast();
   const queryClient = useQueryClient();
 
-  // Strict Supabase developer authorization
-  const isAuthorized = Boolean(user?.is_developer);
-  if (!isAuthorized) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
   const { data: metrics, isLoading, isFetching, refetch } = useDeveloperMetrics();
   const { data: areas = [] } = useAreas();
   const inspectTable = useInspectTable();
@@ -64,6 +58,12 @@ export const DeveloperDashboardPage: React.FC = () => {
   const [tableData, setTableData] = useState<Record<string, unknown>[]>([]);
   const [isInspectModalOpen, setIsInspectModalOpen] = useState(false);
   const [activeActivityTab, setActiveActivityTab] = useState<'members' | 'events' | 'reports'>('members');
+
+  // Strict Supabase developer authorization
+  const isAuthorized = Boolean(user?.is_developer);
+  if (!isAuthorized) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleInspect = async (tableName: string) => {
     setInspectedTable(tableName);
