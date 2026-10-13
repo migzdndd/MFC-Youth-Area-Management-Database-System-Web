@@ -72,7 +72,7 @@ export const DeveloperDashboardPage: React.FC = () => {
       const res = await inspectTable.mutateAsync(tableName);
       setTableData(res.rows || []);
     } catch {
-      toast.error(`Failed to inspect table ${tableName}`, 'Database Error');
+      toast.error('Unable to load records for this category.', 'Connection Issue');
       setTableData([]);
     }
   };
@@ -80,15 +80,15 @@ export const DeveloperDashboardPage: React.FC = () => {
   const handlePing = async () => {
     try {
       const res = await pingMutation.mutateAsync();
-      toast.success(`Supabase round-trip latency: ${res.latencyMs}ms`, 'Database Ping OK');
+      toast.success(`Server response time: ${res.latencyMs}ms`, 'Connection Speed');
     } catch {
-      toast.error('Ping check to Supabase failed.', 'Network Error');
+      toast.error('Could not reach the server.', 'Connection Failed');
     }
   };
 
   const handleClearCache = () => {
     queryClient.clear();
-    toast.success('Client React Query state cache purged successfully.', 'Cache Flushed');
+    toast.success('Temporary app data cleared successfully.', 'Cache Cleared');
     refetch();
   };
 
@@ -110,15 +110,101 @@ export const DeveloperDashboardPage: React.FC = () => {
     toast.success('System diagnostic snapshot exported to JSON.', 'Export Ready');
   };
 
+  const FRIENDLY_TABLE_INFO: Record<string, { label: string; previewTitle: string; previewDesc: string }> = {
+    members: {
+      label: 'Members Directory',
+      previewTitle: 'Members Directory Preview',
+      previewDesc: 'Showing recent youth member records saved in the community.',
+    },
+    chapters: {
+      label: 'Registered Chapters',
+      previewTitle: 'Registered Chapters Preview',
+      previewDesc: 'Showing recent youth chapters registered across areas.',
+    },
+    areas: {
+      label: 'Area Communities',
+      previewTitle: 'Area Communities Preview',
+      previewDesc: 'Showing registered Area community divisions.',
+    },
+    events: {
+      label: 'Community Events',
+      previewTitle: 'Community Events Preview',
+      previewDesc: 'Showing recent youth events, camps, and gatherings.',
+    },
+    event_participants: {
+      label: 'Event Attendance',
+      previewTitle: 'Event Attendance Preview',
+      previewDesc: 'Showing recent attendee registrations and confirmations.',
+    },
+    activity_reports: {
+      label: 'Activity Reports',
+      previewTitle: 'Activity Reports Preview',
+      previewDesc: 'Showing recent pastoral activity reports filed by servant leaders.',
+    },
+    services: {
+      label: 'Universal Services',
+      previewTitle: 'Universal Services Preview',
+      previewDesc: 'Showing available pastoral service categories in the system.',
+    },
+    profiles: {
+      label: 'Servant Accounts',
+      previewTitle: 'Servant Accounts Preview',
+      previewDesc: 'Showing registered servant leader account profiles.',
+    },
+  };
+
+  const formatColumnHeader = (col: string): string => {
+    const customNames: Record<string, string> = {
+      id: 'Record ID',
+      created_at: 'Date Created',
+      updated_at: 'Last Updated',
+      area_id: 'Area ID',
+      chapter_id: 'Chapter ID',
+      member_id: 'Member ID',
+      created_by: 'Created By',
+      starts_at: 'Start Time',
+      ends_at: 'End Time',
+      first_name: 'First Name',
+      last_name: 'Last Name',
+      middle_name: 'Middle Name',
+      must_change_password: 'Password Reset',
+      is_active: 'Active Account',
+      is_developer: 'Developer Access',
+      report_type: 'Report Category',
+      manual_attendance: 'Attendance',
+      payment_status: 'Payment Status',
+      venue: 'Location / Venue',
+      fee: 'Fee',
+      status: 'Status',
+      role: 'Assigned Role',
+      email: 'Email Address',
+      name: 'Name',
+      description: 'Description',
+    };
+    if (customNames[col]) return customNames[col];
+    return col.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
+  const formatCellValue = (val: unknown): string => {
+    if (val === null || val === undefined || val === '') return 'None';
+    if (typeof val === 'boolean') return val ? 'Yes' : 'No';
+    if (typeof val === 'object') return JSON.stringify(val);
+    const str = String(val);
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(str)) {
+      return formatDateTime(str);
+    }
+    return str;
+  };
+
   const tableCards = [
-    { key: 'members', label: 'Members Roster', count: metrics?.counts.members ?? 0, icon: Users, color: 'text-sky-600 bg-sky-50' },
+    { key: 'members', label: 'Members Directory', count: metrics?.counts.members ?? 0, icon: Users, color: 'text-sky-600 bg-sky-50' },
     { key: 'chapters', label: 'Registered Chapters', count: metrics?.counts.chapters ?? 0, icon: Building2, color: 'text-amber-600 bg-amber-50' },
-    { key: 'areas', label: 'Area Databases', count: metrics?.counts.areas ?? 0, icon: MapPin, color: 'text-emerald-600 bg-emerald-50' },
+    { key: 'areas', label: 'Area Communities', count: metrics?.counts.areas ?? 0, icon: MapPin, color: 'text-emerald-600 bg-emerald-50' },
     { key: 'events', label: 'Community Events', count: metrics?.counts.events ?? 0, icon: Calendar, color: 'text-indigo-600 bg-indigo-50' },
-    { key: 'event_participants', label: 'Event Participants', count: metrics?.counts.participants ?? 0, icon: UserCheck, color: 'text-violet-600 bg-violet-50' },
+    { key: 'event_participants', label: 'Event Attendance', count: metrics?.counts.participants ?? 0, icon: UserCheck, color: 'text-violet-600 bg-violet-50' },
     { key: 'activity_reports', label: 'Activity Reports', count: metrics?.counts.reports ?? 0, icon: FileText, color: 'text-rose-600 bg-rose-50' },
     { key: 'services', label: 'Universal Services', count: metrics?.counts.services ?? 0, icon: Briefcase, color: 'text-teal-600 bg-teal-50' },
-    { key: 'profiles', label: 'Leader Profiles', count: metrics?.counts.profiles ?? 0, icon: Layers, color: 'text-slate-600 bg-slate-100' },
+    { key: 'profiles', label: 'Servant Accounts', count: metrics?.counts.profiles ?? 0, icon: Layers, color: 'text-slate-600 bg-slate-100' },
   ];
 
   return (
@@ -131,9 +217,9 @@ export const DeveloperDashboardPage: React.FC = () => {
             <div className="flex items-center gap-2.5 flex-wrap">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                Live Architecture Deck
+                System Active
               </span>
-              <Badge variant="gold">Root Developer Access</Badge>
+              <Badge variant="gold">Developer Access</Badge>
               {user?.email && (
                 <span className="text-xs text-slate-300 font-mono">
                   {user.email}
@@ -141,10 +227,10 @@ export const DeveloperDashboardPage: React.FC = () => {
               )}
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight font-heading">
-              Developer Operations Console
+              Developer & Operations Console
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Real-time telemetry, database row inspection, server memory utilization, and diagnostic controls for MFC Youth Area Management.
+              System records overview, server health, memory status, and administrative testing tools for MFC Youth Area Management.
             </p>
           </div>
 
@@ -157,7 +243,7 @@ export const DeveloperDashboardPage: React.FC = () => {
               className="bg-white/10 text-white hover:bg-white/20 border-white/20 flex items-center gap-2 min-h-[44px]"
             >
               <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
-              <span>{isFetching ? 'Refreshing...' : 'Refresh Telemetry'}</span>
+              <span>{isFetching ? 'Refreshing...' : 'Refresh Stats'}</span>
             </Button>
 
             <Button
@@ -167,7 +253,7 @@ export const DeveloperDashboardPage: React.FC = () => {
               className="bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold border-none flex items-center gap-2 min-h-[44px]"
             >
               <Download className="w-4 h-4" />
-              <span>Export JSON</span>
+              <span>Export Summary</span>
             </Button>
           </div>
         </div>
@@ -178,7 +264,7 @@ export const DeveloperDashboardPage: React.FC = () => {
         {/* Database Latency */}
         <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Database Status</span>
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">System Connection</span>
             <div className="p-2 bg-emerald-50 text-emerald-700 rounded-lg">
               <Database className="w-4 h-4" />
             </div>
@@ -188,17 +274,17 @@ export const DeveloperDashboardPage: React.FC = () => {
               {metrics?.system.dbLatencyMs !== undefined ? `${metrics.system.dbLatencyMs}ms` : 'Checking...'}
             </span>
             <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Supabase Connected
+              <CheckCircle2 className="w-3.5 h-3.5" /> Connected & Active
             </span>
           </div>
           <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
-            <span>Ping latency test</span>
+            <span>Response speed</span>
             <button
               type="button"
               onClick={handlePing}
               className="font-bold text-navy hover:underline cursor-pointer"
             >
-              Run Ping
+              Test Speed
             </button>
           </div>
         </div>
@@ -223,7 +309,7 @@ export const DeveloperDashboardPage: React.FC = () => {
         {/* Memory Allocation */}
         <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Heap Memory</span>
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Memory Usage</span>
             <div className="p-2 bg-amber-50 text-amber-700 rounded-lg">
               <Cpu className="w-4 h-4" />
             </div>
@@ -237,7 +323,7 @@ export const DeveloperDashboardPage: React.FC = () => {
             </span>
           </div>
           <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
-            <span>RSS Footprint</span>
+            <span>Total Memory</span>
             <span className="font-mono font-medium text-slate-800">{metrics?.system.memory.rssMb ? `${metrics.system.memory.rssMb} MB` : 'N/A'}</span>
           </div>
         </div>
@@ -260,15 +346,15 @@ export const DeveloperDashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Database Entity Counter Matrix */}
+      {/* System Records Overview */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-2xs space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-bold text-slate-900 font-heading">
-              Database Tables & Entity Matrix
+              System Records Overview
             </h2>
             <p className="text-xs text-slate-500">
-              Live record counts across core relational database tables in Supabase. Click any entity to inspect rows.
+              Live count of records saved across the community system. Click any category to view recent entries.
             </p>
           </div>
           {isLoading && <Spinner size="sm" />}
@@ -304,17 +390,17 @@ export const DeveloperDashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Dual Section: Recent Database Streams & Developer Utility Workbench */}
+      {/* Dual Section: Recent Activity & Management Tools */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Recent Activity Audit Feed (7 cols) */}
+        {/* Recent Activity Feed (7 cols) */}
         <div className="lg:col-span-7 bg-white border border-slate-200/90 rounded-2xl p-6 shadow-2xs space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold text-slate-900 font-heading">
-                Recent Database Audit Stream
+                Recent System Activity
               </h2>
               <p className="text-xs text-slate-500">
-                Latest transactions written to Supabase tables.
+                Latest updates and entries recorded across the community.
               </p>
             </div>
 
@@ -418,14 +504,14 @@ export const DeveloperDashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Developer Utilities Workbench (5 cols) */}
+        {/* System Management Tools (5 cols) */}
         <div className="lg:col-span-5 bg-white border border-slate-200/90 rounded-2xl p-6 shadow-2xs space-y-5">
           <div>
             <h2 className="text-lg font-bold text-slate-900 font-heading">
-              Developer Controls & Tools
+              System Management Tools
             </h2>
             <p className="text-xs text-slate-500">
-              Administrative functions, testing triggers, and cache purges.
+              Administrative actions, speed tests, and diagnostic utilities.
             </p>
           </div>
 
@@ -433,8 +519,8 @@ export const DeveloperDashboardPage: React.FC = () => {
             {/* Ping Test */}
             <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200/80 flex items-center justify-between gap-3">
               <div>
-                <div className="text-xs font-bold text-slate-900">Database Ping Test</div>
-                <div className="text-[11px] text-slate-500">Measure round-trip latency to database</div>
+                <div className="text-xs font-bold text-slate-900">Connection Speed Test</div>
+                <div className="text-[11px] text-slate-500">Measure server response time</div>
               </div>
               <Button
                 variant="secondary"
@@ -443,15 +529,15 @@ export const DeveloperDashboardPage: React.FC = () => {
                 isLoading={pingMutation.isPending}
                 className="shrink-0 min-h-[36px]"
               >
-                Run Ping
+                Run Test
               </Button>
             </div>
 
             {/* Clear Query Cache */}
             <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200/80 flex items-center justify-between gap-3">
               <div>
-                <div className="text-xs font-bold text-slate-900">Client Cache Purge</div>
-                <div className="text-[11px] text-slate-500">Flush browser React Query memory</div>
+                <div className="text-xs font-bold text-slate-900">Clear Saved App Cache</div>
+                <div className="text-[11px] text-slate-500">Reset locally saved temporary data</div>
               </div>
               <Button
                 variant="secondary"
@@ -460,21 +546,21 @@ export const DeveloperDashboardPage: React.FC = () => {
                 className="shrink-0 min-h-[36px] text-rose-700 hover:bg-rose-50 border-rose-200"
               >
                 <Trash2 className="w-3.5 h-3.5 mr-1" />
-                Purge
+                Clear Cache
               </Button>
             </div>
 
             {/* Toast System Diagnostic */}
             <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200/80 space-y-2">
               <div>
-                <div className="text-xs font-bold text-slate-900">Toast Dispatcher Test</div>
-                <div className="text-[11px] text-slate-500">Dispatch simulated UI notification toasts</div>
+                <div className="text-xs font-bold text-slate-900">Notification Preview Test</div>
+                <div className="text-[11px] text-slate-500">Test in-app alert and notice banners</div>
               </div>
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => toast.success('Operation completed successfully.', 'Success Toast')}
+                  onClick={() => toast.success('Operation completed successfully.', 'Success Alert')}
                   className="text-emerald-700 text-xs min-h-[36px]"
                 >
                   Success
@@ -482,7 +568,7 @@ export const DeveloperDashboardPage: React.FC = () => {
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => toast.showToast({ type: 'warning', title: 'Warning Toast', message: 'Session check requires attention.' })}
+                  onClick={() => toast.showToast({ type: 'warning', title: 'Warning Alert', message: 'Session check requires attention.' })}
                   className="text-amber-700 text-xs min-h-[36px]"
                 >
                   Warning
@@ -490,7 +576,7 @@ export const DeveloperDashboardPage: React.FC = () => {
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => toast.error('Sample synthetic error occurred.', 'Error Toast')}
+                  onClick={() => toast.error('Sample synthetic error occurred.', 'Error Alert')}
                   className="text-rose-700 text-xs min-h-[36px]"
                 >
                   Error
@@ -498,7 +584,7 @@ export const DeveloperDashboardPage: React.FC = () => {
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => toast.showToast({ type: 'info', title: 'Info Toast', message: 'New system event captured.' })}
+                  onClick={() => toast.showToast({ type: 'info', title: 'Notice Alert', message: 'New system event captured.' })}
                   className="text-sky-700 text-xs min-h-[36px]"
                 >
                   Info
@@ -510,8 +596,8 @@ export const DeveloperDashboardPage: React.FC = () => {
             {areas.length > 0 && (
               <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200/80 space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="text-xs font-bold text-slate-900">Area Simulation Scope</div>
-                  <span className="text-[10px] text-slate-500">Multi-tenant switch</span>
+                  <div className="text-xs font-bold text-slate-900">Simulate Area View</div>
+                  <span className="text-[10px] text-slate-500">Switch view</span>
                 </div>
                 <select
                   value={activeArea?.id || user?.area_id || ''}
@@ -520,7 +606,7 @@ export const DeveloperDashboardPage: React.FC = () => {
                     if (found) {
                       setActiveArea(found);
                       queryClient.clear();
-                      toast.success(`Active area context set to ${found.name}`, 'Context Switched');
+                      toast.success(`Active area set to ${found.name}`, 'View Updated');
                     }
                   }}
                   className="w-full text-xs p-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy/20 min-h-[38px]"
@@ -585,7 +671,7 @@ export const DeveloperDashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Database Table Rows Inspection Modal */}
+      {/* Table Rows Inspection Modal */}
       <Modal
         isOpen={isInspectModalOpen}
         onClose={() => {
@@ -593,19 +679,19 @@ export const DeveloperDashboardPage: React.FC = () => {
           setInspectedTable(null);
           setTableData([]);
         }}
-        title={`Table Inspector: public.${inspectedTable}`}
-        description={`Displaying top 10 rows from ${inspectedTable} sorted by creation date.`}
+        title={FRIENDLY_TABLE_INFO[inspectedTable || '']?.previewTitle || 'Record Preview'}
+        description={FRIENDLY_TABLE_INFO[inspectedTable || '']?.previewDesc || 'Showing recent entries sorted by newest first.'}
         maxWidth="xl"
       >
         <div className="space-y-4">
           {inspectTable.isPending ? (
             <div className="p-12 text-center flex flex-col items-center justify-center gap-2">
               <Spinner size="lg" />
-              <span className="text-xs text-slate-500">Fetching records from Supabase...</span>
+              <span className="text-xs text-slate-500">Loading records...</span>
             </div>
           ) : tableData.length === 0 ? (
             <div className="p-8 text-center text-xs text-slate-500 bg-slate-50 rounded-xl border border-slate-200">
-              No rows present in table "{inspectedTable}".
+              No records found in this category.
             </div>
           ) : (
             <div className="overflow-x-auto max-h-[50vh] rounded-xl border border-slate-200">
@@ -614,20 +700,17 @@ export const DeveloperDashboardPage: React.FC = () => {
                   <tr>
                     {Object.keys(tableData[0]).map((col) => (
                       <th key={col} className="p-2.5 px-3 border-r border-slate-200/80 whitespace-nowrap">
-                        {col}
+                        {formatColumnHeader(col)}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
+                <tbody className="divide-y divide-slate-100 font-sans text-[11px]">
                   {tableData.map((row, idx) => (
                     <tr key={idx} className="hover:bg-slate-50/80">
                       {Object.keys(tableData[0]).map((col) => {
                         const val = row[col];
-                        let renderedVal = '';
-                        if (val === null || val === undefined) renderedVal = 'null';
-                        else if (typeof val === 'object') renderedVal = JSON.stringify(val);
-                        else renderedVal = String(val);
+                        const renderedVal = formatCellValue(val);
 
                         return (
                           <td
@@ -647,8 +730,8 @@ export const DeveloperDashboardPage: React.FC = () => {
           )}
 
           <div className="flex items-center justify-between pt-3 border-t border-slate-200">
-            <span className="text-xs text-slate-500 font-mono">
-              Records shown: {tableData.length}
+            <span className="text-xs text-slate-500">
+              Showing top {tableData.length} newest entries (View only)
             </span>
             <Button
               variant="secondary"
@@ -656,7 +739,7 @@ export const DeveloperDashboardPage: React.FC = () => {
               onClick={() => setIsInspectModalOpen(false)}
               className="min-h-[36px]"
             >
-              Close Inspector
+              Close Preview
             </Button>
           </div>
         </div>
