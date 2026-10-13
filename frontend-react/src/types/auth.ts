@@ -20,6 +20,7 @@ export interface UserProfile {
   id: string;
   email: string;
   role: UserRole;
+  home_role?: UserRole;
   area_id: string;
   area_name?: string;
   chapter_id?: string | null;

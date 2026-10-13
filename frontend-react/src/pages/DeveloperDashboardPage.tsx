@@ -30,6 +30,8 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
+import type { UserRole } from '@/types/auth';
+
 function formatUptime(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
   const minutes = Math.floor(seconds / 60);
@@ -43,7 +45,7 @@ function formatUptime(seconds: number): string {
 }
 
 export const DeveloperDashboardPage: React.FC = () => {
-  const { user, activeArea, setActiveArea } = useAuthStore();
+  const { user, activeArea, setActiveArea, setSimulatedRole } = useAuthStore();
   const toast = useToast();
   const queryClient = useQueryClient();
 
@@ -517,6 +519,7 @@ export const DeveloperDashboardPage: React.FC = () => {
                     const found = areas.find((a) => a.id === e.target.value);
                     if (found) {
                       setActiveArea(found);
+                      queryClient.clear();
                       toast.success(`Active area context set to ${found.name}`, 'Context Switched');
                     }
                   }}
@@ -524,10 +527,58 @@ export const DeveloperDashboardPage: React.FC = () => {
                 >
                   {areas.map((a) => (
                     <option key={a.id} value={a.id}>
-                      {a.name} ({a.id.slice(0, 8)}...)
+                      {a.name} {a.id === user?.area_id ? '(Home Area)' : ''}
                     </option>
                   ))}
                 </select>
+
+                {/* Role Simulation within simulated area */}
+                {activeArea && user?.area_id && activeArea.id !== user.area_id && (
+                  <div className="pt-2 border-t border-slate-200/80 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-semibold text-slate-700">Role in Simulated Area</span>
+                      <span className="text-[10px] text-amber-700 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                        Isolated (No Leaks)
+                      </span>
+                    </div>
+                    <select
+                      value={user?.role || 'member'}
+                      onChange={(e) => {
+                        const newRole = e.target.value as UserRole;
+                        setSimulatedRole(newRole);
+                        toast.showToast({
+                          type: 'info',
+                          title: `Simulated role set to ${newRole.replace(/_/g, ' ')}`,
+                          message: 'Role Simulation Scope Updated'
+                        });
+                      }}
+                      className="w-full text-xs p-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy/20 min-h-[38px]"
+                    >
+                      <option value="member">Member (Default non-servant)</option>
+                      <option value="chapter_servant">Chapter Servant</option>
+                      <option value="area_servant">Area Servant</option>
+                      <option value="youth_head">Youth Head</option>
+                      <option value="national_coordinator">National Coordinator</option>
+                    </select>
+                    <p className="text-[10px] text-slate-500 leading-normal">
+                      Your authentic role ({user?.home_role ? user.home_role.replace(/_/g, ' ') : 'Lit Servant'}) is protected and does not stick to other Area Databases.
+                    </p>
+
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="w-full text-xs mt-1"
+                      onClick={() => {
+                        const home = areas.find((a) => a.id === user?.area_id);
+                        setActiveArea(home || null);
+                        queryClient.clear();
+                        toast.success('Restored to your home Area Database and authentic role', 'Simulation Reset');
+                      }}
+                    >
+                      Reset to Home Area
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>

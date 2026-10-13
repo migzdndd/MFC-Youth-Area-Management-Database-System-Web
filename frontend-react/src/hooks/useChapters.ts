@@ -4,9 +4,10 @@ import { useAuthStore } from '@/stores/auth-store';
 import type { Chapter } from '@/types/chapter';
 
 export function useChapters() {
-  const { token, user } = useAuthStore();
+  const { token, user, activeArea } = useAuthStore();
+  const currentAreaId = activeArea?.id || user?.area_id || '';
   return useQuery({
-    queryKey: ['chapters'],
+    queryKey: ['chapters', currentAreaId],
     queryFn: async () => {
       const res = await apiClient<{ ok: boolean; data?: Chapter[]; chapters?: Chapter[] }>('/chapters');
       return res.data || res.chapters || [];

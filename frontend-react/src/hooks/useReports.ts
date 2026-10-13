@@ -4,9 +4,10 @@ import { useAuthStore } from '@/stores/auth-store';
 import type { ActivityReport } from '@/types/report';
 
 export function useReports() {
-  const { token, user } = useAuthStore();
+  const { token, user, activeArea } = useAuthStore();
+  const currentAreaId = activeArea?.id || user?.area_id || '';
   return useQuery({
-    queryKey: ['reports'],
+    queryKey: ['reports', currentAreaId],
     queryFn: async () => {
       const res = await apiClient<{ ok: boolean; data?: ActivityReport[]; reports?: ActivityReport[] }>('/reports');
       return res.data || res.reports || [];

@@ -169,6 +169,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               </span>
               <span className="text-[10px] text-amber-300 uppercase tracking-wider font-bold bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/20">
                 {user?.role ? user.role.replace(/_/g, ' ') : 'Servant'}
+                {activeArea && user?.area_id && activeArea.id !== user.area_id ? ' (SIM)' : ''}
               </span>
             </div>
             {effectiveAreaName && (

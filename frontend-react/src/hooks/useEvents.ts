@@ -4,9 +4,10 @@ import { useAuthStore } from '@/stores/auth-store';
 import type { CommunityEvent, Participant } from '@/types/event';
 
 export function useEvents() {
-  const { token, user } = useAuthStore();
+  const { token, user, activeArea } = useAuthStore();
+  const currentAreaId = activeArea?.id || user?.area_id || '';
   return useQuery({
-    queryKey: ['events'],
+    queryKey: ['events', currentAreaId],
     queryFn: async () => {
       const res = await apiClient<{ ok: boolean; data?: CommunityEvent[]; events?: CommunityEvent[] }>('/events');
       return res.data || res.events || [];

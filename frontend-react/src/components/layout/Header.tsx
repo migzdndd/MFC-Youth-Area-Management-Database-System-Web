@@ -1,5 +1,6 @@
 import React from 'react';
 import { Menu, MapPin } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth-store';
 import { useAreas } from '@/hooks/useDashboard';
 import type { Area } from '@/types/auth';
@@ -11,9 +12,11 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const { user, activeArea, setActiveArea } = useAuthStore();
   const { data: areas = [] } = useAreas();
+  const queryClient = useQueryClient();
 
   const matchedArea = areas.find((a: Area) => a.id === (activeArea?.id || user?.area_id));
   const currentAreaName = activeArea?.name || user?.area_name || matchedArea?.name || (areas.length > 0 ? areas[0].name : 'MFC Youth Area Database');
+  const canSwitchArea = (user?.role === 'national_coordinator' || user?.is_developer) && areas.length > 0;
 
   return (
     <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-xs border-b border-border-subtle h-16 flex items-center justify-between px-4 sm:px-6 shadow-2xs">
@@ -29,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
         </button>
 
         <div className="flex items-center gap-2">
-          {user?.role === 'national_coordinator' && areas.length > 0 ? (
+          {canSwitchArea ? (
             <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-200/90 rounded-lg text-xs font-semibold text-slate-800 shadow-2xs">
               <MapPin className="w-3.5 h-3.5 text-navy shrink-0" aria-hidden="true" />
               <label htmlFor="headerAreaSelect" className="sr-only">Switch active area</label>
@@ -39,12 +42,13 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                 onChange={(e) => {
                   const selected = areas.find((a: Area) => a.id === e.target.value);
                   setActiveArea(selected || null);
+                  queryClient.clear();
                 }}
                 className="bg-transparent text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer max-w-[140px] sm:max-w-[220px] truncate"
               >
                 {areas.map((a: Area) => (
                   <option key={a.id} value={a.id}>
-                    {a.name}
+                    {a.name} {a.id === user?.area_id ? '(Home)' : ''}
                   </option>
                 ))}
               </select>
@@ -59,6 +63,11 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           {user?.role === 'national_coordinator' && (
             <span className="hidden md:inline-block text-[11px] font-semibold text-amber-900 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/90">
               National Context
+            </span>
+          )}
+          {user?.is_developer && activeArea && user?.area_id && activeArea.id !== user.area_id && (
+            <span className="hidden md:inline-block text-[11px] font-semibold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-300">
+              Area Simulation
             </span>
           )}
         </div>

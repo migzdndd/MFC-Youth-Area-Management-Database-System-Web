@@ -54,7 +54,7 @@ export function requireArea(req, profile) {
     req.headers['X-MFC-Area-ID'] ||
     req.headers['X-Area-ID'];
 
-  if (profile?.role === 'national_coordinator') {
+  if (profile?.role === 'national_coordinator' || profile?.is_developer === true) {
     if (headerArea) return headerArea;
   } else if (headerArea && String(headerArea) === String(profile?.area_id)) {
     return headerArea;

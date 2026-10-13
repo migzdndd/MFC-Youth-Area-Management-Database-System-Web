@@ -4,9 +4,10 @@ import { useAuthStore } from '@/stores/auth-store';
 import type { Member, MemberFilter } from '@/types/member';
 
 export function useMembers(filters?: MemberFilter) {
-  const { token, user } = useAuthStore();
+  const { token, user, activeArea } = useAuthStore();
+  const currentAreaId = activeArea?.id || user?.area_id || '';
   return useQuery({
-    queryKey: ['members', filters],
+    queryKey: ['members', currentAreaId, filters],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (filters?.search) params.set('search', filters.search);
