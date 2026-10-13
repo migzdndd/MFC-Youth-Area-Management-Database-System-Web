@@ -336,7 +336,7 @@ export const ReportsPage: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Select
-              label="Host Chapter"
+              label="Chapter"
               value={chapterId}
               onChange={(e) => setChapterId(e.target.value)}
               options={[

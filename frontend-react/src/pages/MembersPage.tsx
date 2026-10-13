@@ -570,7 +570,7 @@ export const MembersPage: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Select
-              label="Assigned Chapter"
+              label="Chapter"
               name="chapterId"
               value={chapterId}
               onChange={(e) => setChapterId(e.target.value)}

@@ -72,7 +72,7 @@ export const ChaptersPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
-              Chapters & Households
+              Chapters
             </h1>
             <Badge variant="navy">
               {chapters.length} {chapters.length === 1 ? 'Chapter' : 'Chapters'}

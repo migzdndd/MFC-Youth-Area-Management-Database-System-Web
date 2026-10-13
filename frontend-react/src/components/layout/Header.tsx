@@ -13,7 +13,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const { data: areas = [] } = useAreas();
 
   const matchedArea = areas.find((a: Area) => a.id === (activeArea?.id || user?.area_id));
-  const currentAreaName = activeArea?.name || user?.area_name || matchedArea?.name || 'MFC Youth Area Database';
+  const currentAreaName = activeArea?.name || user?.area_name || matchedArea?.name || (areas.length > 0 ? areas[0].name : 'MFC Youth Area Database');
 
   return (
     <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-xs border-b border-border-subtle h-16 flex items-center justify-between px-4 sm:px-6 shadow-2xs">

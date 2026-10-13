@@ -13,7 +13,8 @@ import {
   MapPin,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
-import { ROLE_ALLOWED_PAGES } from '@/types/auth';
+import { useAreas } from '@/hooks/useDashboard';
+import { ROLE_ALLOWED_PAGES, type Area } from '@/types/auth';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -21,8 +22,12 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const { user, logout } = useAuthStore();
+  const { user, activeArea, logout } = useAuthStore();
+  const { data: areas = [] } = useAreas();
   const navigate = useNavigate();
+
+  const matchedArea = areas.find((a: Area) => a.id === (activeArea?.id || user?.area_id));
+  const effectiveAreaName = activeArea?.name || user?.area_name || matchedArea?.name || (areas.length > 0 ? areas[0].name : 'MFC Youth Area Database');
 
   React.useEffect(() => {
     if (!isOpen) return;
@@ -137,10 +142,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 {user?.role ? user.role.replace(/_/g, ' ') : 'Servant'}
               </span>
             </div>
-            {user?.area_name && (
+            {effectiveAreaName && (
               <div className="flex items-center gap-1.5 text-[11px] text-slate-400 pt-0.5 truncate">
                 <MapPin className="w-3 h-3 text-amber-300/80 shrink-0" />
-                <span className="truncate">{user.area_name}</span>
+                <span className="truncate">{effectiveAreaName}</span>
               </div>
             )}
           </div>

@@ -27,7 +27,7 @@ export const DashboardPage: React.FC = () => {
 
   const isNationalCoordinator = user?.role === 'national_coordinator';
   const matchedArea = areas?.find((a: Area) => a.id === (activeArea?.id || user?.area_id));
-  const effectiveAreaName = activeArea?.name || user?.area_name || matchedArea?.name || 'Assigned Area';
+  const effectiveAreaName = activeArea?.name || user?.area_name || matchedArea?.name || (areas && areas.length > 0 ? areas[0].name : 'MFC Youth Area Database');
 
   const memberSubtitle = (() => {
     switch (user?.role) {
@@ -40,7 +40,7 @@ export const DashboardPage: React.FC = () => {
       case 'lit_servant':
         return 'Creative Ministries roster';
       case 'chapter_servant':
-        return 'Assigned chapter roster';
+        return 'Chapter roster';
       default:
         return 'Area-wide youth roster';
     }
@@ -148,7 +148,7 @@ export const DashboardPage: React.FC = () => {
                 {metricsLoading ? <Spinner size="sm" /> : (metrics?.totalChapters ?? 0)}
               </div>
               <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
-                <p className="text-xs text-slate-500">Area subdivisions</p>
+                <p className="text-xs text-slate-500 font-medium">View Registered Chapters</p>
                 <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-navy group-hover:translate-x-0.5 transition-all" />
               </div>
             </div>
@@ -210,7 +210,7 @@ export const DashboardPage: React.FC = () => {
 
           <div className="flex items-center justify-between pt-3 border-t border-slate-100">
             <span className="text-xs font-semibold text-sky-800 group-hover:underline">
-              Open Events Calendar & Attendance
+              View Area-Wide Events
             </span>
             <ArrowRight className="w-4 h-4 text-sky-800 group-hover:translate-x-1 transition-transform" />
           </div>
