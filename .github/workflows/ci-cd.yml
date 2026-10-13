@@ -138,7 +138,7 @@ jobs:
           image-ref: mfc-youth-app:${{ github.sha }}
           format: 'sarif'
           output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
+          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
           ignore-unfixed: true
 
       - name: Upload Vulnerability Scan Results
