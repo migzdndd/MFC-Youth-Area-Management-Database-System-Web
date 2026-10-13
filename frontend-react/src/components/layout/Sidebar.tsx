@@ -7,6 +7,7 @@ import {
   Briefcase,
   FileText,
   Calendar,
+  CreditCard,
   BookOpen,
   LogOut,
   X,
@@ -53,6 +54,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { name: 'Services', path: '/services', pageKey: 'services', icon: Briefcase },
     { name: 'Activity Reports', path: '/reports', pageKey: 'reports', icon: FileText },
     { name: 'Events', path: '/events', pageKey: 'events', icon: Calendar },
+    { name: 'GIG Contributions', path: '/gig', pageKey: 'gig', icon: CreditCard },
     { name: 'Daily Readings', path: '/readings', pageKey: 'readings', icon: BookOpen },
   ];
 

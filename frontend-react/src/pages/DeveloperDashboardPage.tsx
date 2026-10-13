@@ -54,6 +54,7 @@ export const DeveloperDashboardPage: React.FC = () => {
   const inspectTable = useInspectTable();
   const pingMutation = useDevPing();
 
+  const [testedLatency, setTestedLatency] = useState<number | null>(null);
   const [inspectedTable, setInspectedTable] = useState<string | null>(null);
   const [tableData, setTableData] = useState<Record<string, unknown>[]>([]);
   const [isInspectModalOpen, setIsInspectModalOpen] = useState(false);
@@ -80,6 +81,7 @@ export const DeveloperDashboardPage: React.FC = () => {
   const handlePing = async () => {
     try {
       const res = await pingMutation.mutateAsync();
+      setTestedLatency(res.latencyMs);
       toast.success(`Server response time: ${res.latencyMs}ms`, 'Connection Speed');
     } catch {
       toast.error('Could not reach the server.', 'Connection Failed');
@@ -271,7 +273,11 @@ export const DeveloperDashboardPage: React.FC = () => {
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-extrabold text-slate-900">
-              {metrics?.system.dbLatencyMs !== undefined ? `${metrics.system.dbLatencyMs}ms` : 'Checking...'}
+              {testedLatency !== null
+                ? `${testedLatency}ms`
+                : metrics?.system.dbLatencyMs !== undefined
+                ? `${metrics.system.dbLatencyMs}ms`
+                : 'Checking...'}
             </span>
             <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5" /> Connected & Active
@@ -281,10 +287,11 @@ export const DeveloperDashboardPage: React.FC = () => {
             <span>Response speed</span>
             <button
               type="button"
+              disabled={pingMutation.isPending}
               onClick={handlePing}
-              className="font-bold text-navy hover:underline cursor-pointer"
+              className="font-bold text-navy hover:underline cursor-pointer disabled:opacity-50"
             >
-              Test Speed
+              {pingMutation.isPending ? 'Testing...' : 'Test Speed'}
             </button>
           </div>
         </div>

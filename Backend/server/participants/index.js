@@ -11,12 +11,12 @@ import { requireAuthenticatedProfile, isChapterServantRole, isLeaderRole } from 
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { cleanText, requireArea, loadAreaRow } from '../_lib/cloud-data.js';
 
-async function eventInArea(supabase, eventId, areaId) {
-  return loadAreaRow(supabase, 'events', eventId, areaId, 'id');
+async function eventInArea(client, eventId, areaId) {
+  return loadAreaRow(client, 'events', eventId, areaId, 'id');
 }
 
-async function memberInArea(supabase, memberId, areaId) {
-  return loadAreaRow(supabase, 'members', memberId, areaId, 'id');
+async function memberInArea(client, memberId, areaId) {
+  return loadAreaRow(client, 'members', memberId, areaId, 'id');
 }
 
 function normalizePaymentStatus(status) {
@@ -87,7 +87,7 @@ async function createParticipant(req, res) {
   const modeOfPayment = cleanText(req.body?.paymentMode ?? req.body?.mode_of_payment, 80) || null;
 
   if (memberId) {
-    if (!(await memberInArea(supabase, memberId, areaId))) {
+    if (!(await memberInArea(admin, memberId, areaId))) {
       return sendJson(res, 400, { ok: false, error: 'Member does not belong to your Area.' });
     }
     const { data: duplicate, error: duplicateError } = await admin

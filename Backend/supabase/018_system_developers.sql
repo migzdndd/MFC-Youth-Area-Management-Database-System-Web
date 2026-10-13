@@ -1,4 +1,4 @@
--- 017_system_developers.sql
+-- 018_system_developers.sql
 -- Migration: Add is_developer flag and system_developers table in Supabase
 
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_developer boolean NOT NULL DEFAULT false;
@@ -12,5 +12,6 @@ CREATE TABLE IF NOT EXISTS public.system_developers (
 -- RLS policy: Only service role / admin can manage system developers
 ALTER TABLE public.system_developers ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS system_developers_read_authenticated ON public.system_developers;
 CREATE POLICY system_developers_read_authenticated ON public.system_developers
   FOR SELECT TO authenticated USING (auth.uid() = user_id);

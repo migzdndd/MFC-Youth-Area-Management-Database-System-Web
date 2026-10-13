@@ -56,9 +56,9 @@ export const ROLE_ALLOWED_PAGES: Record<UserRole, string[]> = {
   area_servant: ['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings'],
   couple_coordinator: ['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings'],
   lit_servant: ['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings'],
-  campus_servant: ['dashboard', 'members', 'services', 'reports', 'events', 'readings'],
-  mfc_high_servant: ['dashboard', 'members', 'services', 'reports', 'events', 'readings'],
-  area_kids_servant: ['dashboard', 'members', 'reports', 'events', 'readings'],
-  chapter_servant: ['dashboard', 'chapters', 'reports', 'events', 'readings'],
+  campus_servant: ['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings'],
+  mfc_high_servant: ['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings'],
+  area_kids_servant: ['dashboard', 'members', 'chapters', 'reports', 'events', 'gig', 'readings'],
+  chapter_servant: ['dashboard', 'members', 'chapters', 'reports', 'events', 'gig', 'readings'],
   member: ['member'],
 };

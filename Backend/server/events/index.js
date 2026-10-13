@@ -27,13 +27,21 @@ function eventPayload(input, areaId, userId) {
     error.statusCode = 400;
     throw error;
   }
+  const rawEndDate = input.ends_at ?? input.endsAt ?? null;
+  let endsAt = null;
+  if (rawEndDate) {
+    const d = localDatePattern.test(String(rawEndDate).trim())
+      ? new Date(`${rawEndDate}:00+08:00`)
+      : new Date(rawEndDate);
+    if (!Number.isNaN(d.getTime())) endsAt = d.toISOString();
+  }
   return {
     area_id: areaId,
     name,
     description: nullableText(input.description, 3000),
     venue: nullableText(input.venue, 255),
     starts_at: date.toISOString(),
-    ends_at: null,
+    ends_at: endsAt,
     fee: asNonNegativeNumber(input.fee, 0),
     manual_attendance: asNonNegativeInteger(input.peopleAttended ?? input.manual_attendance ?? input.manualAttendance, 0),
     ...(userId ? { created_by: userId } : {})
@@ -85,7 +93,7 @@ async function listEvents(req, res) {
 }
 
 async function createEvent(req, res) {
-  const { supabase, profile, user } = await requireAuthenticatedProfile(req);
+  const { admin, profile, user } = await requireAuthenticatedProfile(req);
   if (!isLeaderRole(profile?.role)) {
     return sendJson(res, 403, { ok: false, error: 'Only core leadership servants can add community events.' });
   }
@@ -94,13 +102,13 @@ async function createEvent(req, res) {
     return sendJson(res, 403, { ok: false, error: 'You can only create events for your own assigned Area Database.' });
   }
   const payload = eventPayload(req.body || {}, areaId, user.id);
-  const { data, error } = await supabase.from('events').insert(payload).select('*').single();
+  const { data, error } = await admin.from('events').insert(payload).select('*').single();
   if (error) throw error;
-  return sendJson(res, 201, { ok: true, event: data });
+  return sendJson(res, 201, { ok: true, event: data, data });
 }
 
 async function updateEvent(req, res) {
-  const { supabase, profile, user } = await requireAuthenticatedProfile(req);
+  const { admin, profile, user } = await requireAuthenticatedProfile(req);
   if (!isLeaderRole(profile?.role)) {
     return sendJson(res, 403, { ok: false, error: 'Only core leadership servants can edit community events.' });
   }
@@ -108,9 +116,9 @@ async function updateEvent(req, res) {
   if (profile?.role !== 'national_coordinator' && String(profile?.area_id) !== String(areaId)) {
     return sendJson(res, 403, { ok: false, error: 'You can only edit events for your own assigned Area Database.' });
   }
-  const id = req.body?.id;
+  const id = req.body?.id || req.query?.id;
   if (!id) return sendJson(res, 400, { ok: false, error: 'Event ID is required.' });
-  const existing = await loadAreaRow(supabase, 'events', id, areaId, 'id, created_by');
+  const existing = await loadAreaRow(admin, 'events', id, areaId, 'id, created_by');
   if (!existing) return sendJson(res, 404, { ok: false, error: 'Event not found in your Area.' });
 
   // Event creator or Area Leadership (Area Servants & Coordinators) can edit this event
@@ -121,13 +129,13 @@ async function updateEvent(req, res) {
 
   const payload = eventPayload(req.body || {}, areaId, null);
   delete payload.created_by;
-  const { data, error } = await supabase.from('events').update(payload).eq('id', id).eq('area_id', areaId).select('*').single();
+  const { data, error } = await admin.from('events').update(payload).eq('id', id).eq('area_id', areaId).select('*').single();
   if (error) throw error;
-  return sendJson(res, 200, { ok: true, event: data });
+  return sendJson(res, 200, { ok: true, event: data, data });
 }
 
 async function deleteEvent(req, res) {
-  const { supabase, profile, user } = await requireAuthenticatedProfile(req);
+  const { admin, profile, user } = await requireAuthenticatedProfile(req);
   if (!isLeaderRole(profile?.role)) {
     return sendJson(res, 403, { ok: false, error: 'Only core leadership servants can delete community events.' });
   }
@@ -137,7 +145,7 @@ async function deleteEvent(req, res) {
   }
   const id = req.query?.id || req.body?.id;
   if (!id) return sendJson(res, 400, { ok: false, error: 'Event ID is required.' });
-  const existing = await loadAreaRow(supabase, 'events', id, areaId, 'id, created_by');
+  const existing = await loadAreaRow(admin, 'events', id, areaId, 'id, created_by');
   if (!existing) return sendJson(res, 404, { ok: false, error: 'Event not found in your Area.' });
 
   // Event creator or Area Leadership (Area Servants & Coordinators) can delete this event
@@ -146,7 +154,7 @@ async function deleteEvent(req, res) {
     return sendJson(res, 403, { ok: false, error: 'Only the event creator or Area Leadership can delete this event.' });
   }
 
-  const { error } = await supabase.from('events').delete().eq('id', id).eq('area_id', areaId);
+  const { error } = await admin.from('events').delete().eq('id', id).eq('area_id', areaId);
   if (error) throw error;
   return sendJson(res, 200, { ok: true, deleted: true, id });
 }
