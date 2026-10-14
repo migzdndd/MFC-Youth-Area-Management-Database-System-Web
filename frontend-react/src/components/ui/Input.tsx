@@ -23,6 +23,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       if (type === 'password') return 'current-password';
       if (type === 'tel' || field.includes('contact') || field.includes('phone') || field.includes('mobile')) return 'tel';
       if (field.includes('firstname') || field.includes('first_name')) return 'given-name';
+      if (field.includes('middlename') || field.includes('middle_name')) return 'additional-name';
       if (field.includes('lastname') || field.includes('last_name')) return 'family-name';
       if (field.includes('nickname')) return 'nickname';
       if (field.includes('search') || type === 'search') return 'off';

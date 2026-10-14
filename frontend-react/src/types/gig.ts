@@ -10,6 +10,7 @@ export interface GigContribution {
   created_at?: string;
   member?: {
     first_name: string;
+    middle_name?: string | null;
     last_name: string;
     chapter_name?: string | null;
   };

@@ -75,7 +75,7 @@ export const ServicesPage: React.FC = () => {
   const filteredModalMembers = selectedServiceMembers.filter((m) => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
-    const fullName = `${m.first_name} ${m.last_name}`.toLowerCase();
+    const fullName = [m.first_name, m.middle_name, m.last_name].filter(Boolean).join(' ').toLowerCase();
     const nickname = (m.nickname || '').toLowerCase();
     const email = (m.email || '').toLowerCase();
     return fullName.includes(q) || nickname.includes(q) || email.includes(q);
@@ -186,7 +186,7 @@ export const ServicesPage: React.FC = () => {
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-semibold text-slate-900 truncate">
-                        {member.first_name} {member.last_name}
+                        {[member.first_name, member.middle_name, member.last_name].filter(Boolean).join(' ')}
                       </p>
                       {member.nickname && (
                         <span className="text-xs text-slate-500">"{member.nickname}"</span>

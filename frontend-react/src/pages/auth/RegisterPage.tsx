@@ -58,6 +58,7 @@ export const RegisterPage: React.FC = () => {
   );
 
   const [firstName, setFirstName] = useState('');
+  const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState(stateData?.email || '');
   const [password, setPassword] = useState('');
@@ -127,10 +128,14 @@ export const RegisterPage: React.FC = () => {
     setRegistrationStage('registering');
 
     try {
+      const cleanFirst = firstName.trim();
+      const cleanMiddle = middleName.trim();
+      const cleanLast = lastName.trim();
       const payload: Record<string, unknown> = {
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-        displayName: `${firstName.trim()} ${lastName.trim()}`.trim(),
+        first_name: cleanFirst,
+        middle_name: cleanMiddle || null,
+        last_name: cleanLast,
+        displayName: [cleanFirst, cleanMiddle, cleanLast].filter(Boolean).join(' '),
         email: email.trim(),
         password,
         confirmPassword: password,
@@ -429,13 +434,20 @@ export const RegisterPage: React.FC = () => {
         {/* STEP 1: Registration Form */}
         {viewStep === 'form' && (
           <form onSubmit={handleSubmitDetails} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <Input
                 label="First Name"
                 required
                 placeholder="First name"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
+                disabled={isProcessing}
+              />
+              <Input
+                label="Middle Name"
+                placeholder="Optional"
+                value={middleName}
+                onChange={(e) => setMiddleName(e.target.value)}
                 disabled={isProcessing}
               />
               <Input

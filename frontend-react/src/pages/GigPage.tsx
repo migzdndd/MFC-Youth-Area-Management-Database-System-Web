@@ -167,7 +167,7 @@ export const GigPage: React.FC = () => {
                           {formatDate(r.contribution_date)}
                         </td>
                         <td className="px-5 py-4 font-semibold text-slate-900">
-                          {member ? `${member.first_name} ${member.last_name}` : 'Youth Member'}
+                          {member ? [member.first_name, member.middle_name, member.last_name].filter(Boolean).join(' ') : 'Youth Member'}
                         </td>
                         <td className="px-5 py-4 text-xs text-slate-600">{r.notes || '-'}</td>
                         <td className="px-5 py-4 text-right font-bold text-emerald-700 whitespace-nowrap">
@@ -194,7 +194,7 @@ export const GigPage: React.FC = () => {
                           {formatDate(r.contribution_date)}
                         </div>
                         <h4 className="font-bold text-slate-900 text-sm mt-0.5">
-                          {member ? `${member.first_name} ${member.last_name}` : 'Youth Member'}
+                          {member ? [member.first_name, member.middle_name, member.last_name].filter(Boolean).join(' ') : 'Youth Member'}
                         </h4>
                       </div>
                       <span className="bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-full text-xs font-bold shrink-0">
@@ -237,7 +237,7 @@ export const GigPage: React.FC = () => {
               { value: '', label: 'Select Member' },
               ...members.map((m) => ({
                 value: m.id,
-                label: `${m.first_name} ${m.last_name} (${m.academic_track || 'Member'})`,
+                label: `${[m.first_name, m.middle_name, m.last_name].filter(Boolean).join(' ')} (${m.academic_track || 'Member'})`,
               })),
             ]}
           />

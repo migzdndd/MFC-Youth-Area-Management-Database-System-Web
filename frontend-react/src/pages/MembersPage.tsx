@@ -45,6 +45,7 @@ export const MembersPage: React.FC = () => {
 
   // Form state
   const [firstName, setFirstName] = useState('');
+  const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [nickname, setNickname] = useState('');
   const [gender, setGender] = useState<'Male' | 'Female'>('Male');
@@ -77,6 +78,7 @@ export const MembersPage: React.FC = () => {
       const matchesSearch =
         !q ||
         m.first_name.toLowerCase().includes(q) ||
+        (m.middle_name && m.middle_name.toLowerCase().includes(q)) ||
         m.last_name.toLowerCase().includes(q) ||
         (m.email && m.email.toLowerCase().includes(q)) ||
         ((m.contact || m.contact_number) && (m.contact || m.contact_number)!.includes(q));
@@ -97,6 +99,7 @@ export const MembersPage: React.FC = () => {
   const openCreateModal = () => {
     setEditingMember(null);
     setFirstName('');
+    setMiddleName('');
     setLastName('');
     setNickname('');
     setGender('Male');
@@ -116,6 +119,7 @@ export const MembersPage: React.FC = () => {
   const openEditModal = (member: Member) => {
     setEditingMember(member);
     setFirstName(member.first_name);
+    setMiddleName(member.middle_name || '');
     setLastName(member.last_name);
     setNickname(member.nickname || '');
     setGender(member.gender === 'Female' ? 'Female' : 'Male');
@@ -139,6 +143,7 @@ export const MembersPage: React.FC = () => {
     // Field-level validation
     const errors: Record<string, string> = {};
     const cleanFirst = firstName.trim();
+    const cleanMiddle = middleName.trim();
     const cleanLast = lastName.trim();
     const cleanEmail = email.trim();
     const cleanContact = contact.trim();
@@ -179,10 +184,12 @@ export const MembersPage: React.FC = () => {
     setFieldErrors({});
 
     try {
+      const memberFullName = [cleanFirst, cleanMiddle, cleanLast].filter(Boolean).join(' ');
       if (editingMember) {
         await updateMember.mutateAsync({
           id: editingMember.id,
           first_name: cleanFirst,
+          middle_name: cleanMiddle || null,
           last_name: cleanLast,
           nickname: nickname.trim(),
           gender,
@@ -196,10 +203,11 @@ export const MembersPage: React.FC = () => {
           guardian_contact: cleanGuardianContact,
         });
         setIsModalOpen(false);
-        toast.success('Successful', `Information for ${cleanFirst} ${cleanLast} has been updated successfully.`);
+        toast.success('Successful', `Information for ${memberFullName} has been updated successfully.`);
       } else {
         await createMember.mutateAsync({
           first_name: cleanFirst,
+          middle_name: cleanMiddle || null,
           last_name: cleanLast,
           nickname: nickname.trim(),
           gender,
@@ -213,7 +221,7 @@ export const MembersPage: React.FC = () => {
           guardian_contact: cleanGuardianContact,
         });
         setIsModalOpen(false);
-        toast.success('Successful', `Member ${cleanFirst} ${cleanLast} has been registered successfully.`);
+        toast.success('Successful', `Member ${memberFullName} has been registered successfully.`);
       }
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to save member record.';
@@ -380,7 +388,7 @@ export const MembersPage: React.FC = () => {
                           </div>
                           <div>
                             <div className="font-semibold text-slate-900">
-                              {member.first_name} {member.last_name}
+                              {[member.first_name, member.middle_name, member.last_name].filter(Boolean).join(' ')}
                             </div>
                             {member.nickname && (
                               <div className="text-xs text-slate-500">"{member.nickname}"</div>
@@ -418,7 +426,7 @@ export const MembersPage: React.FC = () => {
                             type="button"
                             onClick={() => openEditModal(member)}
                             className="p-2 text-slate-500 hover:text-navy rounded-lg hover:bg-slate-100 transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
-                            aria-label={`Edit ${member.first_name} ${member.last_name}`}
+                            aria-label={`Edit ${[member.first_name, member.middle_name, member.last_name].filter(Boolean).join(' ')}`}
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
@@ -426,7 +434,7 @@ export const MembersPage: React.FC = () => {
                             type="button"
                             onClick={() => setDeletingId(member.id)}
                             className="p-2 text-slate-500 hover:text-mfc-red rounded-lg hover:bg-rose-50 transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
-                            aria-label={`Delete ${member.first_name} ${member.last_name}`}
+                            aria-label={`Delete ${[member.first_name, member.middle_name, member.last_name].filter(Boolean).join(' ')}`}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -449,7 +457,7 @@ export const MembersPage: React.FC = () => {
                       </div>
                       <div>
                         <div className="font-bold text-slate-900 text-sm">
-                          {member.first_name} {member.last_name}
+                          {[member.first_name, member.middle_name, member.last_name].filter(Boolean).join(' ')}
                         </div>
                         {member.nickname && (
                           <div className="text-xs text-slate-500">"{member.nickname}"</div>
@@ -521,7 +529,7 @@ export const MembersPage: React.FC = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Input
               label="First Name"
               name="firstName"
@@ -533,6 +541,14 @@ export const MembersPage: React.FC = () => {
                 if (fieldErrors.firstName) setFieldErrors((prev) => ({ ...prev, firstName: '' }));
               }}
               error={fieldErrors.firstName}
+            />
+            <Input
+              label="Middle Name"
+              name="middleName"
+              autoComplete="additional-name"
+              placeholder="Optional"
+              value={middleName}
+              onChange={(e) => setMiddleName(e.target.value)}
             />
             <Input
               label="Last Name"

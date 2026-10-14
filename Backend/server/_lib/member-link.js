@@ -289,7 +289,12 @@ export async function ensureLeadershipMemberRecord({
   }
 
   const displayName = user?.user_metadata?.display_name || user?.user_metadata?.full_name || '';
-  const { firstName, middleName, lastName } = splitDisplayName(displayName, email);
+  const parsed = splitDisplayName(displayName, email);
+  const firstName = cleanText(user?.user_metadata?.first_name, 80) || parsed.firstName;
+  const middleName = user?.user_metadata?.middle_name !== undefined
+    ? (cleanText(user?.user_metadata?.middle_name, 80) || null)
+    : parsed.middleName;
+  const lastName = cleanText(user?.user_metadata?.last_name, 80) || parsed.lastName;
 
   let createdMember = null;
   try {

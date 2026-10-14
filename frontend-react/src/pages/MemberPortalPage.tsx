@@ -66,7 +66,7 @@ export const MemberPortalPage: React.FC = () => {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <h2 className="text-xl font-bold text-slate-900 font-heading">
-                  {user?.first_name} {user?.last_name || ''}
+                  {[user?.first_name, user?.middle_name, user?.last_name].filter(Boolean).join(' ') || 'Youth Member'}
                 </h2>
                 <Badge variant="gold">MFC Youth Member</Badge>
               </div>

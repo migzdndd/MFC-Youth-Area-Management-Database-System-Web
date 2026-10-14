@@ -110,18 +110,20 @@ export default async function handler(req, res) {
       });
     }
 
+    let linkedMember = null;
     const authEmail = String(data.user.email || '').trim().toLowerCase();
-    if (linkedProfile.member_id && authEmail) {
-      const { data: linkedMember, error: memberLookupError } = await admin
+    if (linkedProfile.member_id) {
+      const { data: memberRow, error: memberLookupError } = await admin
         .from('members')
-        .select('id, email')
+        .select('id, email, first_name, middle_name, last_name')
         .eq('id', linkedProfile.member_id)
         .maybeSingle();
 
       if (memberLookupError) throw memberLookupError;
+      linkedMember = memberRow;
 
       const currentMemberEmail = String(linkedMember?.email || '').trim().toLowerCase();
-      if (linkedMember?.id && currentMemberEmail !== authEmail) {
+      if (linkedMember?.id && authEmail && currentMemberEmail !== authEmail) {
         const { error: emailSyncError } = await admin
           .from('members')
           .update({ email: authEmail, updated_at: new Date().toISOString() })
@@ -162,9 +164,14 @@ export default async function handler(req, res) {
       user: {
         id: data.user.id,
         email: data.user.email,
-        name: data.user.user_metadata?.display_name || data.user.email,
         memberId: linkedProfile.member_id,
         member_id: linkedProfile.member_id,
+        first_name: linkedMember?.first_name || data.user.user_metadata?.first_name || '',
+        middle_name: linkedMember?.middle_name ?? data.user.user_metadata?.middle_name ?? null,
+        last_name: linkedMember?.last_name || data.user.user_metadata?.last_name || '',
+        name: linkedMember
+          ? [linkedMember.first_name, linkedMember.middle_name, linkedMember.last_name].filter(Boolean).join(' ')
+          : (data.user.user_metadata?.display_name || data.user.email),
         role: linkedProfile.role,
         areaId: linkedProfile.area_id,
         area_id: linkedProfile.area_id,

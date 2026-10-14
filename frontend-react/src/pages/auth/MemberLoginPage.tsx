@@ -62,6 +62,7 @@ export const MemberLoginPage: React.FC = () => {
           memberId?: string | null;
           name?: string;
           first_name?: string;
+          middle_name?: string | null;
           last_name?: string;
           area_name?: string;
           areaName?: string;
@@ -87,6 +88,7 @@ export const MemberLoginPage: React.FC = () => {
           chapter_id: rawUser.chapter_id || rawUser.chapterId || null,
           member_id: rawUser.member_id || rawUser.memberId || null,
           first_name: rawUser.first_name || (rawUser.name ? rawUser.name.split(' ')[0] : ''),
+          middle_name: rawUser.middle_name || null,
           last_name: rawUser.last_name || (rawUser.name ? rawUser.name.split(' ').slice(1).join(' ') : ''),
           is_developer: Boolean(rawUser.is_developer),
         };

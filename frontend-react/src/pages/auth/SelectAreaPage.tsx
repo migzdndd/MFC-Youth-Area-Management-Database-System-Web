@@ -55,7 +55,9 @@ export const SelectAreaPage: React.FC = () => {
     staleTime: 1000 * 30,
   });
 
-  const leaderName = user?.first_name || (user?.email ? user.email.split('@')[0] : 'Servant Leader');
+  const leaderName = user?.first_name
+    ? [user.first_name, user.middle_name, user.last_name].filter(Boolean).join(' ')
+    : (user?.email ? user.email.split('@')[0] : 'Servant Leader');
 
   // Filter areas based on search input
   const filteredAreas = areas.filter((area) => {

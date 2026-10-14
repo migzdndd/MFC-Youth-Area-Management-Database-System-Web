@@ -42,7 +42,7 @@ export const ReportsPage: React.FC = () => {
 
   const getUserFullName = () => {
     if (!user) return '';
-    return [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email || '';
+    return [user.first_name, user.middle_name, user.last_name].filter(Boolean).join(' ') || user.email || '';
   };
 
   const openCreateModal = () => {

@@ -27,6 +27,7 @@ export interface UserProfile {
   chapter_name?: string | null;
   member_id?: string | null;
   first_name?: string;
+  middle_name?: string | null;
   last_name?: string;
   is_mfa_enabled?: boolean;
   is_developer?: boolean;

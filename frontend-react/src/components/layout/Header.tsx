@@ -79,7 +79,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
       <div className="flex items-center gap-3">
         <div className="hidden sm:flex flex-col text-right">
           <span className="text-xs font-bold text-slate-900 leading-tight truncate max-w-[160px]">
-            {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.email}
+            {user?.first_name ? [user.first_name, user.middle_name, user.last_name].filter(Boolean).join(' ') : user?.email}
           </span>
           <span className="text-[11px] text-amber-700 capitalize font-semibold">
             {user?.role ? user.role.replace(/_/g, ' ') : 'Servant'}
@@ -87,7 +87,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
         </div>
         <div
           className="w-9 h-9 rounded-full bg-navy text-white text-xs font-bold ring-2 ring-amber-400/40 flex items-center justify-center select-none shrink-0 shadow-2xs"
-          title={user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.email}
+          title={user?.first_name ? [user.first_name, user.middle_name, user.last_name].filter(Boolean).join(' ') : user?.email}
         >
           {user?.first_name ? user.first_name[0].toUpperCase() : 'U'}
         </div>

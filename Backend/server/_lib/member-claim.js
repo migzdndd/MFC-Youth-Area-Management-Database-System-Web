@@ -66,7 +66,7 @@ export async function claimMemberRecord({ supabase, user }) {
 
   const { data: member, error: memberError } = await supabase
     .from('members')
-    .select('id, area_id, chapter_id, status')
+    .select('id, area_id, chapter_id, status, first_name, middle_name, last_name')
     .ilike('email', escapeLikePattern(email))
     .maybeSingle();
   if (memberError) throw memberError;
@@ -101,5 +101,5 @@ export async function claimMemberRecord({ supabase, user }) {
   const { data: profile, error: saveError } = await query.select('*').single();
   if (saveError) throw saveError;
 
-  return { profile, memberId: member.id, alreadyLinked: false };
+  return { profile, memberId: member.id, member, alreadyLinked: false };
 }

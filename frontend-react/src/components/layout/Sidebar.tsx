@@ -167,7 +167,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <div className="bg-white/5 rounded-lg p-3 border border-white/8 space-y-1">
             <div className="flex items-center justify-between">
               <span className="font-semibold text-white text-xs truncate max-w-[150px]">
-                {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.email}
+                {user?.first_name ? [user.first_name, user.middle_name, user.last_name].filter(Boolean).join(' ') : user?.email}
               </span>
               <span className="text-[10px] text-amber-300 uppercase tracking-wider font-bold bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/20">
                 {user?.role ? user.role.replace(/_/g, ' ') : 'Servant'}

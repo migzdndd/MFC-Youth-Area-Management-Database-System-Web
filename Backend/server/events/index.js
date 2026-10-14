@@ -65,12 +65,12 @@ async function listEvents(req, res) {
     try {
       const { data: profiles } = await admin
         .from('profiles')
-        .select('id, role, member_id, members(first_name, last_name, email)')
+        .select('id, role, member_id, members(first_name, middle_name, last_name, email)')
         .in('id', creatorIds);
       if (profiles) {
         for (const p of profiles) {
           const mem = p.members;
-          const fullName = mem ? `${mem.first_name || ''} ${mem.last_name || ''}`.trim() : '';
+          const fullName = mem ? [mem.first_name, mem.middle_name, mem.last_name].filter(Boolean).join(' ') : '';
           creatorsMap[p.id] = {
             role: p.role,
             name: fullName || 'Area Servant',

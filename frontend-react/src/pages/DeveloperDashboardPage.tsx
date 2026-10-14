@@ -475,7 +475,7 @@ export const DeveloperDashboardPage: React.FC = () => {
                   <div key={m.id} className="p-3 bg-slate-50/70 border border-slate-200/70 rounded-xl flex items-center justify-between gap-3 text-xs">
                     <div className="min-w-0">
                       <div className="font-bold text-slate-900 truncate">
-                        {m.first_name} {m.last_name}
+                        {[m.first_name, m.middle_name, m.last_name].filter(Boolean).join(' ')}
                       </div>
                       <div className="text-slate-500 truncate font-mono text-[11px]">{m.email}</div>
                     </div>

@@ -108,9 +108,10 @@ export default async function handler(req, res) {
       ''
     );
     const firstName = cleanText(req.body?.first_name, 80);
+    const middleName = cleanText(req.body?.middle_name || req.body?.middleName, 80) || null;
     const lastName = cleanText(req.body?.last_name, 80);
     const displayName = cleanText(
-      req.body?.displayName || (firstName || lastName ? `${firstName} ${lastName}`.trim() : ''),
+      req.body?.displayName || (firstName || lastName ? [firstName, middleName, lastName].filter(Boolean).join(' ') : ''),
       160
     );
     const role = String(req.body?.role || '').trim().toLowerCase();
@@ -229,6 +230,7 @@ export default async function handler(req, res) {
         user_metadata: {
           display_name: displayName,
           first_name: firstName || displayName.split(' ')[0] || '',
+          middle_name: middleName,
           last_name: lastName || displayName.split(' ').slice(1).join(' ') || '',
           registration_type: 'servant_leader',
           password_origin: 'self_chosen'
@@ -253,6 +255,7 @@ export default async function handler(req, res) {
               user_metadata: {
                 display_name: displayName,
                 first_name: firstName || displayName.split(' ')[0] || '',
+                middle_name: middleName,
                 last_name: lastName || displayName.split(' ').slice(1).join(' ') || '',
                 registration_type: 'servant_leader',
                 password_origin: 'self_chosen'

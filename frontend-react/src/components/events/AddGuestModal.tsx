@@ -51,7 +51,7 @@ const AddGuestFormContent: React.FC<AddGuestFormContentProps> = ({
   const inviterQuery = invitedBySearch.trim().toLowerCase();
   const filteredInviterMembers = members.filter((m) => {
     if (!inviterQuery) return true;
-    const fullName = `${m.first_name} ${m.last_name}`.toLowerCase();
+    const fullName = [m.first_name, m.middle_name, m.last_name].filter(Boolean).join(' ').toLowerCase();
     const nickname = (m.nickname || '').toLowerCase();
     return fullName.includes(inviterQuery) || nickname.includes(inviterQuery);
   });
@@ -131,7 +131,7 @@ const AddGuestFormContent: React.FC<AddGuestFormContentProps> = ({
           <div className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-xs">
             <div>
               <span className="font-bold text-slate-900">
-                {selectedInviter.first_name} {selectedInviter.last_name}
+                {[selectedInviter.first_name, selectedInviter.middle_name, selectedInviter.last_name].filter(Boolean).join(' ')}
               </span>
               {selectedInviter.nickname && (
                 <span className="text-slate-500 ml-1">
@@ -189,7 +189,7 @@ const AddGuestFormContent: React.FC<AddGuestFormContentProps> = ({
                     >
                       <div>
                         <span className="font-semibold text-slate-900">
-                          {m.first_name} {m.last_name}
+                          {[m.first_name, m.middle_name, m.last_name].filter(Boolean).join(' ')}
                         </span>
                         {m.nickname && (
                           <span className="text-slate-500 ml-1">

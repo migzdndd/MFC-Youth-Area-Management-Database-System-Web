@@ -73,7 +73,7 @@ export const EventAttendanceModal: React.FC<EventAttendanceModalProps> = ({
   const query = attendeeSearch.trim().toLowerCase();
   const filteredMembers = members.filter((m) => {
     if (!query) return true;
-    const fullName = `${m.first_name} ${m.last_name}`.toLowerCase();
+    const fullName = [m.first_name, m.middle_name, m.last_name].filter(Boolean).join(' ').toLowerCase();
     const track = (m.academic_track || '').toLowerCase();
     const chapter = (m.chapter_name || '').toLowerCase();
     return (
@@ -201,7 +201,7 @@ export const EventAttendanceModal: React.FC<EventAttendanceModalProps> = ({
                       );
                       const isPaid = participant?.payment_status === 'Paid';
                       const isAttended = participant?.attended ?? false;
-                      const fullName = `${member.first_name} ${member.last_name}`;
+                      const fullName = [member.first_name, member.middle_name, member.last_name].filter(Boolean).join(' ');
 
                       return (
                         <tr

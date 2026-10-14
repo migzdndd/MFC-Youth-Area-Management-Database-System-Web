@@ -146,7 +146,7 @@ export const ChaptersPage: React.FC = () => {
                         Head:{' '}
                         <strong className="text-slate-900 font-semibold">
                           {headMember
-                            ? `${headMember.first_name} ${headMember.last_name}`
+                            ? [headMember.first_name, headMember.middle_name, headMember.last_name].filter(Boolean).join(' ')
                             : 'Not assigned'}
                         </strong>
                       </span>
@@ -205,7 +205,7 @@ export const ChaptersPage: React.FC = () => {
                     >
                       <div>
                         <div className="font-bold text-sm text-slate-900">
-                          {m.first_name} {m.last_name}
+                          {[m.first_name, m.middle_name, m.last_name].filter(Boolean).join(' ')}
                           {m.nickname && (
                             <span className="text-xs font-normal text-slate-500 ml-1.5">
                               &ldquo;{m.nickname}&rdquo;
@@ -278,7 +278,7 @@ export const ChaptersPage: React.FC = () => {
               { value: '', label: 'Select Chapter Head (Optional)' },
               ...members.map((m) => ({
                 value: m.id,
-                label: `${m.first_name} ${m.last_name} (${m.academic_track || 'Member'})`,
+                label: `${[m.first_name, m.middle_name, m.last_name].filter(Boolean).join(' ')} (${m.academic_track || 'Member'})`,
               })),
             ]}
           />

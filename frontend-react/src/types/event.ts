@@ -25,6 +25,7 @@ export interface Participant {
   attended: boolean;
   member?: {
     first_name: string;
+    middle_name?: string | null;
     last_name: string;
     academic_track?: string | null;
     chapter_name?: string | null;

@@ -86,6 +86,12 @@ export default async function handler(req, res) {
         id: data.user.id,
         email: data.user.email,
         memberId: result.memberId,
+        first_name: result.member?.first_name || '',
+        middle_name: result.member?.middle_name || null,
+        last_name: result.member?.last_name || '',
+        name: result.member
+          ? [result.member.first_name, result.member.middle_name, result.member.last_name].filter(Boolean).join(' ')
+          : data.user.email,
         role: result.profile.role,
         areaId: result.profile.area_id,
         chapterId: result.profile.chapter_id,

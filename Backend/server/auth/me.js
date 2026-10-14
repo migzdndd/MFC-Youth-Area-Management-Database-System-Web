@@ -85,8 +85,11 @@ export default async function handler(req, res) {
         memberId: profile.member_id,
         member_id: profile.member_id,
         first_name: member?.first_name || '',
+        middle_name: member?.middle_name || null,
         last_name: member?.last_name || '',
-        name: member ? `${member.first_name || ''} ${member.last_name || ''}`.trim() : user.email,
+        name: member
+          ? [member.first_name, member.middle_name, member.last_name].filter(Boolean).join(' ')
+          : user.email,
         role: profile.role,
         areaId: profile.area_id,
         area_id: profile.area_id,
