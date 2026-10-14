@@ -8,6 +8,8 @@ import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { MobileNav } from './MobileNav';
 import { OfflineBanner } from './OfflineBanner';
+import { SimulationBanner } from './SimulationBanner';
+import { AreaSwitchModal } from './AreaSwitchModal';
 
 export const AppLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -29,6 +31,8 @@ export const AppLayout: React.FC<{ children?: React.ReactNode }> = ({ children }
   return (
     <div className="min-h-screen bg-canvas flex flex-col">
       <OfflineBanner />
+      <SimulationBanner />
+      <AreaSwitchModal />
 
       {/* Desktop and mobile drawer sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />

@@ -28,9 +28,11 @@ import {
   Briefcase,
   UserCheck,
   ChevronRight,
+  ShieldCheck,
+  RotateCcw,
 } from 'lucide-react';
 
-import type { UserRole } from '@/types/auth';
+import { ROLE_LABELS, type UserRole } from '@/types/auth';
 
 function formatUptime(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
@@ -45,7 +47,14 @@ function formatUptime(seconds: number): string {
 }
 
 export const DeveloperDashboardPage: React.FC = () => {
-  const { user, activeArea, setActiveArea, setSimulatedRole } = useAuthStore();
+  const {
+    user,
+    activeArea,
+    simulatedRole,
+    setSimulatedRole,
+    requestAreaSwitch,
+    roleRestorationValidated,
+  } = useAuthStore();
   const toast = useToast();
   const queryClient = useQueryClient();
 
@@ -155,14 +164,18 @@ export const DeveloperDashboardPage: React.FC = () => {
     },
   };
 
+  const isTechnicalIdColumn = (col: string): boolean => {
+    const lower = col.toLowerCase();
+    return lower === 'id' || lower.endsWith('_id') || lower.endsWith('id');
+  };
+
+  const isUuid = (val: string): boolean =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+
   const formatColumnHeader = (col: string): string => {
     const customNames: Record<string, string> = {
-      id: 'Record ID',
       created_at: 'Date Created',
       updated_at: 'Last Updated',
-      area_id: 'Area ID',
-      chapter_id: 'Chapter ID',
-      member_id: 'Member ID',
       created_by: 'Created By',
       starts_at: 'Start Time',
       ends_at: 'End Time',
@@ -182,6 +195,11 @@ export const DeveloperDashboardPage: React.FC = () => {
       email: 'Email Address',
       name: 'Name',
       description: 'Description',
+      title: 'Title',
+      activity_date: 'Activity Date',
+      participant_count: 'Headcount',
+      notes: 'Notes / Remarks',
+      code: 'Area Code',
     };
     if (customNames[col]) return customNames[col];
     return col.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -192,6 +210,7 @@ export const DeveloperDashboardPage: React.FC = () => {
     if (typeof val === 'boolean') return val ? 'Yes' : 'No';
     if (typeof val === 'object') return JSON.stringify(val);
     const str = String(val);
+    if (isUuid(str)) return 'Active Record';
     if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(str)) {
       return formatDateTime(str);
     }
@@ -496,7 +515,9 @@ export const DeveloperDashboardPage: React.FC = () => {
                   <div key={r.id} className="p-3 bg-slate-50/70 border border-slate-200/70 rounded-xl flex items-center justify-between gap-3 text-xs">
                     <div className="min-w-0">
                       <div className="font-bold text-slate-900 truncate">{r.report_type}</div>
-                      <div className="text-slate-500 truncate text-[11px]">ID: {r.id.slice(0, 8)}...</div>
+                      <div className="text-slate-500 truncate text-[11px]">
+                        {r.chapter_id ? 'Chapter Assembly Report' : 'Area Community Report'}
+                      </div>
                     </div>
                     <div className="text-right shrink-0">
                       <Badge variant="info">{r.status || 'Filed'}</Badge>
@@ -599,81 +620,142 @@ export const DeveloperDashboardPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Area Context Simulation */}
-            {areas.length > 0 && (
-              <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200/80 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-bold text-slate-900">Simulate Area View</div>
-                  <span className="text-[10px] text-slate-500">Switch view</span>
+            {/* Live Role Access & Area Database Simulator */}
+            <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200/80 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-xs font-bold text-slate-900">Live Role Simulator</div>
+                  <div className="text-[10px] text-slate-500">Test access levels system-wide</div>
                 </div>
+                {simulatedRole ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                    Simulating
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                    Authentic
+                  </span>
+                )}
+              </div>
+
+              {/* Status Indicator */}
+              <div className="p-2.5 rounded-lg bg-white border border-slate-200/80 space-y-1.5 text-[11px]">
+                <div className="flex justify-between items-center text-slate-600">
+                  <span>Authentic Role:</span>
+                  <span className="font-semibold text-slate-800">
+                    {user?.home_role ? ROLE_LABELS[user.home_role] || user.home_role : 'Servant'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-slate-600">
+                  <span>Effective Active Role:</span>
+                  <span className={`font-bold ${simulatedRole ? 'text-amber-700' : 'text-emerald-700'}`}>
+                    {user?.role ? ROLE_LABELS[user.role] || user.role : 'Member'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-slate-600">
+                  <span>Current Area DB:</span>
+                  <span className="font-semibold text-slate-800">
+                    {activeArea?.name || 'Home Database'}
+                  </span>
+                </div>
+              </div>
+
+              {roleRestorationValidated && (
+                <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-medium flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Authentic role verified and restored.</span>
+                </div>
+              )}
+
+              {/* Role Selector */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold text-slate-700 block">
+                  Simulate Live Role Access
+                </label>
                 <select
-                  value={activeArea?.id || user?.area_id || ''}
+                  value={simulatedRole || user?.role || 'member'}
                   onChange={(e) => {
-                    const found = areas.find((a) => a.id === e.target.value);
-                    if (found) {
-                      setActiveArea(found);
-                      queryClient.clear();
-                      toast.success(`Active area set to ${found.name}`, 'View Updated');
+                    const newRole = e.target.value as UserRole;
+                    if (newRole === user?.home_role) {
+                      setSimulatedRole(null);
+                      toast.success(
+                        `Restored to authentic role: ${ROLE_LABELS[newRole]}`,
+                        'Authentic Role Restored'
+                      );
+                    } else {
+                      setSimulatedRole(newRole);
+                      toast.showToast({
+                        type: 'info',
+                        title: `Simulating ${ROLE_LABELS[newRole]}`,
+                        message: 'Role permissions applied across the system.',
+                      });
                     }
                   }}
-                  className="w-full text-xs p-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy/20 min-h-[38px]"
+                  className="w-full text-xs p-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy/20 min-h-[38px] font-medium text-slate-800"
                 >
-                  {areas.map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.name} {a.id === user?.area_id ? '(Home Area)' : ''}
+                  {Object.entries(ROLE_LABELS).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label} {user?.home_role === key ? '(Your Authentic Role)' : ''}
                     </option>
                   ))}
                 </select>
-
-                {/* Role Simulation within simulated area */}
-                {activeArea && user?.area_id && activeArea.id !== user.area_id && (
-                  <div className="pt-2 border-t border-slate-200/80 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-semibold text-slate-700">Role in Simulated Area</span>
-                      <span className="text-[10px] text-amber-700 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
-                        Isolated (No Leaks)
-                      </span>
-                    </div>
-                    <select
-                      value={user?.role || 'member'}
-                      onChange={(e) => {
-                        const newRole = e.target.value as UserRole;
-                        setSimulatedRole(newRole);
-                        toast.showToast({
-                          type: 'info',
-                          title: `Simulated role set to ${newRole.replace(/_/g, ' ')}`,
-                          message: 'Role Simulation Scope Updated'
-                        });
-                      }}
-                      className="w-full text-xs p-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy/20 min-h-[38px]"
-                    >
-                      <option value="member">Member (Default non-servant)</option>
-                      <option value="chapter_servant">Chapter Servant</option>
-                      <option value="area_servant">Area Servant</option>
-                      <option value="youth_head">Youth Head</option>
-                      <option value="national_coordinator">National Coordinator</option>
-                    </select>
-                    <p className="text-[10px] text-slate-500 leading-normal">
-                      Your authentic role ({user?.home_role ? user.home_role.replace(/_/g, ' ') : 'Lit Servant'}) is protected and does not stick to other Area Databases.
-                    </p>
-
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="w-full text-xs mt-1"
-                      onClick={() => {
-                        const home = areas.find((a) => a.id === user?.area_id);
-                        setActiveArea(home || null);
-                        queryClient.clear();
-                        toast.success('Restored to your home Area Database and authentic role', 'Simulation Reset');
-                      }}
-                    >
-                      Reset to Home Area
-                    </Button>
-                  </div>
-                )}
               </div>
-            )}
+
+              {/* Reset to Authentic Role Button */}
+              {simulatedRole && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="w-full text-xs flex items-center justify-center gap-1.5 min-h-[36px] text-slate-700 hover:text-slate-900 border-slate-300"
+                  onClick={() => {
+                    setSimulatedRole(null);
+                    queryClient.clear();
+                    toast.success(
+                      `Validated: Authentic role "${user?.home_role ? ROLE_LABELS[user.home_role] || user.home_role : 'Servant'}" restored.`,
+                      'Role Restored'
+                    );
+                  }}
+                >
+                  <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+                  Reset to Authentic Role
+                </Button>
+              )}
+
+              {/* Area Database Switcher */}
+              {areas.length > 0 && (
+                <div className="pt-2.5 border-t border-slate-200/80 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-slate-700">Area Database</span>
+                    <span className="text-[10px] text-slate-500">Live isolation</span>
+                  </div>
+                  <select
+                    value={activeArea?.id || user?.area_id || ''}
+                    onChange={(e) => {
+                      const found = areas.find((a) => a.id === e.target.value);
+                      if (found) {
+                        const direct = requestAreaSwitch(found);
+                        if (direct) {
+                          queryClient.clear();
+                          toast.success(`Active area set to ${found.name}`, 'View Updated');
+                        }
+                      }
+                    }}
+                    className="w-full text-xs p-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy/20 min-h-[38px]"
+                  >
+                    {areas.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.name} {a.id === user?.area_id ? '(Home Area)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-[10px] text-slate-500 leading-normal">
+                    Switching area databases while simulation is active prompts for confirmation and automatically restores and validates your authentic role.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -700,41 +782,47 @@ export const DeveloperDashboardPage: React.FC = () => {
             <div className="p-8 text-center text-xs text-slate-500 bg-slate-50 rounded-xl border border-slate-200">
               No records found in this category.
             </div>
-          ) : (
-            <div className="overflow-x-auto max-h-[50vh] rounded-xl border border-slate-200">
-              <table className="w-full text-xs text-left border-collapse">
-                <thead className="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] sticky top-0 border-b border-slate-200">
-                  <tr>
-                    {Object.keys(tableData[0]).map((col) => (
-                      <th key={col} className="p-2.5 px-3 border-r border-slate-200/80 whitespace-nowrap">
-                        {formatColumnHeader(col)}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 font-sans text-[11px]">
-                  {tableData.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50/80">
-                      {Object.keys(tableData[0]).map((col) => {
-                        const val = row[col];
-                        const renderedVal = formatCellValue(val);
+          ) : (() => {
+            const rawCols = Object.keys(tableData[0] || {});
+            const filteredCols = rawCols.filter((col) => !isTechnicalIdColumn(col));
+            const activeCols = filteredCols.length > 0 ? filteredCols : rawCols;
 
-                        return (
-                          <td
-                            key={col}
-                            className="p-2.5 px-3 border-r border-slate-100 max-w-[200px] truncate text-slate-800"
-                            title={renderedVal}
-                          >
-                            {renderedVal}
-                          </td>
-                        );
-                      })}
+            return (
+              <div className="overflow-x-auto max-h-[50vh] rounded-xl border border-slate-200">
+                <table className="w-full text-xs text-left border-collapse">
+                  <thead className="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] sticky top-0 border-b border-slate-200">
+                    <tr>
+                      {activeCols.map((col) => (
+                        <th key={col} className="p-2.5 px-3 border-r border-slate-200/80 whitespace-nowrap">
+                          {formatColumnHeader(col)}
+                        </th>
+                      ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-sans text-[11px]">
+                    {tableData.map((row, idx) => (
+                      <tr key={idx} className="hover:bg-slate-50/80">
+                        {activeCols.map((col) => {
+                          const val = row[col];
+                          const renderedVal = formatCellValue(val);
+
+                          return (
+                            <td
+                              key={col}
+                              className="p-2.5 px-3 border-r border-slate-100 max-w-[200px] truncate text-slate-800"
+                              title={renderedVal}
+                            >
+                              {renderedVal}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })()}
 
           <div className="flex items-center justify-between pt-3 border-t border-slate-200">
             <span className="text-xs text-slate-500">

@@ -144,7 +144,7 @@ export const ReportsPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
-              Activity Reports & Pastoral Logs
+              Activity Reports
             </h1>
             <Badge variant="navy">
               {reports.length} {reports.length === 1 ? 'Report' : 'Reports'}

@@ -20,7 +20,7 @@ import type { Area } from '@/types/auth';
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, activeArea, setActiveArea } = useAuthStore();
+  const { user, activeArea, requestAreaSwitch } = useAuthStore();
   const { data: metrics, isLoading: metricsLoading } = useDashboardMetrics();
   const { data: areas } = useAreas();
   const { data: readingsData } = useDailyReadings();
@@ -75,7 +75,7 @@ export const DashboardPage: React.FC = () => {
               value={activeArea?.id || user?.area_id || ''}
               onChange={(e) => {
                 const selected = areas.find((a: Area) => a.id === e.target.value);
-                setActiveArea(selected || null);
+                requestAreaSwitch(selected || null);
               }}
               className="text-xs font-semibold text-slate-900 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-navy/20 cursor-pointer shadow-2xs"
             >

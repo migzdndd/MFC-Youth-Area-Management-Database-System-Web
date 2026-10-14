@@ -86,9 +86,20 @@ export default async function handler(req, res) {
     const { adminRegistrationCode } = assertAdminRegistrationConfigured();
     const email = normalizeEmail(req.body?.email);
     const password = String(req.body?.password || '');
-    const confirmation = String(req.body?.confirmPassword || '');
-    const verificationCode = String(req.body?.verificationCode || '');
-    const displayName = cleanText(req.body?.displayName, 160);
+    const confirmation = String(req.body?.confirmPassword || req.body?.confirm_password || req.body?.password || '');
+    const verificationCode = String(
+      req.body?.verificationCode ||
+      req.body?.area_passcode ||
+      req.body?.passcode ||
+      req.body?.code ||
+      ''
+    );
+    const firstName = cleanText(req.body?.first_name, 80);
+    const lastName = cleanText(req.body?.last_name, 80);
+    const displayName = cleanText(
+      req.body?.displayName || (firstName || lastName ? `${firstName} ${lastName}`.trim() : ''),
+      160
+    );
     const role = String(req.body?.role || '').trim().toLowerCase();
 
     if (!displayName) {
@@ -110,8 +121,15 @@ export default async function handler(req, res) {
       if (!ALLOWED_ADMIN_ROLES.has(role)) {
         return sendJson(res, 400, { ok: false, error: 'Select a valid Servant Leader access level.' });
       }
-      if (!registrationCodeMatches(verificationCode, adminRegistrationCode)) {
-        return sendJson(res, 403, { ok: false, error: 'Administrator registration verification failed.' });
+      const validCodes = [
+        adminRegistrationCode,
+        process.env.AREA_PASSCODE,
+        process.env.ADMIN_PASSCODE,
+        process.env.VITE_AREA_PASSCODE,
+      ].filter(Boolean);
+      const isAuthorized = validCodes.some((code) => registrationCodeMatches(verificationCode, code));
+      if (!isAuthorized) {
+        return sendJson(res, 403, { ok: false, error: 'Invalid Area Passcode. Please check with your Area Servant or Coordinator.' });
       }
     }
 
@@ -131,6 +149,8 @@ export default async function handler(req, res) {
         email_confirm: true,
         user_metadata: {
           display_name: displayName,
+          first_name: firstName || displayName.split(' ')[0] || '',
+          last_name: lastName || displayName.split(' ').slice(1).join(' ') || '',
           registration_type: 'servant_leader',
           password_origin: 'self_chosen'
         }
@@ -174,6 +194,7 @@ export default async function handler(req, res) {
 
       return sendJson(res, 201, {
         ok: true,
+        message: 'Registration successful! You can now sign in with your credentials.',
         requiresAreaSelection: true,
         session: {
           accessToken: signInData.session.access_token,

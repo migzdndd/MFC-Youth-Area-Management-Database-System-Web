@@ -7,9 +7,15 @@ interface AuthState {
   refreshToken: string | null;
   activeArea: Area | null;
   simulatedRole: UserRole | null;
+  pendingAreaSwitch: Area | null;
+  roleRestorationValidated: boolean;
   isLoading: boolean;
   setSession: (session: { access_token: string; refresh_token: string; user: UserProfile } | null) => void;
   setActiveArea: (area: Area | null, role?: UserRole | null) => void;
+  requestAreaSwitch: (targetArea: Area | null) => boolean;
+  confirmPendingAreaSwitch: () => { success: boolean; restoredRole: UserRole; areaName: string } | null;
+  cancelPendingAreaSwitch: () => void;
+  clearRestorationValidation: () => void;
   setSimulatedRole: (role: UserRole | null) => void;
   updateUser: (partial: Partial<UserProfile>) => void;
   logout: () => void;
@@ -54,6 +60,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   refreshToken: initialSession?.refresh_token || null,
   activeArea: initialArea || null,
   simulatedRole: null,
+  pendingAreaSwitch: null,
+  roleRestorationValidated: false,
   isLoading: false,
 
   setSession: (session) => {
@@ -68,11 +76,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         token: session.access_token,
         refreshToken: session.refresh_token,
         simulatedRole: null,
+        pendingAreaSwitch: null,
+        roleRestorationValidated: false,
       });
     } else {
       localStorage.removeItem(SESSION_STORAGE_KEY);
       localStorage.removeItem(ACTIVE_AREA_KEY);
-      set({ user: null, token: null, refreshToken: null, activeArea: null, simulatedRole: null });
+      set({
+        user: null,
+        token: null,
+        refreshToken: null,
+        activeArea: null,
+        simulatedRole: null,
+        pendingAreaSwitch: null,
+        roleRestorationValidated: false,
+      });
     }
   },
 
@@ -95,10 +113,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (isHomeArea) {
       // Returned to home area: restore authentic role
       const updatedUser = { ...current, home_role: homeRole, role: homeRole };
-      set({ activeArea: area, user: updatedUser, simulatedRole: null });
+      set({ activeArea: area, user: updatedUser, simulatedRole: null, roleRestorationValidated: true });
     } else {
-      // Simulating or inspecting another area:
-      // National coordinators keep their role, but area/lit/chapter servants do NOT stick to other areas
+      // Simulating or inspecting another area
       const isNational = homeRole === 'national_coordinator';
       const effectiveRole: UserRole = isNational
         ? 'national_coordinator'
@@ -109,34 +126,104 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
+  requestAreaSwitch: (targetArea) => {
+    const { simulatedRole, activeArea, user } = get();
+    // Intercept switch if currently simulating a live role and switching to a DIFFERENT area
+    const currentAreaId = activeArea?.id || user?.area_id || '';
+    const targetAreaId = targetArea?.id || '';
+    const isDifferentArea = targetAreaId !== currentAreaId;
+
+    if (simulatedRole && isDifferentArea && targetArea) {
+      set({ pendingAreaSwitch: targetArea, roleRestorationValidated: false });
+      return false; // Intercepted: prompt user
+    }
+
+    get().setActiveArea(targetArea);
+    return true; // Proceeded directly
+  },
+
+  confirmPendingAreaSwitch: () => {
+    const { pendingAreaSwitch, user } = get();
+    if (!pendingAreaSwitch || !user) return null;
+
+    const originalRole = user.home_role || user.role;
+    const targetArea = pendingAreaSwitch;
+
+    localStorage.setItem(ACTIVE_AREA_KEY, JSON.stringify(targetArea));
+
+    const updatedUser = {
+      ...user,
+      home_role: originalRole,
+      role: originalRole,
+    };
+
+    const session = getStoredSession();
+    if (session) {
+      session.user = updatedUser;
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+    }
+
+    set({
+      activeArea: targetArea,
+      user: updatedUser,
+      simulatedRole: null,
+      pendingAreaSwitch: null,
+      roleRestorationValidated: true,
+    });
+
+    const isRestored = get().user?.role === originalRole && get().simulatedRole === null;
+
+    return {
+      success: isRestored,
+      restoredRole: originalRole,
+      areaName: targetArea.name,
+    };
+  },
+
+  cancelPendingAreaSwitch: () => {
+    set({ pendingAreaSwitch: null });
+  },
+
+  clearRestorationValidation: () => {
+    set({ roleRestorationValidated: false });
+  },
+
   setSimulatedRole: (role) => {
     const current = get().user;
     if (!current) return;
     const homeRole = current.home_role || current.role;
-    const active = get().activeArea;
-    const isHomeArea = !active || active.id === current.area_id;
+    const effectiveRole = role || homeRole;
 
-    if (isHomeArea) {
-      const effectiveRole = role || homeRole;
-      set({ user: { ...current, home_role: homeRole, role: effectiveRole }, simulatedRole: role });
-    } else {
-      const effectiveRole = role || 'member';
-      set({ user: { ...current, home_role: homeRole, role: effectiveRole }, simulatedRole: role });
+    const updatedUser = {
+      ...current,
+      home_role: homeRole,
+      role: effectiveRole,
+    };
+
+    const session = getStoredSession();
+    if (session) {
+      session.user = updatedUser;
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
     }
+
+    set({
+      user: updatedUser,
+      simulatedRole: role,
+      roleRestorationValidated: role === null,
+    });
   },
 
   updateUser: (partial) => {
     const current = get().user;
     if (!current) return;
     const homeRole = partial.home_role || current.home_role || partial.role || current.role;
-    const active = get().activeArea;
-    const isHomeArea = !active || active.id === (partial.area_id || current.area_id);
+    const activeSimulation = get().simulatedRole;
 
     const updated = {
       ...current,
       ...partial,
       home_role: homeRole,
-      role: isHomeArea ? homeRole : (get().simulatedRole || 'member'),
+      role: activeSimulation || homeRole,
     };
     const session = getStoredSession();
     if (session) {

@@ -161,72 +161,98 @@ export const LoginPage: React.FC = () => {
     <div className="min-h-screen bg-canvas flex flex-col justify-between">
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
         <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch bg-white border border-border-subtle rounded-2xl shadow-sm overflow-hidden">
-          {/* Left Hero Overview */}
-          <section className="lg:col-span-6 bg-navy-deep text-white p-6 sm:p-10 flex flex-col justify-between border-r border-navy-surface" aria-label="System overview">
-            <div>
-              <div className="flex items-center justify-between mb-8">
-                <img
-                  src="/img/logo.png"
-                  alt="MFC Youth"
-                  width={180}
-                  height={84}
-                  className="object-contain"
-                />
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-white/10 text-slate-200 border border-white/10">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  Cloud Connected
-                </span>
-              </div>
+          {/* Left Hero Overview with Video Wallpaper Placeholder */}
+          <section className="lg:col-span-6 bg-navy-deep text-white p-6 sm:p-10 flex flex-col justify-between border-r border-navy-surface relative overflow-hidden" aria-label="System overview">
+            {/* ========================================================================= */}
+            {/* VIDEO WALLPAPER PLACEHOLDER                                              */}
+            {/* Place your quick wallpaper video file in /public/videos/login-wallpaper.mp4 */}
+            {/* Supported: MP4 / WebM (muted, loop, playsInline for smooth autoplay)      */}
+            {/* ========================================================================= */}
+            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover opacity-40 filter brightness-[0.55] contrast-[1.1] transition-opacity duration-1000"
+              >
+                <source src="/videos/login-wallpaper.mp4" type="video/mp4" />
+                <source src="/videos/login-bg.mp4" type="video/mp4" />
+              </video>
 
-              <div className="space-y-2 mb-8">
-                <span className="text-xs font-bold tracking-widest text-amber-300 font-heading">
-                  AREA MANAGEMENT SYSTEM
-                </span>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight font-heading">
-                  Lead your Area with one clear, secure workspace.
-                </h1>
-                <p className="text-sm text-slate-300">
-                  Centralized operational portal for youth members, chapters, gatherings, and reports.
-                </p>
-              </div>
-
-              {/* Liturgical Daily Reading Card */}
-              <div className="bg-white/10 border border-white/15 rounded-xl p-4 mb-6">
-                <div className="flex items-center justify-between mb-2 pb-2 border-b border-white/10">
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-amber-300" />
-                    <span className="text-xs font-bold text-white">Daily Scripture Readings</span>
-                  </div>
-                  {readingsData?.date && (
-                    <span className="text-[11px] text-amber-200/90 font-medium">{readingsData.date}</span>
-                  )}
-                </div>
-                {readingsLoading ? (
-                  <p className="text-xs text-slate-300">Loading today's Catholic Mass readings...</p>
-                ) : readingsData?.celebration ? (
-                  <div className="space-y-1.5">
-                    <p className="text-xs font-semibold text-white leading-snug">
-                      {readingsData.celebration}
-                    </p>
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      {readingsData.readings?.slice(0, 3).map((r, i) => (
-                        <span key={i} className="text-[11px] bg-white/10 px-2 py-0.5 rounded text-slate-200 border border-white/10">
-                          {r.type}: {r.reference}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-xs text-slate-300">Daily liturgical feed available online.</p>
-                )}
-              </div>
+              {/* Ambient atmospheric lighting & gradient overlays for optimal text contrast */}
+              <div className="absolute inset-0 bg-gradient-to-t from-navy-deep via-navy-deep/80 to-navy-deep/50 backdrop-blur-[1px]" />
+              <div className="absolute -top-32 -left-32 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
             </div>
 
-            <div className="pt-6 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
-              <span>Missionary Families for Christ Youth</span>
-              <Link to="/member-login" className="text-amber-300 hover:text-white font-semibold flex items-center gap-1 transition-colors">
-                Member Portal <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+            {/* Foreground Hero Content (Layered above video wallpaper) */}
+            <div className="relative z-10 flex flex-col justify-between h-full">
+              <div>
+                <div className="flex items-center justify-between mb-8">
+                  <img
+                    src="/img/logo.png"
+                    alt="MFC Youth"
+                    width={180}
+                    height={84}
+                    className="object-contain drop-shadow-sm"
+                  />
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-white/10 text-slate-200 border border-white/10 backdrop-blur-xs">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                    Cloud Connected
+                  </span>
+                </div>
+
+                <div className="space-y-2 mb-8">
+                  <span className="text-xs font-bold tracking-widest text-amber-300 font-heading">
+                    AREA MANAGEMENT SYSTEM
+                  </span>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight font-heading">
+                    Lead your Area with one clear, secure workspace.
+                  </h1>
+                  <p className="text-sm text-slate-300">
+                    Centralized operational portal for youth members, chapters, gatherings, and reports.
+                  </p>
+                </div>
+
+                {/* Liturgical Daily Reading Card */}
+                <div className="bg-white/10 border border-white/15 rounded-xl p-4 mb-6 backdrop-blur-xs">
+                  <div className="flex items-center justify-between mb-2 pb-2 border-b border-white/10">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-amber-300" />
+                      <span className="text-xs font-bold text-white">Daily Scripture Readings</span>
+                    </div>
+                    {readingsData?.date && (
+                      <span className="text-[11px] text-amber-200/90 font-medium">{readingsData.date}</span>
+                    )}
+                  </div>
+                  {readingsLoading ? (
+                    <p className="text-xs text-slate-300">Loading today's Catholic Mass readings...</p>
+                  ) : readingsData?.celebration ? (
+                    <div className="space-y-1.5">
+                      <p className="text-xs font-semibold text-white leading-snug">
+                        {readingsData.celebration}
+                      </p>
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        {readingsData.readings?.slice(0, 3).map((r, i) => (
+                          <span key={i} className="text-[11px] bg-white/10 px-2 py-0.5 rounded text-slate-200 border border-white/10">
+                            {r.type}: {r.reference}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-300">Daily liturgical feed available online.</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
+                <span>Missionary Families for Christ Youth</span>
+                <Link to="/member-login" className="text-amber-300 hover:text-white font-semibold flex items-center gap-1 transition-colors">
+                  Member Portal <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
             </div>
           </section>
 

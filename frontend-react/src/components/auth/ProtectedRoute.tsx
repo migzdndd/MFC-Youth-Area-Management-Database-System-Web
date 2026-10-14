@@ -26,17 +26,20 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/dashboard" replace />;
   }
 
-  // If member tries to access servant views, redirect to /member portal
+  // If member tries to access servant views, redirect to /member portal (permit developers to visit /dev)
   if (user.role === 'member' && location.pathname !== '/member') {
+    if (user.is_developer && location.pathname === '/dev') {
+      return <>{children}</>;
+    }
     return <Navigate to="/member" replace />;
   }
 
-  // If servant tries to access /member without being a member
-  if (location.pathname === '/member' && user.role !== 'member') {
+  // If servant tries to access /member without being a member (permit developers to test /member)
+  if (location.pathname === '/member' && user.role !== 'member' && !user.is_developer) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
+  if (allowedRoles && !allowedRoles.includes(user.role) && !user.is_developer) {
     return <Navigate to="/dashboard" replace />;
   }
 

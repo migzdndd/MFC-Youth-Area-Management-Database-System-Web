@@ -28,11 +28,14 @@ export const RegisterPage: React.FC = () => {
       const res = await apiClient<{ ok: boolean; message?: string }>('/auth/register', {
         method: 'POST',
         body: JSON.stringify({
-          first_name: firstName,
-          last_name: lastName,
-          email,
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          displayName: `${firstName.trim()} ${lastName.trim()}`.trim(),
+          email: email.trim(),
           password,
-          area_passcode: areaPasscode,
+          confirmPassword: password,
+          area_passcode: areaPasscode.trim(),
+          verificationCode: areaPasscode.trim(),
           role,
         }),
       });

@@ -9,6 +9,7 @@ interface CommitItem {
   commit: {
     message: string;
     author: {
+      name?: string;
       date: string;
     };
   };
@@ -137,9 +138,9 @@ export const ChangelogsPage: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                <code className="text-xs font-mono bg-white px-2.5 py-1 rounded-md border border-slate-200 text-slate-700 font-semibold shrink-0 self-start sm:self-auto shadow-2xs">
-                  {c.sha.substring(0, 7)}
-                </code>
+                <span className="text-xs font-medium bg-white px-2.5 py-1 rounded-md border border-slate-200 text-slate-700 shrink-0 self-start sm:self-auto shadow-2xs">
+                  {c.commit?.author?.name || 'Verified Update'}
+                </span>
               </div>
             ))}
           </div>

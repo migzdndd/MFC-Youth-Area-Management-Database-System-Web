@@ -48,6 +48,7 @@ const ROUTES = new Map([
   ['areas', areas],
   ['areas/select', areaSelect],
   ['auth/account', authAccount],
+  ['auth/register', authAdminRegister],
   ['auth/admin-register', authAdminRegister],
   ['auth/change-password', authChangePassword],
   ['auth/login', authLogin],

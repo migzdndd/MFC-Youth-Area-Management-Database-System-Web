@@ -10,7 +10,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
-  const { user, activeArea, setActiveArea } = useAuthStore();
+  const { user, activeArea, requestAreaSwitch } = useAuthStore();
   const { data: areas = [] } = useAreas();
   const queryClient = useQueryClient();
 
@@ -41,8 +41,10 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                 value={activeArea?.id || user?.area_id || ''}
                 onChange={(e) => {
                   const selected = areas.find((a: Area) => a.id === e.target.value);
-                  setActiveArea(selected || null);
-                  queryClient.clear();
+                  const switched = requestAreaSwitch(selected || null);
+                  if (switched) {
+                    queryClient.clear();
+                  }
                 }}
                 className="bg-transparent text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer max-w-[140px] sm:max-w-[220px] truncate"
               >

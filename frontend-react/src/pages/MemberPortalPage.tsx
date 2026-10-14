@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { Calendar, HeartHandshake, LogOut, Clock, MapPin } from 'lucide-react';
+import { SimulationBanner } from '@/components/layout/SimulationBanner';
+import { AreaSwitchModal } from '@/components/layout/AreaSwitchModal';
 
 export const MemberPortalPage: React.FC = () => {
   const navigate = useNavigate();
@@ -25,6 +27,9 @@ export const MemberPortalPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-canvas">
+      <SimulationBanner />
+      <AreaSwitchModal />
+
       {/* Top Bar */}
       <header className="bg-navy-deep text-white px-4 sm:px-8 py-4 flex items-center justify-between border-b border-navy-surface shadow-2xs">
         <div className="flex items-center gap-3">
