@@ -41,8 +41,8 @@ export const RegisterPage: React.FC = () => {
       });
 
       if (res.ok) {
-        setSuccessMessage('Registration successful! You can now sign in with your credentials.');
-        setTimeout(() => navigate('/login'), 2000);
+        setSuccessMessage('Registration successful! Redirecting to sign in so you can select your Area Database...');
+        setTimeout(() => navigate('/login', { state: { registered: true, email: email.trim() } }), 1500);
       } else {
         setErrorMessage(res.message || 'Registration failed. Please check your passcode.');
       }

@@ -26,6 +26,18 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/dashboard" replace />;
   }
 
+  // Require servant leaders to select/create and validate their Area Database before proceeding to dashboard
+  const isServantLeader = user.role !== 'member';
+  const hasAssignedArea = Boolean(user.area_id && user.area_id.trim());
+
+  if (isServantLeader && !hasAssignedArea && location.pathname !== '/select-area') {
+    return <Navigate to="/select-area" replace />;
+  }
+
+  if (isServantLeader && hasAssignedArea && location.pathname === '/select-area') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   // If member tries to access servant views, redirect to /member portal (permit developers to visit /dev)
   if (user.role === 'member' && location.pathname !== '/member') {
     if (user.is_developer && location.pathname === '/dev') {

@@ -12,6 +12,7 @@ interface AuthState {
   isLoading: boolean;
   setSession: (session: { access_token: string; refresh_token: string; user: UserProfile } | null) => void;
   setActiveArea: (area: Area | null, role?: UserRole | null) => void;
+  setAssignedArea: (area: Area, memberId?: string | null) => void;
   requestAreaSwitch: (targetArea: Area | null) => boolean;
   confirmPendingAreaSwitch: () => { success: boolean; restoredRole: UserRole; areaName: string } | null;
   cancelPendingAreaSwitch: () => void;
@@ -71,10 +72,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         home_role: session.user.home_role || session.user.role,
       };
       localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ ...session, user }));
+      const userArea: Area | null = user.area_id
+        ? { id: user.area_id, name: user.area_name || '' }
+        : null;
+      if (userArea) {
+        localStorage.setItem(ACTIVE_AREA_KEY, JSON.stringify(userArea));
+      } else {
+        localStorage.removeItem(ACTIVE_AREA_KEY);
+      }
       set({
         user,
         token: session.access_token,
         refreshToken: session.refresh_token,
+        activeArea: userArea,
         simulatedRole: null,
         pendingAreaSwitch: null,
         roleRestorationValidated: false,
@@ -124,6 +134,38 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const updatedUser = { ...current, home_role: homeRole, role: effectiveRole };
       set({ activeArea: area, user: updatedUser, simulatedRole: effectiveRole });
     }
+  },
+
+  setAssignedArea: (area, memberId) => {
+    const current = get().user;
+    if (!current) return;
+    const homeRole = current.home_role || current.role;
+    const updatedUser: UserProfile = {
+      ...current,
+      home_role: homeRole,
+      role: homeRole,
+      area_id: area.id,
+      area_name: area.name,
+      ...(memberId ? { member_id: memberId } : {}),
+      requiresAreaSelection: false,
+      requires_area_selection: false,
+    };
+
+    localStorage.setItem(ACTIVE_AREA_KEY, JSON.stringify(area));
+
+    const session = getStoredSession();
+    if (session) {
+      session.user = updatedUser;
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+    }
+
+    set({
+      user: updatedUser,
+      activeArea: area,
+      simulatedRole: null,
+      pendingAreaSwitch: null,
+      roleRestorationValidated: true,
+    });
   },
 
   requestAreaSwitch: (targetArea) => {

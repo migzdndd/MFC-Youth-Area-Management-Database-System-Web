@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth-store';
 import { apiClient } from '@/lib/api';
@@ -14,10 +14,16 @@ const EMAIL_DRAFT_KEY = 'mfc_leader_email_draft';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const { setSession } = useAuthStore();
+  const registrationNotice = location.state?.registered
+    ? 'Registration successful! Sign in to select your Area Database and initialize your portal.'
+    : '';
   const [email, setEmail] = useState(() => {
     try {
+      const stateEmail = (location.state as { email?: string })?.email;
+      if (stateEmail) return stateEmail;
       return localStorage.getItem(REMEMBERED_EMAIL_KEY) || sessionStorage.getItem(EMAIL_DRAFT_KEY) || '';
     } catch {
       return '';
@@ -138,7 +144,17 @@ export const LoginPage: React.FC = () => {
 
         queryClient.clear();
 
-        if (normalizedUser.role === 'member') {
+        const isServantLeader = normalizedUser.role !== 'member';
+        const requiresAreaSelection = Boolean(
+          isServantLeader &&
+          (!normalizedUser.area_id ||
+           normalizedUser.requiresAreaSelection ||
+           (res as { requiresAreaSelection?: boolean }).requiresAreaSelection)
+        );
+
+        if (requiresAreaSelection) {
+          navigate('/select-area');
+        } else if (normalizedUser.role === 'member') {
           navigate('/member');
         } else {
           navigate('/dashboard');
@@ -271,6 +287,12 @@ export const LoginPage: React.FC = () => {
                   Enter your servant credentials to access area records.
                 </p>
               </div>
+
+              {registrationNotice && (
+                <div className="p-3 text-sm text-mfc-green bg-emerald-50 border border-emerald-200 rounded-md font-medium" role="status">
+                  {registrationNotice}
+                </div>
+              )}
 
               {errorMessage && (
                 <div className="p-3 text-sm text-mfc-red bg-red-50 border border-red-200 rounded-md font-medium" role="alert">

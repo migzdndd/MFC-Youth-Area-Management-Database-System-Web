@@ -136,10 +136,13 @@ export default async function handler(req, res) {
       refreshToken: data.session.refresh_token
     }, Boolean(req.body?.remember));
 
+    const requiresAreaSelection = !linkedProfile.area_id && linkedProfile.role !== 'member';
+
     return sendJson(res, 200, {
       ok: true,
       access_token: data.session.access_token,
       refresh_token: data.session.refresh_token,
+      requiresAreaSelection,
       session: {
         accessToken: data.session.access_token,
         refreshToken: data.session.refresh_token,
@@ -161,7 +164,8 @@ export default async function handler(req, res) {
         chapterId: linkedProfile.chapter_id,
         chapter_id: linkedProfile.chapter_id,
         mustChangePassword: linkedProfile.must_change_password,
-        is_developer: Boolean(linkedProfile.is_developer)
+        is_developer: Boolean(linkedProfile.is_developer),
+        requiresAreaSelection
       }
     });
   } catch (error) {

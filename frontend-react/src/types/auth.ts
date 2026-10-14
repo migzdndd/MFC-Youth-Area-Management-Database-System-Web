@@ -30,6 +30,8 @@ export interface UserProfile {
   last_name?: string;
   is_mfa_enabled?: boolean;
   is_developer?: boolean;
+  requiresAreaSelection?: boolean;
+  requires_area_selection?: boolean;
 }
 
 export interface AuthSession {

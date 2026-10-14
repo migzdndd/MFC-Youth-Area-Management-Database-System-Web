@@ -12,6 +12,7 @@ const LoginPage = lazy(() => import('@/pages/auth/LoginPage').then((m) => ({ def
 const MemberLoginPage = lazy(() => import('@/pages/auth/MemberLoginPage').then((m) => ({ default: m.MemberLoginPage })));
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage').then((m) => ({ default: m.RegisterPage })));
 const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })));
+const SelectAreaPage = lazy(() => import('@/pages/auth/SelectAreaPage').then((m) => ({ default: m.SelectAreaPage })));
 
 // Lazy-loaded Feature Pages
 const DashboardPage = lazy(() => import('@/pages/DashboardPage').then((m) => ({ default: m.DashboardPage })));
@@ -80,6 +81,9 @@ const RootRedirect: React.FC = () => {
   if (user.role === 'member') {
     return <Navigate to="/member" replace />;
   }
+  if (!user.area_id) {
+    return <Navigate to="/select-area" replace />;
+  }
   return <Navigate to="/dashboard" replace />;
 };
 
@@ -96,6 +100,16 @@ export default function App() {
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/changelogs" element={<Navigate to="/" replace />} />
+
+              {/* Leader Area Database Selection & Onboarding Route */}
+              <Route
+                path="/select-area"
+                element={
+                  <ProtectedRoute>
+                    <SelectAreaPage />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* Member Portal Dedicated Route */}
               <Route
