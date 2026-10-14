@@ -29,6 +29,15 @@ export default async function handler(req, res) {
     const { data, error } = await authClient.auth.signInWithPassword({ email, password });
 
     if (error || !data?.session || !data?.user) {
+      if (error?.message && error.message.toLowerCase().includes('email not confirmed')) {
+        return sendJson(res, 403, {
+          ok: false,
+          error: 'Your email address is not verified yet. Please check your inbox for the verification code or link.',
+          needsEmailVerification: true,
+          email
+        });
+      }
+
       const lockout = await recordLoginFailure(email);
       if (lockout?.locked) {
         const remainingMinutes = Math.max(1, Math.ceil((new Date(lockout.lockedUntil).getTime() - Date.now()) / 60000));

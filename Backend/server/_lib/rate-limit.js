@@ -33,6 +33,8 @@ const RATE_CONFIGS = {
   'forgot-password': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
   'reset-password': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
   'admin-register': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
+  'verify-email': { maxAttempts: 10, windowMs: 10 * 60 * 1000, label: '10 minutes' },
+  'resend-verification': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
   'member-claim': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
   'daily-readings': { maxAttempts: 120, windowMs: 5 * 60 * 1000, label: '5 minutes' },
   changelogs: { maxAttempts: 120, windowMs: 5 * 60 * 1000, label: '5 minutes' },
@@ -62,7 +64,7 @@ export async function checkRateLimit(req, res, endpoint, targetIdentifier = null
     }
   }
 
-  const isAuthEndpoint = ['login', 'forgot-password', 'reset-password', 'member-claim'].includes(endpoint);
+  const isAuthEndpoint = ['login', 'forgot-password', 'reset-password', 'member-claim', 'verify-email', 'resend-verification'].includes(endpoint);
   const rateKey = (isAuthEndpoint && target)
     ? `${endpoint}:${ip}:${target}`
     : `${endpoint}:${ip}`;

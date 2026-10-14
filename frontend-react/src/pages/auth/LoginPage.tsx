@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth-store';
-import { apiClient } from '@/lib/api';
+import { apiClient, ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useDailyReadings } from '@/hooks/useReadings';
@@ -17,6 +17,7 @@ export const LoginPage: React.FC = () => {
   const location = useLocation();
   const queryClient = useQueryClient();
   const { setSession } = useAuthStore();
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
   const registrationNotice = location.state?.registered
     ? 'Registration successful! Sign in to select your Area Database and initialize your portal.'
     : '';
@@ -163,10 +164,15 @@ export const LoginPage: React.FC = () => {
         setErrorMessage(res.error || 'Invalid email or password.');
       }
     } catch (err: unknown) {
-      if (err instanceof Error) {
+      if (err instanceof ApiError && (err.data as { needsEmailVerification?: boolean })?.needsEmailVerification) {
         setErrorMessage(err.message);
+        setUnverifiedEmail(email.trim());
+      } else if (err instanceof Error) {
+        setErrorMessage(err.message);
+        setUnverifiedEmail(null);
       } else {
         setErrorMessage('Failed to sign in. Please check your credentials.');
+        setUnverifiedEmail(null);
       }
     } finally {
       setIsLoading(false);
@@ -296,7 +302,17 @@ export const LoginPage: React.FC = () => {
 
               {errorMessage && (
                 <div className="p-3 text-sm text-mfc-red bg-red-50 border border-red-200 rounded-md font-medium" role="alert">
-                  {errorMessage}
+                  <div>{errorMessage}</div>
+                  {unverifiedEmail && (
+                    <Link
+                      to="/register"
+                      state={{ email: unverifiedEmail, verifyOnly: true }}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-navy hover:underline mt-2"
+                    >
+                      <span>Enter your 6-digit email verification code</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  )}
                 </div>
               )}
 

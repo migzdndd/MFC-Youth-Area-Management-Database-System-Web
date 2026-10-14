@@ -221,10 +221,11 @@ export default async function handler(req, res) {
         }
       }
 
+      let authUser = null;
       const { data: authData, error: authError } = await admin.auth.admin.createUser({
         email,
         password,
-        email_confirm: true,
+        email_confirm: false,
         user_metadata: {
           display_name: displayName,
           first_name: firstName || displayName.split(' ')[0] || '',
@@ -237,16 +238,42 @@ export default async function handler(req, res) {
       if (authError || !authData?.user) {
         const message = String(authError?.message || '');
         if (message.toLowerCase().includes('already') || message.toLowerCase().includes('registered')) {
-          return sendJson(res, 409, { ok: false, error: 'An account with this email already exists.' });
-        }
-        throw stageError(authError || new Error('Unable to create the account.'), 'auth_user_creation', 'AUTH_USER_CREATION_FAILED');
-      }
+          // Check if existing user is unconfirmed to allow re-verifying
+          const { data: usersList } = await admin.auth.admin.listUsers();
+          const existing = (usersList?.users || []).find(u => u.email?.toLowerCase() === email.toLowerCase());
 
-      createdUserId = authData.user.id;
+          if (existing) {
+            if (existing.email_confirmed_at) {
+              return sendJson(res, 409, { ok: false, error: 'An account with this email already exists. Please sign in.' });
+            }
+
+            // User exists but has not confirmed email yet: update password and user metadata
+            await admin.auth.admin.updateUserById(existing.id, {
+              password,
+              user_metadata: {
+                display_name: displayName,
+                first_name: firstName || displayName.split(' ')[0] || '',
+                last_name: lastName || displayName.split(' ').slice(1).join(' ') || '',
+                registration_type: 'servant_leader',
+                password_origin: 'self_chosen'
+              }
+            });
+            authUser = existing;
+            createdUserId = existing.id;
+          } else {
+            return sendJson(res, 409, { ok: false, error: 'An account with this email already exists.' });
+          }
+        } else {
+          throw stageError(authError || new Error('Unable to create the account.'), 'auth_user_creation', 'AUTH_USER_CREATION_FAILED');
+        }
+      } else {
+        authUser = authData.user;
+        createdUserId = authData.user.id;
+      }
 
       const { data: createdProfile, error: profileError } = await admin
         .from('profiles')
-        .insert({
+        .upsert({
           id: createdUserId,
           member_id: null,
           role,
@@ -262,62 +289,27 @@ export default async function handler(req, res) {
         throw stageError(profileError, 'profile_creation', 'PROFILE_CREATION_FAILED');
       }
 
-      let memberLink = { profile: createdProfile, member: null };
-      if (targetArea?.id) {
-        try {
-          memberLink = await ensureLeadershipMemberRecord({
-            supabase: admin,
-            user: authData.user,
-            profile: createdProfile,
-            areaId: targetArea.id
-          });
-        } catch (linkError) {
-          console.warn('Leadership member linking warning:', linkError?.message || linkError);
-        }
-      }
-
+      // Dispatch real verification email with confirmation code / link via Supabase Auth
       const authClient = createSupabaseAuthClient();
-      const { data: signInData, error: signInError } = await authClient.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (signInError || !signInData?.session) {
-        throw stageError(signInError || new Error('Account created, but automatic sign-in failed.'), 'automatic_sign_in', 'AUTO_SIGNIN_FAILED');
+      try {
+        const { error: resendError } = await authClient.auth.resend({
+          type: 'signup',
+          email
+        });
+        if (resendError) {
+          console.warn('Initial signup verification email dispatch warning:', resendError?.message || resendError);
+        }
+      } catch (emailErr) {
+        console.warn('Initial signup email trigger error:', emailErr?.message || emailErr);
       }
-
-      const requiresAreaSelection = !targetArea?.id;
-      const finalMemberId = memberLink.member?.id || memberLink.profile?.member_id || null;
 
       return sendJson(res, 201, {
         ok: true,
-        message: targetArea
-          ? `Registration validated for ${targetArea.name} Area Database.`
-          : 'Registration successful. Select your Area Database to continue.',
-        requiresAreaSelection,
-        session: {
-          accessToken: signInData.session.access_token,
-          refreshToken: signInData.session.refresh_token,
-          expiresAt: signInData.session.expires_at
-        },
-        user: {
-          id: createdUserId,
-          email,
-          name: displayName,
-          memberId: finalMemberId,
-          member_id: finalMemberId,
-          role,
-          areaId: targetArea?.id || null,
-          area_id: targetArea?.id || null,
-          areaName: targetArea?.name || null,
-          area_name: targetArea?.name || null,
-          chapterId: null,
-          chapter_id: null,
-          mustChangePassword: false,
-          passwordMode: 'self_chosen',
-          requiresAreaSelection
-        },
-        area: targetArea || null
+        requiresEmailVerification: true,
+        email,
+        areaId: targetArea?.id || null,
+        areaName: targetArea?.name || null,
+        message: `A 6-digit verification code has been sent to ${email}. Please check your email to complete registration.`
       });
     } catch (error) {
       if (createdUserId) {
