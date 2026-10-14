@@ -26,7 +26,8 @@ export const DOMAIN_MODERATOR_ROLES = new Set([
 
 export const AREA_ADMIN_ROLES = FULL_AREA_ADMIN_ROLES;
 
-export function isAreaAdminRole(role) {
+export function isAreaAdminRole(role, isDeveloper = false) {
+  if (isDeveloper === true) return true;
   return FULL_AREA_ADMIN_ROLES.has(String(role || '').trim().toLowerCase());
 }
 
@@ -38,7 +39,8 @@ export function isChapterServantRole(role) {
   return String(role || '').trim().toLowerCase() === 'chapter_servant';
 }
 
-export function isLeaderRole(role) {
+export function isLeaderRole(role, isDeveloper = false) {
+  if (isDeveloper === true) return true;
   const normalized = String(role || '').trim().toLowerCase();
   return FULL_AREA_ADMIN_ROLES.has(normalized) ||
     DOMAIN_MODERATOR_ROLES.has(normalized) ||
@@ -141,6 +143,9 @@ export async function requireAuthenticatedProfile(req) {
     error.code = 'ACCOUNT_INACTIVE';
     throw error;
   }
+
+  const isDev = profile.is_developer === true || await isSystemDeveloper(admin, user, profile);
+  profile.is_developer = isDev;
 
   return { supabase: userClient, userClient, admin, user, profile, token };
 }

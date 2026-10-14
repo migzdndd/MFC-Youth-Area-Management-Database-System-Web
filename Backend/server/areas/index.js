@@ -7,6 +7,7 @@
  */
 
 import { requireAuthenticatedProfile } from '../_lib/access.js';
+import { createSupabaseAdmin } from '../_lib/supabase.js';
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { ensureLeadershipMemberRecord } from '../_lib/member-link.js';
 import { STANDARD_SERVICES } from '../_lib/service-catalog.js';
@@ -21,7 +22,6 @@ const LEADERSHIP_ROLES = new Set([
   'area_kids_servant',
   'chapter_servant'
 ]);
-
 
 /**
  * Clean and Format Area Name
@@ -60,17 +60,13 @@ function areaCodeFromName(name) {
  * List All Active Areas for Selection
  *
  * What it does:
- * Fetches the list of all active MFC Youth areas so newly registered servant leaders can select and join their Area.
+ * Fetches the list of all active MFC Youth areas so newly registering leaders and existing leaders can select and join their Area.
  *
  * Backup plan if it breaks:
- * Restricts access to servant leader accounts. If no areas exist yet, it returns an empty list without error.
+ * If no areas exist yet, returns an empty list without throwing an error.
  */
 async function listAreas(req, res) {
-  const { admin, profile } = await requireAuthenticatedProfile(req);
-  if (!LEADERSHIP_ROLES.has(String(profile.role || '').toLowerCase())) {
-    return sendJson(res, 403, { ok: false, error: 'Area setup is available only to Servant Leader accounts.' });
-  }
-
+  const admin = createSupabaseAdmin();
   const { data, error } = await admin
     .from('areas')
     .select('id, name, code, is_active')
@@ -92,10 +88,11 @@ async function listAreas(req, res) {
  */
 async function createArea(req, res) {
   const { admin, profile, user } = await requireAuthenticatedProfile(req);
-  if (!LEADERSHIP_ROLES.has(String(profile.role || '').toLowerCase())) {
+  const isGlobalAdmin = profile?.role === 'national_coordinator' || profile?.is_developer === true;
+  if (!LEADERSHIP_ROLES.has(String(profile.role || '').toLowerCase()) && !isGlobalAdmin) {
     return sendJson(res, 403, { ok: false, error: 'You do not have permission to create an Area.' });
   }
-  if (profile.area_id) {
+  if (profile.area_id && !isGlobalAdmin) {
     return sendJson(res, 409, { ok: false, error: 'Your account is already assigned to an Area.' });
   }
 
@@ -145,12 +142,15 @@ async function createArea(req, res) {
       .insert(STANDARD_SERVICES.map(serviceName => ({ area_id: area.id, name: serviceName, is_active: true })));
     if (serviceError) throw serviceError;
 
-    const memberLink = await ensureLeadershipMemberRecord({
-      supabase: admin,
-      user,
-      profile,
-      areaId: area.id
-    });
+    let memberLink = { profile, member: null, created: false, linkedExisting: false };
+    if (!profile.area_id) {
+      memberLink = await ensureLeadershipMemberRecord({
+        supabase: admin,
+        user,
+        profile,
+        areaId: area.id
+      });
+    }
 
     return sendJson(res, 201, {
       ok: true,

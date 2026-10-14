@@ -29,12 +29,13 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Require servant leaders to select/create and validate their Area Database before proceeding to dashboard
   const isServantLeader = user.role !== 'member';
   const hasAssignedArea = Boolean(user.area_id && user.area_id.trim());
+  const isGlobalAdmin = Boolean(user.is_developer || user.role === 'national_coordinator');
 
-  if (isServantLeader && !hasAssignedArea && location.pathname !== '/select-area') {
+  if (isServantLeader && !hasAssignedArea && !isGlobalAdmin && location.pathname !== '/select-area') {
     return <Navigate to="/select-area" replace />;
   }
 
-  if (isServantLeader && hasAssignedArea && location.pathname === '/select-area') {
+  if (isServantLeader && hasAssignedArea && !isGlobalAdmin && location.pathname === '/select-area') {
     return <Navigate to="/dashboard" replace />;
   }
 

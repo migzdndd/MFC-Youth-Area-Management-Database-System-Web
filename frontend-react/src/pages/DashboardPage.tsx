@@ -63,8 +63,8 @@ export const DashboardPage: React.FC = () => {
           </p>
         </div>
 
-        {/* National Coordinator Area Selector */}
-        {isNationalCoordinator && areas && areas.length > 0 && (
+        {/* Global Admin (National Coordinator / Developer) Area Selector */}
+        {(isNationalCoordinator || user?.is_developer) && areas && areas.length > 0 && (
           <div className="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-2xs shrink-0">
             <MapPin className="w-4 h-4 text-navy shrink-0" />
             <label htmlFor="areaSelect" className="text-xs font-semibold text-slate-700 whitespace-nowrap">

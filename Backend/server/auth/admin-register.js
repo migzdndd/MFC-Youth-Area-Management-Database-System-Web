@@ -11,6 +11,8 @@ import { createSupabaseAdmin, createSupabaseAuthClient } from '../_lib/supabase.
 import { assertAdminRegistrationConfigured } from '../_lib/env.js';
 import { sendJson, methodNotAllowed, normalizeEmail, isValidEmail, apiError, passwordError } from '../_lib/http.js';
 import { checkRateLimit } from '../_lib/rate-limit.js';
+import { ensureLeadershipMemberRecord } from '../_lib/member-link.js';
+import { STANDARD_SERVICES } from '../_lib/service-catalog.js';
 
 const ALLOWED_ADMIN_ROLES = new Set([
   'couple_coordinator',
@@ -21,6 +23,17 @@ const ALLOWED_ADMIN_ROLES = new Set([
   'area_kids_servant',
   'chapter_servant'
 ]);
+
+function areaCodeFromName(name) {
+  const base = String(name || '')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 44);
+  return base || `AREA-${Date.now().toString(36).toUpperCase()}`;
+}
 
 /**
  * Clean User Input Text
@@ -139,10 +152,75 @@ export default async function handler(req, res) {
       return sendJson(res, 400, { ok: false, error: 'Passwords do not match.' });
     }
 
+    const areaId = cleanText(req.body?.area_id || req.body?.areaId, 64);
+    const newAreaName = cleanText(
+      req.body?.new_area_name || req.body?.newAreaName || req.body?.area_name || req.body?.areaName,
+      120
+    );
+
     const admin = createSupabaseAdmin();
     let createdUserId = null;
+    let createdAreaId = null;
+    let targetArea = null;
 
     try {
+      if (newAreaName && newAreaName.length >= 3) {
+        const { data: existingByName, error: existingError } = await admin
+          .from('areas')
+          .select('id, name, code, is_active')
+          .ilike('name', newAreaName)
+          .limit(1)
+          .maybeSingle();
+
+        if (existingError) throw existingError;
+
+        if (existingByName) {
+          targetArea = existingByName;
+        } else {
+          let code = areaCodeFromName(newAreaName);
+          const { data: codeConflict } = await admin
+            .from('areas')
+            .select('id')
+            .eq('code', code)
+            .maybeSingle();
+
+          if (codeConflict) {
+            code = `${code.slice(0, 38)}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+          }
+
+          const { data: newArea, error: createAreaError } = await admin
+            .from('areas')
+            .insert({ name: newAreaName, code, is_active: true })
+            .select('id, name, code, is_active')
+            .single();
+
+          if (createAreaError) throw createAreaError;
+          targetArea = newArea;
+          createdAreaId = newArea.id;
+
+          const { error: serviceError } = await admin
+            .from('services')
+            .insert(STANDARD_SERVICES.map((serviceName) => ({
+              area_id: newArea.id,
+              name: serviceName,
+              is_active: true
+            })));
+
+          if (serviceError) throw serviceError;
+        }
+      } else if (areaId) {
+        const { data: existingArea, error: areaFetchError } = await admin
+          .from('areas')
+          .select('id, name, code, is_active')
+          .eq('id', areaId)
+          .maybeSingle();
+
+        if (areaFetchError) throw areaFetchError;
+        if (existingArea && existingArea.is_active !== false) {
+          targetArea = existingArea;
+        }
+      }
+
       const { data: authData, error: authError } = await admin.auth.admin.createUser({
         email,
         password,
@@ -166,20 +244,36 @@ export default async function handler(req, res) {
 
       createdUserId = authData.user.id;
 
-      const { error: profileError } = await admin
+      const { data: createdProfile, error: profileError } = await admin
         .from('profiles')
         .insert({
           id: createdUserId,
           member_id: null,
           role,
-          area_id: null,
+          area_id: targetArea?.id || null,
           chapter_id: null,
           must_change_password: false,
           is_active: true
-        });
+        })
+        .select('*')
+        .single();
 
       if (profileError) {
         throw stageError(profileError, 'profile_creation', 'PROFILE_CREATION_FAILED');
+      }
+
+      let memberLink = { profile: createdProfile, member: null };
+      if (targetArea?.id) {
+        try {
+          memberLink = await ensureLeadershipMemberRecord({
+            supabase: admin,
+            user: authData.user,
+            profile: createdProfile,
+            areaId: targetArea.id
+          });
+        } catch (linkError) {
+          console.warn('Leadership member linking warning:', linkError?.message || linkError);
+        }
       }
 
       const authClient = createSupabaseAuthClient();
@@ -192,10 +286,15 @@ export default async function handler(req, res) {
         throw stageError(signInError || new Error('Account created, but automatic sign-in failed.'), 'automatic_sign_in', 'AUTO_SIGNIN_FAILED');
       }
 
+      const requiresAreaSelection = !targetArea?.id;
+      const finalMemberId = memberLink.member?.id || memberLink.profile?.member_id || null;
+
       return sendJson(res, 201, {
         ok: true,
-        message: 'Registration successful! You can now sign in with your credentials.',
-        requiresAreaSelection: true,
+        message: targetArea
+          ? `Registration validated for ${targetArea.name} Area Database.`
+          : 'Registration successful. Select your Area Database to continue.',
+        requiresAreaSelection,
         session: {
           accessToken: signInData.session.access_token,
           refreshToken: signInData.session.refresh_token,
@@ -205,18 +304,32 @@ export default async function handler(req, res) {
           id: createdUserId,
           email,
           name: displayName,
-          memberId: null,
+          memberId: finalMemberId,
+          member_id: finalMemberId,
           role,
-          areaId: null,
+          areaId: targetArea?.id || null,
+          area_id: targetArea?.id || null,
+          areaName: targetArea?.name || null,
+          area_name: targetArea?.name || null,
           chapterId: null,
+          chapter_id: null,
           mustChangePassword: false,
-          passwordMode: 'self_chosen'
-        }
+          passwordMode: 'self_chosen',
+          requiresAreaSelection
+        },
+        area: targetArea || null
       });
     } catch (error) {
       if (createdUserId) {
         try {
           await admin.auth.admin.deleteUser(createdUserId);
+        } catch {
+          // Cleanup failure must not replace the original registration error.
+        }
+      }
+      if (createdAreaId) {
+        try {
+          await admin.from('areas').delete().eq('id', createdAreaId);
         } catch {
           // Cleanup failure must not replace the original registration error.
         }

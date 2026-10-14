@@ -25,10 +25,11 @@ export default async function handler(req, res) {
 
   try {
     const { admin, profile, user } = await requireAuthenticatedProfile(req);
-    if (!LEADERSHIP_ROLES.has(String(profile.role || '').toLowerCase())) {
+    const isGlobalAdmin = profile?.role === 'national_coordinator' || profile?.is_developer === true;
+    if (!LEADERSHIP_ROLES.has(String(profile.role || '').toLowerCase()) && !isGlobalAdmin) {
       return sendJson(res, 403, { ok: false, error: 'You do not have permission to select an Area.' });
     }
-    if (profile.area_id) {
+    if (profile.area_id && !isGlobalAdmin) {
       return sendJson(res, 409, { ok: false, error: 'Your account is already assigned to an Area.' });
     }
 
