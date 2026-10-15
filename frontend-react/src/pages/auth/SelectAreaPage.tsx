@@ -148,7 +148,7 @@ export const SelectAreaPage: React.FC = () => {
 
       const verifiedAreaId = meRes.user?.area_id || meRes.user?.areaId;
       const isGlobalAdmin = Boolean(meRes.user?.is_developer || meRes.user?.role === 'national_coordinator');
-      if (!verifiedAreaId || (!isGlobalAdmin && verifiedAreaId !== targetArea.id)) {
+      if (!isGlobalAdmin && (!verifiedAreaId || verifiedAreaId !== targetArea.id)) {
         throw new Error(
           'Assignment validation check failed: The database has not registered your area assignment. Please retry.'
         );

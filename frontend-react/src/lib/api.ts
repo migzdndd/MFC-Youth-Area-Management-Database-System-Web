@@ -39,7 +39,7 @@ export async function apiClient<T>(
     ...(options.headers as Record<string, string>),
   };
 
-  if (token) {
+  if (token && !headers['Authorization']) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
@@ -74,17 +74,20 @@ export async function apiClient<T>(
 
         if (refreshRes.ok) {
           const refreshData = await refreshRes.json();
+          const newAccessToken = refreshData.access_token || refreshData.session?.accessToken || refreshData.session?.access_token;
+          const newRefreshToken = refreshData.refresh_token || refreshData.session?.refreshToken || refreshData.session?.refresh_token || refreshToken;
+
           const currentSession = {
-            access_token: refreshData.access_token,
-            refresh_token: refreshData.refresh_token || refreshToken,
+            access_token: newAccessToken,
+            refresh_token: newRefreshToken,
             user: useAuthStore.getState().user!,
           };
           setSession(currentSession);
-          onRefreshed(refreshData.access_token);
+          onRefreshed(newAccessToken);
           isRefreshing = false;
 
           // Retry original request with fresh token
-          headers['Authorization'] = `Bearer ${refreshData.access_token}`;
+          headers['Authorization'] = `Bearer ${newAccessToken}`;
           const retryRes = await fetch(url, { ...options, headers });
           return retryRes.json();
         } else {

@@ -102,6 +102,8 @@ export default async function handler(req, res) {
       refreshToken: session.refresh_token
     });
 
+    const finalMemberId = memberLink?.member?.id || memberLink?.profile?.member_id || profile?.member_id || null;
+    const requiresAreaSelection = !profile?.area_id && profile?.role !== 'member';
     const isPreRegistration = !profile;
 
     return sendJson(res, 200, {

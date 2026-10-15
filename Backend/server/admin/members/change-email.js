@@ -46,7 +46,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
 
   try {
-    const { user, profile, supabase } = await requireAuthenticatedProfile(req);
+    const { user, profile, supabase, admin } = await requireAuthenticatedProfile(req);
 
     if (!isAreaAdminRole(profile.role)) {
       return sendJson(res, 403, { ok: false, error: 'Only Area-level servants can override email addresses.' });
@@ -95,7 +95,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const { error: authUpdateError } = await supabase.auth.admin.updateUserById(targetProfile.id, { email: newEmail });
+    const { error: authUpdateError } = await admin.auth.admin.updateUserById(targetProfile.id, { email: newEmail });
     if (authUpdateError) {
       audit({ actorId: user.id, memberId: targetMember.id, status: 'FAILURE', errorCode: 'AUTH_UPDATE_FAILED' });
       throw authUpdateError;

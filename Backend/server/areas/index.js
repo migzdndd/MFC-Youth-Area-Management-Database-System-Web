@@ -163,7 +163,11 @@ async function createArea(req, res) {
     });
   } catch (error) {
     if (createdArea?.id) {
-      await admin.from('areas').delete().eq('id', createdArea.id).catch(() => {});
+      try {
+        await admin.from('areas').delete().eq('id', createdArea.id);
+      } catch {
+        // Silently ignore rollback failure to preserve original error
+      }
     }
     throw error;
   }

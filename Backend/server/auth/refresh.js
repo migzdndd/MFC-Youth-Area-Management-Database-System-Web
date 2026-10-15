@@ -16,6 +16,7 @@ export default async function handler(req, res) {
     const cookies = parseCookies(req.headers?.cookie);
     const refreshToken = String(
       req.body?.refreshToken ||
+      req.body?.refresh_token ||
       cookies.sb_refresh_token ||
       cookies['sb-refresh-token'] ||
       ''
@@ -50,6 +51,8 @@ export default async function handler(req, res) {
 
     return sendJson(res, 200, {
       ok: true,
+      access_token: data.session.access_token,
+      refresh_token: data.session.refresh_token,
       session: {
         accessToken: data.session.access_token,
         refreshToken: data.session.refresh_token,

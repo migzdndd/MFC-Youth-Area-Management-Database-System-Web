@@ -82,7 +82,8 @@ const RootRedirect: React.FC = () => {
   if (user.role === 'member') {
     return <Navigate to="/member" replace />;
   }
-  if (!user.area_id) {
+  const isGlobalAdmin = Boolean(user.is_developer || user.role === 'national_coordinator');
+  if (!user.area_id && !isGlobalAdmin) {
     return <Navigate to="/select-area" replace />;
   }
   return <Navigate to="/dashboard" replace />;
