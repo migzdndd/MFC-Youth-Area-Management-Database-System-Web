@@ -9,10 +9,10 @@
 import { timingSafeEqual } from 'node:crypto';
 import { createSupabaseAdmin, createSupabaseAuthClient } from '../_lib/supabase.js';
 import { assertAdminRegistrationConfigured } from '../_lib/env.js';
-import { sendJson, methodNotAllowed, normalizeEmail, isValidEmail, apiError, passwordError } from '../_lib/http.js';
+import { sendJson, methodNotAllowed, normalizeEmail, isValidEmail, apiError, passwordError, setAuthCookies } from '../_lib/http.js';
 import { checkRateLimit } from '../_lib/rate-limit.js';
 import { ensureLeadershipMemberRecord } from '../_lib/member-link.js';
-import { STANDARD_SERVICES } from '../_lib/service-catalog.js';
+import { resolveOrCreateArea } from '../_lib/area-setup.js';
 
 const ALLOWED_ADMIN_ROLES = new Set([
   'couple_coordinator',
@@ -23,17 +23,6 @@ const ALLOWED_ADMIN_ROLES = new Set([
   'area_kids_servant',
   'chapter_servant'
 ]);
-
-function areaCodeFromName(name) {
-  const base = String(name || '')
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toUpperCase()
-    .replace(/[^A-Z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 44);
-  return base || `AREA-${Date.now().toString(36).toUpperCase()}`;
-}
 
 /**
  * Clean User Input Text
@@ -165,62 +154,13 @@ export default async function handler(req, res) {
     let targetArea = null;
 
     try {
-      if (newAreaName && newAreaName.length >= 3) {
-        const { data: existingByName, error: existingError } = await admin
-          .from('areas')
-          .select('id, name, code, is_active')
-          .ilike('name', newAreaName)
-          .limit(1)
-          .maybeSingle();
-
-        if (existingError) throw existingError;
-
-        if (existingByName) {
-          targetArea = existingByName;
-        } else {
-          let code = areaCodeFromName(newAreaName);
-          const { data: codeConflict } = await admin
-            .from('areas')
-            .select('id')
-            .eq('code', code)
-            .maybeSingle();
-
-          if (codeConflict) {
-            code = `${code.slice(0, 38)}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
-          }
-
-          const { data: newArea, error: createAreaError } = await admin
-            .from('areas')
-            .insert({ name: newAreaName, code, is_active: true })
-            .select('id, name, code, is_active')
-            .single();
-
-          if (createAreaError) throw createAreaError;
-          targetArea = newArea;
-          createdAreaId = newArea.id;
-
-          const { error: serviceError } = await admin
-            .from('services')
-            .insert(STANDARD_SERVICES.map((serviceName) => ({
-              area_id: newArea.id,
-              name: serviceName,
-              is_active: true
-            })));
-
-          if (serviceError) throw serviceError;
-        }
-      } else if (areaId) {
-        const { data: existingArea, error: areaFetchError } = await admin
-          .from('areas')
-          .select('id, name, code, is_active')
-          .eq('id', areaId)
-          .maybeSingle();
-
-        if (areaFetchError) throw areaFetchError;
-        if (existingArea && existingArea.is_active !== false) {
-          targetArea = existingArea;
-        }
-      }
+      const { targetArea: resolvedArea, createdAreaId: newCreatedAreaId } = await resolveOrCreateArea({
+        admin,
+        areaId,
+        newAreaName
+      });
+      targetArea = resolvedArea;
+      createdAreaId = newCreatedAreaId;
 
       let authUser = null;
       const { data: authData, error: authError } = await admin.auth.admin.createUser({
@@ -245,12 +185,19 @@ export default async function handler(req, res) {
           const existing = (usersList?.users || []).find(u => u.email?.toLowerCase() === email.toLowerCase());
 
           if (existing) {
-            if (existing.email_confirmed_at) {
+            // Check if user already has an established leader profile
+            const { data: existingProfile } = await admin
+              .from('profiles')
+              .select('id, is_active')
+              .eq('id', existing.id)
+              .maybeSingle();
+
+            if (existingProfile) {
               return sendJson(res, 409, { ok: false, error: 'An account with this email already exists. Please sign in.' });
             }
 
-            // User exists but has not confirmed email yet: update password and user metadata
-            await admin.auth.admin.updateUserById(existing.id, {
+            // User exists from pre-verification: update chosen password and user metadata
+            const { data: updatedUserData, error: updateError } = await admin.auth.admin.updateUserById(existing.id, {
               password,
               user_metadata: {
                 display_name: displayName,
@@ -261,7 +208,8 @@ export default async function handler(req, res) {
                 password_origin: 'self_chosen'
               }
             });
-            authUser = existing;
+            if (updateError) throw updateError;
+            authUser = updatedUserData?.user || existing;
             createdUserId = existing.id;
           } else {
             return sendJson(res, 409, { ok: false, error: 'An account with this email already exists.' });
@@ -292,12 +240,65 @@ export default async function handler(req, res) {
         throw stageError(profileError, 'profile_creation', 'PROFILE_CREATION_FAILED');
       }
 
+      if (authUser?.email_confirmed_at) {
+        // Pre-verified user: establish session immediately
+        const authClient = createSupabaseAuthClient();
+        try {
+          const { data: signInData, error: signInError } = await authClient.auth.signInWithPassword({
+            email,
+            password
+          });
+
+          if (!signInError && signInData?.session) {
+            setAuthCookies(res, {
+              accessToken: signInData.session.access_token,
+              refreshToken: signInData.session.refresh_token
+            });
+
+            return sendJson(res, 201, {
+              ok: true,
+              requiresEmailVerification: false,
+              email,
+              session: {
+                accessToken: signInData.session.access_token,
+                refreshToken: signInData.session.refresh_token,
+                access_token: signInData.session.access_token,
+                refresh_token: signInData.session.refresh_token,
+              },
+              user: {
+                id: createdUserId,
+                email,
+                name: displayName,
+                role: createdProfile.role,
+                area_id: targetArea?.id || null,
+                areaName: targetArea?.name || null,
+              },
+              area: targetArea,
+              message: `Account created successfully! Welcome, ${displayName}.`
+            });
+          }
+        } catch (signInErr) {
+          console.warn('Pre-verified user initial sign-in warning:', signInErr?.message || signInErr);
+        }
+      }
+
       // Dispatch real verification email with confirmation code / link via Supabase Auth
       const authClient = createSupabaseAuthClient();
+      const originHeader = req.headers?.origin || req.headers?.referer;
+      let emailRedirectTo = null;
+      if (originHeader) {
+        try {
+          const parsed = new URL(originHeader);
+          emailRedirectTo = `${parsed.protocol}//${parsed.host}/register`;
+        } catch {
+          // Ignore invalid URL
+        }
+      }
       try {
         const { error: resendError } = await authClient.auth.resend({
           type: 'signup',
-          email
+          email,
+          ...(emailRedirectTo ? { options: { emailRedirectTo } } : {})
         });
         if (resendError) {
           console.warn('Initial signup verification email dispatch warning:', resendError?.message || resendError);

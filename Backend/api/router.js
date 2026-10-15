@@ -20,6 +20,8 @@ import authForgotPassword from '../server/auth/forgot-password.js';
 import authResetPassword from '../server/auth/reset-password.js';
 import authVerifyEmail from '../server/auth/verify-email.js';
 import authResendVerification from '../server/auth/resend-verification.js';
+import authSendVerification from '../server/auth/send-verification.js';
+import authCheckEmailVerification from '../server/auth/check-email-verification.js';
 import adminChangeEmail from '../server/admin/members/change-email.js';
 import authMe from '../server/auth/me.js';
 import authMemberClaim from '../server/auth/member-claim.js';
@@ -54,6 +56,8 @@ const ROUTES = new Map([
   ['auth/admin-register', authAdminRegister],
   ['auth/verify-email', authVerifyEmail],
   ['auth/resend-verification', authResendVerification],
+  ['auth/send-verification', authSendVerification],
+  ['auth/check-email-verification', authCheckEmailVerification],
   ['auth/change-password', authChangePassword],
   ['auth/login', authLogin],
   ['auth/logout', authLogout],

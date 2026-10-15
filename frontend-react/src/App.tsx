@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth-store';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { AuthRedirectHandler } from '@/components/auth/AuthRedirectHandler';
 import { Spinner } from '@/components/ui/Spinner';
 import { ToastProvider } from '@/components/ui/Toast';
 
@@ -92,6 +93,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
         <BrowserRouter>
+          <AuthRedirectHandler />
           <Suspense fallback={<LoadingFallback />}>
             <Routes>
               {/* Public Auth Routes */}
