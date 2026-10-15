@@ -75,7 +75,7 @@ async function getDeveloperMetrics(req, res) {
     admin.from('profiles').select('*', { count: 'exact', head: true }),
     admin.from('members').select('id, first_name, middle_name, last_name, email, status, created_at, area_id').order('created_at', { ascending: false }).limit(6),
     admin.from('events').select('id, name, venue, fee, starts_at, created_at, created_by').order('created_at', { ascending: false }).limit(6),
-    admin.from('activity_reports').select('id, report_type, status, created_at, chapter_id').order('created_at', { ascending: false }).limit(6),
+    admin.from('activity_reports').select('id, report_type, audit_status, created_at, chapter_id').order('created_at', { ascending: false }).limit(6),
   ]);
   const memoryUsage = process.memoryUsage();
 
@@ -111,7 +111,10 @@ async function getDeveloperMetrics(req, res) {
     recentActivity: {
       members: recentMembersRes.data || [],
       events: recentEventsRes.data || [],
-      reports: recentReportsRes.data || [],
+      reports: (recentReportsRes.data || []).map((r) => ({
+        ...r,
+        status: r.audit_status || 'Filed',
+      })),
     },
   };
 
