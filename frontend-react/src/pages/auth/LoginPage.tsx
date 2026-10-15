@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth-store';
+import { useToast } from '@/hooks/useToast';
 import { apiClient, ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -9,62 +10,38 @@ import { useDailyReadings } from '@/hooks/useReadings';
 import { ShieldCheck, BookOpen, ExternalLink, ArrowRight } from 'lucide-react';
 import type { UserProfile } from '@/types/auth';
 
-const REMEMBERED_EMAIL_KEY = 'mfc_remembered_leader_email';
-const EMAIL_DRAFT_KEY = 'mfc_leader_email_draft';
-
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const { setSession } = useAuthStore();
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
   const registrationNotice = location.state?.registered
     ? 'Registration successful! Sign in to select your Area Database and initialize your portal.'
     : '';
-  const [email, setEmail] = useState(() => {
-    try {
-      const stateEmail = (location.state as { email?: string })?.email;
-      if (stateEmail) return stateEmail;
-      return localStorage.getItem(REMEMBERED_EMAIL_KEY) || sessionStorage.getItem(EMAIL_DRAFT_KEY) || '';
-    } catch {
-      return '';
-    }
-  });
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(() => {
-    try {
-      const stored = localStorage.getItem(REMEMBERED_EMAIL_KEY);
-      return stored !== null ? true : true;
-    } catch {
-      return true;
-    }
-  });
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleEmailChange = (val: string) => {
-    setEmail(val);
+  // Clear any legacy saved credential drafts on mount
+  useEffect(() => {
     try {
-      sessionStorage.setItem(EMAIL_DRAFT_KEY, val);
-      if (rememberMe) {
-        localStorage.setItem(REMEMBERED_EMAIL_KEY, val);
-      }
+      localStorage.removeItem('mfc_remembered_leader_email');
+      sessionStorage.removeItem('mfc_leader_email_draft');
     } catch {
       // Ignore storage errors in restrictive modes
     }
+  }, []);
+
+  const handleEmailChange = (val: string) => {
+    setEmail(val);
   };
 
   const handleRememberChange = (checked: boolean) => {
     setRememberMe(checked);
-    try {
-      if (checked && email) {
-        localStorage.setItem(REMEMBERED_EMAIL_KEY, email);
-      } else if (!checked) {
-        localStorage.removeItem(REMEMBERED_EMAIL_KEY);
-      }
-    } catch {
-      // Ignore storage errors in restrictive modes
-    }
   };
 
   const { data: readingsData, isLoading: readingsLoading } = useDailyReadings();
@@ -133,17 +110,6 @@ export const LoginPage: React.FC = () => {
           refresh_token: refreshToken,
           user: normalizedUser,
         });
-
-        try {
-          sessionStorage.removeItem(EMAIL_DRAFT_KEY);
-          if (rememberMe && email.trim()) {
-            localStorage.setItem(REMEMBERED_EMAIL_KEY, email.trim());
-          } else {
-            localStorage.removeItem(REMEMBERED_EMAIL_KEY);
-          }
-        } catch {
-          // Ignore storage errors
-        }
 
         queryClient.clear();
 
@@ -318,14 +284,19 @@ export const LoginPage: React.FC = () => {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
                 <Input
                   label="Email Address"
                   type="email"
-                  name="email"
+                  name="mfc_leader_email"
                   id="login-email"
                   required
-                  autoComplete="email"
+                  autoComplete="off"
+                  preventAutofill
+                  disableCopyPaste
+                  onBlockedClipboard={(action) => {
+                    toast.error('Action blocked', `${action === 'paste' ? 'Pasting into' : 'Copying from'} email is disabled for credential security.`);
+                  }}
                   placeholder="servant@example.com"
                   value={email}
                   onChange={(e) => handleEmailChange(e.target.value)}
@@ -334,10 +305,15 @@ export const LoginPage: React.FC = () => {
                 <Input
                   label="Password"
                   type="password"
-                  name="password"
+                  name="mfc_leader_password"
                   id="login-password"
                   required
-                  autoComplete="current-password"
+                  autoComplete="new-password"
+                  preventAutofill
+                  disableCopyPaste
+                  onBlockedClipboard={(action) => {
+                    toast.error('Action blocked', `${action === 'paste' ? 'Pasting into' : 'Copying from'} password is disabled for credential security.`);
+                  }}
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -351,7 +327,7 @@ export const LoginPage: React.FC = () => {
                       onChange={(e) => handleRememberChange(e.target.checked)}
                       className="rounded border-slate-300 text-navy focus:ring-navy w-4 h-4"
                     />
-                    <span className="text-xs text-text-muted font-medium">Remember me</span>
+                    <span className="text-xs text-text-muted font-medium">Keep me signed in</span>
                   </label>
                   <Link to="/forgot-password" className="text-xs font-semibold text-navy hover:underline">
                     Forgot password?

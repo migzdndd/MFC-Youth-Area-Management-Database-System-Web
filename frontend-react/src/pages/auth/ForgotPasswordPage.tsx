@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useToast } from '@/hooks/useToast';
 import { apiClient } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { ArrowLeft, KeyRound } from 'lucide-react';
 
 export const ForgotPasswordPage: React.FC = () => {
+  const toast = useToast();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -70,12 +72,19 @@ export const ForgotPasswordPage: React.FC = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
           <Input
             label="Email Address"
             type="email"
+            name="recovery_email"
+            id="recovery-email"
             required
-            autoComplete="email"
+            autoComplete="off"
+            preventAutofill
+            disableCopyPaste
+            onBlockedClipboard={(action) => {
+              toast.error('Action blocked', `${action === 'paste' ? 'Pasting into' : 'Copying from'} email is disabled for credential security.`);
+            }}
             placeholder="servant@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}

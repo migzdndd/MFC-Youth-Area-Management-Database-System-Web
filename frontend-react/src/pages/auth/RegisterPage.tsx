@@ -36,8 +36,6 @@ interface RegistrationDraft {
   middleName?: string;
   lastName?: string;
   email?: string;
-  password?: string;
-  areaPasscode?: string;
   role?: string;
   areaMode?: AreaMode;
   selectedAreaId?: string;
@@ -80,7 +78,7 @@ export const RegisterPage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Save current form inputs to sessionStorage
+  // Save current non-credential form inputs to sessionStorage
   const saveDraft = useCallback((overrides?: Partial<RegistrationDraft>) => {
     try {
       const draft: RegistrationDraft = {
@@ -88,8 +86,6 @@ export const RegisterPage: React.FC = () => {
         middleName,
         lastName,
         email,
-        password,
-        areaPasscode,
         role,
         areaMode,
         selectedAreaId,
@@ -101,7 +97,7 @@ export const RegisterPage: React.FC = () => {
     } catch {
       // Storage unavailable or quota exceeded
     }
-  }, [firstName, middleName, lastName, email, password, areaPasscode, role, areaMode, selectedAreaId, newAreaName, isEmailVerified]);
+  }, [firstName, middleName, lastName, email, role, areaMode, selectedAreaId, newAreaName, isEmailVerified]);
 
   const clearDraft = () => {
     try {
@@ -118,7 +114,14 @@ export const RegisterPage: React.FC = () => {
     try {
       const saved = sessionStorage.getItem(REGISTRATION_DRAFT_KEY);
       if (saved) {
-        const draft: RegistrationDraft = JSON.parse(saved);
+        const rawDraft = JSON.parse(saved);
+        // Purge any legacy stored credentials from draft storage
+        if (rawDraft.password || rawDraft.areaPasscode) {
+          delete rawDraft.password;
+          delete rawDraft.areaPasscode;
+          sessionStorage.setItem(REGISTRATION_DRAFT_KEY, JSON.stringify(rawDraft));
+        }
+        const draft: RegistrationDraft = rawDraft;
         if (draft.firstName) setFirstName(draft.firstName);
         if (draft.middleName) setMiddleName(draft.middleName);
         if (draft.lastName) setLastName(draft.lastName);
@@ -126,8 +129,6 @@ export const RegisterPage: React.FC = () => {
           setEmail(draft.email);
           savedDraftEmail = draft.email;
         }
-        if (draft.password) setPassword(draft.password);
-        if (draft.areaPasscode) setAreaPasscode(draft.areaPasscode);
         if (draft.role) setRole(draft.role);
         if (draft.areaMode) setAreaMode(draft.areaMode);
         if (draft.selectedAreaId) setSelectedAreaId(draft.selectedAreaId);
@@ -372,7 +373,7 @@ export const RegisterPage: React.FC = () => {
         )}
 
         {/* Registration Form */}
-        <form onSubmit={handleSubmitRegistration} className="space-y-4">
+        <form onSubmit={handleSubmitRegistration} autoComplete="off" className="space-y-4">
           {/* Name Row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Input
@@ -420,8 +421,15 @@ export const RegisterPage: React.FC = () => {
           <Input
             label="Password"
             type="password"
+            name="register_password"
+            id="register-password"
             required
             autoComplete="new-password"
+            preventAutofill
+            disableCopyPaste
+            onBlockedClipboard={(action) => {
+              toast.error('Action blocked', `${action === 'paste' ? 'Pasting into' : 'Copying from'} password is disabled for credential security.`);
+            }}
             placeholder="Create password (min. 8 characters)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -431,7 +439,15 @@ export const RegisterPage: React.FC = () => {
           {/* Area Passcode */}
           <Input
             label="Area Passcode"
+            name="register_area_passcode"
+            id="register-area-passcode"
             required
+            autoComplete="off"
+            preventAutofill
+            disableCopyPaste
+            onBlockedClipboard={(action) => {
+              toast.error('Action blocked', `${action === 'paste' ? 'Pasting into' : 'Copying from'} Area Passcode is disabled for credential security.`);
+            }}
             placeholder="Enter Area Passcode provided by your Area Servant"
             value={areaPasscode}
             onChange={(e) => setAreaPasscode(e.target.value)}

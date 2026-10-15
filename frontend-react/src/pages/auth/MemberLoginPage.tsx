@@ -1,37 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth-store';
+import { useToast } from '@/hooks/useToast';
 import { apiClient } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { UserCheck, ArrowLeft } from 'lucide-react';
 import type { UserProfile } from '@/types/auth';
 
-const REMEMBERED_MEMBER_EMAIL_KEY = 'mfc_remembered_member_email';
-const MEMBER_EMAIL_DRAFT_KEY = 'mfc_member_email_draft';
-
 export const MemberLoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const toast = useToast();
   const { setSession } = useAuthStore();
-  const [email, setEmail] = useState(() => {
-    try {
-      return localStorage.getItem(REMEMBERED_MEMBER_EMAIL_KEY) || sessionStorage.getItem(MEMBER_EMAIL_DRAFT_KEY) || '';
-    } catch {
-      return '';
-    }
-  });
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
+  // Clear legacy member email drafts on mount
+  useEffect(() => {
+    try {
+      localStorage.removeItem('mfc_remembered_member_email');
+      sessionStorage.removeItem('mfc_member_email_draft');
+    } catch {
+      // Ignore
+    }
+  }, []);
+
   const handleEmailChange = (val: string) => {
     setEmail(val);
-    try {
-      sessionStorage.setItem(MEMBER_EMAIL_DRAFT_KEY, val);
-      localStorage.setItem(REMEMBERED_MEMBER_EMAIL_KEY, val);
-    } catch {
-      // Storage unavailable fallback
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -99,15 +96,6 @@ export const MemberLoginPage: React.FC = () => {
           user: normalizedUser,
         });
 
-        try {
-          sessionStorage.removeItem(MEMBER_EMAIL_DRAFT_KEY);
-          if (email.trim()) {
-            localStorage.setItem(REMEMBERED_MEMBER_EMAIL_KEY, email.trim());
-          }
-        } catch {
-          // Ignore storage error
-        }
-
         navigate('/member');
       } else {
         setErrorMessage(res.error || 'Invalid credentials for Member Portal.');
@@ -153,12 +141,19 @@ export const MemberLoginPage: React.FC = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
           <Input
             label="Member Email"
             type="email"
+            name="mfc_member_email"
+            id="member-email"
             required
-            autoComplete="email"
+            autoComplete="off"
+            preventAutofill
+            disableCopyPaste
+            onBlockedClipboard={(action) => {
+              toast.error('Action blocked', `${action === 'paste' ? 'Pasting into' : 'Copying from'} email is disabled for credential security.`);
+            }}
             placeholder="member@example.com"
             value={email}
             onChange={(e) => handleEmailChange(e.target.value)}
@@ -167,8 +162,15 @@ export const MemberLoginPage: React.FC = () => {
           <Input
             label="Password"
             type="password"
+            name="mfc_member_password"
+            id="member-password"
             required
-            autoComplete="current-password"
+            autoComplete="new-password"
+            preventAutofill
+            disableCopyPaste
+            onBlockedClipboard={(action) => {
+              toast.error('Action blocked', `${action === 'paste' ? 'Pasting into' : 'Copying from'} password is disabled for credential security.`);
+            }}
             placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

@@ -135,11 +135,31 @@ export const EmailVerificationField: React.FC<EmailVerificationFieldProps> = ({
         <div className="relative flex-1">
           <input
             id="reg-email"
+            name="reg_email"
             type="email"
             required
-            autoComplete="email"
+            autoComplete="off"
+            data-lpignore="true"
+            data-1p-ignore="true"
+            data-form-type="other"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
             placeholder="servant@example.com"
             value={email}
+            onCopy={(e) => {
+              e.preventDefault();
+              toast.error('Action blocked', 'Copying from email field is disabled for credential security.');
+            }}
+            onPaste={(e) => {
+              e.preventDefault();
+              toast.error('Action blocked', 'Pasting into email field is disabled for credential security.');
+            }}
+            onCut={(e) => {
+              e.preventDefault();
+              toast.error('Action blocked', 'Cutting from email field is disabled for credential security.');
+            }}
+            onDrop={(e) => e.preventDefault()}
             onChange={(e) => {
               onChangeEmail(e.target.value);
               if (isVerified) {
@@ -229,11 +249,29 @@ export const EmailVerificationField: React.FC<EmailVerificationFieldProps> = ({
                 <div className="flex flex-wrap items-center gap-2">
                   <input
                     type="text"
+                    name="reg_email_otp"
                     inputMode="numeric"
                     pattern="[0-9]*"
                     maxLength={6}
+                    autoComplete="off"
+                    data-lpignore="true"
+                    data-1p-ignore="true"
+                    data-form-type="other"
                     placeholder="123456"
                     value={inlineOtpCode}
+                    onCopy={(e) => {
+                      e.preventDefault();
+                      toast.error('Action blocked', 'Copying the verification code is disabled for credential security.');
+                    }}
+                    onPaste={(e) => {
+                      e.preventDefault();
+                      toast.error('Action blocked', 'Pasting the verification code is disabled for credential security.');
+                    }}
+                    onCut={(e) => {
+                      e.preventDefault();
+                      toast.error('Action blocked', 'Cutting the verification code is disabled for credential security.');
+                    }}
+                    onDrop={(e) => e.preventDefault()}
                     onChange={(e) => setInlineOtpCode(e.target.value.replace(/\D/g, ''))}
                     className="w-28 h-9 px-2.5 text-center text-sm font-mono tracking-widest rounded border border-slate-300 bg-white focus:outline-none focus:border-navy focus:ring-1 focus:ring-navy"
                   />

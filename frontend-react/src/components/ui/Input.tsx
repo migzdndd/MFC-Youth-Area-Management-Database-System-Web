@@ -5,19 +5,93 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   label?: string;
   error?: string;
   helperText?: string;
+  disableCopyPaste?: boolean;
+  preventAutofill?: boolean;
+  onBlockedClipboard?: (action: 'copy' | 'paste' | 'cut') => void;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, helperText, className = '', id, name, type = 'text', autoComplete, ...props }, ref) => {
+  (
+    {
+      label,
+      error,
+      helperText,
+      className = '',
+      id,
+      name,
+      type = 'text',
+      autoComplete,
+      disableCopyPaste = false,
+      preventAutofill = false,
+      onBlockedClipboard,
+      ...props
+    },
+    ref
+  ) => {
     const generatedId = useId();
     const inputId = id || (name ? String(name) : `input-${generatedId}`);
     const inputName = name || inputId;
     const [showPassword, setShowPassword] = useState(false);
+    const [isReadOnly, setIsReadOnly] = useState(Boolean(preventAutofill));
+
+    const unlockField = () => {
+      if (preventAutofill && isReadOnly) {
+        setIsReadOnly(false);
+      }
+    };
+
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+      unlockField();
+      props.onFocus?.(e);
+    };
+
+    const handleMouseDown = (e: React.MouseEvent<HTMLInputElement>) => {
+      unlockField();
+      props.onMouseDown?.(e);
+    };
+
+    const handleTouchStart = (e: React.TouchEvent<HTMLInputElement>) => {
+      unlockField();
+      props.onTouchStart?.(e);
+    };
+
+    const handleCopy = (e: React.ClipboardEvent<HTMLInputElement>) => {
+      if (disableCopyPaste) {
+        e.preventDefault();
+        onBlockedClipboard?.('copy');
+      }
+      props.onCopy?.(e);
+    };
+
+    const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+      if (disableCopyPaste) {
+        e.preventDefault();
+        onBlockedClipboard?.('paste');
+      }
+      props.onPaste?.(e);
+    };
+
+    const handleCut = (e: React.ClipboardEvent<HTMLInputElement>) => {
+      if (disableCopyPaste) {
+        e.preventDefault();
+        onBlockedClipboard?.('cut');
+      }
+      props.onCut?.(e);
+    };
+
+    const handleDrop = (e: React.DragEvent<HTMLInputElement>) => {
+      if (disableCopyPaste) {
+        e.preventDefault();
+      }
+      props.onDrop?.(e);
+    };
 
     const isPassword = type === 'password';
     const effectiveType = isPassword ? (showPassword ? 'text' : 'password') : type;
+    const effectiveReadOnly = props.readOnly ?? (preventAutofill ? isReadOnly : undefined);
 
     const resolvedAutoComplete = autoComplete ?? (() => {
+      if (preventAutofill) return 'off';
       const field = String(name || id || '').toLowerCase();
       if (type === 'email' || field.includes('email')) return 'email';
       if (type === 'password') return 'current-password';
@@ -42,17 +116,31 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         <div className="relative flex items-center w-full">
           <input
+            {...props}
             id={inputId}
             name={inputName}
             type={effectiveType}
             autoComplete={resolvedAutoComplete}
+            readOnly={effectiveReadOnly}
+            onFocus={handleFocus}
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
+            onCopy={handleCopy}
+            onPaste={handlePaste}
+            onCut={handleCut}
+            onDrop={handleDrop}
+            data-lpignore={preventAutofill ? 'true' : undefined}
+            data-1p-ignore={preventAutofill ? 'true' : undefined}
+            data-form-type={preventAutofill ? 'other' : undefined}
+            autoCorrect={preventAutofill ? 'off' : props.autoCorrect}
+            autoCapitalize={preventAutofill ? 'off' : props.autoCapitalize}
+            spellCheck={preventAutofill ? false : props.spellCheck}
             ref={ref}
             className={`w-full px-3.5 py-2.5 text-sm bg-white text-slate-900 border rounded-lg min-h-[44px] transition-all placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/15 focus:border-navy disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed shadow-2xs ${
               isPassword ? 'pr-11' : ''
             } ${
               error ? 'border-mfc-red focus:border-mfc-red focus:ring-red-100' : 'border-slate-300 hover:border-slate-400'
             } ${className}`}
-            {...props}
           />
           {isPassword && (
             <button
