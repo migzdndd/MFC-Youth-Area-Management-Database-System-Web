@@ -43,7 +43,8 @@ function secureFetch(input, init = {}) {
     ...init,
     signal: controller.signal,
     redirect: 'error',
-    cache: 'no-store'
+    cache: 'no-store',
+    keepalive: true
   }).finally(() => clearTimeout(timeout));
 }
 
@@ -72,6 +73,9 @@ function clientOptions(token = '') {
   };
 }
 
+let cachedAdmin = null;
+let cachedAuth = null;
+
 /**
  * Create Master Administrative Database Client
  *
@@ -82,8 +86,10 @@ function clientOptions(token = '') {
  * If secret keys or database URLs are missing or invalid, it throws a 503 error before attempting any operations.
  */
 export function createSupabaseAdmin() {
+  if (cachedAdmin) return cachedAdmin;
   const { supabaseUrl, supabaseServiceRoleKey } = assertBackendConfigured();
-  return createClient(supabaseUrl, supabaseServiceRoleKey, clientOptions());
+  cachedAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, clientOptions());
+  return cachedAdmin;
 }
 
 /**
@@ -96,8 +102,10 @@ export function createSupabaseAdmin() {
  * Validates environment settings first, throwing a configuration error if keys are absent.
  */
 export function createSupabaseAuthClient() {
+  if (cachedAuth) return cachedAuth;
   const { supabaseUrl, supabaseAnonKey } = assertBackendConfigured();
-  return createClient(supabaseUrl, supabaseAnonKey, clientOptions());
+  cachedAuth = createClient(supabaseUrl, supabaseAnonKey, clientOptions());
+  return cachedAuth;
 }
 
 /**

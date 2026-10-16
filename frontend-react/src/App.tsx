@@ -32,6 +32,9 @@ const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ de
 if (typeof window !== 'undefined') {
   const schedulePrefetch = () => {
     const prefetchRoutes = () => {
+      import('@/pages/DashboardPage');
+      import('@/pages/auth/SelectAreaPage');
+      import('@/pages/MemberPortalPage');
       import('@/pages/EventsPage');
       import('@/pages/MembersPage');
       import('@/pages/ChaptersPage');
@@ -39,9 +42,9 @@ if (typeof window !== 'undefined') {
     };
 
     if ('requestIdleCallback' in window) {
-      (window as unknown as { requestIdleCallback: (cb: () => void, opts: { timeout: number }) => void }).requestIdleCallback(prefetchRoutes, { timeout: 3000 });
+      (window as unknown as { requestIdleCallback: (cb: () => void, opts: { timeout: number }) => void }).requestIdleCallback(prefetchRoutes, { timeout: 2000 });
     } else {
-      setTimeout(prefetchRoutes, 1500);
+      setTimeout(prefetchRoutes, 1000);
     }
   };
 

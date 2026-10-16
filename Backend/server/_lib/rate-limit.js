@@ -86,6 +86,7 @@ export async function checkRateLimit(req, res, endpoint, targetIdentifier = null
 
     if (record) {
       if (record.blocked_until && new Date(record.blocked_until) > now) {
+        if (!res || res.headersSent) return false;
         const remainingSeconds = Math.max(1, Math.ceil((new Date(record.blocked_until).getTime() - now.getTime()) / 1000));
         res.setHeader('Retry-After', String(remainingSeconds));
         sendJson(res, 429, {
@@ -98,15 +99,17 @@ export async function checkRateLimit(req, res, endpoint, targetIdentifier = null
 
       const windowStart = new Date(record.window_started_at);
       if (now.getTime() - windowStart.getTime() > config.windowMs) {
-        await admin
-          .from('auth_rate_limits')
-          .update({
-            attempt_count: 1,
-            window_started_at: now.toISOString(),
-            blocked_until: null,
-            updated_at: now.toISOString()
-          })
-          .eq('rate_key', rateKey);
+        Promise.resolve(
+          admin
+            .from('auth_rate_limits')
+            .update({
+              attempt_count: 1,
+              window_started_at: now.toISOString(),
+              blocked_until: null,
+              updated_at: now.toISOString()
+            })
+            .eq('rate_key', rateKey)
+        ).catch(err => console.warn('Rate limit reset update failed:', err?.message || err));
 
         return true;
       }
@@ -116,15 +119,18 @@ export async function checkRateLimit(req, res, endpoint, targetIdentifier = null
         const blockedUntil = new Date(windowStart.getTime() + config.windowMs);
         const remainingSeconds = Math.max(1, Math.ceil((blockedUntil.getTime() - now.getTime()) / 1000));
 
-        await admin
-          .from('auth_rate_limits')
-          .update({
-            attempt_count: newCount,
-            blocked_until: blockedUntil.toISOString(),
-            updated_at: now.toISOString()
-          })
-          .eq('rate_key', rateKey);
+        Promise.resolve(
+          admin
+            .from('auth_rate_limits')
+            .update({
+              attempt_count: newCount,
+              blocked_until: blockedUntil.toISOString(),
+              updated_at: now.toISOString()
+            })
+            .eq('rate_key', rateKey)
+        ).catch(err => console.warn('Rate limit block update failed:', err?.message || err));
 
+        if (!res || res.headersSent) return false;
         res.setHeader('Retry-After', String(remainingSeconds));
         sendJson(res, 429, {
           ok: false,
@@ -134,26 +140,30 @@ export async function checkRateLimit(req, res, endpoint, targetIdentifier = null
         return false;
       }
 
-      await admin
-        .from('auth_rate_limits')
-        .update({
-          attempt_count: newCount,
-          updated_at: now.toISOString()
-        })
-        .eq('rate_key', rateKey);
+      Promise.resolve(
+        admin
+          .from('auth_rate_limits')
+          .update({
+            attempt_count: newCount,
+            updated_at: now.toISOString()
+          })
+          .eq('rate_key', rateKey)
+      ).catch(err => console.warn('Rate limit count update failed:', err?.message || err));
 
       return true;
     }
 
-    await admin
-      .from('auth_rate_limits')
-      .upsert({
-        rate_key: rateKey,
-        attempt_count: 1,
-        window_started_at: now.toISOString(),
-        blocked_until: null,
-        updated_at: now.toISOString()
-      }, { onConflict: 'rate_key' });
+    Promise.resolve(
+      admin
+        .from('auth_rate_limits')
+        .upsert({
+          rate_key: rateKey,
+          attempt_count: 1,
+          window_started_at: now.toISOString(),
+          blocked_until: null,
+          updated_at: now.toISOString()
+        }, { onConflict: 'rate_key' })
+    ).catch(err => console.warn('Rate limit upsert failed:', err?.message || err));
 
     return true;
   } catch (err) {

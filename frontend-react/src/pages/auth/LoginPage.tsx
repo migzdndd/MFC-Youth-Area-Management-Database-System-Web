@@ -147,6 +147,11 @@ export const LoginPage: React.FC = () => {
     }
   };
 
+  const prefetchDestinations = () => {
+    import('@/pages/DashboardPage');
+    import('@/pages/auth/SelectAreaPage');
+  };
+
   return (
     <div className="min-h-screen bg-canvas flex flex-col justify-between">
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -284,7 +289,13 @@ export const LoginPage: React.FC = () => {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
+              <form
+                onSubmit={handleSubmit}
+                onFocusCapture={prefetchDestinations}
+                onMouseEnter={prefetchDestinations}
+                autoComplete="off"
+                className="space-y-4"
+              >
                 <Input
                   label="Email Address"
                   type="email"

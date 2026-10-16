@@ -42,6 +42,7 @@ export async function checkBruteForce(req, res, email) {
     if (record.locked_until) {
       const lockedUntil = new Date(record.locked_until);
       if (lockedUntil > now) {
+        if (!res || res.headersSent) return false;
         const remainingMinutes = Math.max(1, Math.ceil((lockedUntil.getTime() - now.getTime()) / 60000));
         sendJson(res, 423, {
           ok: false,
