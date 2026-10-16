@@ -6,6 +6,7 @@ import { apiClient } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { UserCheck, ArrowLeft } from 'lucide-react';
+import { MemberClaimWizardModal } from '@/components/auth/MemberClaimWizardModal';
 import type { UserProfile } from '@/types/auth';
 
 export const MemberLoginPage: React.FC = () => {
@@ -16,6 +17,7 @@ export const MemberLoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
 
   // Clear legacy member email drafts on mount
   useEffect(() => {
@@ -181,6 +183,20 @@ export const MemberLoginPage: React.FC = () => {
           </Button>
         </form>
 
+        <div className="pt-2 text-center border-t border-slate-100">
+          <p className="text-xs text-text-muted mb-2">First time accessing your record?</p>
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            onClick={() => setIsClaimModalOpen(true)}
+            className="w-full flex items-center justify-center gap-1.5 min-h-[44px]"
+          >
+            <UserCheck className="w-4 h-4 text-navy" />
+            <span>Claim Your Youth Profile</span>
+          </Button>
+        </div>
+
         <div className="pt-4 border-t border-border-subtle text-center text-xs text-text-muted">
           <span>Are you a Servant Leader? </span>
           <Link to="/login" className="font-bold text-navy hover:underline">
@@ -188,6 +204,13 @@ export const MemberLoginPage: React.FC = () => {
           </Link>
         </div>
       </div>
+
+      {isClaimModalOpen && (
+        <MemberClaimWizardModal
+          isOpen={isClaimModalOpen}
+          onClose={() => setIsClaimModalOpen(false)}
+        />
+      )}
     </div>
   );
 };

@@ -13,7 +13,9 @@ import {
   CheckCircle,
   XCircle,
   Trash2,
+  QrCode,
 } from 'lucide-react';
+import { QrAttendanceScannerModal } from './QrAttendanceScannerModal';
 import type { CommunityEvent, Participant } from '@/types/event';
 import type { Member } from '@/types/member';
 
@@ -57,6 +59,7 @@ export const EventAttendanceModal: React.FC<EventAttendanceModalProps> = ({
   onDeleteGuest,
 }) => {
   const [attendeeSearch, setAttendeeSearch] = useState('');
+  const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
 
   if (!event) return null;
 
@@ -100,11 +103,21 @@ export const EventAttendanceModal: React.FC<EventAttendanceModalProps> = ({
     >
       <div className="space-y-6">
         {/* Quick Operations Bar */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
           <span className="text-xs text-slate-500 font-medium">
             Event Operations
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={() => setIsQrScannerOpen(true)}
+              className="flex items-center gap-1.5 min-h-[36px]"
+            >
+              <QrCode className="w-3.5 h-3.5" />
+              <span>Scan QR Code</span>
+            </Button>
             <Button
               type="button"
               variant="secondary"
@@ -433,6 +446,20 @@ export const EventAttendanceModal: React.FC<EventAttendanceModalProps> = ({
           </Button>
         </div>
       </div>
+
+      {isQrScannerOpen && (
+        <QrAttendanceScannerModal
+          isOpen={isQrScannerOpen}
+          onClose={() => setIsQrScannerOpen(false)}
+          event={event}
+          members={members}
+          participants={participants}
+          onCheckInMember={(memberId) => {
+            const existingParticipant = participants.find((p) => p.member_id === memberId);
+            onSetAttendance(true, existingParticipant, memberId);
+          }}
+        />
+      )}
     </Modal>
   );
 };

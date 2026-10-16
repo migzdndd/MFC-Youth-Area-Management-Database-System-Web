@@ -17,7 +17,14 @@ import { requireArea } from '../_lib/cloud-data.js';
 import { isLitService } from '../_lib/service-catalog.js';
 
 export default async function handler(req, res) {
-  if (req.method !== 'GET') return methodNotAllowed(res, ['GET']);
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    return methodNotAllowed(res, ['GET', 'POST']);
+  }
+
+  if (req.method === 'POST') {
+    return handleBatchSync(req, res);
+  }
+
   try {
     const { supabase, admin, profile } = await requireAuthenticatedProfile(req);
     const areaId = requireArea(req, profile);
@@ -165,3 +172,182 @@ export default async function handler(req, res) {
     return apiError(res, error);
   }
 }
+
+async function handleBatchSync(req, res) {
+  try {
+    const { admin, profile, user } = await requireAuthenticatedProfile(req);
+    const areaId = requireArea(req, profile);
+    const mutations = req.body?.mutations;
+
+    if (!Array.isArray(mutations)) {
+      return sendJson(res, 400, { ok: false, error: 'Mutations array is required.' });
+    }
+
+    let processedCount = 0;
+    const failures = [];
+
+    for (const mut of mutations) {
+      const { id, endpoint, method, payload } = mut || {};
+      if (!id || !endpoint) {
+        failures.push({ id: id || 'unknown', error: 'Missing mutation ID or endpoint' });
+        continue;
+      }
+
+      try {
+        const cleanEndpoint = String(endpoint).replace(/^\/?api\/?/, '').replace(/^\//, '');
+
+        if (cleanEndpoint.startsWith('participants')) {
+          const eventId = payload?.eventId ?? payload?.event_id;
+          const memberId = payload?.memberId ?? payload?.member_id ?? null;
+          const nonMemberName = payload?.nonMemberName ?? payload?.non_member_name ?? null;
+          const attended = payload?.attended !== undefined ? Boolean(payload?.attended) : true;
+          const paymentStatus = payload?.paymentStatus ?? payload?.payment_status ?? 'Not Paid';
+          const modeOfPayment = payload?.modeOfPayment ?? payload?.mode_of_payment ?? null;
+
+          if (!eventId) {
+            failures.push({ id, error: 'Event ID is required for participant mutation.' });
+            continue;
+          }
+
+          if (memberId) {
+            const { data: existing } = await admin
+              .from('event_participants')
+              .select('id')
+              .eq('event_id', eventId)
+              .eq('member_id', memberId)
+              .maybeSingle();
+
+            if (existing) {
+              await admin
+                .from('event_participants')
+                .update({
+                  attended,
+                  payment_status: paymentStatus,
+                  mode_of_payment: modeOfPayment,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', existing.id);
+            } else {
+              await admin
+                .from('event_participants')
+                .insert({
+                  event_id: eventId,
+                  member_id: memberId,
+                  attended,
+                  payment_status: paymentStatus,
+                  mode_of_payment: modeOfPayment,
+                  registered_by: user.id
+                });
+            }
+          } else if (nonMemberName) {
+            const { data: existingGuest } = await admin
+              .from('event_participants')
+              .select('id')
+              .eq('event_id', eventId)
+              .is('member_id', null)
+              .ilike('non_member_name', nonMemberName)
+              .maybeSingle();
+
+            if (existingGuest) {
+              await admin
+                .from('event_participants')
+                .update({
+                  attended,
+                  payment_status: paymentStatus,
+                  mode_of_payment: modeOfPayment,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', existingGuest.id);
+            } else {
+              await admin
+                .from('event_participants')
+                .insert({
+                  event_id: eventId,
+                  non_member_name: nonMemberName,
+                  attended,
+                  payment_status: paymentStatus,
+                  mode_of_payment: modeOfPayment,
+                  registered_by: user.id
+                });
+            }
+          }
+          processedCount++;
+        } else if (cleanEndpoint.startsWith('gig')) {
+          const memberId = payload?.memberId ?? payload?.member_id ?? null;
+          const amount = Number(payload?.amount || 0);
+          const contributionDate = payload?.contributionDate ?? payload?.contribution_date ?? new Date().toISOString().slice(0, 10);
+          const notes = payload?.notes ? String(payload.notes) : null;
+          const chapterId = payload?.chapterId ?? payload?.chapter_id ?? profile.chapter_id ?? null;
+
+          const { data: existingGig } = await admin
+            .from('gig_contributions')
+            .select('id')
+            .eq('area_id', areaId)
+            .eq('member_id', memberId)
+            .eq('amount', amount)
+            .eq('contribution_date', contributionDate)
+            .maybeSingle();
+
+          if (!existingGig) {
+            await admin.from('gig_contributions').insert({
+              area_id: areaId,
+              chapter_id: chapterId,
+              member_id: memberId,
+              amount,
+              contribution_date: contributionDate,
+              notes
+            });
+          }
+          processedCount++;
+        } else if (cleanEndpoint.startsWith('reports')) {
+          const reportType = payload?.reportType ?? payload?.report_type ?? 'Household';
+          const title = payload?.title || 'Report';
+          const activityDate = payload?.activityDate ?? payload?.activity_date ?? new Date().toISOString().slice(0, 10);
+          const chapterId = payload?.chapterId ?? payload?.chapter_id ?? profile.chapter_id ?? null;
+
+          const { data: existingReport } = await admin
+            .from('activity_reports')
+            .select('id')
+            .eq('area_id', areaId)
+            .eq('chapter_id', chapterId)
+            .eq('activity_date', activityDate)
+            .eq('title', title)
+            .maybeSingle();
+
+          if (!existingReport) {
+            await admin.from('activity_reports').insert({
+              area_id: areaId,
+              chapter_id: chapterId,
+              prepared_by_member_id: profile.member_id || null,
+              prepared_by_name: profile.first_name ? [profile.first_name, profile.last_name].filter(Boolean).join(' ') : user.email,
+              report_type: reportType,
+              activity_date: activityDate,
+              title,
+              activity: payload?.activity || '',
+              participant_count: Number(payload?.participantCount ?? payload?.participant_count ?? 0),
+              location: payload?.location || '',
+              notes: payload?.notes || ''
+            });
+          }
+          processedCount++;
+        } else {
+          processedCount++;
+        }
+      } catch (itemErr) {
+        failures.push({
+          id,
+          error: itemErr instanceof Error ? itemErr.message : 'Processing failed'
+        });
+      }
+    }
+
+    return sendJson(res, 200, {
+      ok: true,
+      processed: processedCount,
+      failures
+    });
+  } catch (error) {
+    return apiError(res, error);
+  }
+}
+

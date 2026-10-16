@@ -9,7 +9,7 @@ import { Select } from '@/components/ui/Select';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
-import { Spinner } from '@/components/ui/Spinner';
+import { TableRowSkeleton } from '@/components/ui/Skeleton';
 import { useToast } from '@/hooks/useToast';
 import { UserPlus, Edit2, Trash2, Filter, AlertTriangle } from 'lucide-react';
 import type { Member, AcademicTrack, MemberStatus } from '@/types/member';
@@ -343,9 +343,8 @@ export const MembersPage: React.FC = () => {
       {/* Data Container */}
       <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs">
         {isLoading ? (
-          <div className="p-12 flex flex-col items-center justify-center gap-3">
-            <Spinner size="lg" />
-            <span className="text-xs text-slate-500 font-medium">Loading members list...</span>
+          <div className="p-4">
+            <TableRowSkeleton columns={6} rows={8} />
           </div>
         ) : filteredMembers.length === 0 ? (
           <div className="p-12 text-center">

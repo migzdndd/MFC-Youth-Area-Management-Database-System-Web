@@ -15,7 +15,7 @@ import {
   ArrowRight,
   MapPin,
 } from 'lucide-react';
-import { Spinner } from '@/components/ui/Spinner';
+import { Skeleton } from '@/components/ui/Skeleton';
 import type { Area } from '@/types/auth';
 
 export const DashboardPage: React.FC = () => {
@@ -107,7 +107,7 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             <div className="text-4xl sm:text-5xl font-extrabold text-slate-900 font-heading tracking-tight mb-2">
-              {metricsLoading ? <Spinner size="md" /> : (metrics?.totalMembers ?? 0)}
+              {metricsLoading ? <Skeleton className="h-11 w-24 rounded-lg inline-block" /> : (metrics?.totalMembers ?? 0)}
             </div>
             <p className="text-xs sm:text-sm text-slate-600">
               {memberSubtitle}
@@ -140,7 +140,7 @@ export const DashboardPage: React.FC = () => {
 
             <div>
               <div className="text-3xl font-bold text-slate-900 font-heading tracking-tight">
-                {metricsLoading ? <Spinner size="sm" /> : (metrics?.totalChapters ?? 0)}
+                {metricsLoading ? <Skeleton className="h-8 w-16 rounded-md inline-block" /> : (metrics?.totalChapters ?? 0)}
               </div>
               <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
                 <p className="text-xs text-slate-500">View all registered Chapters</p>
@@ -165,7 +165,7 @@ export const DashboardPage: React.FC = () => {
 
             <div>
               <div className="text-3xl font-bold text-slate-900 font-heading tracking-tight">
-                {metricsLoading ? <Spinner size="sm" /> : (metrics?.totalReports ?? 0)}
+                {metricsLoading ? <Skeleton className="h-8 w-16 rounded-md inline-block" /> : (metrics?.totalReports ?? 0)}
               </div>
               <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
                 <p className="text-xs text-slate-500">Pastoral logs filed</p>
@@ -194,7 +194,7 @@ export const DashboardPage: React.FC = () => {
                 </h2>
               </div>
               <span className="text-2xl font-bold text-sky-800 font-heading">
-                {metricsLoading ? <Spinner size="sm" /> : (metrics?.upcomingEvents ?? 0)}
+                {metricsLoading ? <Skeleton className="h-8 w-14 rounded-md inline-block" /> : (metrics?.upcomingEvents ?? 0)}
               </span>
             </div>
 

@@ -3,6 +3,7 @@ import { Menu, MapPin } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth-store';
 import { useAreas } from '@/hooks/useDashboard';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import type { Area } from '@/types/auth';
 
 interface HeaderProps {
@@ -75,8 +76,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
         </div>
       </div>
 
-      {/* Right: User identity tag */}
+      {/* Right: User identity tag & Theme Toggle */}
       <div className="flex items-center gap-3">
+        <ThemeToggle />
         <div className="hidden sm:flex flex-col text-right">
           <span className="text-xs font-bold text-slate-900 leading-tight truncate max-w-[160px]">
             {user?.first_name ? [user.first_name, user.middle_name, user.last_name].filter(Boolean).join(' ') : user?.email}

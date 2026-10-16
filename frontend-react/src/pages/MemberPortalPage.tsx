@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth-store';
 import { useEvents } from '@/hooks/useEvents';
@@ -6,15 +6,18 @@ import { useGigRecords } from '@/hooks/useGig';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
-import { Calendar, HeartHandshake, LogOut, Clock, MapPin } from 'lucide-react';
+import { Calendar, HeartHandshake, LogOut, Clock, MapPin, QrCode } from 'lucide-react';
 import { SimulationBanner } from '@/components/layout/SimulationBanner';
 import { AreaSwitchModal } from '@/components/layout/AreaSwitchModal';
+import { MemberDigitalPassModal } from '@/components/member/MemberDigitalPassModal';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 export const MemberPortalPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
   const { data: events = [] } = useEvents();
   const { data: gigRecords = [] } = useGigRecords();
+  const [isPassOpen, setIsPassOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -44,15 +47,18 @@ export const MemberPortalPage: React.FC = () => {
           </div>
         </div>
 
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={handleLogout}
-          className="bg-white/10 text-white border-white/20 hover:bg-white/20 hover:text-white"
-        >
-          <LogOut className="w-4 h-4 mr-1.5" />
-          <span>Sign Out</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle className="text-white hover:text-amber-300 hover:bg-white/10 border-white/10" />
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleLogout}
+            className="bg-white/10 text-white border-white/20 hover:bg-white/20 hover:text-white"
+          >
+            <LogOut className="w-4 h-4 mr-1.5" />
+            <span>Sign Out</span>
+          </Button>
+        </div>
       </header>
 
       {/* Main Content */}
@@ -79,6 +85,17 @@ export const MemberPortalPage: React.FC = () => {
               </div>
             </div>
           </div>
+
+          <Button
+            type="button"
+            variant="primary"
+            size="md"
+            onClick={() => setIsPassOpen(true)}
+            className="flex items-center gap-2 min-h-[44px] shrink-0 w-full sm:w-auto justify-center"
+          >
+            <QrCode className="w-4 h-4 text-amber-300" />
+            <span>My Digital Event Pass</span>
+          </Button>
         </div>
 
         {/* Section: Upcoming Gatherings */}
@@ -156,6 +173,15 @@ export const MemberPortalPage: React.FC = () => {
           )}
         </section>
       </main>
+
+      {isPassOpen && (
+        <MemberDigitalPassModal
+          isOpen={isPassOpen}
+          onClose={() => setIsPassOpen(false)}
+          user={user}
+          events={events}
+        />
+      )}
     </div>
   );
 };

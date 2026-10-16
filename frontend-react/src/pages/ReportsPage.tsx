@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
-import { Spinner } from '@/components/ui/Spinner';
+import { TableRowSkeleton } from '@/components/ui/Skeleton';
 import { formatDate } from '@/lib/utils';
 import { FilePlus, FileText, Download } from 'lucide-react';
 import jsPDF from 'jspdf';
@@ -197,9 +197,8 @@ export const ReportsPage: React.FC = () => {
       {/* Reports Table & Container */}
       <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs">
         {isLoading ? (
-          <div className="p-12 flex flex-col items-center justify-center gap-3">
-            <Spinner size="lg" />
-            <span className="text-xs text-slate-500 font-medium">Loading activity reports...</span>
+          <div className="p-4">
+            <TableRowSkeleton columns={5} rows={6} />
           </div>
         ) : reports.length === 0 ? (
           <div className="p-12 text-center">

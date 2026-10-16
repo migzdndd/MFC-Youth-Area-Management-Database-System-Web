@@ -6,6 +6,7 @@
  * set a secure password, and connect their login directly to their member profile.
  */
 
+import crypto from 'node:crypto';
 import { createSupabaseAdmin, createSupabaseAuthClient } from '../_lib/supabase.js';
 import { requireAuthenticatedUser } from '../_lib/access.js';
 import { claimMemberRecord } from '../_lib/member-claim.js';
@@ -14,6 +15,13 @@ import { checkRateLimit } from '../_lib/rate-limit.js';
 
 function escapeLikePattern(value) {
   return String(value).replace(/[\\%_]/g, character => `\\${character}`);
+}
+
+function normalizeDate(val) {
+  if (!val) return '';
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return String(val).trim().slice(0, 10);
+  return d.toISOString().slice(0, 10);
 }
 
 export default async function handler(req, res) {
@@ -34,13 +42,19 @@ export default async function handler(req, res) {
 
     const email = normalizeEmail(req.body?.email);
     const password = String(req.body?.password || '');
+    const birthdate = normalizeDate(req.body?.birthdate);
+    const pin = String(req.body?.pin || '').trim();
+
     if (!isValidEmail(email)) return sendJson(res, 400, { ok: false, error: 'Enter the email address stored in your Member record.' });
+    if (!birthdate) return sendJson(res, 400, { ok: false, error: 'Birthdate (YYYY-MM-DD) is required to verify your member record.' });
+    if (!pin || !/^\d{4,6}$/.test(pin)) return sendJson(res, 400, { ok: false, error: 'A 4-to-6 digit security PIN is required.' });
+
     const pError = passwordError(password);
     if (pError) return sendJson(res, 400, { ok: false, error: pError });
 
     const { data: matchingMember, error: memberLookupError } = await admin
       .from('members')
-      .select('id')
+      .select('id, birthdate, claim_pin, security_pin_hash')
       .ilike('email', escapeLikePattern(email))
       .maybeSingle();
     if (memberLookupError) throw memberLookupError;
@@ -54,6 +68,39 @@ export default async function handler(req, res) {
     if (!matchingMember) {
       return genericClaimResponse();
     }
+
+    // Verify birthdate match
+    const rosterBirthdate = normalizeDate(matchingMember.birthdate);
+    if (rosterBirthdate && rosterBirthdate !== birthdate) {
+      return sendJson(res, 400, {
+        ok: false,
+        error: 'The provided birthdate does not match our community roster. Please check with your Chapter Head.'
+      });
+    }
+
+    // Verify security PIN if assigned
+    const submittedPinHash = crypto.createHash('sha256').update(pin).digest('hex');
+    if (matchingMember.security_pin_hash) {
+      if (matchingMember.security_pin_hash !== submittedPinHash && matchingMember.claim_pin !== pin) {
+        return sendJson(res, 400, {
+          ok: false,
+          error: 'Invalid security PIN. Please request your verification PIN from your Chapter Head.'
+        });
+      }
+    } else if (matchingMember.claim_pin) {
+      if (matchingMember.claim_pin !== pin) {
+        return sendJson(res, 400, {
+          ok: false,
+          error: 'Invalid security PIN. Please request your verification PIN from your Chapter Head.'
+        });
+      }
+    }
+
+    // Store security_pin_hash for future hardening
+    await admin
+      .from('members')
+      .update({ security_pin_hash: submittedPinHash })
+      .eq('id', matchingMember.id);
 
     const authClient = createSupabaseAuthClient();
     const { data, error } = await authClient.auth.signUp({ email, password });

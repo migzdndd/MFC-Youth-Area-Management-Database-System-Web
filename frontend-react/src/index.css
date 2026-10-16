@@ -1,22 +1,24 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-navy: #002847;
   --color-navy-deep: #00182c;
   --color-navy-light: #0a3d66;
   --color-navy-surface: #06233b;
 
-  --color-canvas: #f8fafc;
-  --color-surface: #ffffff;
-  --color-surface-hover: #f1f5f9;
-  --color-surface-subtle: #f8fafc;
+  --color-canvas: var(--bg-canvas);
+  --color-surface: var(--bg-surface);
+  --color-surface-hover: var(--bg-surface-hover);
+  --color-surface-subtle: var(--bg-surface-subtle);
 
-  --color-text-main: #0f172a;
-  --color-text-muted: #475569;
-  --color-text-subtle: #64748b;
+  --color-text-main: var(--text-main);
+  --color-text-muted: var(--text-muted);
+  --color-text-subtle: var(--text-subtle);
 
-  --color-border-subtle: #e2e8f0;
-  --color-border-strong: #cbd5e1;
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
 
   /* Community Accent: Dignified Warm Gold / Amber */
   --color-gold: #d97706;
@@ -40,6 +42,28 @@
 
 :root {
   color-scheme: light;
+  --bg-canvas: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f1f5f9;
+  --bg-surface-subtle: #f8fafc;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-subtle: #64748b;
+  --border-subtle: #e2e8f0;
+  --border-strong: #cbd5e1;
+}
+
+.dark {
+  color-scheme: dark;
+  --bg-canvas: #070e18;
+  --bg-surface: #0c1829;
+  --bg-surface-hover: #122138;
+  --bg-surface-subtle: #0f1c30;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-subtle: #64748b;
+  --border-subtle: #1e2d42;
+  --border-strong: #33445c;
 }
 
 body {
@@ -52,6 +76,71 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.dark body {
+  background-color: #070e18;
+  color: #f1f5f9;
+}
+
+/* Dark mode surface refinements for core cards and containers */
+.dark .bg-white {
+  background-color: #0c1829 !important;
+}
+
+.dark .bg-white\/95 {
+  background-color: rgba(12, 24, 41, 0.95) !important;
+}
+
+.dark .bg-slate-50 {
+  background-color: #0f1c30 !important;
+}
+
+.dark .bg-slate-100,
+.dark .bg-slate-100\/90 {
+  background-color: #15243b !important;
+}
+
+.dark .border-slate-100,
+.dark .border-slate-200,
+.dark .border-slate-200\/80,
+.dark .border-slate-200\/90,
+.dark .border-border-subtle {
+  border-color: #1e2d42 !important;
+}
+
+.dark .border-slate-300 {
+  border-color: #2b3e59 !important;
+}
+
+.dark .text-slate-900 {
+  color: #f8fafc !important;
+}
+
+.dark .text-slate-800 {
+  color: #e2e8f0 !important;
+}
+
+.dark .text-slate-700 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-slate-600 {
+  color: #94a3b8 !important;
+}
+
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark select,
+.dark textarea {
+  background-color: #0c1829 !important;
+  color: #f1f5f9 !important;
+  border-color: #2b3e59 !important;
+}
+
+.dark .divide-slate-200\/80 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-border-subtle > :not([hidden]) ~ :not([hidden]) {
+  border-color: #1e2d42 !important;
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
 }
@@ -59,6 +148,11 @@ h1, h2, h3, h4, h5, h6 {
 /* Accessible focus ring across all keyboard interactive elements */
 :focus-visible {
   outline: 2px solid #002847;
+  outline-offset: 2px;
+}
+
+.dark :focus-visible {
+  outline: 2px solid #38bdf8;
   outline-offset: 2px;
 }
 
@@ -83,4 +177,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #1e2d42;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #33445c;
 }

@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/stores/auth-store';
+import { enqueueMutation } from './offlineQueue';
 
 export interface ApiResponse<T = unknown> {
   ok?: boolean;
@@ -32,6 +33,31 @@ export async function apiClient<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
+  const method = (options.method || 'GET').toUpperCase();
+  const isWrite = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
+  const isExcludedFromQueue = endpoint.includes('/auth/') || endpoint.includes('/sync') || endpoint.includes('/health');
+
+  let parsedPayload: unknown = null;
+  if (isWrite && options.body && typeof options.body === 'string') {
+    try {
+      parsedPayload = JSON.parse(options.body);
+    } catch {
+      parsedPayload = options.body;
+    }
+  }
+
+  // If browser is actively offline and it's an operational write request, queue it immediately
+  if (typeof navigator !== 'undefined' && !navigator.onLine && isWrite && !isExcludedFromQueue) {
+    const queued = await enqueueMutation(endpoint, method, parsedPayload);
+    return {
+      ok: true,
+      deferred: true,
+      offlineQueued: true,
+      id: queued.id,
+      message: 'Network offline. Action queued for automatic synchronization.',
+    } as T;
+  }
+
   const { token, activeArea, user, logout, setSession } = useAuthStore.getState();
 
   const headers: Record<string, string> = {
@@ -51,10 +77,26 @@ export async function apiClient<T>(
 
   const url = endpoint.startsWith('http') ? endpoint : `/api${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers,
+    });
+  } catch (netErr) {
+    // If request failed due to network dropout and it's a write operation, queue optimistically
+    if (isWrite && !isExcludedFromQueue) {
+      const queued = await enqueueMutation(endpoint, method, parsedPayload);
+      return {
+        ok: true,
+        deferred: true,
+        offlineQueued: true,
+        id: queued.id,
+        message: 'Network connection dropped. Action queued for automatic replay.',
+      } as T;
+    }
+    throw netErr;
+  }
 
   if (response.status === 401 && !endpoint.includes('/auth/login') && !endpoint.includes('/auth/refresh')) {
     const refreshToken = useAuthStore.getState().refreshToken;

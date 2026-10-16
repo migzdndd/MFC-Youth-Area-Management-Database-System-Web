@@ -14,7 +14,7 @@ import { useMembers } from '@/hooks/useMembers';
 import { useToast } from '@/hooks/useToast';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { Spinner } from '@/components/ui/Spinner';
+import { EventCardSkeleton } from '@/components/ui/Skeleton';
 import { CalendarPlus } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import type { CommunityEvent, Participant } from '@/types/event';
@@ -296,9 +296,10 @@ export const EventsPage: React.FC = () => {
 
       {/* Events List */}
       {isLoading ? (
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-12 flex flex-col items-center justify-center gap-3 shadow-2xs">
-          <Spinner size="lg" />
-          <span className="text-xs text-slate-500 font-medium">Loading gatherings...</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <EventCardSkeleton key={`event-skel-${i}`} />
+          ))}
         </div>
       ) : events.length === 0 ? (
         <div className="bg-white border border-slate-200/90 rounded-2xl p-12 text-center shadow-2xs">
