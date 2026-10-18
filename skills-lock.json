@@ -1,11 +1,467 @@
 {
   "version": 1,
   "skills": {
+    "agent-manager-skill": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/agent-manager-skill/SKILL.md",
+      "computedHash": "10a431337b4d58fd808a11dd86e1b77ff799c6e3024f20e725498590f59bc75d"
+    },
+    "agent-memory": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/agent-memory/SKILL.md",
+      "computedHash": "2dced40ca8360feff60081b90c177eb3117c64200905de9927f29ebc34daf105"
+    },
+    "agent-memory-discipline": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/agent-memory-discipline/SKILL.md",
+      "computedHash": "2db5c758f75e69d6035ebd0240b8b6510b7510fa6ae1a0fa6bef8750490f8dd2"
+    },
+    "agent-memory-mcp": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/agent-memory-mcp/SKILL.md",
+      "computedHash": "046c0a752955149a894d629961977ca3fcc647b8145ad46fe196cb2443b9c345"
+    },
     "agent-skills": {
       "source": "datadog-labs/agent-skills",
       "sourceType": "github",
       "skillPath": "SKILL.md",
       "computedHash": "7f2ba474bc0564990689c824262699681c444507ba7b5ccafd3f858e815933eb"
+    },
+    "agent-squad": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/agent-squad/SKILL.md",
+      "computedHash": "23b43a7d5651613a2ab1ba471b12704d1120e6de7baa87e4b7825ad6d459a55f"
+    },
+    "ai-code-generation-guardrails": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ai-code-generation-guardrails/SKILL.md",
+      "computedHash": "deb509b25a75f96bfe02870533b1d9a048452183fd20fe1597418c271fc10ef0"
+    },
+    "ai-coding-agent-guardrails": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ai-coding-agent-guardrails/SKILL.md",
+      "computedHash": "604d02c4b20194da9940e893093d907f1332423cd7e0029f6d5d759ff6793e7e"
+    },
+    "ai-seo": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ai-seo/SKILL.md",
+      "computedHash": "7d133348d19567db480decba9eb91f61cbf7e260cf8f76ba11f836f0dac0d356"
+    },
+    "angular": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/angular/SKILL.md",
+      "computedHash": "cb9d980694054620a206a1d70ec6e25d6b339dfddaca85c4ebcf6652745591b5"
+    },
+    "angular-best-practices": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/angular-best-practices/SKILL.md",
+      "computedHash": "ff25d6db5be6f60f24f880af050a7d4805d6c5a2223c78f0fc8a40b8212d75e7"
+    },
+    "angular-migration": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/angular-migration/SKILL.md",
+      "computedHash": "ef8273b82f3e519ead8a1dd0f3b508fb484d6b74d9b2b3b0c7ed8175a585f88d"
+    },
+    "angular-state-management": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/angular-state-management/SKILL.md",
+      "computedHash": "ccd643567e29acb0f467cc00628bc73eb6e87b41c248b1b893ebda9fadd88921"
+    },
+    "animejs-animation": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/animejs-animation/SKILL.md",
+      "computedHash": "b56e1d6d3da661bf12eb64e25e2970a4e516d95d3601d6d541001c637670bfd4"
+    },
+    "anti-slop-design": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/anti-slop-design/SKILL.md",
+      "computedHash": "2f290101307e88d2855770750c9c96cc41e0b18080b84c5ed3682f85f83651d4"
+    },
+    "anti-ui-slop": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/anti-ui-slop/SKILL.md",
+      "computedHash": "546fb5ff241f53d70898553f64efb970192003f61cc7dac38f965a47535a1779"
+    },
+    "architecture": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/architecture/SKILL.md",
+      "computedHash": "a7a6d85d018ee5f1447ecedcb8c153a9dbcac00cf2529aee40db8a86637b9ee9"
+    },
+    "audit-skills": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/audit-skills/SKILL.md",
+      "computedHash": "3bf1efb8e092f6ccdfc87c71191a710de57033d0c25901f1202dcaf2e44133d1"
+    },
+    "backend-architect": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/backend-architect/SKILL.md",
+      "computedHash": "077ff029f39cc07caed1a4869075cbe189d26a891752dd1217fc9f78141148e7"
+    },
+    "backend-dev-guidelines": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/backend-dev-guidelines/SKILL.md",
+      "computedHash": "074094e8e4c78e2e767095145b099ffd3a595d7e6898e9f3f62943d03b2ec21c"
+    },
+    "backend-development-feature-development": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/backend-development-feature-development/SKILL.md",
+      "computedHash": "524c0379ee8009d13e4846d0cd55af927a1d660c2ad2fffdd64c1e26d64ecb8e"
+    },
+    "backend-security-coder": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/backend-security-coder/SKILL.md",
+      "computedHash": "d260a70f12f4dfd10662482afad4c1c2c48e2d29be23b85de9ab74680cf777d4"
+    },
+    "backtesting-frameworks": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/backtesting-frameworks/SKILL.md",
+      "computedHash": "8acf4cc4243000dbf224aebc12dd384d95d1cc4cd34d3c815dc0fd29625431f2"
+    },
+    "baseline-ui": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/baseline-ui/SKILL.md",
+      "computedHash": "8e3fdedeea2c698d73a0402371a66e704b335d244aed94b17a4a1f89ef1263fe"
+    },
+    "bug-bounty": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/bug-bounty/SKILL.md",
+      "computedHash": "4e4e8b0b59ed9b727f9f71e5cf50db6d6a53988e33316175a9b9c46b22fc0238"
+    },
+    "bug-hunter": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/bug-hunter/SKILL.md",
+      "computedHash": "cbef4de02103ae0459768ce59d99ce9f076a48ee299781ce2f02cb7662a3267d"
+    },
+    "bugcrowd-reporting": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/bugcrowd-reporting/SKILL.md",
+      "computedHash": "93128f585aa20d8000c3e464c24fc0f794cfc61c26b883856d3715cec8db8543"
+    },
+    "bugs-are-annoying": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/bugs-are-annoying/SKILL.md",
+      "computedHash": "81bcb2fb37341e8b8e62e5ada17ad985788b7f781612f0622b1401369089b142"
+    },
+    "cc-skill-security-review": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/cc-skill-security-review/SKILL.md",
+      "computedHash": "266779919390ee2f4589f4f06d5e40131cd96c90debea407ae229a0d74a59cd2"
+    },
+    "changelog-entry": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/changelog-entry/SKILL.md",
+      "computedHash": "4695060a1711f3858f7cdfb63fde417780876beca559fe947bdb51e7cb82ae1a"
+    },
+    "changelog-updates": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/changelog-updates/SKILL.md",
+      "computedHash": "718063a47ea817e4c9e44e242ac2b1d14268e79303cc387f018039afe66be0a2"
+    },
+    "ci-cd-and-automation": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ci-cd-and-automation/SKILL.md",
+      "computedHash": "ddc77fd79cb578e7a34136df9ed6d9cc29fc106083f95b56b3e6903cf80f653d"
+    },
+    "cicd-automation-workflow-automate": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/cicd-automation-workflow-automate/SKILL.md",
+      "computedHash": "23c80d0aeb5e8714bfb402309e896f1c80ac783a0ec20720cba2cda83236aa57"
+    },
+    "code-refactoring-context-restore": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/code-refactoring-context-restore/SKILL.md",
+      "computedHash": "50b90ba328095e0386d6cef39aa0336a608f284bea0b97bee3599307d6b11c16"
+    },
+    "code-refactoring-refactor-clean": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/code-refactoring-refactor-clean/SKILL.md",
+      "computedHash": "51f7f369d70f6c0b8551f30aa79ced9bee6c0ddc25c455c59e320ae1bfaa93bd"
+    },
+    "code-refactoring-tech-debt": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/code-refactoring-tech-debt/SKILL.md",
+      "computedHash": "c9889a9d184fb240d22be8c8df43452620dbd8aa11f7bd6cd04f320026128f04"
+    },
+    "code-review-ai-ai-review": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/code-review-ai-ai-review/SKILL.md",
+      "computedHash": "f05dcc7799ec4da2ad042d66d1203ba3693dda5e49ff636df3709a62516aef3f"
+    },
+    "code-review-and-quality": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/code-review-and-quality/SKILL.md",
+      "computedHash": "28f9502385de7fc6676aa667b56ad54808877aaa203969ec9fc921404271d8ce"
+    },
+    "code-review-checklist": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/code-review-checklist/SKILL.md",
+      "computedHash": "221fe90d65ac38ebd1b0d913a4fdc84c3a192af42432fd36d705fdd48dbe20dd"
+    },
+    "code-review-excellence": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/code-review-excellence/SKILL.md",
+      "computedHash": "7c57a6f171ca176966f9be968dfedbcb06e1b2813bd951e3499a2d89e344c540"
+    },
+    "code-review-sensei": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/code-review-sensei/SKILL.md",
+      "computedHash": "208203d3bf5a970f106ef38a0f685d094fff8054113032da2cf1b83e6217ba6e"
+    },
+    "code-reviewer": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/code-reviewer/SKILL.md",
+      "computedHash": "4723c3d8460155061533b42e2779850e9482104ce61ab91ac55a7c0fdd897772"
+    },
+    "code-simplification": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/code-simplification/SKILL.md",
+      "computedHash": "f7fedbe3aef5594b8a2f9fc6f1eb68c91e570e424576220ccbf1070127c6cd5e"
+    },
+    "code-simplifier": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/code-simplifier/SKILL.md",
+      "computedHash": "fbbc15d42631a5946d4006012421acfa33686a0ce1481d7925bbea0725273ef9"
+    },
+    "codebase-audit-pre-push": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/codebase-audit-pre-push/SKILL.md",
+      "computedHash": "3b45bd9989641d3d87e88564f526984c78cbc233276e5217d52b55aa9ab6f2ae"
+    },
+    "codebase-cleanup-deps-audit": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/codebase-cleanup-deps-audit/SKILL.md",
+      "computedHash": "d344734c32cf576e70389abd61be0d07cecd523b0383e0fccef6df9de98f63fd"
+    },
+    "codebase-cleanup-refactor-clean": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/codebase-cleanup-refactor-clean/SKILL.md",
+      "computedHash": "c855f7eb1cd221fd041ace88ae17861418c36dbdf1301a456550bf482e0630b1"
+    },
+    "codebase-cleanup-tech-debt": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/codebase-cleanup-tech-debt/SKILL.md",
+      "computedHash": "f9bacdff19226a690ba25d9164ebaf1348dfffb98eb3fcc7ba0338e8b7ec8dc2"
+    },
+    "comprehensive-review-full-review": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/comprehensive-review-full-review/SKILL.md",
+      "computedHash": "a1971b699fa888f57236ad935eb8dfb18e2e62838988161de6674c72e50328cb"
+    },
+    "comprehensive-review-pr-enhance": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/comprehensive-review-pr-enhance/SKILL.md",
+      "computedHash": "b2fa3bc4331834cf8a1cfcd0f71d2d79b674653c9305d8a7a552533dedf66df2"
+    },
+    "context-compression": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/context-compression/SKILL.md",
+      "computedHash": "905df438374a5393cab7bf7abfab61c621728cd5330d6c241a7a0491b0a75ff8"
+    },
+    "context-driven-development": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/context-driven-development/SKILL.md",
+      "computedHash": "05700af859a60e58c253d1055482c22b57e2e97bfc2c16b4fba67b21bbdb7996"
+    },
+    "context-engineering": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/context-engineering/SKILL.md",
+      "computedHash": "b20e5df318296fb5d0572cc9f0f14a0ccf50bd9b1a68e663a44b510454ab1f10"
+    },
+    "context-fundamentals": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/context-fundamentals/SKILL.md",
+      "computedHash": "417b312fa55bdf432eaa6fafe5dd87f203251c6c4068f36496df935165c198dd"
+    },
+    "context-kit": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/context-kit/SKILL.md",
+      "computedHash": "29c4f8fe8d48b3a94da61f7762da316c73cfe9bbf18e34e6fa97b8eaeae53c0c"
+    },
+    "context-optimization": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/context-optimization/SKILL.md",
+      "computedHash": "e9f2cb4eb444d5e9b37ebdd592308c682c3d3d04461cdec5b0f0f77f5e413d0a"
+    },
+    "database": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/database/SKILL.md",
+      "computedHash": "af40b7d08c16de22bb9f4ba7f0add17d75ea802361365971d3d42ace55e5eaf9"
+    },
+    "database-backups": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/database-backups/SKILL.md",
+      "computedHash": "7e0b7d1b90ec9195a39bd00bcbd79989989fd86d2c2fb5c4b10bc038e2a96950"
+    },
+    "database-design": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/database-design/SKILL.md",
+      "computedHash": "f3a1ed6e8a5b622c430c0ff9d68b8926f8f5cc70a180117cedc4a1a8ddae2527"
+    },
+    "database-optimizer": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/database-optimizer/SKILL.md",
+      "computedHash": "5f141b7e7ba74b6c1b69ac746172a42a8810bfe34ffc8eeec7158f4bc595007d"
+    },
+    "database-security": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/database-security/SKILL.md",
+      "computedHash": "97592d97d3e585a71ea6d97e31849123d91e77e7da9bc09e0e710072b82e7a5f"
+    },
+    "datadog": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/datadog/SKILL.md",
+      "computedHash": "2803a77cbb192a1b59bc7f2a71f148ea8dfa2a235a6af2f18aa50c98c6b5a606"
+    },
+    "debugger": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/debugger/SKILL.md",
+      "computedHash": "2fc4d03b0f7a7f7978e3326c709a85b1cab553dfc424655c000d9c259742563b"
+    },
+    "debugging-and-error-recovery": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/debugging-and-error-recovery/SKILL.md",
+      "computedHash": "fabed2b60f36c17bf672fd3175f8bb5d35523e05e62d1137cf8b550eb7a4668c"
+    },
+    "debugging-code": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/debugging-code/SKILL.md",
+      "computedHash": "588c51fd51cd51e11cb7e22cfa0f98f8c568ca5a2b4ff969328d81a1dc002e58"
+    },
+    "debugging-toolkit": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/debugging-toolkit/SKILL.md",
+      "computedHash": "45c0ab406559075ef6aa2c4424dd1ad1ed7063c1c6cc820fcc6077febe337e55"
+    },
+    "debugging-toolkit-smart-debug": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/debugging-toolkit-smart-debug/SKILL.md",
+      "computedHash": "b8487fc4d454a4491965a51fd7c5fbbe779893555a7388281fcf936ad6e7a141"
+    },
+    "decision-navigator": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/decision-navigator/SKILL.md",
+      "computedHash": "dab0a37765312f8c482631b7d9c0726992097299e5679460dc04e0b9bd36c178"
+    },
+    "developer-seo": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/developer-seo/SKILL.md",
+      "computedHash": "c988cf996a31b20d5e2849851337bce5e3a65b80bbdf98414e050902313b2ad7"
+    },
+    "frontend-api-integration-patterns": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-api-integration-patterns/SKILL.md",
+      "computedHash": "c5ce5d01584c15e469cfeef6a75fd92e36bd63accfb2d774bfb5309499ad4068"
+    },
+    "frontend-architecture": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-architecture/SKILL.md",
+      "computedHash": "1184001053f2e1d15df2c743f2a28e3d029354fd83acb72a24b3829eaf041f37"
+    },
+    "frontend-design": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "808e01b929a2b0fabaede596026c8072ba967fe970ac331f2e75367ce548b3c0"
+    },
+    "frontend-dev-guidelines": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-dev-guidelines/SKILL.md",
+      "computedHash": "ef9d92373884a4682bc968b45eb0006f719be4cdff7e567bad7b6c894bd7e29c"
+    },
+    "frontend-developer": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-developer/SKILL.md",
+      "computedHash": "433c1de72312aed1bd4be7c92931293c1e503d925ab41e3583fb95bff64c366e"
+    },
+    "frontend-seo": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-seo/SKILL.md",
+      "computedHash": "e3709f83c6945dc1215b4d96a915dd9aafdd7663219f7918f1d26079660d9572"
+    },
+    "github-actions-advanced": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/github-actions-advanced/SKILL.md",
+      "computedHash": "55bd683739d2f6e82ffc9691eda28a34fc5e90142a9fdfdb42e73f2cc2ab63af"
+    },
+    "github-actions-debugger": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/github-actions-debugger/SKILL.md",
+      "computedHash": "1dcf3a571efc9f96f9c5abf8737275f64a42fb2c719e74b2e04f395a09e650b8"
     },
     "security-audit": {
       "source": "cloudflare/security-audit-skill",
