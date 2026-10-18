@@ -116,7 +116,7 @@ export const ServicesPage: React.FC = () => {
                   setSearchQuery('');
                 }
               }}
-              className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between shadow-2xs group cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy/20"
+              className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 hover:shadow-md hover:border-slate-300 active:scale-[0.99] transition-all duration-150 flex flex-col justify-between shadow-2xs group cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy/20"
             >
               <div>
                 <div className="flex items-center justify-between mb-3">

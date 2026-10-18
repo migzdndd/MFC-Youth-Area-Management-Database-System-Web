@@ -104,10 +104,10 @@ export const AreaSwitchModal: React.FC = () => {
             type="button"
             variant="primary"
             onClick={handleProceed}
-            className="flex items-center gap-1.5"
+            className="flex items-center gap-1.5 group"
           >
             <span>Proceed &amp; Restore Role</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-150" />
           </Button>
         </div>
       </div>

@@ -292,7 +292,7 @@ export const QrAttendanceScannerModal: React.FC<QrAttendanceScannerModalProps> =
         )}
 
         {scanError && (
-          <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-3 text-amber-900 text-xs">
+          <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-3 text-amber-900 text-xs animate-in fade-in slide-in-from-top-2 duration-200">
             <AlertCircle className="w-5 h-5 text-amber-700 shrink-0" />
             <span className="font-medium">{scanError}</span>
           </div>

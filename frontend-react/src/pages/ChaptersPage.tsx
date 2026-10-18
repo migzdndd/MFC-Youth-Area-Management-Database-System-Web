@@ -118,7 +118,7 @@ export const ChaptersPage: React.FC = () => {
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-4">
                     <div className="flex items-center gap-2.5">
-                      <div className="p-2.5 rounded-xl bg-navy/10 text-navy group-hover:scale-105 transition-transform">
+                      <div className="p-2.5 rounded-xl bg-navy/10 text-navy group-hover:scale-105 transition-transform duration-150">
                         <Building2 className="w-5 h-5" />
                       </div>
                       <h3 className="font-bold text-slate-900 text-base font-heading group-hover:text-navy transition-colors">
@@ -132,7 +132,7 @@ export const ChaptersPage: React.FC = () => {
                         e.stopPropagation();
                         handleDelete(chapter);
                       }}
-                      className="p-2 text-slate-400 hover:text-mfc-red rounded-lg hover:bg-rose-50 transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
+                      className="p-2 text-slate-400 hover:text-mfc-red active:scale-95 rounded-lg hover:bg-rose-50 transition-all duration-150 cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
                       aria-label={`Delete chapter ${chapter.name}`}
                     >
                       <Trash2 className="w-4 h-4" />

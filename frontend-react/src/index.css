@@ -185,3 +185,157 @@ h1, h2, h3, h4, h5, h6 {
 .dark ::-webkit-scrollbar-thumb:hover {
   background: #33445c;
 }
+
+/* --------------------------------------------------------------------------
+   Motion System Tokens & Keyframes (DESIGN.md: ENERGY 1 / MOTION 1 / 2/10)
+   Subtle 150-200ms ease, snappy feedback, strictly purposeful.
+   -------------------------------------------------------------------------- */
+
+@keyframes mfcFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes mfcFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes mfcPageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mfcSlideInTop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mfcSlideInBottom {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mfcSlideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes mfcZoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-page-enter {
+  animation: mfcPageEnter 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in {
+  animation: mfcFadeIn 150ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-out {
+  animation: mfcFadeOut 120ms ease-in both;
+}
+
+.animate-scale-in {
+  animation: mfcZoomIn 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-down {
+  animation: mfcSlideInTop 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-up {
+  animation: mfcSlideInBottom 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Radix dialog and utility classes support */
+.animate-in {
+  animation-duration: 180ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: both;
+}
+
+.animate-in.fade-in {
+  animation-name: mfcFadeIn;
+}
+
+.animate-in.slide-in-from-top-2 {
+  animation-name: mfcSlideInTop;
+}
+
+.animate-in.slide-in-from-bottom-4 {
+  animation-name: mfcSlideInBottom;
+}
+
+@media (min-width: 640px) {
+  .animate-in.sm\:zoom-in-95 {
+    animation-name: mfcZoomIn;
+  }
+  .animate-in.sm\:slide-in-from-right-4 {
+    animation-name: mfcSlideInRight;
+  }
+}
+
+/* Interactive tactile feedback helper */
+.interactive-tactile {
+  transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 150ms ease, border-color 150ms ease, background-color 150ms ease;
+}
+.interactive-tactile:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* --------------------------------------------------------------------------
+   Accessibility: WCAG 2.2.2 & 2.3.3 motion compliance
+   Disables all transforms and transitions for users preferring reduced motion.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+

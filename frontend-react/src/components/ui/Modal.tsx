@@ -48,7 +48,7 @@ export const Modal: React.FC<ModalProps> = ({
               <Dialog.Close asChild>
                 <button
                   type="button"
-                  className="p-2 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
+                  className="p-2 text-slate-400 hover:text-slate-700 active:scale-95 rounded-lg hover:bg-slate-100 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
                   aria-label="Close dialog"
                 >
                   <X className="w-5 h-5" />

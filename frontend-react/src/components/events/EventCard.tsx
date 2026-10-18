@@ -70,7 +70,7 @@ export const EventCard: React.FC<EventCardProps> = ({
                 e.stopPropagation();
                 onViewSummary(event);
               }}
-              className="p-1.5 text-slate-400 hover:text-navy hover:bg-slate-100 rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+              className="p-1.5 text-slate-400 hover:text-navy hover:bg-slate-100 active:scale-95 rounded-lg transition-all duration-150 cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
               title="View Event Summary"
               aria-label="View Event Summary"
             >
@@ -85,7 +85,7 @@ export const EventCard: React.FC<EventCardProps> = ({
                     e.stopPropagation();
                     onEdit(event);
                   }}
-                  className="p-1.5 text-slate-400 hover:text-navy hover:bg-slate-100 rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+                  className="p-1.5 text-slate-400 hover:text-navy hover:bg-slate-100 active:scale-95 rounded-lg transition-all duration-150 cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
                   title={`Edit ${event.name}`}
                   aria-label={`Edit ${event.name}`}
                 >
@@ -97,7 +97,7 @@ export const EventCard: React.FC<EventCardProps> = ({
                     e.stopPropagation();
                     onDelete(event);
                   }}
-                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 active:scale-95 rounded-lg transition-all duration-150 cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
                   title={`Delete ${event.name}`}
                   aria-label={`Delete ${event.name}`}
                 >
@@ -154,7 +154,7 @@ export const EventCard: React.FC<EventCardProps> = ({
             </>
           )}
         </span>
-        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-150 ease-out" />
       </div>
     </div>
   );

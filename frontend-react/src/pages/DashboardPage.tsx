@@ -224,9 +224,9 @@ export const DashboardPage: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate('/members')}
-              className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
+              className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/90 active:scale-[0.98] border border-slate-200/90 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
             >
-              <div className="p-2.5 rounded-lg bg-navy text-white shadow-2xs group-hover:scale-105 transition-transform">
+              <div className="p-2.5 rounded-lg bg-navy text-white shadow-2xs group-hover:scale-105 transition-transform duration-150">
                 <UserPlus className="w-4 h-4" />
               </div>
               <div>
@@ -240,9 +240,9 @@ export const DashboardPage: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate('/events')}
-              className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
+              className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/90 active:scale-[0.98] border border-slate-200/90 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
             >
-              <div className="p-2.5 rounded-lg bg-amber-600 text-white shadow-2xs group-hover:scale-105 transition-transform">
+              <div className="p-2.5 rounded-lg bg-amber-600 text-white shadow-2xs group-hover:scale-105 transition-transform duration-150">
                 <CalendarPlus className="w-4 h-4" />
               </div>
               <div>
@@ -256,9 +256,9 @@ export const DashboardPage: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate('/reports')}
-              className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
+              className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100/90 active:scale-[0.98] border border-slate-200/90 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
             >
-              <div className="p-2.5 rounded-lg bg-emerald-700 text-white shadow-2xs group-hover:scale-105 transition-transform">
+              <div className="p-2.5 rounded-lg bg-emerald-700 text-white shadow-2xs group-hover:scale-105 transition-transform duration-150">
                 <FilePlus className="w-4 h-4" />
               </div>
               <div>
@@ -292,7 +292,7 @@ export const DashboardPage: React.FC = () => {
 
           <Link
             to="/readings"
-            className="inline-flex items-center gap-2 px-3.5 py-2 bg-navy text-white text-xs font-bold rounded-lg hover:bg-navy-light transition-all shadow-2xs hover:shadow-xs shrink-0 select-none min-h-[40px]"
+            className="inline-flex items-center gap-2 px-3.5 py-2 bg-navy text-white text-xs font-bold rounded-lg hover:bg-navy-light active:scale-[0.98] transition-all duration-150 shadow-2xs hover:shadow-xs shrink-0 select-none min-h-[40px]"
           >
             <span>Read Scriptures</span>
             <ArrowRight className="w-3.5 h-3.5" />

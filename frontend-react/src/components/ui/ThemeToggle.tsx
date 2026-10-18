@@ -35,14 +35,14 @@ export const ThemeToggle: React.FC<{ className?: string }> = ({ className = '' }
     <button
       type="button"
       onClick={toggleTheme}
-      className={`p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-navy dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700/60 ${className}`}
+      className={`p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-navy dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 active:scale-90 min-h-[44px] min-w-[44px] flex items-center justify-center transition-all duration-150 cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700/60 ${className}`}
       aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
       title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
     >
       {theme === 'dark' ? (
-        <Sun className="w-5 h-5 text-amber-400 transition-transform hover:rotate-45" aria-hidden="true" />
+        <Sun className="w-5 h-5 text-amber-400 transition-transform duration-200 hover:rotate-45" aria-hidden="true" />
       ) : (
-        <Moon className="w-5 h-5 text-slate-700 transition-transform hover:-rotate-12" aria-hidden="true" />
+        <Moon className="w-5 h-5 text-slate-700 transition-transform duration-200 hover:-rotate-12" aria-hidden="true" />
       )}
     </button>
   );

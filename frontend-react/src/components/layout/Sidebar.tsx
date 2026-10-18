@@ -76,7 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       {/* Sidebar container */}
       <aside
         id="main-sidebar"
-        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-navy-deep text-white flex flex-col transition-transform duration-250 ease-out lg:translate-x-0 border-r border-navy-surface shadow-xl lg:shadow-none ${
+        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-navy-deep text-white flex flex-col transition-transform duration-200 ease-out lg:translate-x-0 border-r border-navy-surface shadow-xl lg:shadow-none ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         aria-label="Main navigation"
@@ -105,7 +105,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <button
             type="button"
             onClick={onClose}
-            className="lg:hidden p-2 text-white/70 hover:text-white rounded-lg hover:bg-white/10 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
+            className="lg:hidden p-2 text-white/70 hover:text-white rounded-lg hover:bg-white/10 active:scale-95 transition-all duration-150 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
             aria-label="Close navigation"
           >
             <X className="w-5 h-5" />
@@ -122,7 +122,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 to={item.path}
                 onClick={() => onClose()}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 min-h-[44px] select-none ${
+                  `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 active:scale-[0.98] min-h-[44px] select-none ${
                     isActive
                       ? 'bg-white/12 text-white font-semibold border-l-[3px] border-amber-400 pl-2.5 shadow-2xs'
                       : 'text-slate-300 hover:bg-white/7 hover:text-white'
@@ -144,7 +144,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 to="/dev"
                 onClick={() => onClose()}
                 className={({ isActive }) =>
-                  `flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 min-h-[44px] select-none mt-1 ${
+                  `flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 active:scale-[0.98] min-h-[44px] select-none mt-1 ${
                     isActive
                       ? 'bg-amber-400/20 text-amber-300 font-semibold border-l-[3px] border-amber-400 pl-2.5 shadow-2xs'
                       : 'text-amber-200/90 hover:bg-white/7 hover:text-amber-100'
@@ -186,7 +186,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <button
             type="button"
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-rose-200 hover:text-white bg-rose-500/10 hover:bg-rose-600/30 border border-rose-400/20 rounded-lg transition-all duration-150 min-h-[44px] cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-rose-200 hover:text-white bg-rose-500/10 hover:bg-rose-600/30 border border-rose-400/20 rounded-lg transition-all duration-150 active:scale-[0.98] min-h-[44px] cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Sign Out</span>

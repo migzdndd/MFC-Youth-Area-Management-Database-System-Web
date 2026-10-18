@@ -30,7 +30,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen =
           aria-expanded={isSidebarOpen}
           aria-controls="main-sidebar"
           aria-label={isSidebarOpen ? 'Close navigation menu' : 'Open navigation menu'}
-          className="lg:hidden p-2 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors cursor-pointer"
+          className="lg:hidden p-2 text-slate-600 hover:text-slate-900 active:scale-95 rounded-lg hover:bg-slate-100 min-h-[44px] min-w-[44px] flex items-center justify-center transition-all duration-150 cursor-pointer"
         >
           <Menu className="w-5 h-5" aria-hidden="true" />
         </button>

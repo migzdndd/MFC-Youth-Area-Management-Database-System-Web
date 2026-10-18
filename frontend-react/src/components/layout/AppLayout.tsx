@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth-store';
 import { apiClient } from '@/lib/api';
@@ -13,6 +13,7 @@ import { AreaSwitchModal } from './AreaSwitchModal';
 export const AppLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { token, updateUser } = useAuthStore();
+  const location = useLocation();
 
   const { data: meData } = useQuery({
     queryKey: ['auth', 'me'],
@@ -56,7 +57,9 @@ export const AppLayout: React.FC<{ children?: React.ReactNode }> = ({ children }
           className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto pb-8 sm:pb-12 focus:outline-none"
           tabIndex={-1}
         >
-          {children ?? <Outlet />}
+          <div key={location.pathname} className="animate-page-enter">
+            {children ?? <Outlet />}
+          </div>
         </main>
       </div>
     </div>
