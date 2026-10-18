@@ -35,7 +35,7 @@
 ## Craftsmanship & Mobile Constraints
 - **Minimum Tap Target:** 44px × 44px on all touch surfaces (`min-h-[44px]`).
 - **Focus Rings:** Distinct `:focus-visible` outline (`2px solid #002847`, `offset 2px`).
-- **Mobile First:** Bottom navigation bar (< 768px), zero horizontal scroll leak, and responsive card lists for tables.
+- **Responsive Website:** Desktop sidebar navigation, accessible mobile drawer (< 1024px), skip-to-content accessibility link, zero horizontal scroll leak, and responsive card lists for tables.
 - **Zero Slop:** No generic AI blue-purple gradients, no glowing borders, no pill-shaped cards/inputs, no fake metrics or testimonials, no em dashes (`—`) in UI copy.
 
 ## Design System Source of Truth

@@ -46,7 +46,7 @@ export const AreaSwitchModal: React.FC = () => {
     <Modal
       isOpen={Boolean(pendingAreaSwitch)}
       onClose={cancelPendingAreaSwitch}
-      title="Switch Area Database — Restore Original Role"
+      title="Switch Area Database: Restore Original Role"
       maxWidth="md"
     >
       <div className="space-y-4">

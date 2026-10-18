@@ -8,9 +8,10 @@ import type { Area } from '@/types/auth';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
+  isSidebarOpen?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
+export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen = false }) => {
   const { user, activeArea, requestAreaSwitch } = useAuthStore();
   const { data: areas = [] } = useAreas();
   const queryClient = useQueryClient();
@@ -26,8 +27,10 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
         <button
           type="button"
           onClick={onToggleSidebar}
+          aria-expanded={isSidebarOpen}
+          aria-controls="main-sidebar"
+          aria-label={isSidebarOpen ? 'Close navigation menu' : 'Open navigation menu'}
           className="lg:hidden p-2 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors cursor-pointer"
-          aria-label="Open navigation menu"
         >
           <Menu className="w-5 h-5" aria-hidden="true" />
         </button>

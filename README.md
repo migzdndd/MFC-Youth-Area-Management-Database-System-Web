@@ -44,7 +44,7 @@ The **MFC Youth Area Management System (AMS)** serves as a central operational p
 
 ```
                                 +-----------------------------------+
-                                |    Client Application (PWA)       |
+                                |    Responsive Web Application     |
                                 |   React 19 / TypeScript / Vite    |
                                 |      Tailwind CSS / Lucide        |
                                 +-----------------+-----------------+
@@ -68,7 +68,7 @@ The **MFC Youth Area Management System (AMS)** serves as a central operational p
 - **Frontend**: React 19, TypeScript, Vite, Tailwind CSS, Lucide React icons, React Router, Zustand for state management.
 - **Backend API**: Node.js (Vercel Serverless Functions running on Node 24.x runtime).
 - **Database & Auth**: Supabase PostgreSQL with Row Level Security (RLS) policies, multi-stage schema migrations, and encrypted session handling.
-- **Native Packaging**: Ready for mobile compilation via Capacitor 6 and desktop packaging via Tauri 2.
+- **Architecture**: Strictly a cloud-based responsive web application accessible across all standard desktop, tablet, and mobile browsers.
 
 ---
 
@@ -82,8 +82,8 @@ MFC-Youth-Area-Management-System-Web/
 │   ├── server/               # Modular route handlers (members, chapters, events, services)
 │   ├── supabase/             # SQL schema migrations (001_initial_schema to 016_...)
 │   └── package.json
-├── frontend-react/           # Modern React 19 Single-Page Application
-│   ├── public/               # Static assets, branding logos, PWA manifest
+├── frontend-react/           # Modern React 19 Single-Page Web Application
+│   ├── public/               # Static assets, branding logos, icons
 │   ├── src/
 │   │   ├── components/       # Shared UI primitives (Header, Sidebar, Modals, Nav)
 │   │   ├── pages/            # View components (Dashboard, Members, Chapters, Services, etc.)

@@ -671,10 +671,11 @@ export const DeveloperDashboardPage: React.FC = () => {
 
               {/* Role Selector */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-slate-700 block">
+                <label htmlFor="devSimulateRole" className="text-[11px] font-semibold text-slate-700 block">
                   Simulate Live Role Access
                 </label>
                 <select
+                  id="devSimulateRole"
                   value={simulatedRole || user?.role || 'member'}
                   onChange={(e) => {
                     const newRole = e.target.value as UserRole;
@@ -727,10 +728,14 @@ export const DeveloperDashboardPage: React.FC = () => {
               {areas.length > 0 && (
                 <div className="pt-2.5 border-t border-slate-200/80 space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold text-slate-700">Area Database</span>
+                    <label htmlFor="devAreaSwitch" className="text-[11px] font-semibold text-slate-700 cursor-pointer">
+                      Area Database
+                    </label>
                     <span className="text-[10px] text-slate-500">Live isolation</span>
                   </div>
                   <select
+                    id="devAreaSwitch"
+                    aria-label="Select active area database"
                     value={activeArea?.id || user?.area_id || ''}
                     onChange={(e) => {
                       const found = areas.find((a) => a.id === e.target.value);

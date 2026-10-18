@@ -4,11 +4,11 @@
 
 ## Platform
 
-web / mobile pwa / cross-platform desktop
+web (strictly responsive website across desktop, tablet, and mobile browsers)
 
 ## Users
 
-- **Primary**: Servant Leaders and Chapter Heads of Missionary Families for Christ (MFC) Youth. They operate in the field during pastoral assemblies, youth camps, household meetings, and chapter events, often on mobile phones under varying network conditions.
+- **Primary**: Servant Leaders and Chapter Heads of Missionary Families for Christ (MFC) Youth. They operate in the field during pastoral assemblies, youth camps, household meetings, and chapter events, accessing the website on mobile browsers under varying network conditions.
 - **Secondary**: Area Coordinators, Couple Coordinators, National Coordinators, and Domain Moderators (LIT Servant, Campus Servant, MFC High Servant, Area Kids Servant) requiring pastoral oversight across chapters, aggregate attendance, and ministry analytics.
 
 ## Product Purpose
@@ -21,8 +21,8 @@ Unlike generic community databases or unwieldy spreadsheets, the system is purpo
 
 ## Operating Context
 
-- **Environment**: Mobile browsers and installed PWAs on smartphones in parish halls, retreat camps, classrooms, and outdoor event grounds; desktop workstations for area coordinators.
-- **Connectivity**: Mobile web with offline caching for attendance and reference data during venue network dropouts.
+- **Environment**: Modern web browsers on smartphones, tablets, and desktop workstations in parish halls, retreat camps, classrooms, and administrative offices.
+- **Connectivity**: Responsive web application with network status indicators for venue network dropouts.
 - **Rituals**: Fast entry during event check-ins, household attendance logging, monthly activity reports, and periodic chapter roster audits.
 
 ## Capabilities and Constraints
@@ -33,8 +33,9 @@ Unlike generic community databases or unwieldy spreadsheets, the system is purpo
   - LIT Creative Ministries catalog focused strictly on the 5 pillars: Music, Dance, Graphics & Promo, Creative Writing, and Photography & Videography.
   - Event registration, fee status tracking, and attendance verification.
   - GIG (God is Generous) stewardship catalog and service tracking.
-  - Mobile-first React Native style UI with 44px touch targets and bottom tab navigation.
+  - Responsive website UI with 44px minimum touch targets, desktop collapsible sidebar, and accessible mobile drawer navigation.
 - **Constraints**:
+  - Strictly a web application (no native mobile app wrappers, no PWA install prompts, standard browser navigation).
   - Strict compliance with data privacy standards for minors (no public leakage of youth contact details or emergency records).
   - Clean separation: React 19 + TypeScript frontend (`frontend-react/`) with Vercel serverless functions (`Backend/server/`) and Supabase PostgreSQL with RLS.
   - Lightweight, performant client footprint with zero decorative AI bloat or neon glows.
@@ -50,7 +51,7 @@ Unlike generic community databases or unwieldy spreadsheets, the system is purpo
 - Modern React 19 + TypeScript + Vite + Tailwind CSS application in `frontend-react/` (`DashboardPage.tsx`, `MembersPage.tsx`, `ChaptersPage.tsx`, `EventsPage.tsx`, `ServicesPage.tsx`, `ReportsPage.tsx`, `GigPage.tsx`).
 - Official logo assets in `frontend-react/public/img/` and `Frontend/img/`.
 - Documented schema migrations in `Backend/supabase/` (migrations 001 through 016) defining tables for areas, chapters, members, events, attendance, services, and reports.
-- Working PWA configuration and mobile-friendly responsive layout.
+- Fully accessible responsive website layout conforming to WCAG AA accessibility standards.
 
 ## Product Principles
 

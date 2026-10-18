@@ -104,13 +104,17 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       return undefined;
     })();
 
+    const errorId = error ? `${inputId}-error` : undefined;
+    const helperId = helperText ? `${inputId}-helper` : undefined;
+    const describedBy = [errorId, helperId].filter(Boolean).join(' ') || undefined;
+
     return (
       <div className="w-full flex flex-col gap-1.5">
         {label && (
           <label htmlFor={inputId} className="text-sm font-semibold text-slate-800 select-none flex items-center justify-between">
             <span>
               {label}
-              {props.required && <span className="text-mfc-red ml-1">*</span>}
+              {props.required && <span className="text-mfc-red ml-1" aria-hidden="true">*</span>}
             </span>
           </label>
         )}
@@ -122,6 +126,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             type={effectiveType}
             autoComplete={resolvedAutoComplete}
             readOnly={effectiveReadOnly}
+            aria-invalid={Boolean(error) || undefined}
+            aria-describedby={describedBy}
             onFocus={handleFocus}
             onMouseDown={handleMouseDown}
             onTouchStart={handleTouchStart}
@@ -146,15 +152,16 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
+              aria-pressed={showPassword}
               className="absolute right-2 p-2 text-slate-400 hover:text-slate-600 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
               aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {showPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
             </button>
           )}
         </div>
-        {error && <span className="text-xs text-mfc-red font-medium" role="alert">{error}</span>}
-        {helperText && !error && <span className="text-xs text-slate-500">{helperText}</span>}
+        {error && <span id={errorId} className="text-xs text-mfc-red font-medium" role="alert">{error}</span>}
+        {helperText && !error && <span id={helperId} className="text-xs text-slate-500">{helperText}</span>}
       </div>
     );
   }

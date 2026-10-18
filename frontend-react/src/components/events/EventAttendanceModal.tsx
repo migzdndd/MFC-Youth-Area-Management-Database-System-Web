@@ -165,9 +165,11 @@ export const EventAttendanceModal: React.FC<EventAttendanceModalProps> = ({
 
         {/* Search Bar */}
         <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
           <input
+            id="attendeeSearchInput"
             type="text"
+            aria-label="Search area members by name, academic track, or chapter"
             placeholder="Search area members by name, academic track, or chapter..."
             className="w-full pl-9 pr-4 py-2.5 text-sm bg-white text-slate-900 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy min-h-[44px]"
             value={attendeeSearch}

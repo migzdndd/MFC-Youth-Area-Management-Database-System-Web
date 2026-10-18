@@ -133,10 +133,11 @@ const EventFormContent: React.FC<EventFormContentProps> = ({
       />
 
       <div className="w-full flex flex-col gap-1.5">
-        <label className="text-sm font-semibold text-slate-800">
+        <label htmlFor="eventDescription" className="text-sm font-semibold text-slate-800">
           Description / Agenda (Optional)
         </label>
         <textarea
+          id="eventDescription"
           rows={3}
           className="w-full px-3.5 py-2.5 text-sm bg-white text-slate-900 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy"
           placeholder="Event details..."

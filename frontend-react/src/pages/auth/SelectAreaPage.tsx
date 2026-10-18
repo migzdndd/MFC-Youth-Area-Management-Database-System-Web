@@ -373,6 +373,7 @@ export const SelectAreaPage: React.FC = () => {
                   <input
                     id={searchInputId}
                     type="search"
+                    aria-label="Search area name or code"
                     placeholder="Search area name or code..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}

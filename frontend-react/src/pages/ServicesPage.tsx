@@ -160,9 +160,11 @@ export const ServicesPage: React.FC = () => {
               Total assigned: <span className="font-bold text-navy">{selectedServiceMembers.length}</span> member{selectedServiceMembers.length === 1 ? '' : 's'}
             </p>
             <div className="relative min-w-[200px] sm:w-64">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
               <input
+                id="serviceServantSearch"
                 type="text"
+                aria-label="Search assigned servants"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search servant..."

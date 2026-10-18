@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { Search, X } from 'lucide-react';
 
 export interface SearchBarProps {
@@ -6,6 +6,7 @@ export interface SearchBarProps {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  id?: string;
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
@@ -13,13 +14,17 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   onChange,
   placeholder = 'Search...',
   className = '',
+  id,
 }) => {
+  const generatedId = useId();
+  const searchInputId = id || `search-${generatedId}`;
+
   return (
     <div className={`relative flex items-center w-full ${className}`}>
-      <Search className="absolute left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+      <Search className="absolute left-3.5 w-4 h-4 text-slate-400 pointer-events-none" aria-hidden="true" />
       <input
         type="text"
-        id="member-search-input"
+        id={searchInputId}
         name="search"
         autoComplete="off"
         aria-label={placeholder}
@@ -35,7 +40,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           className="absolute right-1.5 p-2 text-slate-400 hover:text-slate-700 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
           aria-label="Clear search"
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4" aria-hidden="true" />
         </button>
       )}
     </div>

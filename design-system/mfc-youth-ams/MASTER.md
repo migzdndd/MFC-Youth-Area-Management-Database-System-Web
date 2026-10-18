@@ -11,7 +11,7 @@
 ## 1. System Metadata & Design Dials
 
 - **Project:** Missionary Families for Christ (MFC) Youth Area Management System (`MFC Youth AMS`)
-- **Platform:** React 19 + TypeScript + Tailwind CSS v4 + Vite + PWA (Mobile Field Web & Desktop Workspace)
+- **Platform:** React 19 + TypeScript + Tailwind CSS v4 + Vite (Responsive Web Application across Desktop, Tablet, and Mobile Web Browsers)
 - **Target Audience:** MFC Youth Servant Leaders, Chapter Heads, Area Coordinators, Domain Moderators (LIT, Campus, High, Kids)
 - **Primary Operating Context:** Field environments (parish halls, camp grounds, youth assemblies) on mobile devices under varying outdoor light, plus desktop administrative workstations for roster and activity reporting.
 

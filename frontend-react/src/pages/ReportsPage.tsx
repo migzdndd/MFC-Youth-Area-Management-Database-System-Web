@@ -363,10 +363,11 @@ export const ReportsPage: React.FC = () => {
           />
 
           <div className="w-full flex flex-col gap-1.5">
-            <label className="text-sm font-semibold text-text-main">
+            <label htmlFor="reportNotes" className="text-sm font-semibold text-text-main">
               Activity Notes & Pastoral Highlights
             </label>
             <textarea
+              id="reportNotes"
               rows={3}
               className="w-full px-3.5 py-2.5 text-sm bg-white text-text-main border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-navy/20 focus:border-navy"
               placeholder="Summary of activity, worship, and fellowship..."

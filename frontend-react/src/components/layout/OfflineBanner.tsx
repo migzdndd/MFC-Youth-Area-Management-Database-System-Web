@@ -21,10 +21,12 @@ export const OfflineBanner: React.FC = () => {
 
   return (
     <aside
+      role="status"
+      aria-live="polite"
       className="bg-amber-600 text-white text-xs sm:text-sm font-medium px-4 py-2 flex items-center justify-center gap-2 z-50 sticky top-0"
       aria-label="Offline connection alert"
     >
-      <WifiOff className="w-4 h-4 shrink-0" />
+      <WifiOff className="w-4 h-4 shrink-0" aria-hidden="true" />
       <span>Working offline. New records will sync automatically when your connection is restored.</span>
     </aside>
   );

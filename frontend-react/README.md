@@ -1,22 +1,22 @@
 # MFC Youth Area Management System - React Frontend
 
-The official modern web and mobile client application for the **MFC Youth Area Management System (AMS)**, built with **React 19**, **TypeScript**, **Vite**, and **Tailwind CSS**.
+The official modern responsive web client for the **MFC Youth Area Management System (AMS)**, built with **React 19**, **TypeScript**, **Vite**, and **Tailwind CSS**.
 
 ---
 
-## Design Philosophy: React Native Style Interface
+## Design Philosophy: Responsive Web Ergonomics
 
-The frontend adopts a React Native style design language engineered specifically for field ergonomics and mobile performance:
+The frontend is engineered as a pure, responsive web application for field ergonomics, desktop administration, and accessibility:
 
-1. **Mobile-First Touch Ergonomics**:
+1. **Touch & Keyboard Ergonomics**:
    - All interactive elements (buttons, inputs, filters, list items) strictly observe a minimum 44px tap target.
-   - Eliminates pinch-zoom requirements or miss-clicks during rapid check-ins at youth conferences and retreat camps.
+   - Complete keyboard accessibility (`Tab`, `Shift+Tab`, `Enter`, `Escape`) with visible focus indicators.
 2. **Tactile Card Surfaces**:
    - Clean, elevated card containers with crisp borders (`border-slate-200/80`) and subtle elevation.
    - Eliminates generic AI gradients, neon glows, and excessive glassmorphism in favor of calm, pastoral utility.
 3. **Adaptive Navigation**:
-   - **Mobile**: High-frequency thumb navigation via a persistent bottom navigation bar (Dashboard, Members, Chapters, Services, Events, Reports) paired with a lightweight top status header.
-   - **Desktop**: Collapsible sidebar with role-aware links and active pastoral area indicator.
+   - **Mobile**: Clean header with accessible hamburger drawer button controlling the sliding sidebar.
+   - **Desktop**: Persistent collapsible sidebar with role-aware links and active pastoral area indicator.
 4. **Official Community Palette**:
    - Deep Community Navy: `#002847` (Brand dominant, navigation, headers)
    - Crisp Off-White: `#F8FAFC` (Screen background surface)
@@ -29,14 +29,12 @@ The frontend adopts a React Native style design language engineered specifically
 
 ```text
 frontend-react/
-├── public/                 # Favicon, PWA manifest, branding logos
+├── public/                 # Favicon, branding logos, icons
 ├── src/
 │   ├── components/         # Reusable UI primitives
-│   │   ├── BottomNav.tsx   # Mobile-friendly thumb navigation bar
-│   │   ├── Header.tsx      # Top bar with user profile, area badge, logout
-│   │   ├── Sidebar.tsx     # Desktop collapsible navigation drawer
-│   │   ├── Layout.tsx      # Shell layout coordinating Header, Sidebar, BottomNav
-│   │   └── ProtectedRoute.tsx # Route guard enforcing authentication
+│   │   ├── layout/         # AppLayout, Header, Sidebar, Banners, Modals
+│   │   ├── ui/             # Button, Input, Select, Modal, SearchBar, ThemeToggle
+│   │   └── events/         # Event cards, attendance rosters, summary modals
 │   ├── pages/              # Domain views
 │   │   ├── DashboardPage.tsx  # Dynamic metrics, quick links, Scripture card
 │   │   ├── MembersPage.tsx    # Youth directory with academic tracks and Heartchamps

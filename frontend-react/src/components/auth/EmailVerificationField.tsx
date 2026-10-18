@@ -243,13 +243,15 @@ export const EmailVerificationField: React.FC<EmailVerificationFieldProps> = ({
             {/* Inline 6-Digit Code Entry */}
             {verificationSent && !isVerified && (
               <div className="mt-2.5 pt-2 border-t border-slate-200/80 space-y-2">
-                <span className="text-[11px] font-semibold text-slate-800 block">
+                <label htmlFor="reg_email_otp" className="text-[11px] font-semibold text-slate-800 block cursor-pointer">
                   Received the 6-digit code? Enter it below:
-                </span>
+                </label>
                 <div className="flex flex-wrap items-center gap-2">
                   <input
+                    id="reg_email_otp"
                     type="text"
                     name="reg_email_otp"
+                    aria-label="6-digit verification code"
                     inputMode="numeric"
                     pattern="[0-9]*"
                     maxLength={6}

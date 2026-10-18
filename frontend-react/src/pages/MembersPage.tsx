@@ -281,6 +281,7 @@ export const MembersPage: React.FC = () => {
 
           <Select
             name="chapterFilter"
+            aria-label="Filter by chapter"
             value={chapterFilter}
             onChange={(e) => setChapterFilter(e.target.value)}
             options={[
@@ -291,6 +292,7 @@ export const MembersPage: React.FC = () => {
 
           <Select
             name="trackFilter"
+            aria-label="Filter by academic track"
             value={trackFilter}
             onChange={(e) => setTrackFilter(e.target.value)}
             options={[
@@ -304,6 +306,7 @@ export const MembersPage: React.FC = () => {
 
           <Select
             name="serviceFilter"
+            aria-label="Filter by ministry service"
             value={serviceFilter}
             onChange={(e) => setServiceFilter(e.target.value)}
             options={[
@@ -314,6 +317,7 @@ export const MembersPage: React.FC = () => {
 
           <Select
             name="statusFilter"
+            aria-label="Filter by member status"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             options={[
