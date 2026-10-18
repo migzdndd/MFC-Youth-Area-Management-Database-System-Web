@@ -2,64 +2,24 @@ import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth-store';
 import { useDeveloperMetrics, useInspectTable, useDevPing } from '@/hooks/useDeveloper';
-import { useAreas } from '@/hooks/useDashboard';
 import { useToast } from '@/hooks/useToast';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
-import { Modal } from '@/components/ui/Modal';
-import { Spinner } from '@/components/ui/Spinner';
-import { formatDateTime } from '@/lib/utils';
+import { RefreshCw, Download } from 'lucide-react';
 import {
-  Server,
-  Database,
-  Cpu,
-  RefreshCw,
-  Download,
-  Trash2,
-  MapPin,
-  CheckCircle2,
-  Clock,
-  Layers,
-  Users,
-  Building2,
-  Calendar,
-  FileText,
-  Briefcase,
-  UserCheck,
-  ChevronRight,
-  ShieldCheck,
-  RotateCcw,
-} from 'lucide-react';
-
-import { ROLE_LABELS, type UserRole } from '@/types/auth';
-
-function formatUptime(seconds: number): string {
-  if (seconds < 60) return `${seconds}s`;
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ${seconds % 60}s`;
-  const hours = Math.floor(minutes / 60);
-  const remMinutes = minutes % 60;
-  if (hours < 24) return `${hours}h ${remMinutes}m`;
-  const days = Math.floor(hours / 24);
-  const remHours = hours % 24;
-  return `${days}d ${remHours}h ${remMinutes}m`;
-}
+  SystemTelemetryGrid,
+  SystemRecordsOverview,
+  RecentActivityFeed,
+  SystemManagementTools,
+  TableInspectModal,
+} from '@/components/developer';
 
 export const DeveloperDashboardPage: React.FC = () => {
-  const {
-    user,
-    activeArea,
-    simulatedRole,
-    setSimulatedRole,
-    requestAreaSwitch,
-    roleRestorationValidated,
-  } = useAuthStore();
+  const { user, activeArea } = useAuthStore();
   const toast = useToast();
   const queryClient = useQueryClient();
 
   const { data: metrics, isLoading, isFetching, refetch } = useDeveloperMetrics();
-  const { data: areas = [] } = useAreas();
   const inspectTable = useInspectTable();
   const pingMutation = useDevPing();
 
@@ -67,7 +27,6 @@ export const DeveloperDashboardPage: React.FC = () => {
   const [inspectedTable, setInspectedTable] = useState<string | null>(null);
   const [tableData, setTableData] = useState<Record<string, unknown>[]>([]);
   const [isInspectModalOpen, setIsInspectModalOpen] = useState(false);
-  const [activeActivityTab, setActiveActivityTab] = useState<'members' | 'events' | 'reports'>('members');
 
   // Strict Supabase developer authorization
   const isAuthorized = Boolean(user?.is_developer);
@@ -121,113 +80,6 @@ export const DeveloperDashboardPage: React.FC = () => {
     toast.success('System diagnostic snapshot exported to JSON.', 'Export Ready');
   };
 
-  const FRIENDLY_TABLE_INFO: Record<string, { label: string; previewTitle: string; previewDesc: string }> = {
-    members: {
-      label: 'Members Directory',
-      previewTitle: 'Members Directory Preview',
-      previewDesc: 'Showing recent youth member records saved in the community.',
-    },
-    chapters: {
-      label: 'Registered Chapters',
-      previewTitle: 'Registered Chapters Preview',
-      previewDesc: 'Showing recent youth chapters registered across areas.',
-    },
-    areas: {
-      label: 'Area Communities',
-      previewTitle: 'Area Communities Preview',
-      previewDesc: 'Showing registered Area community divisions.',
-    },
-    events: {
-      label: 'Community Events',
-      previewTitle: 'Community Events Preview',
-      previewDesc: 'Showing recent youth events, camps, and gatherings.',
-    },
-    event_participants: {
-      label: 'Event Attendance',
-      previewTitle: 'Event Attendance Preview',
-      previewDesc: 'Showing recent attendee registrations and confirmations.',
-    },
-    activity_reports: {
-      label: 'Activity Reports',
-      previewTitle: 'Activity Reports Preview',
-      previewDesc: 'Showing recent pastoral activity reports filed by servant leaders.',
-    },
-    services: {
-      label: 'Universal Services',
-      previewTitle: 'Universal Services Preview',
-      previewDesc: 'Showing available pastoral service categories in the system.',
-    },
-    profiles: {
-      label: 'Servant Accounts',
-      previewTitle: 'Servant Accounts Preview',
-      previewDesc: 'Showing registered servant leader account profiles.',
-    },
-  };
-
-  const isTechnicalIdColumn = (col: string): boolean => {
-    const lower = col.toLowerCase();
-    return lower === 'id' || lower.endsWith('_id') || lower.endsWith('id');
-  };
-
-  const isUuid = (val: string): boolean =>
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
-
-  const formatColumnHeader = (col: string): string => {
-    const customNames: Record<string, string> = {
-      created_at: 'Date Created',
-      updated_at: 'Last Updated',
-      created_by: 'Created By',
-      starts_at: 'Start Time',
-      ends_at: 'End Time',
-      first_name: 'First Name',
-      last_name: 'Last Name',
-      middle_name: 'Middle Name',
-      must_change_password: 'Password Reset',
-      is_active: 'Active Account',
-      is_developer: 'Developer Access',
-      report_type: 'Report Category',
-      manual_attendance: 'Attendance',
-      payment_status: 'Payment Status',
-      venue: 'Location / Venue',
-      fee: 'Fee',
-      status: 'Status',
-      role: 'Assigned Role',
-      email: 'Email Address',
-      name: 'Name',
-      description: 'Description',
-      title: 'Title',
-      activity_date: 'Activity Date',
-      participant_count: 'Headcount',
-      notes: 'Notes / Remarks',
-      code: 'Area Code',
-    };
-    if (customNames[col]) return customNames[col];
-    return col.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-  };
-
-  const formatCellValue = (val: unknown): string => {
-    if (val === null || val === undefined || val === '') return 'None';
-    if (typeof val === 'boolean') return val ? 'Yes' : 'No';
-    if (typeof val === 'object') return JSON.stringify(val);
-    const str = String(val);
-    if (isUuid(str)) return 'Active Record';
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(str)) {
-      return formatDateTime(str);
-    }
-    return str;
-  };
-
-  const tableCards = [
-    { key: 'members', label: 'Members Directory', count: metrics?.counts.members ?? 0, icon: Users, color: 'text-sky-600 bg-sky-50' },
-    { key: 'chapters', label: 'Registered Chapters', count: metrics?.counts.chapters ?? 0, icon: Building2, color: 'text-amber-600 bg-amber-50' },
-    { key: 'areas', label: 'Area Communities', count: metrics?.counts.areas ?? 0, icon: MapPin, color: 'text-emerald-600 bg-emerald-50' },
-    { key: 'events', label: 'Community Events', count: metrics?.counts.events ?? 0, icon: Calendar, color: 'text-indigo-600 bg-indigo-50' },
-    { key: 'event_participants', label: 'Event Attendance', count: metrics?.counts.participants ?? 0, icon: UserCheck, color: 'text-violet-600 bg-violet-50' },
-    { key: 'activity_reports', label: 'Activity Reports', count: metrics?.counts.reports ?? 0, icon: FileText, color: 'text-rose-600 bg-rose-50' },
-    { key: 'services', label: 'Universal Services', count: metrics?.counts.services ?? 0, icon: Briefcase, color: 'text-teal-600 bg-teal-50' },
-    { key: 'profiles', label: 'Servant Accounts', count: metrics?.counts.profiles ?? 0, icon: Layers, color: 'text-slate-600 bg-slate-100' },
-  ];
-
   return (
     <div className="space-y-6">
       {/* Top Banner & Control Deck */}
@@ -274,569 +126,46 @@ export const DeveloperDashboardPage: React.FC = () => {
       </div>
 
       {/* System Vitals & Performance Telemetry Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Database Latency */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">System Connection</span>
-            <div className="p-2 bg-emerald-50 text-emerald-700 rounded-lg">
-              <Database className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-slate-900">
-              {testedLatency !== null
-                ? `${testedLatency}ms`
-                : metrics?.system.dbLatencyMs !== undefined
-                ? `${metrics.system.dbLatencyMs}ms`
-                : 'Checking...'}
-            </span>
-            <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Connected & Active
-            </span>
-          </div>
-          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
-            <span>Response speed</span>
-            <button
-              type="button"
-              disabled={pingMutation.isPending}
-              onClick={handlePing}
-              className="font-bold text-navy hover:underline cursor-pointer disabled:opacity-50"
-            >
-              {pingMutation.isPending ? 'Testing...' : 'Test Speed'}
-            </button>
-          </div>
-        </div>
-
-        {/* Runtime & Uptime */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Process Uptime</span>
-            <div className="p-2 bg-sky-50 text-sky-800 rounded-lg">
-              <Clock className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-2xl font-extrabold text-slate-900">
-            {metrics?.system.uptimeSeconds ? formatUptime(metrics.system.uptimeSeconds) : 'Calculating...'}
-          </div>
-          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
-            <span>Runtime Engine</span>
-            <span className="font-mono font-medium text-slate-800">{metrics?.system.nodeVersion || 'v20.x'}</span>
-          </div>
-        </div>
-
-        {/* Memory Allocation */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Memory Usage</span>
-            <div className="p-2 bg-amber-50 text-amber-700 rounded-lg">
-              <Cpu className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-slate-900">
-              {metrics?.system.memory.heapUsedMb ? `${metrics.system.memory.heapUsedMb} MB` : 'N/A'}
-            </span>
-            <span className="text-xs text-slate-500">
-              / {metrics?.system.memory.heapTotalMb ? `${metrics.system.memory.heapTotalMb} MB` : 'N/A'}
-            </span>
-          </div>
-          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
-            <span>Total Memory</span>
-            <span className="font-mono font-medium text-slate-800">{metrics?.system.memory.rssMb ? `${metrics.system.memory.rssMb} MB` : 'N/A'}</span>
-          </div>
-        </div>
-
-        {/* Architecture & Environment */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Host Platform</span>
-            <div className="p-2 bg-violet-50 text-violet-700 rounded-lg">
-              <Server className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-2xl font-extrabold text-slate-900 uppercase">
-            {metrics?.system.platform ? `${metrics.system.platform} (${metrics.system.arch})` : 'Windows'}
-          </div>
-          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
-            <span>Environment</span>
-            <Badge variant="navy">{metrics?.system.env || 'production'}</Badge>
-          </div>
-        </div>
-      </div>
+      <SystemTelemetryGrid
+        metrics={metrics}
+        testedLatency={testedLatency}
+        isPingPending={pingMutation.isPending}
+        onPing={handlePing}
+      />
 
       {/* System Records Overview */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-2xs space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 font-heading">
-              System Records Overview
-            </h2>
-            <p className="text-xs text-slate-500">
-              Live count of records saved across the community system. Click any category to view recent entries.
-            </p>
-          </div>
-          {isLoading && <Spinner size="sm" />}
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-          {tableCards.map((card) => {
-            const Icon = card.icon;
-            return (
-              <button
-                key={card.key}
-                type="button"
-                onClick={() => handleInspect(card.key)}
-                className="p-4 bg-slate-50/80 hover:bg-slate-100/80 border border-slate-200/80 hover:border-navy/40 rounded-xl transition-all duration-150 text-left cursor-pointer group flex flex-col justify-between min-h-[100px]"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className={`p-2 rounded-lg ${card.color}`}>
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-navy group-hover:translate-x-0.5 transition-transform" />
-                </div>
-                <div>
-                  <div className="text-xl sm:text-2xl font-extrabold text-slate-900 font-mono">
-                    {card.count}
-                  </div>
-                  <div className="text-xs font-semibold text-slate-600 truncate mt-0.5">
-                    {card.label}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <SystemRecordsOverview
+        metrics={metrics}
+        isLoading={isLoading}
+        onInspect={handleInspect}
+      />
 
       {/* Dual Section: Recent Activity & Management Tools */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Recent Activity Feed (7 cols) */}
-        <div className="lg:col-span-7 bg-white border border-slate-200/90 rounded-2xl p-6 shadow-2xs space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <h2 className="text-lg font-bold text-slate-900 font-heading">
-                Recent System Activity
-              </h2>
-              <p className="text-xs text-slate-500">
-                Latest updates and entries recorded across the community.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-lg shrink-0">
-              <button
-                type="button"
-                onClick={() => setActiveActivityTab('members')}
-                className={`px-3 py-1 text-xs font-bold rounded-md transition-colors cursor-pointer ${
-                  activeActivityTab === 'members'
-                    ? 'bg-white text-navy shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Members ({metrics?.recentActivity.members.length || 0})
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveActivityTab('events')}
-                className={`px-3 py-1 text-xs font-bold rounded-md transition-colors cursor-pointer ${
-                  activeActivityTab === 'events'
-                    ? 'bg-white text-navy shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Events ({metrics?.recentActivity.events.length || 0})
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveActivityTab('reports')}
-                className={`px-3 py-1 text-xs font-bold rounded-md transition-colors cursor-pointer ${
-                  activeActivityTab === 'reports'
-                    ? 'bg-white text-navy shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Reports ({metrics?.recentActivity.reports.length || 0})
-              </button>
-            </div>
-          </div>
-
-          {/* Activity items list */}
-          <div className="space-y-2.5">
-            {activeActivityTab === 'members' && (
-              metrics?.recentActivity.members.length ? (
-                metrics.recentActivity.members.map((m) => (
-                  <div key={m.id} className="p-3 bg-slate-50/70 border border-slate-200/70 rounded-xl flex items-center justify-between gap-3 text-xs">
-                    <div className="min-w-0">
-                      <div className="font-bold text-slate-900 truncate">
-                        {[m.first_name, m.middle_name, m.last_name].filter(Boolean).join(' ')}
-                      </div>
-                      <div className="text-slate-500 truncate font-mono text-[11px]">{m.email}</div>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <Badge variant={m.status === 'Active' ? 'success' : 'default'}>{m.status}</Badge>
-                      <div className="text-[10px] text-slate-500 mt-1">{formatDateTime(m.created_at)}</div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="p-8 text-center text-xs text-slate-500">No member records recorded yet.</div>
-              )
-            )}
-
-            {activeActivityTab === 'events' && (
-              metrics?.recentActivity.events.length ? (
-                metrics.recentActivity.events.map((e) => (
-                  <div key={e.id} className="p-3 bg-slate-50/70 border border-slate-200/70 rounded-xl flex items-center justify-between gap-3 text-xs">
-                    <div className="min-w-0">
-                      <div className="font-bold text-slate-900 truncate">{e.name}</div>
-                      <div className="text-slate-500 truncate text-[11px]">{e.venue}</div>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <Badge variant={e.fee > 0 ? 'warning' : 'success'}>{e.fee > 0 ? `₱${e.fee}` : 'Free'}</Badge>
-                      <div className="text-[10px] text-slate-500 mt-1">{formatDateTime(e.created_at)}</div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="p-8 text-center text-xs text-slate-500">No event records scheduled yet.</div>
-              )
-            )}
-
-            {activeActivityTab === 'reports' && (
-              metrics?.recentActivity.reports.length ? (
-                metrics.recentActivity.reports.map((r) => (
-                  <div key={r.id} className="p-3 bg-slate-50/70 border border-slate-200/70 rounded-xl flex items-center justify-between gap-3 text-xs">
-                    <div className="min-w-0">
-                      <div className="font-bold text-slate-900 truncate">{r.report_type}</div>
-                      <div className="text-slate-500 truncate text-[11px]">
-                        {r.chapter_id ? 'Chapter Assembly Report' : 'Area Community Report'}
-                      </div>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <Badge variant="info">{r.status || 'Filed'}</Badge>
-                      <div className="text-[10px] text-slate-500 mt-1">{formatDateTime(r.created_at)}</div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="p-8 text-center text-xs text-slate-500">No activity report records filed yet.</div>
-              )
-            )}
-          </div>
+        <div className="lg:col-span-7">
+          <RecentActivityFeed metrics={metrics} />
         </div>
-
-        {/* System Management Tools (5 cols) */}
-        <div className="lg:col-span-5 bg-white border border-slate-200/90 rounded-2xl p-6 shadow-2xs space-y-5">
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 font-heading">
-              System Management Tools
-            </h2>
-            <p className="text-xs text-slate-500">
-              Administrative actions, speed tests, and diagnostic utilities.
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            {/* Ping Test */}
-            <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200/80 flex items-center justify-between gap-3">
-              <div>
-                <div className="text-xs font-bold text-slate-900">Connection Speed Test</div>
-                <div className="text-[11px] text-slate-500">Measure server response time</div>
-              </div>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handlePing}
-                isLoading={pingMutation.isPending}
-                className="shrink-0 min-h-[36px]"
-              >
-                Run Test
-              </Button>
-            </div>
-
-            {/* Clear Query Cache */}
-            <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200/80 flex items-center justify-between gap-3">
-              <div>
-                <div className="text-xs font-bold text-slate-900">Clear Saved App Cache</div>
-                <div className="text-[11px] text-slate-500">Reset locally saved temporary data</div>
-              </div>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleClearCache}
-                className="shrink-0 min-h-[36px] text-rose-700 hover:bg-rose-50 border-rose-200"
-              >
-                <Trash2 className="w-3.5 h-3.5 mr-1" />
-                Clear Cache
-              </Button>
-            </div>
-
-            {/* Toast System Diagnostic */}
-            <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200/80 space-y-2">
-              <div>
-                <div className="text-xs font-bold text-slate-900">Notification Preview Test</div>
-                <div className="text-[11px] text-slate-500">Test in-app alert and notice banners</div>
-              </div>
-              <div className="grid grid-cols-2 gap-2 pt-1">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => toast.success('Operation completed successfully.', 'Success Alert')}
-                  className="text-emerald-700 text-xs min-h-[36px]"
-                >
-                  Success
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => toast.showToast({ type: 'warning', title: 'Warning Alert', message: 'Session check requires attention.' })}
-                  className="text-amber-700 text-xs min-h-[36px]"
-                >
-                  Warning
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => toast.error('Sample synthetic error occurred.', 'Error Alert')}
-                  className="text-rose-700 text-xs min-h-[36px]"
-                >
-                  Error
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => toast.showToast({ type: 'info', title: 'Notice Alert', message: 'New system event captured.' })}
-                  className="text-sky-700 text-xs min-h-[36px]"
-                >
-                  Info
-                </Button>
-              </div>
-            </div>
-
-            {/* Live Role Access & Area Database Simulator */}
-            <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200/80 space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-bold text-slate-900">Live Role Simulator</div>
-                  <div className="text-[10px] text-slate-500">Test access levels system-wide</div>
-                </div>
-                {simulatedRole ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-300">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                    Simulating
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                    <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                    Authentic
-                  </span>
-                )}
-              </div>
-
-              {/* Status Indicator */}
-              <div className="p-2.5 rounded-lg bg-white border border-slate-200/80 space-y-1.5 text-[11px]">
-                <div className="flex justify-between items-center text-slate-600">
-                  <span>Authentic Role:</span>
-                  <span className="font-semibold text-slate-800">
-                    {user?.home_role ? ROLE_LABELS[user.home_role] || user.home_role : 'Servant'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-slate-600">
-                  <span>Effective Active Role:</span>
-                  <span className={`font-bold ${simulatedRole ? 'text-amber-700' : 'text-emerald-700'}`}>
-                    {user?.role ? ROLE_LABELS[user.role] || user.role : 'Member'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-slate-600">
-                  <span>Current Area DB:</span>
-                  <span className="font-semibold text-slate-800">
-                    {activeArea?.name || 'Home Database'}
-                  </span>
-                </div>
-              </div>
-
-              {roleRestorationValidated && (
-                <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-medium flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Authentic role verified and restored.</span>
-                </div>
-              )}
-
-              {/* Role Selector */}
-              <div className="space-y-1.5">
-                <label htmlFor="devSimulateRole" className="text-[11px] font-semibold text-slate-700 block">
-                  Simulate Live Role Access
-                </label>
-                <select
-                  id="devSimulateRole"
-                  value={simulatedRole || user?.role || 'member'}
-                  onChange={(e) => {
-                    const newRole = e.target.value as UserRole;
-                    if (newRole === user?.home_role) {
-                      setSimulatedRole(null);
-                      toast.success(
-                        `Restored to authentic role: ${ROLE_LABELS[newRole]}`,
-                        'Authentic Role Restored'
-                      );
-                    } else {
-                      setSimulatedRole(newRole);
-                      toast.showToast({
-                        type: 'info',
-                        title: `Simulating ${ROLE_LABELS[newRole]}`,
-                        message: 'Role permissions applied across the system.',
-                      });
-                    }
-                  }}
-                  className="w-full text-xs p-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy/20 min-h-[38px] font-medium text-slate-800"
-                >
-                  {Object.entries(ROLE_LABELS).map(([key, label]) => (
-                    <option key={key} value={key}>
-                      {label} {user?.home_role === key ? '(Your Authentic Role)' : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Reset to Authentic Role Button */}
-              {simulatedRole && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="w-full text-xs flex items-center justify-center gap-1.5 min-h-[36px] text-slate-700 hover:text-slate-900 border-slate-300"
-                  onClick={() => {
-                    setSimulatedRole(null);
-                    queryClient.clear();
-                    toast.success(
-                      `Validated: Authentic role "${user?.home_role ? ROLE_LABELS[user.home_role] || user.home_role : 'Servant'}" restored.`,
-                      'Role Restored'
-                    );
-                  }}
-                >
-                  <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-                  Reset to Authentic Role
-                </Button>
-              )}
-
-              {/* Area Database Switcher */}
-              {areas.length > 0 && (
-                <div className="pt-2.5 border-t border-slate-200/80 space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="devAreaSwitch" className="text-[11px] font-semibold text-slate-700 cursor-pointer">
-                      Area Database
-                    </label>
-                    <span className="text-[10px] text-slate-500">Live isolation</span>
-                  </div>
-                  <select
-                    id="devAreaSwitch"
-                    aria-label="Select active area database"
-                    value={activeArea?.id || user?.area_id || ''}
-                    onChange={(e) => {
-                      const found = areas.find((a) => a.id === e.target.value);
-                      if (found) {
-                        const direct = requestAreaSwitch(found);
-                        if (direct) {
-                          queryClient.clear();
-                          toast.success(`Active area set to ${found.name}`, 'View Updated');
-                        }
-                      }
-                    }}
-                    className="w-full text-xs p-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy/20 min-h-[38px]"
-                  >
-                    {areas.map((a) => (
-                      <option key={a.id} value={a.id}>
-                        {a.name} {a.id === user?.area_id ? '(Home Area)' : ''}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-[10px] text-slate-500 leading-normal">
-                    Switching area databases while simulation is active prompts for confirmation and automatically restores and validates your authentic role.
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
+        <div className="lg:col-span-5">
+          <SystemManagementTools
+            onPing={handlePing}
+            isPingPending={pingMutation.isPending}
+            onClearCache={handleClearCache}
+          />
         </div>
       </div>
 
       {/* Table Rows Inspection Modal */}
-      <Modal
+      <TableInspectModal
         isOpen={isInspectModalOpen}
         onClose={() => {
           setIsInspectModalOpen(false);
           setInspectedTable(null);
           setTableData([]);
         }}
-        title={FRIENDLY_TABLE_INFO[inspectedTable || '']?.previewTitle || 'Record Preview'}
-        description={FRIENDLY_TABLE_INFO[inspectedTable || '']?.previewDesc || 'Showing recent entries sorted by newest first.'}
-        maxWidth="xl"
-      >
-        <div className="space-y-4">
-          {inspectTable.isPending ? (
-            <div className="p-12 text-center flex flex-col items-center justify-center gap-2">
-              <Spinner size="lg" />
-              <span className="text-xs text-slate-500">Loading records...</span>
-            </div>
-          ) : tableData.length === 0 ? (
-            <div className="p-8 text-center text-xs text-slate-500 bg-slate-50 rounded-xl border border-slate-200">
-              No records found in this category.
-            </div>
-          ) : (() => {
-            const rawCols = Object.keys(tableData[0] || {});
-            const filteredCols = rawCols.filter((col) => !isTechnicalIdColumn(col));
-            const activeCols = filteredCols.length > 0 ? filteredCols : rawCols;
-
-            return (
-              <div className="overflow-x-auto max-h-[50vh] rounded-xl border border-slate-200">
-                <table className="w-full text-xs text-left border-collapse">
-                  <thead className="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] sticky top-0 border-b border-slate-200">
-                    <tr>
-                      {activeCols.map((col) => (
-                        <th key={col} className="p-2.5 px-3 border-r border-slate-200/80 whitespace-nowrap">
-                          {formatColumnHeader(col)}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 font-sans text-[11px]">
-                    {tableData.map((row, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50/80">
-                        {activeCols.map((col) => {
-                          const val = row[col];
-                          const renderedVal = formatCellValue(val);
-
-                          return (
-                            <td
-                              key={col}
-                              className="p-2.5 px-3 border-r border-slate-100 max-w-[200px] truncate text-slate-800"
-                              title={renderedVal}
-                            >
-                              {renderedVal}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            );
-          })()}
-
-          <div className="flex items-center justify-between pt-3 border-t border-slate-200">
-            <span className="text-xs text-slate-500">
-              Showing top {tableData.length} newest entries (View only)
-            </span>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setIsInspectModalOpen(false)}
-              className="min-h-[36px]"
-            >
-              Close Preview
-            </Button>
-          </div>
-        </div>
-      </Modal>
+        tableName={inspectedTable}
+        tableData={tableData}
+        isLoading={inspectTable.isPending}
+      />
     </div>
   );
 };

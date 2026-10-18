@@ -4,18 +4,17 @@ import { useMembers, useCreateMember, useUpdateMember, useDeleteMember } from '@
 import { useChapters } from '@/hooks/useChapters';
 import { useServices } from '@/hooks/useServices';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { Badge } from '@/components/ui/Badge';
-import { Modal } from '@/components/ui/Modal';
 import { TableRowSkeleton } from '@/components/ui/Skeleton';
 import { useToast } from '@/hooks/useToast';
-import { UserPlus, Edit2, Trash2, Filter, AlertTriangle } from 'lucide-react';
-import type { Member, AcademicTrack, MemberStatus } from '@/types/member';
+import { UserPlus, Edit2, Trash2, Filter } from 'lucide-react';
+import type { Member } from '@/types/member';
 import type { Area } from '@/types/auth';
 import { useAuthStore } from '@/stores/auth-store';
 import { useAreas } from '@/hooks/useDashboard';
+import { MemberFormModal, MemberDeleteModal, type MemberFormData } from '@/components/member';
 
 export const MembersPage: React.FC = () => {
   const location = useLocation();
@@ -48,23 +47,6 @@ export const MembersPage: React.FC = () => {
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
-
-  // Form state
-  const [firstName, setFirstName] = useState('');
-  const [middleName, setMiddleName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [nickname, setNickname] = useState('');
-  const [gender, setGender] = useState<'Male' | 'Female'>('Male');
-  const [chapterId, setChapterId] = useState('');
-  const [track, setTrack] = useState<AcademicTrack>('College');
-  const [service, setService] = useState('');
-  const [contact, setContact] = useState('');
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<MemberStatus>('active');
-  const [guardianName, setGuardianName] = useState('');
-  const [guardianContact, setGuardianContact] = useState('');
-  const [formError, setFormError] = useState('');
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const ministryOptions = useMemo(() => {
     const defaultServices = [
@@ -104,137 +86,59 @@ export const MembersPage: React.FC = () => {
 
   const openCreateModal = () => {
     setEditingMember(null);
-    setFirstName('');
-    setMiddleName('');
-    setLastName('');
-    setNickname('');
-    setGender('Male');
-    setChapterId(chapters[0]?.id || '');
-    setTrack('College');
-    setService('');
-    setContact('');
-    setEmail('');
-    setStatus('active');
-    setGuardianName('');
-    setGuardianContact('');
-    setFormError('');
-    setFieldErrors({});
     setIsModalOpen(true);
   };
 
   const openEditModal = (member: Member) => {
     setEditingMember(member);
-    setFirstName(member.first_name);
-    setMiddleName(member.middle_name || '');
-    setLastName(member.last_name);
-    setNickname(member.nickname || '');
-    setGender(member.gender === 'Female' ? 'Female' : 'Male');
-    setChapterId(member.chapter_id || '');
-    setTrack(member.academic_track || 'College');
-    setService(member.service || (member.assigned_services && member.assigned_services[0]) || '');
-    setContact(member.contact || member.contact_number || '');
-    setEmail(member.email || '');
-    setStatus(member.status?.toLowerCase() === 'inactive' ? 'inactive' : 'active');
-    setGuardianName(member.guardian_name || '');
-    setGuardianContact(member.guardian_contact || '');
-    setFormError('');
-    setFieldErrors({});
     setIsModalOpen(true);
   };
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError('');
-
-    // Field-level validation
-    const errors: Record<string, string> = {};
-    const cleanFirst = firstName.trim();
-    const cleanMiddle = middleName.trim();
-    const cleanLast = lastName.trim();
-    const cleanEmail = email.trim();
-    const cleanContact = contact.trim();
-    const cleanGuardianContact = guardianContact.trim();
-
-    if (!cleanFirst) {
-      errors.firstName = 'First name is required.';
-    } else if (cleanFirst.length < 2) {
-      errors.firstName = 'First name must be at least 2 characters.';
-    }
-
-    if (!cleanLast) {
-      errors.lastName = 'Last name is required.';
-    } else if (cleanLast.length < 2) {
-      errors.lastName = 'Last name must be at least 2 characters.';
-    }
-
-    if (!cleanEmail) {
-      errors.email = 'Email address is required.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-      errors.email = 'Please provide a valid email address (e.g., name@example.com).';
-    }
-
-    if (cleanContact && !/^[0-9+()\-\s]{7,20}$/.test(cleanContact)) {
-      errors.contact = 'Please enter a valid phone number (at least 7 digits).';
-    }
-
-    if (cleanGuardianContact && !/^[0-9+()\-\s]{7,20}$/.test(cleanGuardianContact)) {
-      errors.guardianContact = 'Please enter a valid emergency contact phone number.';
-    }
-
-    if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
-      const firstErrorMessage = Object.values(errors)[0];
-      setFormError(firstErrorMessage);
-      toast.error('Failed', `Validation error: ${firstErrorMessage}`);
-      return;
-    }
-
-    setFieldErrors({});
-
+  const handleSaveMember = async (formData: MemberFormData) => {
+    const memberFullName = [formData.firstName, formData.middleName, formData.lastName].filter(Boolean).join(' ');
     try {
-      const memberFullName = [cleanFirst, cleanMiddle, cleanLast].filter(Boolean).join(' ');
       if (editingMember) {
         await updateMember.mutateAsync({
           id: editingMember.id,
-          first_name: cleanFirst,
-          middle_name: cleanMiddle || null,
-          last_name: cleanLast,
-          nickname: nickname.trim(),
-          gender,
-          chapter_id: chapterId || null,
-          academic_track: track,
-          service: service || null,
-          contact: cleanContact,
-          email: cleanEmail,
-          status,
-          guardian_name: guardianName.trim(),
-          guardian_contact: cleanGuardianContact,
+          first_name: formData.firstName,
+          middle_name: formData.middleName || null,
+          last_name: formData.lastName,
+          nickname: formData.nickname,
+          gender: formData.gender,
+          chapter_id: formData.chapterId || null,
+          academic_track: formData.track,
+          service: formData.service || null,
+          contact: formData.contact,
+          email: formData.email,
+          status: formData.status,
+          guardian_name: formData.guardianName,
+          guardian_contact: formData.guardianContact,
         });
         setIsModalOpen(false);
         toast.success('Successful', `Information for ${memberFullName} has been updated successfully.`);
       } else {
         await createMember.mutateAsync({
-          first_name: cleanFirst,
-          middle_name: cleanMiddle || null,
-          last_name: cleanLast,
-          nickname: nickname.trim(),
-          gender,
-          chapter_id: chapterId || null,
-          academic_track: track,
-          service: service || null,
-          contact: cleanContact,
-          email: cleanEmail,
-          status,
-          guardian_name: guardianName.trim(),
-          guardian_contact: cleanGuardianContact,
+          first_name: formData.firstName,
+          middle_name: formData.middleName || null,
+          last_name: formData.lastName,
+          nickname: formData.nickname,
+          gender: formData.gender,
+          chapter_id: formData.chapterId || null,
+          academic_track: formData.track,
+          service: formData.service || null,
+          contact: formData.contact,
+          email: formData.email,
+          status: formData.status,
+          guardian_name: formData.guardianName,
+          guardian_contact: formData.guardianContact,
         });
         setIsModalOpen(false);
         toast.success('Successful', `Member ${memberFullName} has been registered successfully.`);
       }
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to save member record.';
-      setFormError(errorMsg);
       toast.error('Failed', errorMsg);
+      throw err;
     }
   };
 
@@ -525,222 +429,23 @@ export const MembersPage: React.FC = () => {
       </div>
 
       {/* Add / Edit Member Modal */}
-      <Modal
+      <MemberFormModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingMember ? 'Edit Member Record' : 'Register New Member'}
-        maxWidth="lg"
-      >
-        <form onSubmit={handleFormSubmit} className="space-y-4">
-          {formError && (
-            <div className="p-3 text-xs text-mfc-red bg-red-50 border border-red-200 rounded-md font-medium">
-              {formError}
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <Input
-              label="First Name"
-              name="firstName"
-              autoComplete="given-name"
-              required
-              value={firstName}
-              onChange={(e) => {
-                setFirstName(e.target.value);
-                if (fieldErrors.firstName) setFieldErrors((prev) => ({ ...prev, firstName: '' }));
-              }}
-              error={fieldErrors.firstName}
-            />
-            <Input
-              label="Middle Name"
-              name="middleName"
-              autoComplete="additional-name"
-              placeholder="Optional"
-              value={middleName}
-              onChange={(e) => setMiddleName(e.target.value)}
-            />
-            <Input
-              label="Last Name"
-              name="lastName"
-              autoComplete="family-name"
-              required
-              value={lastName}
-              onChange={(e) => {
-                setLastName(e.target.value);
-                if (fieldErrors.lastName) setFieldErrors((prev) => ({ ...prev, lastName: '' }));
-              }}
-              error={fieldErrors.lastName}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input
-              label="Nickname"
-              name="nickname"
-              autoComplete="nickname"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-            />
-            <Select
-              label="Gender"
-              name="gender"
-              value={gender}
-              onChange={(e) => setGender(e.target.value as 'Male' | 'Female')}
-              options={[
-                { value: 'Male', label: 'Male' },
-                { value: 'Female', label: 'Female' },
-              ]}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Select
-              label="Chapter"
-              name="chapterId"
-              value={chapterId}
-              onChange={(e) => setChapterId(e.target.value)}
-              options={[
-                { value: '', label: 'Unassigned' },
-                ...chapters.map((c) => ({ value: c.id, label: c.name })),
-              ]}
-            />
-            <Select
-              label="Academic Track"
-              name="academicTrack"
-              value={track}
-              onChange={(e) => setTrack(e.target.value as AcademicTrack)}
-              options={[
-                { value: 'High School', label: 'High School' },
-                { value: 'Senior High School', label: 'Senior High School' },
-                { value: 'College', label: 'College' },
-                { value: 'Working', label: 'Working' },
-              ]}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Select
-              label="Ministry Service Track"
-              name="service"
-              value={service}
-              onChange={(e) => setService(e.target.value)}
-              options={[
-                { value: '', label: 'Unassigned / None' },
-                ...ministryOptions.map((s) => ({ value: s, label: s })),
-              ]}
-            />
-            <Select
-              label="Membership Status"
-              name="status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value as MemberStatus)}
-              options={[
-                { value: 'active', label: 'Active' },
-                { value: 'inactive', label: 'Inactive' },
-              ]}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input
-              label="Mobile Number"
-              name="contact"
-              autoComplete="tel"
-              value={contact}
-              onChange={(e) => {
-                setContact(e.target.value);
-                if (fieldErrors.contact) setFieldErrors((prev) => ({ ...prev, contact: '' }));
-              }}
-              placeholder="09123456789"
-              error={fieldErrors.contact}
-            />
-            <Input
-              label="Email Address"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: '' }));
-              }}
-              placeholder="name@example.com"
-              error={fieldErrors.email}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input
-              label="Guardian Name"
-              name="guardianName"
-              autoComplete="name"
-              value={guardianName}
-              onChange={(e) => setGuardianName(e.target.value)}
-              placeholder="Parent or Guardian"
-            />
-            <Input
-              label="Guardian Contact"
-              name="guardianContact"
-              autoComplete="tel"
-              value={guardianContact}
-              onChange={(e) => {
-                setGuardianContact(e.target.value);
-                if (fieldErrors.guardianContact) setFieldErrors((prev) => ({ ...prev, guardianContact: '' }));
-              }}
-              placeholder="Emergency phone number"
-              error={fieldErrors.guardianContact}
-            />
-          </div>
-
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-border-subtle">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setIsModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              isLoading={createMember.isPending || updateMember.isPending}
-            >
-              {editingMember ? 'Save Changes' : 'Register Member'}
-            </Button>
-          </div>
-        </form>
-      </Modal>
+        editingMember={editingMember}
+        chapters={chapters}
+        ministryOptions={ministryOptions}
+        onSave={handleSaveMember}
+        isSubmitting={createMember.isPending || updateMember.isPending}
+      />
 
       {/* Delete Confirmation Modal */}
-      <Modal
+      <MemberDeleteModal
         isOpen={Boolean(deletingId)}
         onClose={() => setDeletingId(null)}
-        title="Confirm Member Deletion"
-        maxWidth="sm"
-      >
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 p-3 bg-red-50 text-mfc-red rounded-lg">
-            <AlertTriangle className="w-5 h-5 shrink-0" />
-            <p className="text-xs">
-              Are you sure you want to permanently delete this member record? This action cannot be undone.
-            </p>
-          </div>
-
-          <div className="flex items-center justify-end gap-3 pt-2">
-            <Button variant="secondary" onClick={() => setDeletingId(null)}>
-              Cancel
-            </Button>
-            <Button
-              variant="danger"
-              isLoading={deleteMember.isPending}
-              onClick={() => deletingId && handleDelete(deletingId)}
-            >
-              Delete Permanently
-            </Button>
-          </div>
-        </div>
-      </Modal>
+        onConfirm={() => deletingId && handleDelete(deletingId)}
+        isDeleting={deleteMember.isPending}
+      />
     </div>
   );
 };
