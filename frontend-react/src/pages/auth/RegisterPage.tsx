@@ -45,6 +45,23 @@ interface RegistrationDraft {
 
 const REGISTRATION_DRAFT_KEY = 'mfc_registration_form_draft';
 
+function getInitialDraft(): RegistrationDraft {
+  if (typeof window === 'undefined') return {};
+  try {
+    const saved = sessionStorage.getItem(REGISTRATION_DRAFT_KEY);
+    if (!saved) return {};
+    const rawDraft = JSON.parse(saved);
+    if (rawDraft.password || rawDraft.areaPasscode) {
+      delete rawDraft.password;
+      delete rawDraft.areaPasscode;
+      sessionStorage.setItem(REGISTRATION_DRAFT_KEY, JSON.stringify(rawDraft));
+    }
+    return rawDraft as RegistrationDraft;
+  } catch {
+    return {};
+  }
+}
+
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -53,25 +70,30 @@ export const RegisterPage: React.FC = () => {
   const { setSession, setAssignedArea } = useAuthStore();
 
   const stateData = location.state as { email?: string } | null;
+  const [initialDraft] = useState(getInitialDraft);
 
   // Form state
-  const [firstName, setFirstName] = useState('');
-  const [middleName, setMiddleName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState(stateData?.email || '');
+  const [firstName, setFirstName] = useState(initialDraft.firstName || '');
+  const [middleName, setMiddleName] = useState(initialDraft.middleName || '');
+  const [lastName, setLastName] = useState(initialDraft.lastName || '');
+  const [email, setEmail] = useState(stateData?.email || initialDraft.email || '');
   const [password, setPassword] = useState('');
   const [areaPasscode, setAreaPasscode] = useState('');
-  const [role, setRole] = useState('chapter_servant');
+  const [role, setRole] = useState(initialDraft.role || 'chapter_servant');
 
   // Area Database selection & creation state
-  const [areaMode, setAreaMode] = useState<AreaMode>('select');
-  const [selectedAreaId, setSelectedAreaId] = useState('');
-  const [newAreaName, setNewAreaName] = useState('');
+  const [areaMode, setAreaMode] = useState<AreaMode>(initialDraft.areaMode || 'select');
+  const [selectedAreaId, setSelectedAreaId] = useState(initialDraft.selectedAreaId || '');
+  const [newAreaName, setNewAreaName] = useState(initialDraft.newAreaName || '');
 
   // Email verification state
-  const [isEmailVerified, setIsEmailVerified] = useState(false);
-  const [emailNotification, setEmailNotification] = useState<string | null>(null);
-  const [emailNotificationType, setEmailNotificationType] = useState<'info' | 'success' | 'error'>('info');
+  const [isEmailVerified, setIsEmailVerified] = useState(Boolean(initialDraft.isEmailVerified));
+  const [emailNotification, setEmailNotification] = useState<string | null>(
+    initialDraft.isEmailVerified ? 'Email is verified. You can now complete your registration.' : null
+  );
+  const [emailNotificationType, setEmailNotificationType] = useState<'info' | 'success' | 'error'>(
+    initialDraft.isEmailVerified ? 'success' : 'info'
+  );
 
   // Submission stage & callouts
   const [registrationStage, setRegistrationStage] = useState<RegistrationStage>('idle');
@@ -107,43 +129,10 @@ export const RegisterPage: React.FC = () => {
     }
   };
 
-  // Restore saved form inputs from sessionStorage and handle incoming email link token
+  // Intercept redirect from Supabase email verification link (#access_token=... or ?type=signup)
   useEffect(() => {
-    let savedDraftEmail = '';
+    if (typeof window === 'undefined') return;
 
-    try {
-      const saved = sessionStorage.getItem(REGISTRATION_DRAFT_KEY);
-      if (saved) {
-        const rawDraft = JSON.parse(saved);
-        // Purge any legacy stored credentials from draft storage
-        if (rawDraft.password || rawDraft.areaPasscode) {
-          delete rawDraft.password;
-          delete rawDraft.areaPasscode;
-          sessionStorage.setItem(REGISTRATION_DRAFT_KEY, JSON.stringify(rawDraft));
-        }
-        const draft: RegistrationDraft = rawDraft;
-        if (draft.firstName) setFirstName(draft.firstName);
-        if (draft.middleName) setMiddleName(draft.middleName);
-        if (draft.lastName) setLastName(draft.lastName);
-        if (draft.email) {
-          setEmail(draft.email);
-          savedDraftEmail = draft.email;
-        }
-        if (draft.role) setRole(draft.role);
-        if (draft.areaMode) setAreaMode(draft.areaMode);
-        if (draft.selectedAreaId) setSelectedAreaId(draft.selectedAreaId);
-        if (draft.newAreaName) setNewAreaName(draft.newAreaName);
-        if (draft.isEmailVerified) {
-          setIsEmailVerified(true);
-          setEmailNotification('Email is verified. You can now complete your registration.');
-          setEmailNotificationType('success');
-        }
-      }
-    } catch {
-      // Ignore parse errors
-    }
-
-    // Intercept redirect from Supabase email verification link (#access_token=... or ?type=signup)
     const hash = window.location.hash;
     const cleanHash = hash.startsWith('#') ? hash.slice(1) : hash;
     const params = new URLSearchParams(cleanHash);
@@ -153,7 +142,7 @@ export const RegisterPage: React.FC = () => {
     if (hasAuthToken || isSignupType) {
       window.history.replaceState(null, '', window.location.pathname);
 
-      const targetEmail = savedDraftEmail || email;
+      const targetEmail = initialDraft.email || email;
       if (targetEmail) {
         apiClient<{ ok: boolean; verified: boolean; message?: string }>('/auth/check-email-verification', {
           method: 'POST',
@@ -177,7 +166,7 @@ export const RegisterPage: React.FC = () => {
           });
       }
     }
-  }, [saveDraft]);
+  }, [saveDraft, email, initialDraft.email, toast]);
 
   // Fetch available active area databases
   const {
@@ -193,12 +182,7 @@ export const RegisterPage: React.FC = () => {
     staleTime: 1000 * 60,
   });
 
-  // Default to create mode if database has no areas yet
-  useEffect(() => {
-    if (!isLoadingAreas && areas.length === 0) {
-      setAreaMode('create');
-    }
-  }, [isLoadingAreas, areas.length]);
+  const effectiveAreaMode: AreaMode = !isLoadingAreas && areas.length === 0 ? 'create' : areaMode;
 
   // Submit Completed Registration Details
   const handleSubmitRegistration = async (e: React.FormEvent) => {
@@ -213,12 +197,12 @@ export const RegisterPage: React.FC = () => {
       return;
     }
 
-    if (areaMode === 'select' && !selectedAreaId) {
+    if (effectiveAreaMode === 'select' && !selectedAreaId) {
       setErrorMessage('Please select the Area Database you are assigned in, or create a new one.');
       return;
     }
 
-    if (areaMode === 'create' && newAreaName.trim().length < 3) {
+    if (effectiveAreaMode === 'create' && newAreaName.trim().length < 3) {
       setErrorMessage('Please enter an Area Database name (at least 3 characters).');
       return;
     }
@@ -242,7 +226,7 @@ export const RegisterPage: React.FC = () => {
         role,
       };
 
-      if (areaMode === 'select') {
+      if (effectiveAreaMode === 'select') {
         payload.area_id = selectedAreaId;
       } else {
         payload.new_area_name = newAreaName.trim();
@@ -474,7 +458,7 @@ export const RegisterPage: React.FC = () => {
 
           {/* Modular Area Database Assignment & Creation */}
           <AreaDatabaseSelector
-            mode={areaMode}
+            mode={effectiveAreaMode}
             onModeChange={(newMode) => {
               setAreaMode(newMode);
               setErrorMessage('');

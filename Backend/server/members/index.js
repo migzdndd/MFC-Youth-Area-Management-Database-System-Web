@@ -77,7 +77,7 @@ async function listMembers(req, res) {
 
   let query = admin
     .from('members')
-    .select('id, area_id, chapter_id, first_name, middle_name, last_name, birth_date, contact_number, email, address, status, first_attended_youth_camp, access_level, academic_track, grade_level, school, avatar_url, created_at, updated_at')
+    .select('id, area_id, chapter_id, first_name, middle_name, last_name, nickname, gender, birth_date, contact_number, email, address, status, first_attended_youth_camp, access_level, academic_track, grade_level, school, avatar_url, guardian_name, guardian_contact, created_at, updated_at')
     .order('last_name', { ascending: true })
     .order('first_name', { ascending: true });
 
@@ -202,6 +202,11 @@ async function createMember(req, res) {
   const gradeLevel = cleanText(input.gradeLevel ?? input.grade_level, 50) || null;
   const school = cleanText(input.school, 255) || null;
 
+  const nickname = cleanText(input.nickname, 100) || null;
+  const gender = cleanText(input.gender, 20) || null;
+  const guardianName = cleanText(input.guardianName ?? input.guardian_name, 100) || null;
+  const guardianContact = cleanText(input.guardianContact ?? input.guardian_contact, 50) || null;
+
   if (!firstName || !lastName) {
     return sendJson(res, 400, { ok: false, error: 'First name and last name are required.' });
   }
@@ -262,6 +267,8 @@ async function createMember(req, res) {
       first_name: firstName,
       middle_name: middleName,
       last_name: lastName,
+      nickname,
+      gender,
       birth_date: birthDate,
       contact_number: contactNumber,
       email,
@@ -272,6 +279,8 @@ async function createMember(req, res) {
       academic_track: academicTrack,
       grade_level: gradeLevel,
       school,
+      guardian_name: guardianName,
+      guardian_contact: guardianContact,
       created_by: user.id
     })
     .select('*')
@@ -374,6 +383,10 @@ async function updateMember(req, res) {
   const academicTrack = cleanText(input.academicTrack ?? input.academic_track ?? input.track ?? existing.academic_track, 100) || null;
   const gradeLevel = cleanText(input.gradeLevel ?? input.grade_level ?? existing.grade_level, 50) || null;
   const school = cleanText(input.school ?? existing.school, 255) || null;
+  const nickname = cleanText(input.nickname ?? existing.nickname, 100) || null;
+  const gender = cleanText(input.gender ?? existing.gender, 20) || null;
+  const guardianName = cleanText(input.guardianName ?? input.guardian_name ?? existing.guardian_name, 100) || null;
+  const guardianContact = cleanText(input.guardianContact ?? input.guardian_contact ?? existing.guardian_contact, 50) || null;
   const avatarUrl = input.avatarUrl !== undefined
     ? input.avatarUrl
     : (input.avatar_url !== undefined ? input.avatar_url : (existing.avatar_url || null));
@@ -466,6 +479,8 @@ async function updateMember(req, res) {
       first_name: firstName,
       middle_name: middleName,
       last_name: lastName,
+      nickname,
+      gender,
       birth_date: birthDate,
       contact_number: contactNumber,
       email,
@@ -476,6 +491,8 @@ async function updateMember(req, res) {
       academic_track: academicTrack,
       grade_level: gradeLevel,
       school,
+      guardian_name: guardianName,
+      guardian_contact: guardianContact,
       avatar_url: avatarUrl
     })
     .eq('id', memberId)

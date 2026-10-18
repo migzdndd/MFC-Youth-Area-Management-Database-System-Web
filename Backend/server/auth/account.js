@@ -19,19 +19,20 @@ export default async function handler(req, res) {
 
     const memberId = profile?.member_id || null;
 
-    const { error: authDeleteError } = await admin.auth.admin.deleteUser(user.id);
-    if (authDeleteError) throw authDeleteError;
-
-    // profiles.id references auth.users ON DELETE CASCADE, so the profile is
-    // removed by the Auth deletion. The linked member is intentionally cleaned
-    // up afterward because auth.users does not own public.members directly.
+    // Delete linked member record first using admin client so that user session context
+    // and database integrity remain intact throughout the cleanup.
     if (memberId) {
-      const { error: memberDeleteError } = await supabase
+      const { error: memberDeleteError } = await admin
         .from('members')
         .delete()
         .eq('id', memberId);
       if (memberDeleteError) throw memberDeleteError;
     }
+
+    // profiles.id references auth.users ON DELETE CASCADE, so deleting the auth user
+    // cascades and cleans up public.profiles cleanly.
+    const { error: authDeleteError } = await admin.auth.admin.deleteUser(user.id);
+    if (authDeleteError) throw authDeleteError;
 
     return sendJson(res, 200, {
       ok: true,

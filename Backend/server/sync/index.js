@@ -144,12 +144,19 @@ export default async function handler(req, res) {
       participants = participantResult.data || [];
     }
 
+    const nowIso = new Date().toISOString();
+    const upcomingEventsCount = (eventsResult.data || []).filter(item => {
+      const eventEnd = item.ends_at || item.starts_at;
+      return eventEnd ? eventEnd >= nowIso : false;
+    }).length;
+
     const dashboard = {
       members: membersResult.data?.length || 0,
       activeMembers: (membersResult.data || []).filter(item => item.status === 'Active').length,
       chapters: chaptersResult.data?.length || 0,
       services: servicesResult.data?.length || 0,
       events: eventsResult.data?.length || 0,
+      upcomingEvents: upcomingEventsCount,
       reports: reportsResult.data?.length || 0,
       registrations: participants.length,
       attended: participants.filter(item => item.attended).length,

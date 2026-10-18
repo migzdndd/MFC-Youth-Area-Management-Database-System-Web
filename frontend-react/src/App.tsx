@@ -13,6 +13,7 @@ const LoginPage = lazy(() => import('@/pages/auth/LoginPage').then((m) => ({ def
 const MemberLoginPage = lazy(() => import('@/pages/auth/MemberLoginPage').then((m) => ({ default: m.MemberLoginPage })));
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage').then((m) => ({ default: m.RegisterPage })));
 const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })));
+const ResetPasswordPage = lazy(() => import('@/pages/auth/ResetPasswordPage').then((m) => ({ default: m.ResetPasswordPage })));
 const SelectAreaPage = lazy(() => import('@/pages/auth/SelectAreaPage').then((m) => ({ default: m.SelectAreaPage })));
 
 // Lazy-loaded Feature Pages
@@ -105,6 +106,7 @@ export default function App() {
               <Route path="/member-login" element={<MemberLoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/changelogs" element={<Navigate to="/" replace />} />
 
               {/* Leader Area Database Selection & Onboarding Route */}

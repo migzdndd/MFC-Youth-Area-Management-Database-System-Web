@@ -31,14 +31,12 @@ export const MembersPage: React.FC = () => {
   const updateMember = useUpdateMember();
   const deleteMember = useDeleteMember();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(() => Boolean((location.state as { openCreate?: boolean })?.openCreate));
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     if ((location.state as { openCreate?: boolean })?.openCreate) {
-      setEditingMember(null);
-      setIsModalOpen(true);
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
@@ -161,7 +159,9 @@ export const MembersPage: React.FC = () => {
       errors.lastName = 'Last name must be at least 2 characters.';
     }
 
-    if (cleanEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+    if (!cleanEmail) {
+      errors.email = 'Email address is required.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
       errors.email = 'Please provide a valid email address (e.g., name@example.com).';
     }
 
@@ -648,6 +648,7 @@ export const MembersPage: React.FC = () => {
               label="Email Address"
               name="email"
               type="email"
+              required
               autoComplete="email"
               value={email}
               onChange={(e) => {

@@ -30,11 +30,11 @@ export const ReportsPage: React.FC = () => {
   const toast = useToast();
   const createReport = useCreateReport();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(() => Boolean((location.state as { openCreate?: boolean })?.openCreate));
   const [title, setTitle] = useState('');
-  const [chapterId, setChapterId] = useState('');
+  const [chapterId, setChapterId] = useState(() => user?.chapter_id || '');
   const [preparedBy, setPreparedBy] = useState('');
-  const [activityDate, setActivityDate] = useState('');
+  const [activityDate, setActivityDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [participantCount, setParticipantCount] = useState('0');
   const [reportType, setReportType] = useState('Household');
   const [notes, setNotes] = useState('');
@@ -59,7 +59,6 @@ export const ReportsPage: React.FC = () => {
 
   useEffect(() => {
     if ((location.state as { openCreate?: boolean })?.openCreate) {
-      openCreateModal();
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);

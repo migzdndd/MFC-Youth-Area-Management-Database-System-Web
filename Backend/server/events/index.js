@@ -33,7 +33,14 @@ function eventPayload(input, areaId, userId) {
     const d = localDatePattern.test(String(rawEndDate).trim())
       ? new Date(`${rawEndDate}:00+08:00`)
       : new Date(rawEndDate);
-    if (!Number.isNaN(d.getTime())) endsAt = d.toISOString();
+    if (!Number.isNaN(d.getTime())) {
+      if (d.getTime() < date.getTime()) {
+        const error = new Error('Event end date and time cannot be earlier than the start date and time.');
+        error.statusCode = 400;
+        throw error;
+      }
+      endsAt = d.toISOString();
+    }
   }
   return {
     area_id: areaId,

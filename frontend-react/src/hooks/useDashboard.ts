@@ -26,6 +26,7 @@ export function useDashboardMetrics() {
             members?: number;
             chapters?: number;
             events?: number;
+            upcomingEvents?: number;
             reports?: number;
           };
         }>('/sync');
@@ -34,7 +35,7 @@ export function useDashboardMetrics() {
           return {
             totalMembers: Number(syncRes.dashboard.members ?? 0),
             totalChapters: Number(syncRes.dashboard.chapters ?? 0),
-            upcomingEvents: Number(syncRes.dashboard.events ?? 0),
+            upcomingEvents: Number(syncRes.dashboard.upcomingEvents ?? syncRes.dashboard.events ?? 0),
             totalReports: Number(syncRes.dashboard.reports ?? 0),
           };
         }
@@ -55,10 +56,18 @@ export function useDashboardMetrics() {
       const events = eventsRes.status === 'fulfilled' ? eventsRes.value?.data || eventsRes.value?.events || [] : [];
       const reports = reportsRes.status === 'fulfilled' ? reportsRes.value?.data || reportsRes.value?.reports || [] : [];
 
+      const now = new Date();
+      const upcomingCount = (events as { starts_at?: string; ends_at?: string }[]).filter((e) => {
+        const dateStr = e.ends_at || e.starts_at;
+        if (!dateStr) return false;
+        const d = new Date(dateStr);
+        return !Number.isNaN(d.getTime()) && d >= now;
+      }).length;
+
       return {
         totalMembers: members.length,
         totalChapters: chapters.length,
-        upcomingEvents: events.length,
+        upcomingEvents: upcomingCount,
         totalReports: reports.length,
       };
     },

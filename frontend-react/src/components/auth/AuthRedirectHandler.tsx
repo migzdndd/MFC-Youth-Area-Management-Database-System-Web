@@ -34,8 +34,14 @@ export const AuthRedirectHandler: React.FC = () => {
 
     if (!accessToken) return;
 
-    // Allow RegisterPage to handle its own inline verification and form restoration
-    if (window.location.pathname.startsWith('/register')) return;
+    // Allow RegisterPage and ResetPasswordPage to handle their own inline verification and form restoration
+    if (window.location.pathname.startsWith('/register') || window.location.pathname.startsWith('/reset-password')) return;
+
+    // If an incoming token is for password recovery and landed on another route, navigate to /reset-password
+    if (type === 'recovery') {
+      navigate(`/reset-password${window.location.hash}`, { replace: true });
+      return;
+    }
 
     let isMounted = true;
 

@@ -107,6 +107,11 @@ export const QrAttendanceScannerModal: React.FC<QrAttendanceScannerModalProps> =
     }
   };
 
+  const handleQrPayloadRef = useRef(handleQrPayload);
+  useEffect(() => {
+    handleQrPayloadRef.current = handleQrPayload;
+  });
+
   useEffect(() => {
     if (!isOpen) {
       if (scannerRef.current) {
@@ -135,7 +140,7 @@ export const QrAttendanceScannerModal: React.FC<QrAttendanceScannerModalProps> =
           },
           (decodedText) => {
             if (isMounted) {
-              void handleQrPayload(decodedText);
+              void handleQrPayloadRef.current(decodedText);
             }
           },
           () => {
@@ -153,7 +158,7 @@ export const QrAttendanceScannerModal: React.FC<QrAttendanceScannerModalProps> =
             setTorchSupported(false);
           }
         }
-      } catch (err) {
+      } catch {
         if (isMounted) {
           setIsCameraActive(false);
           setScanError('Unable to access camera. Please verify camera permissions in your browser.');

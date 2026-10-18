@@ -22,11 +22,39 @@ export class ApiError extends Error {
 }
 
 let isRefreshing = false;
-let refreshSubscribers: ((token: string) => void)[] = [];
+let refreshSubscribers: {
+  resolve: (token: string) => void;
+  reject: (error: unknown) => void;
+}[] = [];
 
 function onRefreshed(token: string) {
-  refreshSubscribers.forEach((callback) => callback(token));
+  refreshSubscribers.forEach((sub) => sub.resolve(token));
   refreshSubscribers = [];
+}
+
+function onRefreshFailed(error: unknown) {
+  refreshSubscribers.forEach((sub) => sub.reject(error));
+  refreshSubscribers = [];
+}
+
+async function parseResponse<T>(response: Response): Promise<T> {
+  let data: unknown;
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    data = await response.json();
+  } else {
+    data = await response.text();
+  }
+
+  if (!response.ok) {
+    const errorMsg =
+      (data && typeof data === 'object' && 'error' in data ? (data as { error: string }).error : null) ||
+      (data && typeof data === 'object' && 'message' in data ? (data as { message: string }).message : null) ||
+      `Request failed with status ${response.status}`;
+    throw new ApiError(errorMsg, response.status, data);
+  }
+
+  return data as T;
 }
 
 export async function apiClient<T>(
@@ -131,12 +159,15 @@ export async function apiClient<T>(
           // Retry original request with fresh token
           headers['Authorization'] = `Bearer ${newAccessToken}`;
           const retryRes = await fetch(url, { ...options, headers });
-          return retryRes.json();
+          return parseResponse<T>(retryRes);
         } else {
+          const refreshErr = new ApiError('Session expired. Please sign in again.', 401);
+          onRefreshFailed(refreshErr);
           logout();
-          throw new ApiError('Session expired. Please sign in again.', 401);
+          throw refreshErr;
         }
       } catch (err) {
+        onRefreshFailed(err);
         logout();
         throw err;
       } finally {
@@ -145,34 +176,23 @@ export async function apiClient<T>(
     } else {
       // Wait for refresh in flight
       return new Promise<T>((resolve, reject) => {
-        refreshSubscribers.push(async (newToken) => {
-          headers['Authorization'] = `Bearer ${newToken}`;
-          try {
-            const retryRes = await fetch(url, { ...options, headers });
-            resolve(await retryRes.json());
-          } catch (err) {
+        refreshSubscribers.push({
+          resolve: async (newToken: string) => {
+            headers['Authorization'] = `Bearer ${newToken}`;
+            try {
+              const retryRes = await fetch(url, { ...options, headers });
+              resolve(await parseResponse<T>(retryRes));
+            } catch (err) {
+              reject(err);
+            }
+          },
+          reject: (err: unknown) => {
             reject(err);
-          }
+          },
         });
       });
     }
   }
 
-  let data: unknown;
-  const contentType = response.headers.get('content-type');
-  if (contentType && contentType.includes('application/json')) {
-    data = await response.json();
-  } else {
-    data = await response.text();
-  }
-
-  if (!response.ok) {
-    const errorMsg =
-      (data && typeof data === 'object' && 'error' in data ? (data as { error: string }).error : null) ||
-      (data && typeof data === 'object' && 'message' in data ? (data as { message: string }).message : null) ||
-      `Request failed with status ${response.status}`;
-    throw new ApiError(errorMsg, response.status, data);
-  }
-
-  return data as T;
+  return parseResponse<T>(response);
 }

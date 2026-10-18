@@ -32,14 +32,16 @@ const RATE_CONFIGS = {
   'mfa-verify': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
   'forgot-password': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
   'reset-password': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
-  'admin-register': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
+  'admin-register': { maxAttempts: 10, windowMs: 10 * 60 * 1000, label: '10 minutes' },
   'verify-email': { maxAttempts: 10, windowMs: 10 * 60 * 1000, label: '10 minutes' },
-  'resend-verification': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
+  'send-verification': { maxAttempts: 10, windowMs: 10 * 60 * 1000, label: '10 minutes' },
+  'resend-verification': { maxAttempts: 10, windowMs: 10 * 60 * 1000, label: '10 minutes' },
+  'check-email-verification': { maxAttempts: 60, windowMs: 5 * 60 * 1000, label: '5 minutes' },
   'member-claim': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
   'daily-readings': { maxAttempts: 120, windowMs: 5 * 60 * 1000, label: '5 minutes' },
   changelogs: { maxAttempts: 120, windowMs: 5 * 60 * 1000, label: '5 minutes' },
   health: { maxAttempts: 120, windowMs: 5 * 60 * 1000, label: '5 minutes' },
-  default: { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' }
+  default: { maxAttempts: 15, windowMs: 10 * 60 * 1000, label: '10 minutes' }
 };
 
 /**
@@ -61,10 +63,23 @@ export async function checkRateLimit(req, res, endpoint, targetIdentifier = null
       target = normalizeEmail(req.body.email);
     } else if (req.body.token_hash) {
       target = String(req.body.token_hash).slice(0, 32);
+    } else if (req.body.access_token) {
+      target = String(req.body.access_token).slice(0, 32);
     }
   }
 
-  const isAuthEndpoint = ['login', 'forgot-password', 'reset-password', 'member-claim', 'verify-email', 'resend-verification'].includes(endpoint);
+  const isAuthEndpoint = [
+    'login',
+    'admin-register',
+    'send-verification',
+    'resend-verification',
+    'check-email-verification',
+    'verify-email',
+    'forgot-password',
+    'reset-password',
+    'member-claim',
+    'mfa-verify'
+  ].includes(endpoint);
   const rateKey = (isAuthEndpoint && target)
     ? `${endpoint}:${ip}:${target}`
     : `${endpoint}:${ip}`;

@@ -19,28 +19,39 @@ export default async function handler(req, res) {
   let recoverySessionEstablished = false;
 
   try {
-    const { token_hash, newPassword } = req.body || {};
-    if (!token_hash) {
+    const { token_hash, access_token, refresh_token, newPassword } = req.body || {};
+    if (!token_hash && !access_token) {
       return sendJson(res, 400, { ok: false, error: 'Recovery token is missing.' });
     }
 
     const validationError = passwordError(newPassword);
     if (validationError) return sendJson(res, 400, { ok: false, error: validationError });
 
-    const { data: verifyData, error: verifyError } = await authClient.auth.verifyOtp({
-      token_hash: String(token_hash),
-      type: 'recovery'
-    });
+    let activeSession = null;
+    if (token_hash) {
+      const { data: verifyData, error: verifyError } = await authClient.auth.verifyOtp({
+        token_hash: String(token_hash),
+        type: 'recovery'
+      });
 
-    if (verifyError || !verifyData?.session) {
-      return sendJson(res, 401, { ok: false, error: 'The recovery link is invalid or has expired.' });
+      if (verifyError || !verifyData?.session) {
+        return sendJson(res, 401, { ok: false, error: 'The recovery link is invalid or has expired.' });
+      }
+      activeSession = verifyData.session;
+    } else {
+      activeSession = {
+        access_token: String(access_token),
+        refresh_token: refresh_token ? String(refresh_token) : ''
+      };
     }
 
     const { error: setSessionError } = await authClient.auth.setSession({
-      access_token: verifyData.session.access_token,
-      refresh_token: verifyData.session.refresh_token
+      access_token: activeSession.access_token,
+      refresh_token: activeSession.refresh_token || ''
     });
-    if (setSessionError) throw setSessionError;
+    if (setSessionError) {
+      return sendJson(res, 401, { ok: false, error: 'The recovery session is invalid or has expired.' });
+    }
     recoverySessionEstablished = true;
 
     const { error: updateError } = await authClient.auth.updateUser({ password: newPassword });

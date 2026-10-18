@@ -193,6 +193,20 @@ export async function ensureLeadershipMemberRecord({
         .single();
       if (memberUpdateError) throw memberUpdateError;
 
+      const profileUpdates = {
+        member_id: updatedMember.id,
+        area_id: targetAreaId
+      };
+      if (targetChapterId) profileUpdates.chapter_id = targetChapterId;
+
+      const { data: updatedProfile, error: profileUpdateError } = await supabase
+        .from('profiles')
+        .update(profileUpdates)
+        .eq('id', profile.id)
+        .select('*')
+        .single();
+      if (profileUpdateError) throw profileUpdateError;
+
       await ensureRoleServiceAssignment(supabase, {
         memberId: updatedMember.id,
         areaId: targetAreaId,
@@ -200,7 +214,7 @@ export async function ensureLeadershipMemberRecord({
       });
 
       return {
-        profile: { ...profile, area_id: targetAreaId, member_id: updatedMember.id },
+        profile: updatedProfile || { ...profile, area_id: targetAreaId, member_id: updatedMember.id },
         member: updatedMember,
         created: false,
         linkedExisting: false

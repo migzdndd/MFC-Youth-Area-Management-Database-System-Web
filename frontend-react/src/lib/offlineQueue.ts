@@ -147,7 +147,18 @@ export async function replayOfflineQueue(): Promise<{
       return { ok: true, processed: 0, failures: [] };
     }
 
-    const token = typeof window !== 'undefined' ? localStorage.getItem('mfc_auth_token') : null;
+    const token = (() => {
+      if (typeof window === 'undefined') return null;
+      try {
+        const raw = localStorage.getItem('mfc_ams_session');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed?.access_token) return String(parsed.access_token);
+        }
+      } catch {}
+      return localStorage.getItem('mfc_auth_token');
+    })();
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
@@ -175,7 +186,16 @@ export async function replayOfflineQueue(): Promise<{
     const result = await response.json();
     if (result.ok) {
       const processedCount = result.processed ?? mutations.length;
-      const failedIds = new Set<string>(result.failures || []);
+      const rawFailures = Array.isArray(result.failures) ? result.failures : [];
+      const failedIds = new Set<string>(
+        rawFailures
+          .map((f: unknown) => {
+            if (typeof f === 'string') return f;
+            if (f && typeof f === 'object' && 'id' in f) return String((f as { id: unknown }).id);
+            return '';
+          })
+          .filter(Boolean)
+      );
       const successfulIds = mutations
         .filter((m) => !failedIds.has(m.id))
         .map((m) => m.id);
