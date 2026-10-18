@@ -70,7 +70,7 @@ export const GigPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
-              Give It Generously (GIG) Stewardship
+              God is Generous (GIG) Stewardship
             </h1>
             <Badge variant="gold">Tithes & Mission</Badge>
           </div>

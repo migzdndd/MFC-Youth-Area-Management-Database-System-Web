@@ -1,5 +1,5 @@
 /**
- * Give It Generously (GIG) Contribution Management Endpoint
+ * God is Generous (GIG) Contribution Management Endpoint
  *
  * What it Does: Simple non IT Terms
  * Records and tracks voluntary financial youth contributions (GIG), allowing youth members

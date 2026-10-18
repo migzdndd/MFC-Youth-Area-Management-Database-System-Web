@@ -44,7 +44,7 @@ frontend-react/
 │   │   ├── ServicesPage.tsx   # The 5 Creative Ministries (Music, Dance, etc.)
 │   │   ├── EventsPage.tsx     # Youth assemblies, camps, and check-in rosters
 │   │   ├── ReportsPage.tsx    # Monthly pastoral reports and printable export
-│   │   ├── GigPage.tsx        # Give It Generously stewardship ledger
+│   │   ├── GigPage.tsx        # God is Generous stewardship ledger
 │   │   ├── LoginPage.tsx      # Secure leader authentication
 │   │   ├── RegisterPage.tsx   # Servant leader registration
 │   │   ├── ForgotPasswordPage.tsx # Password recovery request
@@ -93,7 +93,7 @@ frontend-react/
 
 ### 6. Pastoral Reports (`/reports`) & GIG (`/gig`)
 - Activity reporting with participant headcounts and notes.
-- Give It Generously (GIG) stewardship and tithe ledger.
+- God is Generous (GIG) stewardship and tithe ledger.
 
 ---
 

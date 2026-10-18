@@ -32,7 +32,7 @@ Unlike generic community databases or unwieldy spreadsheets, the system is purpo
   - Role-Based Access Control (RBAC) with 4 tiers: Area Admins, Domain Moderators (LIT, Campus, High, Kids), Chapter Leaders, and Members.
   - LIT Creative Ministries catalog focused strictly on the 5 pillars: Music, Dance, Graphics & Promo, Creative Writing, and Photography & Videography.
   - Event registration, fee status tracking, and attendance verification.
-  - GIG (Give It Generously) stewardship catalog and service tracking.
+  - GIG (God is Generous) stewardship catalog and service tracking.
   - Mobile-first React Native style UI with 44px touch targets and bottom tab navigation.
 - **Constraints**:
   - Strict compliance with data privacy standards for minors (no public leakage of youth contact details or emergency records).

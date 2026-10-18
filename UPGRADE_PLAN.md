@@ -103,7 +103,7 @@ flowchart TD
 - **Services**: The 5 Creative Ministries (Music, Dance, Graphics & Promo, Creative Writing, Photography & Videography). Purged legacy unmentioned services.
 - **Events**: Activity schedule, attendance counter, registration tracking, and fee status.
 - **Reports**: Activity report logs, participant totals, and printable documentation.
-- **GIG (Give It Generously)**: Tithes and stewardship contribution tracking.
+- **GIG (God is Generous)**: Tithes and stewardship contribution tracking.
 
 ### Phase 5: 4-Tier RBAC & Domain Moderation
 - Implemented backend scoping in `Backend/server/_lib/access.js`, `members/index.js`, and `sync/index.js`.

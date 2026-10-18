@@ -101,19 +101,25 @@ function cleanBaseUrl(value) {
 export function backendConfig() {
   loadEnvFiles();
   const publishableKey = cleanEnv(
-    process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY
+    process.env.SUPABASE_PUBLISHABLE_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   );
   const secretKey = cleanEnv(
     process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
   );
+  const url = cleanBaseUrl(
+    process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+  );
 
   return {
-    supabaseUrl: cleanBaseUrl(process.env.SUPABASE_URL),
+    supabaseUrl: url,
     supabaseAnonKey: publishableKey,
     supabaseServiceRoleKey: secretKey,
     supabasePublishableKey: publishableKey,
     supabaseSecretKey: secretKey,
-    usingLegacyPublishableEnv: !cleanEnv(process.env.SUPABASE_PUBLISHABLE_KEY) && Boolean(cleanEnv(process.env.SUPABASE_ANON_KEY)),
+    usingLegacyPublishableEnv: !cleanEnv(process.env.SUPABASE_PUBLISHABLE_KEY) && Boolean(cleanEnv(process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)),
     usingLegacySecretEnv: !cleanEnv(process.env.SUPABASE_SECRET_KEY) && Boolean(cleanEnv(process.env.SUPABASE_SERVICE_ROLE_KEY)),
     adminRegistrationCode: cleanEnv(process.env.ADMIN_REGISTRATION_CODE)
   };

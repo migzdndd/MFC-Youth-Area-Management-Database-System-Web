@@ -34,7 +34,7 @@ The **MFC Youth Area Management System (AMS)** serves as a central operational p
 - **Event Registrations**: Manage youth camps, conferences, area assemblies, and leadership trainings.
 - **Attendance & Fee Tracking**: Record event participation, fee statuses (free vs paid), and check-in logs.
 
-### GIG (Give It Generously) & Financial Stewardship
+### GIG (God is Generous) & Financial Stewardship
 - **Stewardship Tracking**: Log community contributions, tithes, and pastoral support records.
 - **Pastoral Analytics**: Generate area reports and summary metrics for community coordination.
 
