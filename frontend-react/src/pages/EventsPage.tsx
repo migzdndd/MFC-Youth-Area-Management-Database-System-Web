@@ -13,7 +13,6 @@ import {
 import { useMembers } from '@/hooks/useMembers';
 import { useToast } from '@/hooks/useToast';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import { EventCardSkeleton } from '@/components/ui/Skeleton';
 import { CalendarPlus } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
@@ -271,14 +270,9 @@ export const EventsPage: React.FC = () => {
       {/* Header */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
-              Events & Gatherings
-            </h1>
-            <Badge variant="navy">
-              {events.length} {events.length === 1 ? 'Gathering' : 'Gatherings'}
-            </Badge>
-          </div>
+          <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight mb-1">
+            Events & Gatherings
+          </h1>
           <p className="text-xs text-slate-500">
             {isCoreRole
               ? 'Schedule, manage, and coordinate community events and youth assemblies.'

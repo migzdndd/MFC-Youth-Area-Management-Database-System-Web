@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useDailyReadings } from '@/hooks/useReadings';
 import { Spinner } from '@/components/ui/Spinner';
-import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { BookOpen, Calendar, ExternalLink } from 'lucide-react';
 
@@ -21,12 +20,9 @@ export const ReadingsPage: React.FC = () => {
     <div className="space-y-4 max-w-4xl mx-auto">
       {/* Header */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
-            Daily Catholic Scripture Readings
-          </h1>
-          <Badge variant="gold">Daily Word</Badge>
-        </div>
+        <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
+          Daily Catholic Scripture Readings
+        </h1>
 
         <div className="flex items-center gap-2 bg-slate-50 p-1 px-2.5 rounded-xl border border-slate-200 shadow-2xs shrink-0">
           <Calendar className="w-4 h-4 text-navy shrink-0" />

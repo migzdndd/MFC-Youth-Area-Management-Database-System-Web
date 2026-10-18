@@ -235,18 +235,11 @@ export const DeveloperDashboardPage: React.FC = () => {
         <div className="absolute top-0 right-0 w-80 h-80 bg-sky-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                System Active
+            {user?.email && (
+              <span className="text-xs text-slate-300 font-mono block">
+                {user.email}
               </span>
-              <Badge variant="gold">Developer Access</Badge>
-              {user?.email && (
-                <span className="text-xs text-slate-300 font-mono">
-                  {user.email}
-                </span>
-              )}
-            </div>
+            )}
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight font-heading">
               Developer & Operations Console
             </h1>

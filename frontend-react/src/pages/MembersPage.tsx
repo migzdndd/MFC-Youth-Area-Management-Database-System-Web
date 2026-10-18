@@ -264,14 +264,9 @@ export const MembersPage: React.FC = () => {
       {/* Header and Action */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
-              Members Directory
-            </h1>
-            <Badge variant="navy">
-              {filteredMembers.length} {filteredMembers.length === 1 ? 'Record' : 'Records'}
-            </Badge>
-          </div>
+          <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
+            Members Directory
+          </h1>
           <p className="text-xs text-slate-500 mt-1">
             Area Database: <span className="font-semibold text-navy">{effectiveAreaName}</span>
           </p>

@@ -70,12 +70,9 @@ export const MemberPortalPage: React.FC = () => {
               {user?.first_name ? user.first_name[0].toUpperCase() : 'M'}
             </div>
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-xl font-bold text-slate-900 font-heading">
-                  {[user?.first_name, user?.middle_name, user?.last_name].filter(Boolean).join(' ') || 'Youth Member'}
-                </h2>
-                <Badge variant="gold">MFC Youth Member</Badge>
-              </div>
+              <h2 className="text-xl font-bold text-slate-900 font-heading mb-1">
+                {[user?.first_name, user?.middle_name, user?.last_name].filter(Boolean).join(' ') || 'Youth Member'}
+              </h2>
               <p className="text-xs text-slate-500">{user?.email}</p>
               <div className="text-xs text-slate-600 mt-2 flex flex-wrap gap-2">
                 <span className="bg-slate-100 px-2.5 py-0.5 rounded-full font-medium">Area: <strong className="text-navy">{user?.area_name || 'MFC Youth Area Database'}</strong></span>

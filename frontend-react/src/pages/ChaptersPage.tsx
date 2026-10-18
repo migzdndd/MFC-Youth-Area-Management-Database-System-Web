@@ -70,14 +70,9 @@ export const ChaptersPage: React.FC = () => {
       {/* Header */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
-              Chapters
-            </h1>
-            <Badge variant="navy">
-              {chapters.length} {chapters.length === 1 ? 'Chapter' : 'Chapters'}
-            </Badge>
-          </div>
+          <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
+            Chapters
+          </h1>
         </div>
 
         <Button onClick={openCreateModal} className="flex items-center gap-2 shrink-0">

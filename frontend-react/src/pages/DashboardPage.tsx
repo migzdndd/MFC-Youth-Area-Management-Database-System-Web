@@ -51,9 +51,6 @@ export const DashboardPage: React.FC = () => {
       {/* Top Banner and Area Switcher */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-200/90 mb-2">
-            <span>COMMAND OVERVIEW</span>
-          </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading tracking-tight">
             Welcome, {user?.first_name || 'Servant Leader'}
           </h1>

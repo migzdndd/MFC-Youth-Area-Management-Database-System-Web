@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useGigRecords, useCreateGigRecord } from '@/hooks/useGig';
 import { useMembers } from '@/hooks/useMembers';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
@@ -68,12 +67,9 @@ export const GigPage: React.FC = () => {
       {/* Header */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
-              God is Generous (GIG) Stewardship
-            </h1>
-            <Badge variant="gold">Tithes & Mission</Badge>
-          </div>
+          <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight mb-1">
+            God is Generous (GIG) Stewardship
+          </h1>
         </div>
 
         <Button onClick={openModal} className="flex items-center gap-2 shrink-0">
