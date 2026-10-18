@@ -51,6 +51,9 @@ export const LoginPage: React.FC = () => {
     setErrorMessage('');
     setIsLoading(true);
 
+    // Warm destination bundles while auth API request is in flight
+    prefetchDestinations();
+
     try {
       const res = await apiClient<{
         ok?: boolean;
@@ -150,33 +153,18 @@ export const LoginPage: React.FC = () => {
   const prefetchDestinations = () => {
     import('@/pages/DashboardPage');
     import('@/pages/auth/SelectAreaPage');
+    import('@/pages/MemberPortalPage');
   };
 
   return (
     <div className="min-h-screen bg-canvas flex flex-col justify-between">
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
         <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch bg-white border border-border-subtle rounded-2xl shadow-sm overflow-hidden">
-          {/* Left Hero Overview with Video Wallpaper Placeholder */}
+          {/* Left Hero Overview */}
           <section className="lg:col-span-6 bg-navy-deep text-white p-6 sm:p-10 flex flex-col justify-between border-r border-navy-surface relative overflow-hidden" aria-label="System overview">
-            {/* ========================================================================= */}
-            {/* VIDEO WALLPAPER PLACEHOLDER                                              */}
-            {/* Place your quick wallpaper video file in /public/videos/login-wallpaper.mp4 */}
-            {/* Supported: MP4 / WebM (muted, loop, playsInline for smooth autoplay)      */}
-            {/* ========================================================================= */}
+            {/* Ambient atmospheric lighting & gradient overlays for optimal text contrast */}
             <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover opacity-40 filter brightness-[0.55] contrast-[1.1] transition-opacity duration-1000"
-              >
-                <source src="/videos/login-wallpaper.mp4" type="video/mp4" />
-                <source src="/videos/login-bg.mp4" type="video/mp4" />
-              </video>
-
-              {/* Ambient atmospheric lighting & gradient overlays for optimal text contrast */}
-              <div className="absolute inset-0 bg-gradient-to-t from-navy-deep via-navy-deep/80 to-navy-deep/50 backdrop-blur-[1px]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-navy-deep via-navy-deep/80 to-navy-deep/50" />
               <div className="absolute -top-32 -left-32 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
               <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
             </div>

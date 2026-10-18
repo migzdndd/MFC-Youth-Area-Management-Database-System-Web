@@ -8,8 +8,10 @@ import { AuthRedirectHandler } from '@/components/auth/AuthRedirectHandler';
 import { Spinner } from '@/components/ui/Spinner';
 import { ToastProvider } from '@/components/ui/Toast';
 
-// Lazy-loaded Auth Pages
-const LoginPage = lazy(() => import('@/pages/auth/LoginPage').then((m) => ({ default: m.LoginPage })));
+// Eagerly loaded primary landing page for zero-delay FCP/LCP
+import { LoginPage } from '@/pages/auth/LoginPage';
+
+// Lazy-loaded Secondary Auth Pages
 const MemberLoginPage = lazy(() => import('@/pages/auth/MemberLoginPage').then((m) => ({ default: m.MemberLoginPage })));
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage').then((m) => ({ default: m.RegisterPage })));
 const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })));
@@ -29,23 +31,29 @@ const DeveloperDashboardPage = lazy(() => import('@/pages/DeveloperDashboardPage
 const MemberPortalPage = lazy(() => import('@/pages/MemberPortalPage').then((m) => ({ default: m.MemberPortalPage })));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 
-// Prefetch core routes during idle browser cycles to eliminate transition lag
+// Prefetch routes during idle browser cycles without competing with login requests
 if (typeof window !== 'undefined') {
   const schedulePrefetch = () => {
     const prefetchRoutes = () => {
-      import('@/pages/DashboardPage');
-      import('@/pages/auth/SelectAreaPage');
-      import('@/pages/MemberPortalPage');
-      import('@/pages/EventsPage');
-      import('@/pages/MembersPage');
-      import('@/pages/ChaptersPage');
-      import('@/pages/DeveloperDashboardPage');
+      const hasSession = Boolean(localStorage.getItem('mfc_ams_session'));
+      if (hasSession) {
+        import('@/pages/DashboardPage');
+        import('@/pages/auth/SelectAreaPage');
+        import('@/pages/MemberPortalPage');
+        import('@/pages/EventsPage');
+        import('@/pages/MembersPage');
+        import('@/pages/ChaptersPage');
+      } else {
+        // Unauthenticated guests only pre-warm immediate post-login landing pages
+        import('@/pages/DashboardPage');
+        import('@/pages/auth/SelectAreaPage');
+      }
     };
 
     if ('requestIdleCallback' in window) {
-      (window as unknown as { requestIdleCallback: (cb: () => void, opts: { timeout: number }) => void }).requestIdleCallback(prefetchRoutes, { timeout: 2000 });
+      (window as unknown as { requestIdleCallback: (cb: () => void, opts: { timeout: number }) => void }).requestIdleCallback(prefetchRoutes, { timeout: 3000 });
     } else {
-      setTimeout(prefetchRoutes, 1000);
+      setTimeout(prefetchRoutes, 2000);
     }
   };
 

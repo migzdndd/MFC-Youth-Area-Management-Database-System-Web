@@ -15,6 +15,11 @@ const LOCKOUT_MINUTES = 15;
 const LOCKOUT_DURATION_MS = LOCKOUT_MINUTES * 60 * 1000;
 const FAILURE_WINDOW_MS = LOCKOUT_DURATION_MS;
 
+// In-memory fast caches: prevents redundant database lookups on clean accounts and active lockouts
+const activeLockoutCache = new Map(); // email -> Date
+const cleanEmailCache = new Map(); // email -> timestamp
+const CLEAN_CACHE_TTL_MS = 15 * 1000; // 15 seconds
+
 /**
  * Check If Account is Temporarily Locked for Protection
  *
@@ -28,6 +33,30 @@ export async function checkBruteForce(req, res, email) {
   const normalized = normalizeEmail(email);
   if (!normalized) return true;
 
+  const now = new Date();
+
+  // Fast path 1: In-memory active lockout check (drops brute-force flooding instantly)
+  const cachedLockout = activeLockoutCache.get(normalized);
+  if (cachedLockout) {
+    if (cachedLockout > now) {
+      if (!res || res.headersSent) return false;
+      const remainingMinutes = Math.max(1, Math.ceil((cachedLockout.getTime() - now.getTime()) / 60000));
+      sendJson(res, 423, {
+        ok: false,
+        error: `Account temporarily locked due to multiple failed login attempts. Please try again in ${remainingMinutes} minute${remainingMinutes === 1 ? '' : 's'}.`,
+        lockedUntil: cachedLockout.toISOString()
+      });
+      return false;
+    }
+    activeLockoutCache.delete(normalized);
+  }
+
+  // Fast path 2: Recently verified clean email (avoids extra DB roundtrip on quick re-submissions)
+  const cleanTimestamp = cleanEmailCache.get(normalized);
+  if (cleanTimestamp && (now.getTime() - cleanTimestamp < CLEAN_CACHE_TTL_MS)) {
+    return true;
+  }
+
   try {
     const admin = createSupabaseAdmin();
     const { data: record, error } = await admin
@@ -36,12 +65,16 @@ export async function checkBruteForce(req, res, email) {
       .eq('email', normalized)
       .maybeSingle();
 
-    if (error || !record) return true;
+    if (error || !record) {
+      cleanEmailCache.set(normalized, now.getTime());
+      return true;
+    }
 
-    const now = new Date();
     if (record.locked_until) {
       const lockedUntil = new Date(record.locked_until);
       if (lockedUntil > now) {
+        activeLockoutCache.set(normalized, lockedUntil);
+        cleanEmailCache.delete(normalized);
         if (!res || res.headersSent) return false;
         const remainingMinutes = Math.max(1, Math.ceil((lockedUntil.getTime() - now.getTime()) / 60000));
         sendJson(res, 423, {
@@ -53,6 +86,7 @@ export async function checkBruteForce(req, res, email) {
       }
     }
 
+    cleanEmailCache.set(normalized, now.getTime());
     return true;
   } catch (err) {
     console.warn('Brute-force check skipped due to database lookup error:', err?.message || err);
@@ -116,12 +150,18 @@ export async function recordLoginFailure(email) {
       })
       .eq('email', normalized);
 
+    cleanEmailCache.delete(normalized);
+    if (lockedUntil) {
+      activeLockoutCache.set(normalized, new Date(lockedUntil));
+    }
+
     return {
       locked: !!lockedUntil,
       attempts: newCount,
       lockedUntil
     };
   } catch (err) {
+    cleanEmailCache.delete(normalized);
     console.warn('Failed to record login failure:', err?.message || err);
     return { locked: false, attempts: 1, lockedUntil: null };
   }
@@ -139,6 +179,9 @@ export async function recordLoginFailure(email) {
 export async function clearLoginFailures(email) {
   const normalized = normalizeEmail(email);
   if (!normalized) return;
+
+  activeLockoutCache.delete(normalized);
+  cleanEmailCache.set(normalized, Date.now());
 
   try {
     const admin = createSupabaseAdmin();

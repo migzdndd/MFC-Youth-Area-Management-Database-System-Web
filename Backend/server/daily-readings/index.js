@@ -10,6 +10,10 @@ import * as cheerio from 'cheerio';
 import { sendJson } from '../_lib/http.js';
 import { checkRateLimit } from '../_lib/rate-limit.js';
 
+// High-performance in-memory cache for daily readings feed (6-hour TTL per calendar date)
+const readingsMemoryCache = new Map();
+const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return sendJson(res, 405, { ok: false, error: 'Method Not Allowed' });
@@ -39,6 +43,13 @@ export default async function handler(req, res) {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(targetDate)) {
         return sendJson(res, 400, { ok: false, error: 'Invalid date format. Use YYYY-MM-DD.' });
       }
+    }
+
+    // Fast in-memory cache hit: serves subsequent requests in <1ms without hitting external network
+    const cachedEntry = readingsMemoryCache.get(targetDate);
+    if (cachedEntry && (Date.now() - cachedEntry.cachedAt < CACHE_TTL_MS)) {
+      res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+      return sendJson(res, 200, cachedEntry.payload);
     }
 
     // 2. Fetch EWTN with timeout
@@ -182,10 +193,7 @@ export default async function handler(req, res) {
       dayName = new Intl.DateTimeFormat('en-US', { weekday: 'long', timeZone: 'UTC' }).format(dateObj);
     } catch (e) {}
 
-    // 4. Cache Headers & Response
-    res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
-
-    return sendJson(res, 200, {
+    const payload = {
       ok: true,
       date: targetDate,
       day: dayName,
@@ -196,7 +204,17 @@ export default async function handler(req, res) {
         name: 'EWTN',
         url: ewtnUrl
       }
+    };
+
+    // Cache parsed readings in-memory for immediate retrieval on subsequent loads
+    readingsMemoryCache.set(targetDate, {
+      cachedAt: Date.now(),
+      payload
     });
+
+    // 4. Cache Headers & Response
+    res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+    return sendJson(res, 200, payload);
 
   } catch (error) {
     console.error(`[EWTN] Unexpected error:`, error);

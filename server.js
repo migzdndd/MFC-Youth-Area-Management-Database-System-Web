@@ -1,6 +1,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { loadEnvFiles } from './Backend/server/_lib/env.js';
 import handler from './Backend/api/router.js';
@@ -23,6 +24,9 @@ const MIME_TYPES = {
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon'
 };
+
+const COMPRESSIBLE_EXTS = new Set(['.html', '.css', '.js', '.json', '.svg']);
+const gzipCache = new Map();
 
 /**
  * Polyfill Vercel helper properties (res.status, res.json) for standard Node HTTP response objects
@@ -74,11 +78,32 @@ const server = http.createServer(async (req, res) => {
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
     const content = fs.readFileSync(filePath);
 
+    // Optimized Caching Policies: Immutable long-term cache for Vite content-hashed assets
     let cacheControl = 'public, max-age=0, must-revalidate';
-    if (ext === '.png' || ext === '.jpg' || ext === '.svg' || ext === '.ico') {
+    if (lowerPathname.startsWith('/assets/') && (ext === '.js' || ext === '.css')) {
+      cacheControl = 'public, max-age=31536000, immutable';
+    } else if (ext === '.png' || ext === '.jpg' || ext === '.svg' || ext === '.ico') {
       cacheControl = 'public, max-age=604800, stale-while-revalidate=2592000';
-    } else if (ext === '.css' || ext === '.js') {
-      cacheControl = 'public, max-age=86400, stale-while-revalidate=604800';
+    }
+
+    const acceptEncoding = req.headers['accept-encoding'] || '';
+    const shouldGzip = COMPRESSIBLE_EXTS.has(ext) && acceptEncoding.includes('gzip');
+
+    if (shouldGzip) {
+      let gzipped = gzipCache.get(filePath);
+      if (!gzipped) {
+        gzipped = zlib.gzipSync(content, { level: 6 });
+        gzipCache.set(filePath, gzipped);
+      }
+
+      res.writeHead(200, {
+        'Content-Type': contentType,
+        'Content-Encoding': 'gzip',
+        'Vary': 'Accept-Encoding',
+        'Cache-Control': cacheControl,
+        'X-Content-Type-Options': 'nosniff'
+      });
+      return res.end(gzipped);
     }
 
     res.writeHead(200, {
@@ -92,6 +117,9 @@ const server = http.createServer(async (req, res) => {
     res.end('Internal Server Error');
   }
 });
+
+server.keepAliveTimeout = 65000;
+server.headersTimeout = 66000;
 
 server.listen(PORT, () => {
   console.log(`MFC Youth Area Management System running on port ${PORT}`);

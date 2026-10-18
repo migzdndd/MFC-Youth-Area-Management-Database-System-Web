@@ -57,18 +57,30 @@ export default async function handler(req, res) {
     // Clear failed login history asynchronously in the background (non-blocking)
     clearLoginFailures(email).catch(err => console.warn('Failed to clear login failures:', err?.message || err));
 
-    // Check MFA factors: Supabase signInWithPassword returns enrolled factors in data.user.factors
-    let verifiedFactors = (data.user?.factors || []).filter(f => f.factor_type === 'totp' && f.status === 'verified');
-    if (!verifiedFactors.length && data.user?.factors === undefined) {
-      try {
-        const admin = createSupabaseAdmin();
-        const { data: factorData } = await admin.auth.admin.mfa.listFactors({ userId: data.user.id });
-        verifiedFactors = (factorData?.factors || []).filter(f => f.factor_type === 'totp' && f.status === 'verified');
-      } catch (factorErr) {
-        console.warn('MFA factor listing skipped:', factorErr?.message || factorErr);
-      }
-    }
+    const admin = createSupabaseAdmin();
 
+    // Concurrently resolve MFA factors (if not included in user payload) and user profile joined record
+    const mfaPromise = (data.user?.factors === undefined)
+      ? admin.auth.admin.mfa.listFactors({ userId: data.user.id }).catch(err => {
+          console.warn('MFA factor listing skipped:', err?.message || err);
+          return { data: { factors: [] } };
+        })
+      : Promise.resolve({ data: { factors: data.user.factors || [] } });
+
+    const profilePromise = admin
+      .from('profiles')
+      .select('id, member_id, role, area_id, chapter_id, must_change_password, is_active, is_developer, areas(name), members(id, email, first_name, middle_name, last_name)')
+      .eq('id', data.user.id)
+      .maybeSingle();
+
+    const [factorResult, { data: profile, error: profileError }] = await Promise.all([
+      mfaPromise,
+      profilePromise
+    ]);
+
+    if (profileError) throw profileError;
+
+    const verifiedFactors = (factorResult?.data?.factors || []).filter(f => f.factor_type === 'totp' && f.status === 'verified');
     if (verifiedFactors.length > 0) {
       const factor = verifiedFactors[0];
       return sendJson(res, 200, {
@@ -87,17 +99,6 @@ export default async function handler(req, res) {
         }
       });
     }
-
-    const admin = createSupabaseAdmin();
-
-    // Query profile with linked area and member records in a single joined PostgREST request
-    const { data: profile, error: profileError } = await admin
-      .from('profiles')
-      .select('id, member_id, role, area_id, chapter_id, must_change_password, is_active, is_developer, areas(name), members(id, email, first_name, middle_name, last_name)')
-      .eq('id', data.user.id)
-      .maybeSingle();
-
-    if (profileError) throw profileError;
     let linkedProfile = profile;
     if (!linkedProfile) {
       if (!data.user.email_confirmed_at) {
@@ -109,28 +110,22 @@ export default async function handler(req, res) {
       return sendJson(res, 403, { ok: false, error: 'This account is not active.' });
     }
 
-    // Resolve area name from joined row or fallback query
+    // Resolve area name and linked member from joined row or parallel fallback query
     let areaName = linkedProfile.areas?.name || null;
-    if (!areaName && linkedProfile.area_id && !linkedProfile.areas) {
-      const { data: areaRow } = await admin
-        .from('areas')
-        .select('name')
-        .eq('id', linkedProfile.area_id)
-        .maybeSingle();
-      areaName = areaRow?.name || null;
-    }
-
-    // Resolve linked member from joined row or fallback query
     let linkedMember = linkedProfile.members || null;
-    if (!linkedMember && linkedProfile.member_id) {
-      const { data: memberRow, error: memberLookupError } = await admin
-        .from('members')
-        .select('id, email, first_name, middle_name, last_name')
-        .eq('id', linkedProfile.member_id)
-        .maybeSingle();
 
-      if (memberLookupError) throw memberLookupError;
-      linkedMember = memberRow;
+    if ((!areaName && linkedProfile.area_id && !linkedProfile.areas) || (!linkedMember && linkedProfile.member_id)) {
+      const areaFallbackPromise = (!areaName && linkedProfile.area_id && !linkedProfile.areas)
+        ? admin.from('areas').select('name').eq('id', linkedProfile.area_id).maybeSingle()
+        : Promise.resolve({ data: null });
+
+      const memberFallbackPromise = (!linkedMember && linkedProfile.member_id)
+        ? admin.from('members').select('id, email, first_name, middle_name, last_name').eq('id', linkedProfile.member_id).maybeSingle()
+        : Promise.resolve({ data: null });
+
+      const [areaFallbackRes, memberFallbackRes] = await Promise.all([areaFallbackPromise, memberFallbackPromise]);
+      if (areaFallbackRes?.data?.name) areaName = areaFallbackRes.data.name;
+      if (memberFallbackRes?.data) linkedMember = memberFallbackRes.data;
     }
 
     // Non-blocking background email sync if member record email has drifted

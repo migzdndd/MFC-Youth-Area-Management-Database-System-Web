@@ -38,6 +38,9 @@ export const MemberLoginPage: React.FC = () => {
     setErrorMessage('');
     setIsLoading(true);
 
+    // Warm destination bundle while member auth request is in flight
+    prefetchDestinations();
+
     try {
       const res = await apiClient<{
         ok?: boolean;
