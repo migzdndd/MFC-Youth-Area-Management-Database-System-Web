@@ -37,7 +37,6 @@ import reports from '../server/reports/index.js';
 import services from '../server/services/index.js';
 import sync from '../server/sync/index.js';
 import dailyReadings from '../server/daily-readings/index.js';
-import changelogs from '../server/changelogs/index.js';
 import mfaEnroll from '../server/auth/mfa/enroll.js';
 import mfaVerifyEnroll from '../server/auth/mfa/verify-enroll.js';
 import mfaChallenge from '../server/auth/mfa/challenge.js';
@@ -91,7 +90,6 @@ const ROUTES = new Map([
   ['services', services],
   ['sync', sync],
   ['daily-readings', dailyReadings],
-  ['changelogs', changelogs],
   ['dev', dev],
   ['dev/metrics', dev]
 ]);

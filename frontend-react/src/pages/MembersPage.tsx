@@ -13,14 +13,22 @@ import { TableRowSkeleton } from '@/components/ui/Skeleton';
 import { useToast } from '@/hooks/useToast';
 import { UserPlus, Edit2, Trash2, Filter, AlertTriangle } from 'lucide-react';
 import type { Member, AcademicTrack, MemberStatus } from '@/types/member';
+import type { Area } from '@/types/auth';
+import { useAuthStore } from '@/stores/auth-store';
+import { useAreas } from '@/hooks/useDashboard';
 
 export const MembersPage: React.FC = () => {
   const location = useLocation();
+  const { user, activeArea } = useAuthStore();
+  const { data: areas = [] } = useAreas();
   const [search, setSearch] = useState('');
   const [chapterFilter, setChapterFilter] = useState('');
   const [trackFilter, setTrackFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [serviceFilter, setServiceFilter] = useState('');
+
+  const matchedArea = areas.find((a: Area) => a.id === (activeArea?.id || user?.area_id));
+  const effectiveAreaName = activeArea?.name || user?.area_name || matchedArea?.name || (areas.length > 0 ? areas[0].name : 'MFC Youth Area Database');
 
   const { data: members = [], isLoading } = useMembers();
   const { data: chapters = [] } = useChapters();
@@ -264,6 +272,9 @@ export const MembersPage: React.FC = () => {
               {filteredMembers.length} {filteredMembers.length === 1 ? 'Record' : 'Records'}
             </Badge>
           </div>
+          <p className="text-xs text-slate-500 mt-1">
+            Area Database: <span className="font-semibold text-navy">{effectiveAreaName}</span>
+          </p>
         </div>
 
         <Button onClick={openCreateModal} className="flex items-center gap-2 shrink-0">
@@ -357,7 +368,7 @@ export const MembersPage: React.FC = () => {
             <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
               {hasActiveFilters
                 ? 'Try adjusting or clearing your search filters to find what you are looking for.'
-                : 'No members registered yet in this roster. Add your first member to get started.'}
+                : `No members registered yet in ${effectiveAreaName}. Add your first member to get started.`}
             </p>
             {hasActiveFilters && (
               <Button variant="secondary" size="sm" onClick={clearAllFilters} className="mt-4">

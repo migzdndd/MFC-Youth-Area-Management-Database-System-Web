@@ -35,12 +35,14 @@ export const AreaDatabaseSelector: React.FC<AreaDatabaseSelectorProps> = ({
   areasError,
   disabled = false,
 }) => {
+  const selectedArea = areas.find((a) => a.id === selectedAreaId);
+
   return (
     <div className="pt-3 border-t border-border-subtle space-y-3">
       <div className="flex items-center justify-between">
         <label className="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
           <Database className="w-4 h-4 text-navy" aria-hidden="true" />
-          <span>Area Database Assignment</span>
+          <span>{selectedArea ? selectedArea.name : 'Area Database'}</span>
           <span className="text-mfc-red">*</span>
         </label>
         <span className="text-xs text-text-muted">
@@ -93,12 +95,12 @@ export const AreaDatabaseSelector: React.FC<AreaDatabaseSelectorProps> = ({
             </div>
           ) : areas.length > 0 ? (
             <Select
-              label="Assigned Area Database"
+              label={selectedArea ? `Area Database: ${selectedArea.name}` : 'Area Database'}
               value={selectedAreaId}
               onChange={(e) => onSelectAreaId(e.target.value)}
               disabled={disabled}
               options={[
-                { value: '', label: '-- Choose your assigned Area Database --' },
+                { value: '', label: '-- Select Area Database --' },
                 ...areas.map((a) => ({ value: a.id, label: a.name })),
               ]}
             />

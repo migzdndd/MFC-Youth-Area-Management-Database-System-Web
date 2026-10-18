@@ -19,20 +19,6 @@ export const Skeleton: React.FC<SkeletonProps> = ({ className = '', ...props }) 
   );
 };
 
-export const MetricCardSkeleton: React.FC<{ className?: string }> = ({ className = '' }) => (
-  <div
-    className={`p-5 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-2xs space-y-3 ${className}`}
-    aria-hidden="true"
-  >
-    <div className="flex items-center justify-between">
-      <Skeleton className="h-3 w-28 rounded" />
-      <Skeleton className="h-10 w-10 rounded-xl" />
-    </div>
-    <Skeleton className="h-9 w-20 rounded-md" />
-    <Skeleton className="h-3 w-36 rounded" />
-  </div>
-);
-
 export const EventCardSkeleton: React.FC<{ className?: string }> = ({ className = '' }) => (
   <div
     className={`p-5 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-2xs space-y-4 ${className}`}

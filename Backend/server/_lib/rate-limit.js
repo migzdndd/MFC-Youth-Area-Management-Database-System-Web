@@ -39,7 +39,6 @@ const RATE_CONFIGS = {
   'check-email-verification': { maxAttempts: 60, windowMs: 5 * 60 * 1000, label: '5 minutes' },
   'member-claim': { maxAttempts: 5, windowMs: 10 * 60 * 1000, label: '10 minutes' },
   'daily-readings': { maxAttempts: 120, windowMs: 5 * 60 * 1000, label: '5 minutes' },
-  changelogs: { maxAttempts: 120, windowMs: 5 * 60 * 1000, label: '5 minutes' },
   health: { maxAttempts: 120, windowMs: 5 * 60 * 1000, label: '5 minutes' },
   default: { maxAttempts: 15, windowMs: 10 * 60 * 1000, label: '10 minutes' }
 };

@@ -27,7 +27,7 @@ export const DashboardPage: React.FC = () => {
 
   const isNationalCoordinator = user?.role === 'national_coordinator';
   const matchedArea = areas?.find((a: Area) => a.id === (activeArea?.id || user?.area_id));
-  const effectiveAreaName = activeArea?.name || user?.area_name || matchedArea?.name || 'Area Community';
+  const effectiveAreaName = activeArea?.name || user?.area_name || matchedArea?.name || (areas && areas.length > 0 ? areas[0].name : 'MFC Youth Area Database');
 
   const memberSubtitle = (() => {
     switch (user?.role) {
@@ -40,7 +40,7 @@ export const DashboardPage: React.FC = () => {
       case 'lit_servant':
         return 'Creative Ministries roster';
       case 'chapter_servant':
-        return 'Assigned chapter roster';
+        return 'Chapter roster';
       default:
         return 'Area-wide youth roster';
     }

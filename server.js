@@ -21,8 +21,7 @@ const MIME_TYPES = {
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.svg': 'image/svg+xml',
-  '.ico': 'image/x-icon',
-  '.webmanifest': 'application/manifest+json'
+  '.ico': 'image/x-icon'
 };
 
 /**
@@ -78,7 +77,7 @@ const server = http.createServer(async (req, res) => {
     let cacheControl = 'public, max-age=0, must-revalidate';
     if (ext === '.png' || ext === '.jpg' || ext === '.svg' || ext === '.ico') {
       cacheControl = 'public, max-age=604800, stale-while-revalidate=2592000';
-    } else if (ext === '.css' || (ext === '.js' && !filePath.endsWith('sw.js'))) {
+    } else if (ext === '.css' || ext === '.js') {
       cacheControl = 'public, max-age=86400, stale-while-revalidate=604800';
     }
 

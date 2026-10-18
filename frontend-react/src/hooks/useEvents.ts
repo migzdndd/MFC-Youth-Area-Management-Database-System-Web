@@ -132,25 +132,3 @@ export function useDeleteParticipant() {
     },
   });
 }
-
-export function useUpdateParticipantAttendance() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: {
-      event_id: string;
-      member_id?: string | null;
-      id?: string;
-      attended: boolean;
-      payment_status?: 'Paid' | 'Not Paid';
-      non_member_name?: string | null;
-    }) =>
-      apiClient<{ ok: boolean }>('/participants', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      }),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['event-participants', variables.event_id] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
-    },
-  });
-}

@@ -41,8 +41,3 @@ export function formatDateTime(dateString: string | null | undefined): string {
     return String(dateString);
   }
 }
-
-export function truncate(str: string, maxLength: number): string {
-  if (!str || str.length <= maxLength) return str;
-  return str.slice(0, maxLength) + '...';
-}
