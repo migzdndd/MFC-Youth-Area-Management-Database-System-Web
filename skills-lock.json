@@ -1,11 +1,29 @@
 {
   "version": 1,
   "skills": {
+    "agent-skills": {
+      "source": "datadog-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "7f2ba474bc0564990689c824262699681c444507ba7b5ccafd3f858e815933eb"
+    },
     "security-audit": {
       "source": "cloudflare/security-audit-skill",
       "sourceType": "github",
       "skillPath": "skills/security-audit/SKILL.md",
       "computedHash": "e6b2e317de75da97e9de18d842982994803f3a67a4a6d8154a82323dc3de8528"
+    },
+    "sentry-fix-issues": {
+      "source": "getsentry/sentry-for-ai",
+      "sourceType": "github",
+      "skillPath": "skills-legacy/sentry-fix-issues/SKILL.md",
+      "computedHash": "d8f04b1844eb6ae5721d58507a69be1f880a7cd231560de5097b3e40d8d11e1c"
+    },
+    "sentry-fix-stack-traces": {
+      "source": "getsentry/sentry-for-ai",
+      "sourceType": "github",
+      "skillPath": "src/skills/sentry-fix-stack-traces/SKILL.md",
+      "computedHash": "f591e2ed9535d12a7466d0bcb079502b458fee37be3e24dab607f7ae7e7e3156"
     }
   }
 }
