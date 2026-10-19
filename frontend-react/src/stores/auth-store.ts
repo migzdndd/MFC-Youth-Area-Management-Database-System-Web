@@ -10,7 +10,7 @@ interface AuthState {
   pendingAreaSwitch: Area | null;
   roleRestorationValidated: boolean;
   isLoading: boolean;
-  setSession: (session: { access_token: string; refresh_token: string; user: UserProfile } | null) => void;
+  setSession: (session: { access_token: string; refresh_token: string; user: UserProfile } | null, remember?: boolean) => void;
   setActiveArea: (area: Area | null, role?: UserRole | null) => void;
   setAssignedArea: (area: Area, memberId?: string | null) => void;
   requestAreaSwitch: (targetArea: Area | null) => boolean;
@@ -29,9 +29,11 @@ const ACTIVE_AREA_KEY = 'mfc_ams_active_area';
 
 function getStoredSession() {
   try {
-    const raw = localStorage.getItem(SESSION_STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
+    const rawLocal = localStorage.getItem(SESSION_STORAGE_KEY);
+    if (rawLocal) return JSON.parse(rawLocal);
+    const rawSession = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    if (rawSession) return JSON.parse(rawSession);
+    return null;
   } catch {
     return null;
   }
@@ -39,11 +41,44 @@ function getStoredSession() {
 
 function getStoredArea() {
   try {
-    const raw = localStorage.getItem(ACTIVE_AREA_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
+    const rawLocal = localStorage.getItem(ACTIVE_AREA_KEY);
+    if (rawLocal) return JSON.parse(rawLocal);
+    const rawSession = sessionStorage.getItem(ACTIVE_AREA_KEY);
+    if (rawSession) return JSON.parse(rawSession);
+    return null;
   } catch {
     return null;
+  }
+}
+
+function saveStoredSession(session: unknown) {
+  try {
+    const isSessionOnly = typeof sessionStorage !== 'undefined' &&
+      Boolean(sessionStorage.getItem(SESSION_STORAGE_KEY)) &&
+      (!localStorage.getItem(SESSION_STORAGE_KEY));
+    const target = isSessionOnly ? sessionStorage : localStorage;
+    target.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+  } catch {
+    // Storage restricted mode fallback
+  }
+}
+
+function saveStoredArea(area: Area | null) {
+  try {
+    const isSessionOnly = typeof sessionStorage !== 'undefined' &&
+      Boolean(sessionStorage.getItem(SESSION_STORAGE_KEY)) &&
+      (!localStorage.getItem(SESSION_STORAGE_KEY));
+    const target = isSessionOnly ? sessionStorage : localStorage;
+    const other = isSessionOnly ? localStorage : sessionStorage;
+
+    if (area) {
+      target.setItem(ACTIVE_AREA_KEY, JSON.stringify(area));
+    } else {
+      target.removeItem(ACTIVE_AREA_KEY);
+    }
+    other.removeItem(ACTIVE_AREA_KEY);
+  } catch {
+    // Storage restricted mode fallback
   }
 }
 
@@ -65,21 +100,42 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   roleRestorationValidated: false,
   isLoading: false,
 
-  setSession: (session) => {
+  setSession: (session, remember) => {
     if (session) {
       const user = {
         ...session.user,
         home_role: session.user.home_role || session.user.role,
       };
-      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ ...session, user }));
+
+      const shouldUseLocalStorage = remember !== undefined
+        ? remember
+        : !(typeof sessionStorage !== 'undefined' && sessionStorage.getItem(SESSION_STORAGE_KEY) && !localStorage.getItem(SESSION_STORAGE_KEY));
+
+      const target = shouldUseLocalStorage ? localStorage : sessionStorage;
+      const other = shouldUseLocalStorage ? sessionStorage : localStorage;
+
+      try {
+        target.setItem(SESSION_STORAGE_KEY, JSON.stringify({ ...session, user }));
+        other.removeItem(SESSION_STORAGE_KEY);
+      } catch {
+        // Storage restricted mode fallback
+      }
+
       const userArea: Area | null = user.area_id
         ? { id: user.area_id, name: user.area_name || '' }
         : null;
-      if (userArea) {
-        localStorage.setItem(ACTIVE_AREA_KEY, JSON.stringify(userArea));
-      } else {
-        localStorage.removeItem(ACTIVE_AREA_KEY);
+
+      try {
+        if (userArea) {
+          target.setItem(ACTIVE_AREA_KEY, JSON.stringify(userArea));
+        } else {
+          target.removeItem(ACTIVE_AREA_KEY);
+        }
+        other.removeItem(ACTIVE_AREA_KEY);
+      } catch {
+        // Storage restricted mode fallback
       }
+
       set({
         user,
         token: session.access_token,
@@ -90,8 +146,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         roleRestorationValidated: false,
       });
     } else {
-      localStorage.removeItem(SESSION_STORAGE_KEY);
-      localStorage.removeItem(ACTIVE_AREA_KEY);
+      try {
+        localStorage.removeItem(SESSION_STORAGE_KEY);
+        localStorage.removeItem(ACTIVE_AREA_KEY);
+        sessionStorage.removeItem(SESSION_STORAGE_KEY);
+        sessionStorage.removeItem(ACTIVE_AREA_KEY);
+      } catch {
+        // Storage restricted mode fallback
+      }
       set({
         user: null,
         token: null,
@@ -106,11 +168,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   setActiveArea: (area, roleOverride) => {
     const current = get().user;
-    if (area) {
-      localStorage.setItem(ACTIVE_AREA_KEY, JSON.stringify(area));
-    } else {
-      localStorage.removeItem(ACTIVE_AREA_KEY);
-    }
+    saveStoredArea(area);
 
     if (!current) {
       set({ activeArea: area });
@@ -151,12 +209,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       requires_area_selection: false,
     };
 
-    localStorage.setItem(ACTIVE_AREA_KEY, JSON.stringify(area));
+    saveStoredArea(area);
 
     const session = getStoredSession();
     if (session) {
       session.user = updatedUser;
-      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+      saveStoredSession(session);
     }
 
     set({
@@ -191,7 +249,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const originalRole = user.home_role || user.role;
     const targetArea = pendingAreaSwitch;
 
-    localStorage.setItem(ACTIVE_AREA_KEY, JSON.stringify(targetArea));
+    saveStoredArea(targetArea);
 
     const updatedUser = {
       ...user,
@@ -202,7 +260,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const session = getStoredSession();
     if (session) {
       session.user = updatedUser;
-      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+      saveStoredSession(session);
     }
 
     set({
@@ -245,7 +303,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const session = getStoredSession();
     if (session) {
       session.user = updatedUser;
-      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+      saveStoredSession(session);
     }
 
     set({
@@ -270,15 +328,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const session = getStoredSession();
     if (session) {
       session.user = updated;
-      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+      saveStoredSession(session);
     }
     set({ user: updated });
   },
 
   logout: () => {
-    localStorage.removeItem(SESSION_STORAGE_KEY);
-    localStorage.removeItem(ACTIVE_AREA_KEY);
-    set({ user: null, token: null, refreshToken: null, activeArea: null });
+    try {
+      localStorage.removeItem(SESSION_STORAGE_KEY);
+      localStorage.removeItem(ACTIVE_AREA_KEY);
+      sessionStorage.removeItem(SESSION_STORAGE_KEY);
+      sessionStorage.removeItem(ACTIVE_AREA_KEY);
+    } catch {
+      // Storage restricted mode fallback
+    }
+    set({
+      user: null,
+      token: null,
+      refreshToken: null,
+      activeArea: null,
+      simulatedRole: null,
+      pendingAreaSwitch: null,
+      roleRestorationValidated: false,
+    });
   },
 
   hasRole: (roles) => {

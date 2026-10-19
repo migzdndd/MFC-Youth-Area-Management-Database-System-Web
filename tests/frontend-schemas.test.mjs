@@ -79,6 +79,35 @@ test('LoginSchema validation with optional remember field', () => {
     assert.equal(valid.data.email, 'test@example.com');
   }
 
+  const defaultFalse = LoginSchema.safeParse({
+    email: 'test@example.com',
+    password: 'securepassword123',
+  });
+  assert.equal(defaultFalse.success, true);
+  if (defaultFalse.success) {
+    assert.equal(defaultFalse.data.remember, false);
+  }
+
+  const booleanTrue = LoginSchema.safeParse({
+    email: 'test@example.com',
+    password: 'securepassword123',
+    remember: true,
+  });
+  assert.equal(booleanTrue.success, true);
+  if (booleanTrue.success) {
+    assert.equal(booleanTrue.data.remember, true);
+  }
+
+  const booleanFalse = LoginSchema.safeParse({
+    email: 'test@example.com',
+    password: 'securepassword123',
+    remember: false,
+  });
+  assert.equal(booleanFalse.success, true);
+  if (booleanFalse.success) {
+    assert.equal(booleanFalse.data.remember, false);
+  }
+
   const invalid = LoginSchema.safeParse({
     email: '',
     password: '',

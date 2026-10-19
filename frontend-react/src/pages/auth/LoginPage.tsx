@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth-store';
@@ -10,6 +10,9 @@ import { useDailyReadings } from '@/hooks/useReadings';
 import { ShieldCheck, BookOpen, ExternalLink, ArrowRight } from 'lucide-react';
 import type { UserProfile } from '@/types/auth';
 
+const REMEMBERED_LEADER_EMAIL_KEY = 'mfc_remembered_leader_email';
+const LEADER_EMAIL_DRAFT_KEY = 'mfc_leader_email_draft';
+
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,28 +23,54 @@ export const LoginPage: React.FC = () => {
   const registrationNotice = location.state?.registered
     ? 'Registration successful! Sign in to select your Area Database and initialize your portal.'
     : '';
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => {
+    try {
+      return localStorage.getItem(REMEMBERED_LEADER_EMAIL_KEY) || sessionStorage.getItem(LEADER_EMAIL_DRAFT_KEY) || '';
+    } catch {
+      return '';
+    }
+  });
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(() => {
+    try {
+      const stored = localStorage.getItem(REMEMBERED_LEADER_EMAIL_KEY);
+      return Boolean(stored && stored.trim().length > 0);
+    } catch {
+      return false;
+    }
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Clear any legacy saved credential drafts on mount
-  useEffect(() => {
-    try {
-      localStorage.removeItem('mfc_remembered_leader_email');
-      sessionStorage.removeItem('mfc_leader_email_draft');
-    } catch {
-      // Ignore storage errors in restrictive modes
-    }
-  }, []);
-
   const handleEmailChange = (val: string) => {
     setEmail(val);
+    try {
+      sessionStorage.setItem(LEADER_EMAIL_DRAFT_KEY, val);
+      if (rememberMe) {
+        if (val.trim()) {
+          localStorage.setItem(REMEMBERED_LEADER_EMAIL_KEY, val.trim());
+        } else {
+          localStorage.removeItem(REMEMBERED_LEADER_EMAIL_KEY);
+        }
+      }
+    } catch {
+      // Storage restricted mode fallback
+    }
   };
 
   const handleRememberChange = (checked: boolean) => {
     setRememberMe(checked);
+    try {
+      if (checked) {
+        if (email.trim()) {
+          localStorage.setItem(REMEMBERED_LEADER_EMAIL_KEY, email.trim());
+        }
+      } else {
+        localStorage.removeItem(REMEMBERED_LEADER_EMAIL_KEY);
+      }
+    } catch {
+      // Storage restricted mode fallback
+    }
   };
 
   const { data: readingsData, isLoading: readingsLoading } = useDailyReadings();
@@ -112,7 +141,18 @@ export const LoginPage: React.FC = () => {
           access_token: accessToken,
           refresh_token: refreshToken,
           user: normalizedUser,
-        });
+        }, rememberMe);
+
+        try {
+          sessionStorage.removeItem(LEADER_EMAIL_DRAFT_KEY);
+          if (rememberMe && email.trim()) {
+            localStorage.setItem(REMEMBERED_LEADER_EMAIL_KEY, email.trim());
+          } else {
+            localStorage.removeItem(REMEMBERED_LEADER_EMAIL_KEY);
+          }
+        } catch {
+          // Storage restricted mode fallback
+        }
 
         queryClient.clear();
 
@@ -319,14 +359,15 @@ export const LoginPage: React.FC = () => {
                 />
 
                 <div className="flex items-center justify-between text-sm pt-1">
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <label htmlFor="login-remember-me" className="flex items-center gap-2 cursor-pointer select-none min-h-[44px] py-1">
                     <input
+                      id="login-remember-me"
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => handleRememberChange(e.target.checked)}
-                      className="rounded border-slate-300 text-navy focus:ring-navy w-4 h-4"
+                      className="rounded border-slate-300 text-navy focus:ring-navy w-4 h-4 cursor-pointer"
                     />
-                    <span className="text-xs text-text-muted font-medium">Keep me signed in</span>
+                    <span className="text-xs text-text-muted font-medium">Remember me</span>
                   </label>
                   <Link to="/forgot-password" className="text-xs font-semibold text-navy hover:underline">
                     Forgot password?

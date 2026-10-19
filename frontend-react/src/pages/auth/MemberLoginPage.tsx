@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth-store';
 import { useToast } from '@/hooks/useToast';
@@ -9,28 +9,62 @@ import { UserCheck, ArrowLeft } from 'lucide-react';
 import { MemberClaimWizardModal } from '@/components/auth/MemberClaimWizardModal';
 import type { UserProfile } from '@/types/auth';
 
+const REMEMBERED_MEMBER_EMAIL_KEY = 'mfc_remembered_member_email';
+const MEMBER_EMAIL_DRAFT_KEY = 'mfc_member_email_draft';
+
 export const MemberLoginPage: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const { setSession } = useAuthStore();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => {
+    try {
+      return localStorage.getItem(REMEMBERED_MEMBER_EMAIL_KEY) || sessionStorage.getItem(MEMBER_EMAIL_DRAFT_KEY) || '';
+    } catch {
+      return '';
+    }
+  });
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(() => {
+    try {
+      const stored = localStorage.getItem(REMEMBERED_MEMBER_EMAIL_KEY);
+      return Boolean(stored && stored.trim().length > 0);
+    } catch {
+      return false;
+    }
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
 
-  // Clear legacy member email drafts on mount
-  useEffect(() => {
-    try {
-      localStorage.removeItem('mfc_remembered_member_email');
-      sessionStorage.removeItem('mfc_member_email_draft');
-    } catch {
-      // Ignore
-    }
-  }, []);
-
   const handleEmailChange = (val: string) => {
     setEmail(val);
+    try {
+      sessionStorage.setItem(MEMBER_EMAIL_DRAFT_KEY, val);
+      if (rememberMe) {
+        if (val.trim()) {
+          localStorage.setItem(REMEMBERED_MEMBER_EMAIL_KEY, val.trim());
+        } else {
+          localStorage.removeItem(REMEMBERED_MEMBER_EMAIL_KEY);
+        }
+      }
+    } catch {
+      // Storage restricted mode fallback
+    }
+  };
+
+  const handleRememberChange = (checked: boolean) => {
+    setRememberMe(checked);
+    try {
+      if (checked) {
+        if (email.trim()) {
+          localStorage.setItem(REMEMBERED_MEMBER_EMAIL_KEY, email.trim());
+        }
+      } else {
+        localStorage.removeItem(REMEMBERED_MEMBER_EMAIL_KEY);
+      }
+    } catch {
+      // Storage restricted mode fallback
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -73,7 +107,7 @@ export const MemberLoginPage: React.FC = () => {
         error?: string;
       }>('/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ email, password, portal: 'member' }),
+        body: JSON.stringify({ email: email.trim(), password, portal: 'member', remember: rememberMe }),
       });
 
       const accessToken = res.access_token || res.session?.accessToken || res.session?.access_token;
@@ -99,7 +133,18 @@ export const MemberLoginPage: React.FC = () => {
           access_token: accessToken,
           refresh_token: refreshToken,
           user: normalizedUser,
-        });
+        }, rememberMe);
+
+        try {
+          sessionStorage.removeItem(MEMBER_EMAIL_DRAFT_KEY);
+          if (rememberMe && email.trim()) {
+            localStorage.setItem(REMEMBERED_MEMBER_EMAIL_KEY, email.trim());
+          } else {
+            localStorage.removeItem(REMEMBERED_MEMBER_EMAIL_KEY);
+          }
+        } catch {
+          // Storage restricted mode fallback
+        }
 
         navigate('/member');
       } else {
@@ -190,6 +235,22 @@ export const MemberLoginPage: React.FC = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+
+          <div className="flex items-center justify-between text-sm pt-1">
+            <label htmlFor="member-remember-me" className="flex items-center gap-2 cursor-pointer select-none min-h-[44px] py-1">
+              <input
+                id="member-remember-me"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => handleRememberChange(e.target.checked)}
+                className="rounded border-slate-300 text-navy focus:ring-navy w-4 h-4 cursor-pointer"
+              />
+              <span className="text-xs text-text-muted font-medium">Remember me</span>
+            </label>
+            <Link to="/forgot-password" className="text-xs font-semibold text-navy hover:underline">
+              Forgot password?
+            </Link>
+          </div>
 
           <Button type="submit" variant="primary" size="lg" className="w-full" isLoading={isLoading}>
             Sign In to Member Portal
