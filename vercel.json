@@ -81,6 +81,28 @@
           "value": "public, max-age=31536000, immutable"
         }
       ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/(index\\.html)?",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
     }
   ],
   "builds": [
@@ -100,6 +122,10 @@
     {
       "src": "/api/(.*)",
       "dest": "/Backend/api/router.js?route=$1"
+    },
+    {
+      "src": "/sw.js",
+      "dest": "/frontend-react/sw.js"
     },
     {
       "src": "/assets/(.*)",

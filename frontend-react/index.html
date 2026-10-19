@@ -17,6 +17,24 @@
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Poppins:wght@600;700&display=swap" />
     </noscript>
     <title>MFC Youth Area Management System</title>
+    <script>
+      (function() {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for (var i = 0; i < registrations.length; i++) {
+              registrations[i].unregister();
+            }
+          });
+        }
+        if ('caches' in window) {
+          caches.keys().then(function(keys) {
+            for (var j = 0; j < keys.length; j++) {
+              caches.delete(keys[j]);
+            }
+          });
+        }
+      })();
+    </script>
   </head>
   <body class="bg-canvas text-text-main antialiased selection:bg-navy/15 selection:text-navy" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false">
     <div id="root" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false"></div>

@@ -422,9 +422,14 @@ export const ServicesPage: React.FC = () => {
                   <div className="p-3 rounded-xl bg-navy/10 dark:bg-sky-500/15 text-navy dark:text-sky-400 border border-transparent dark:border-sky-500/20 group-hover:scale-105 transition-transform duration-150">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border border-transparent dark:border-slate-700/60 group-hover:bg-navy/10 dark:group-hover:bg-sky-500/20 group-hover:text-navy dark:group-hover:text-sky-300 transition-colors">
-                    View Roster
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-base font-extrabold text-navy dark:text-sky-400 px-2 py-0.5 rounded-lg bg-navy/5 dark:bg-sky-500/10 border border-navy/10 dark:border-sky-500/20">
+                      {matchedCount}
+                    </span>
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border border-transparent dark:border-slate-700/60 group-hover:bg-navy/10 dark:group-hover:bg-sky-500/20 group-hover:text-navy dark:group-hover:text-sky-300 transition-colors">
+                      View Roster
+                    </span>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2">
