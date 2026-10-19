@@ -68,9 +68,9 @@ export const ChaptersPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white font-heading tracking-tight">
             Chapters
           </h1>
         </div>
@@ -83,15 +83,15 @@ export const ChaptersPage: React.FC = () => {
 
       {/* Chapters Grid */}
       {isLoading ? (
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-12 flex flex-col items-center justify-center gap-3 shadow-2xs">
+        <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-12 flex flex-col items-center justify-center gap-3 shadow-2xs">
           <Spinner size="lg" />
-          <span className="text-xs text-slate-500 font-medium">Loading chapters...</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Loading chapters...</span>
         </div>
       ) : chapters.length === 0 ? (
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-12 text-center shadow-2xs">
-          <Building2 className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-          <h3 className="text-sm font-bold text-slate-900">No chapters established</h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+        <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-12 text-center shadow-2xs">
+          <Building2 className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+          <h3 className="text-sm font-bold text-slate-900 dark:text-white">No chapters established</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
             Create your first area chapter to start organizing households and community members.
           </p>
           <Button onClick={openCreateModal} className="mt-4" size="sm">
@@ -108,15 +108,15 @@ export const ChaptersPage: React.FC = () => {
               <div
                 key={chapter.id}
                 onClick={() => setSelectedChapterForMembers(chapter)}
-                className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group cursor-pointer"
+                className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-slate-300 dark:hover:border-sky-500/40 transition-all duration-200 flex flex-col justify-between group cursor-pointer"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-4">
                     <div className="flex items-center gap-2.5">
-                      <div className="p-2.5 rounded-xl bg-navy/10 text-navy group-hover:scale-105 transition-transform duration-150">
+                      <div className="p-2.5 rounded-xl bg-navy/10 dark:bg-sky-500/15 text-navy dark:text-sky-400 border border-transparent dark:border-sky-500/20 group-hover:scale-105 transition-transform duration-150">
                         <Building2 className="w-5 h-5" />
                       </div>
-                      <h3 className="font-bold text-slate-900 text-base font-heading group-hover:text-navy transition-colors">
+                      <h3 className="font-bold text-slate-900 dark:text-white text-base font-heading group-hover:text-navy dark:group-hover:text-sky-300 transition-colors">
                         {chapter.name}
                       </h3>
                     </div>
@@ -127,19 +127,19 @@ export const ChaptersPage: React.FC = () => {
                         e.stopPropagation();
                         handleDelete(chapter);
                       }}
-                      className="p-2 text-slate-400 hover:text-mfc-red active:scale-95 rounded-lg hover:bg-rose-50 transition-all duration-150 cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
+                      className="p-2 text-slate-400 hover:text-mfc-red dark:hover:text-rose-400 active:scale-95 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all duration-150 cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
                       aria-label={`Delete chapter ${chapter.name}`}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
 
-                  <div className="space-y-2 py-2 bg-slate-50/70 p-3 rounded-xl border border-slate-200/70">
-                    <div className="flex items-center gap-2 text-xs text-slate-600">
-                      <User className="w-3.5 h-3.5 text-navy shrink-0" />
+                  <div className="space-y-2 py-2 bg-slate-50/70 dark:bg-slate-950/60 p-3 rounded-xl border border-slate-200/70 dark:border-sky-500/15">
+                    <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                      <User className="w-3.5 h-3.5 text-navy dark:text-sky-400 shrink-0" />
                       <span className="truncate">
                         Head:{' '}
-                        <strong className="text-slate-900 font-semibold">
+                        <strong className="text-slate-900 dark:text-white font-semibold">
                           {headMember
                             ? [headMember.first_name, headMember.middle_name, headMember.last_name].filter(Boolean).join(' ')
                             : 'Not assigned'}
@@ -147,18 +147,18 @@ export const ChaptersPage: React.FC = () => {
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-xs text-slate-600">
-                      <Users className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                      <Users className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
                       <span>
                         Youth Roster:{' '}
-                        <strong className="text-slate-900 font-semibold">{chapterMembers.length} members</strong>
+                        <strong className="text-slate-900 dark:text-white font-semibold">{chapterMembers.length} members</strong>
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-3 mt-4 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
-                  <span className="text-navy font-medium group-hover:underline">Click to view members &rarr;</span>
+                <div className="pt-3 mt-4 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                  <span className="text-navy dark:text-sky-400 font-medium group-hover:underline">Click to view members &rarr;</span>
                   <Badge variant="success">Active</Badge>
                 </div>
               </div>

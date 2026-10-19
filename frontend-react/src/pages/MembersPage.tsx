@@ -166,13 +166,13 @@ export const MembersPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header and Action */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white font-heading tracking-tight">
             Members Directory
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Area Database: <span className="font-semibold text-navy">{effectiveAreaName}</span>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Area Database: <span className="font-semibold text-navy dark:text-sky-400">{effectiveAreaName}</span>
           </p>
         </div>
 
@@ -183,7 +183,7 @@ export const MembersPage: React.FC = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-2xs space-y-3">
+      <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <div className="sm:col-span-2 lg:col-span-1">
             <SearchBar value={search} onChange={setSearch} placeholder="Search by name, email, phone..." />
@@ -255,16 +255,16 @@ export const MembersPage: React.FC = () => {
       </div>
 
       {/* Data Container */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs">
+      <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">
         {isLoading ? (
           <div className="p-4">
             <TableRowSkeleton columns={6} rows={8} />
           </div>
         ) : filteredMembers.length === 0 ? (
           <div className="p-12 text-center">
-            <Filter className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-            <h3 className="text-sm font-bold text-slate-900">No members match your criteria</h3>
-            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+            <Filter className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">No members match your criteria</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
               {hasActiveFilters
                 ? 'Try adjusting or clearing your search filters to find what you are looking for.'
                 : `No members registered yet in ${effectiveAreaName}. Add your first member to get started.`}
@@ -296,11 +296,11 @@ export const MembersPage: React.FC = () => {
                     <tr key={member.id} className="hover:bg-slate-50/80 transition-colors">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-navy/10 text-navy font-bold text-xs flex items-center justify-center shrink-0 border border-navy/15 shadow-2xs">
+                          <div className="w-9 h-9 rounded-full bg-navy/10 dark:bg-sky-500/15 text-navy dark:text-sky-400 font-bold text-xs flex items-center justify-center shrink-0 border border-navy/15 dark:border-sky-500/30 shadow-2xs">
                             {member.first_name ? member.first_name[0].toUpperCase() : 'M'}
                           </div>
                           <div>
-                            <div className="font-semibold text-slate-900">
+                            <div className="font-semibold text-slate-900 dark:text-white">
                               {[member.first_name, member.middle_name, member.last_name].filter(Boolean).join(' ')}
                             </div>
                             {member.nickname && (

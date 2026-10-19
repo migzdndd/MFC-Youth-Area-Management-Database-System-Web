@@ -139,9 +139,9 @@ export const ReportsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight mb-1">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white font-heading tracking-tight mb-1">
             Activity Reports
           </h1>
         </div>
@@ -149,7 +149,7 @@ export const ReportsPage: React.FC = () => {
         <div className="flex items-center gap-2.5 shrink-0">
           {reports.length > 0 && (
             <Button variant="secondary" onClick={exportPDF} className="flex items-center gap-2">
-              <Download className="w-4 h-4 text-navy" />
+              <Download className="w-4 h-4 text-navy dark:text-sky-400" />
               <span>Export PDF</span>
             </Button>
           )}
@@ -163,42 +163,42 @@ export const ReportsPage: React.FC = () => {
 
       {/* Summary Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Reports Filed</span>
-          <div className="text-3xl font-bold text-slate-900 font-heading mt-1">
+        <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs">
+          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Reports Filed</span>
+          <div className="text-3xl font-bold text-slate-900 dark:text-white font-heading mt-1">
             {reports.length}
           </div>
-          <p className="text-xs text-slate-500 mt-1">Documented activities</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Documented activities</p>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Youth Reached</span>
-          <div className="text-3xl font-bold text-navy font-heading mt-1">
+        <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs">
+          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Youth Reached</span>
+          <div className="text-3xl font-bold text-navy dark:text-sky-400 font-heading mt-1">
             {totalHeadcount}
           </div>
-          <p className="text-xs text-slate-500 mt-1">Cumulative participants logged</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Cumulative participants logged</p>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Average Attendance</span>
-          <div className="text-3xl font-bold text-emerald-700 font-heading mt-1">
+        <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs">
+          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Average Attendance</span>
+          <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-400 font-heading mt-1">
             {avgHeadcount}
           </div>
-          <p className="text-xs text-slate-500 mt-1">Youth per activity</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Youth per activity</p>
         </div>
       </div>
 
       {/* Reports Table & Container */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs">
+      <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">
         {isLoading ? (
           <div className="p-4">
             <TableRowSkeleton columns={5} rows={6} />
           </div>
         ) : reports.length === 0 ? (
           <div className="p-12 text-center">
-            <FileText className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-            <h3 className="text-sm font-bold text-slate-900">No activity reports recorded</h3>
-            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+            <FileText className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">No activity reports recorded</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
               File a pastoral report following a chapter assembly or household meeting to track ministry growth.
             </p>
             <Button onClick={openCreateModal} className="mt-4" size="sm">

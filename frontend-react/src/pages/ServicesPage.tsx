@@ -89,8 +89,8 @@ export const ServicesPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs">
-        <h1 className="text-2xl font-bold text-slate-900 font-heading tracking-tight">
+      <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-2xs">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white font-heading tracking-tight">
           Creative Ministry Services
         </h1>
       </div>
@@ -116,29 +116,29 @@ export const ServicesPage: React.FC = () => {
                   setSearchQuery('');
                 }
               }}
-              className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 hover:shadow-md hover:border-slate-300 active:scale-[0.99] transition-all duration-150 flex flex-col justify-between shadow-2xs group cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy/20"
+              className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 hover:shadow-md hover:border-slate-300 dark:hover:border-sky-500/40 active:scale-[0.99] transition-all duration-150 flex flex-col justify-between shadow-2xs group cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy/20 dark:focus:ring-sky-500/30"
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <div className="p-3 rounded-xl bg-navy/10 text-navy group-hover:scale-105 transition-transform duration-150">
+                  <div className="p-3 rounded-xl bg-navy/10 dark:bg-sky-500/15 text-navy dark:text-sky-400 border border-transparent dark:border-sky-500/20 group-hover:scale-105 transition-transform duration-150">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 group-hover:bg-navy/10 group-hover:text-navy transition-colors">
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border border-transparent dark:border-slate-700/60 group-hover:bg-navy/10 dark:group-hover:bg-sky-500/20 group-hover:text-navy dark:group-hover:text-sky-300 transition-colors">
                     View Servants
                   </span>
                 </div>
 
-                <h3 className="font-bold text-base text-slate-900 font-heading group-hover:text-navy transition-colors">
+                <h3 className="font-bold text-base text-slate-900 dark:text-white font-heading group-hover:text-navy dark:group-hover:text-sky-300 transition-colors">
                   {service.title}
                 </h3>
-                <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
                   {service.description}
                 </p>
               </div>
 
-              <div className="pt-3 mt-4 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
+              <div className="pt-3 mt-4 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between">
                 <span>LIT Creative Pillar</span>
-                <span className="font-semibold text-navy text-xs">
+                <span className="font-semibold text-navy dark:text-sky-400 text-xs">
                   {servantCount} {servantCount === 1 ? 'Servant' : 'Servants'}
                 </span>
               </div>

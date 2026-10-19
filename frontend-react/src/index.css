@@ -54,15 +54,20 @@
 
 .dark {
   color-scheme: dark;
-  --bg-canvas: #070e18;
-  --bg-surface: #0c1829;
-  --bg-surface-hover: #122138;
-  --bg-surface-subtle: #0f1c30;
+  --color-navy: #38bdf8;
+  --color-navy-deep: #0284c7;
+  --color-navy-light: #7dd3fc;
+  --color-navy-surface: #0e2744;
+
+  --bg-canvas: #060d17;
+  --bg-surface: #0e1e36;
+  --bg-surface-hover: #132746;
+  --bg-surface-subtle: #091424;
   --text-main: #f8fafc;
   --text-muted: #cbd5e1;
   --text-subtle: #94a3b8;
-  --border-subtle: #1e2d42;
-  --border-strong: #33445c;
+  --border-subtle: #1c3558;
+  --border-strong: #2c4e7c;
 }
 
 body {
@@ -76,38 +81,77 @@ body {
 }
 
 .dark body {
-  background-color: #070e18;
+  background-color: #060d17;
   color: #f8fafc;
 }
 
-/* Dark mode surface refinements for core cards and containers */
+/* Dark mode card surfaces: rich elevated deep navy with crisp sky/slate border and top inset highlight */
 .dark .bg-white {
-  background-color: #0c1829 !important;
+  background-color: #0e1e36 !important;
+  border-color: #1c3558 !important;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.06), 0 4px 18px -2px rgba(0, 0, 0, 0.5) !important;
 }
 
 .dark .bg-white\/95 {
-  background-color: rgba(12, 24, 41, 0.95) !important;
+  background-color: rgba(14, 30, 54, 0.95) !important;
+  border-color: #1c3558 !important;
 }
 
-.dark .bg-slate-50 {
-  background-color: #0f1c30 !important;
+/* Recessed inner wells inside cards (e.g. chapter rosters, filters, action boxes) */
+.dark .bg-slate-50,
+.dark .bg-slate-50\/70,
+.dark .bg-slate-50\/80,
+.dark [class*="bg-slate-50"] {
+  background-color: rgba(6, 13, 23, 0.75) !important;
+  border-color: rgba(56, 189, 248, 0.14) !important;
 }
 
 .dark .bg-slate-100,
-.dark .bg-slate-100\/90 {
-  background-color: #15243b !important;
+.dark .bg-slate-100\/90,
+.dark [class*="bg-slate-100"] {
+  background-color: #12243e !important;
+  border-color: #1c3558 !important;
 }
 
 .dark .border-slate-100,
 .dark .border-slate-200,
+.dark .border-slate-200\/70,
 .dark .border-slate-200\/80,
 .dark .border-slate-200\/90,
+.dark [class*="border-slate-200"],
 .dark .border-border-subtle {
-  border-color: #1e2d42 !important;
+  border-color: #1c3558 !important;
 }
 
 .dark .border-slate-300 {
-  border-color: #2b3e59 !important;
+  border-color: #2b4974 !important;
+}
+
+.dark .border-navy\/20,
+.dark [class*="border-navy/20"] {
+  border-color: rgba(56, 189, 248, 0.25) !important;
+}
+
+.dark .border-navy\/40,
+.dark [class*="border-navy/40"],
+.dark .border-navy\/50,
+.dark [class*="border-navy/50"] {
+  border-color: rgba(56, 189, 248, 0.45) !important;
+}
+
+/* Interactive card hover states */
+.dark .hover\:border-slate-300:hover,
+.dark .hover\:border-slate-400:hover,
+.dark [class*="hover:border-navy"]:hover,
+.dark .group:hover.hover\:border-slate-300,
+.dark .group:hover .group-hover\:border-slate-300 {
+  border-color: rgba(56, 189, 248, 0.45) !important;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1), 0 8px 24px -4px rgba(0, 0, 0, 0.6), 0 0 16px -2px rgba(56, 189, 248, 0.12) !important;
+}
+
+.dark .hover\:bg-slate-50:hover,
+.dark [class*="hover:bg-slate-100"]:hover {
+  background-color: #162a48 !important;
 }
 
 /* High-contrast typography inversion for dark mode */
@@ -238,22 +282,25 @@ body {
   background-color: #15243b !important;
 }
 
-/* Status pills and badge backgrounds in dark mode */
+/* Status pills, card icon containers, and badge backgrounds in dark mode */
 .dark .bg-emerald-50,
 .dark .bg-emerald-100 {
-  background-color: rgba(6, 78, 59, 0.45) !important;
+  background-color: rgba(16, 185, 129, 0.18) !important;
+  color: #6ee7b7 !important;
   border-color: rgba(16, 185, 129, 0.35) !important;
 }
 
 .dark .bg-amber-50,
 .dark .bg-amber-100 {
-  background-color: rgba(120, 53, 15, 0.45) !important;
+  background-color: rgba(245, 158, 11, 0.18) !important;
+  color: #fcd34d !important;
   border-color: rgba(245, 158, 11, 0.35) !important;
 }
 
 .dark .bg-sky-50,
 .dark .bg-sky-100 {
-  background-color: rgba(12, 74, 110, 0.45) !important;
+  background-color: rgba(14, 165, 233, 0.18) !important;
+  color: #7dd3fc !important;
   border-color: rgba(14, 165, 233, 0.35) !important;
 }
 
@@ -261,15 +308,47 @@ body {
 .dark .bg-rose-100,
 .dark .bg-red-50,
 .dark .bg-red-100 {
-  background-color: rgba(136, 19, 55, 0.45) !important;
+  background-color: rgba(244, 63, 94, 0.18) !important;
+  color: #fda4af !important;
   border-color: rgba(244, 63, 94, 0.35) !important;
+}
+
+.dark .bg-navy {
+  background-color: rgba(56, 189, 248, 0.18) !important;
+  color: #38bdf8 !important;
+  border-color: rgba(56, 189, 248, 0.35) !important;
 }
 
 .dark .bg-navy\/10,
 .dark .bg-navy\/15,
-.dark .bg-navy\/20 {
+.dark .bg-navy\/20,
+.dark [class*="bg-navy/"] {
   background-color: rgba(56, 189, 248, 0.15) !important;
+  color: #38bdf8 !important;
   border-color: rgba(56, 189, 248, 0.35) !important;
+}
+
+/* Gradient card overrides for dark mode (Liturgical readings, highlights) */
+.dark .from-amber-50\/60,
+.dark [class*="from-amber-50"] {
+  --tw-gradient-from: rgba(120, 53, 15, 0.25) !important;
+  --tw-gradient-to: #0e1e36 !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+  border-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+.dark .to-white {
+  --tw-gradient-to: #0e1e36 !important;
+}
+
+.dark .border-amber-200\/80,
+.dark [class*="border-amber-200"] {
+  border-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+.dark .border-amber-300\/80,
+.dark [class*="border-amber-300"] {
+  border-color: rgba(245, 158, 11, 0.35) !important;
 }
 
 .dark .divide-slate-200\/80 > :not([hidden]) ~ :not([hidden]),
