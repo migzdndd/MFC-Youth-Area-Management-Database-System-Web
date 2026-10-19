@@ -54,7 +54,7 @@ export const AppLayout: React.FC<{ children?: React.ReactNode }> = ({ children }
 
         <main
           id="main-content"
-          className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto pb-8 sm:pb-12 focus:outline-none"
+          className="flex-1 p-3.5 sm:p-5 lg:p-6 max-w-7xl w-full mx-auto pb-6 sm:pb-8 focus:outline-none"
           tabIndex={-1}
         >
           <div key={location.pathname} className="animate-page-enter">
