@@ -1,8 +1,9 @@
 import { createSupabaseAuthClient, createSupabaseAdmin } from '../_lib/supabase.js';
-import { sendJson, methodNotAllowed, normalizeEmail, isValidEmail, apiError, setAuthCookies } from '../_lib/http.js';
+import { sendJson, methodNotAllowed, apiError, setAuthCookies } from '../_lib/http.js';
 import { claimMemberRecord } from '../_lib/member-claim.js';
 import { checkRateLimit } from '../_lib/rate-limit.js';
 import { checkBruteForce, recordLoginFailure, clearLoginFailures } from '../_lib/brute-force.js';
+import { validateRequestBody, LoginSchema } from '../_lib/schemas.js';
 
 /**
  * User Sign-In and Session Initialization Handler
@@ -15,12 +16,10 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
 
   try {
-    const email = normalizeEmail(req.body?.email);
-    const password = String(req.body?.password || '');
+    const validated = validateRequestBody(req, res, LoginSchema);
+    if (!validated) return;
 
-    if (!isValidEmail(email) || !password) {
-      return sendJson(res, 400, { ok: false, error: 'A valid email and password are required.' });
-    }
+    const { email, password, remember } = validated;
 
     // Parallel pre-auth validation: rate limiting and brute force checks execute concurrently
     const [rateLimitPassed, bruteForcePassed] = await Promise.all([
@@ -156,7 +155,7 @@ export default async function handler(req, res) {
     setAuthCookies(res, {
       accessToken: data.session.access_token,
       refreshToken: data.session.refresh_token
-    }, Boolean(req.body?.remember));
+    }, remember);
 
     const requiresAreaSelection = !linkedProfile.area_id && linkedProfile.role !== 'member';
 

@@ -15,6 +15,7 @@ import {
 import { sendJson, methodNotAllowed, apiError } from '../_lib/http.js';
 import { requireArea } from '../_lib/cloud-data.js';
 import { isLitService } from '../_lib/service-catalog.js';
+import { validateRequestBody, BatchSyncSchema } from '../_lib/schemas.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') {
@@ -182,13 +183,12 @@ export default async function handler(req, res) {
 
 async function handleBatchSync(req, res) {
   try {
+    const validated = validateRequestBody(req, res, BatchSyncSchema);
+    if (!validated) return;
+
     const { admin, profile, user } = await requireAuthenticatedProfile(req);
     const areaId = requireArea(req, profile);
-    const mutations = req.body?.mutations;
-
-    if (!Array.isArray(mutations)) {
-      return sendJson(res, 400, { ok: false, error: 'Mutations array is required.' });
-    }
+    const { mutations } = validated;
 
     let processedCount = 0;
     const failures = [];

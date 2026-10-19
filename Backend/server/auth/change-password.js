@@ -10,6 +10,7 @@ import { requireAuthenticatedProfile } from '../_lib/access.js';
 import { sendJson, methodNotAllowed, apiError, readBearerToken, passwordError } from '../_lib/http.js';
 import { assertBackendConfigured } from '../_lib/env.js';
 import { createSupabaseAuthClient } from '../_lib/supabase.js';
+import { validateRequestBody, ChangePasswordSchema } from '../_lib/schemas.js';
 
 
 /**
@@ -52,12 +53,10 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);
 
   try {
-    const currentPassword = String(req.body?.currentPassword || '');
-    const newPassword = String(req.body?.newPassword || '');
+    const validated = validateRequestBody(req, res, ChangePasswordSchema);
+    if (!validated) return;
 
-    if (!currentPassword) {
-      return sendJson(res, 400, { ok: false, error: 'Current password is required.' });
-    }
+    const { currentPassword, newPassword } = validated;
 
     const validationError = passwordError(newPassword);
     if (validationError) return sendJson(res, 400, { ok: false, error: validationError });
