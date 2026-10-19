@@ -30,10 +30,16 @@ Unlike generic community databases or unwieldy spreadsheets, the system is purpo
 - **Capabilities**:
   - Member directory and pastoral profiles (ages 13 to 21, including Heartchamps) with household head associations.
   - Role-Based Access Control (RBAC) with 4 tiers: Area Admins, Domain Moderators (LIT, Campus, High, Kids), Chapter Leaders, and Members.
-  - LIT Creative Ministries catalog focused strictly on the 5 pillars: Music, Dance, Graphics & Promo, Creative Writing, and Photography & Videography.
+  - Role-Differentiated Services Management:
+    - **Campus Servant**: Demographic track overview and member management for College and Senior High School (SHS) Academic Tracks with in-app track re-assignment.
+    - **MFC High Servant**: Dedicated demographic tracking for High School (HS / JHS) Academic Track youth.
+    - **Area Kids Servant**: Demographic tracking and directory for Heartchamp transition members.
+    - **LIT Servant**: Creative Ministries catalog focused strictly on the 5 pillars: Music, Dance, Graphics & Promo, Creative Writing, and Photography & Videography.
+    - **Area Servant & Couple Coordinators**: Pastoral leadership directory across the 5 servant domains (Campus Servant, MFC High Servant, LIT Servant, Area Kids Servant, Chapter Servant).
   - Event registration, fee status tracking, and attendance verification.
   - GIG (God is Generous) stewardship catalog and service tracking.
-  - Responsive website UI with 44px minimum touch targets, desktop collapsible sidebar, and accessible mobile drawer navigation.
+  - Compact, minimal, and clean UI density: streamlined horizontal headers, dynamically balanced responsive card grids, tight member list padding, and 44px minimum touch targets.
+  - Built-in Demo Presentation Accounts across all leadership tiers for live demonstrations and walkthroughs.
 - **Constraints**:
   - Strictly a web application (no native mobile app wrappers, no PWA install prompts, standard browser navigation).
   - Strict compliance with data privacy standards for minors (no public leakage of youth contact details or emergency records).

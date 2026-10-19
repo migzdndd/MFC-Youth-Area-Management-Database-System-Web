@@ -27,6 +27,29 @@ The **MFC Youth Area Management System (AMS)** serves as a central operational p
 - **Tier 3 - Chapter Leaders**: Scoped to the specific chapter for Chapter Servants and Assistant Chapter Servants.
 - **Tier 4 - Core Servants & Members**: Personal profile and event attendance portal for general members.
 
+### Role-Differentiated Services Management
+Inside the Services Tab, each access level sees an interface tailored to their pastoral focus:
+- **Campus Servant**: Demographic tracks overview and roster for **College Academic Track** and **SHS Academic Track**, with direct member track re-assignment.
+- **MFC High Servant**: Demographic track overview and roster for **HS Academic Track** youth.
+- **Area Kids Servant**: Demographic track overview and roster for **Heartchamp** transition members.
+- **LIT Servant**: The 5 Creative Ministries (Music, Dance, Graphics & Promo, Creative Writing, Photography & Videography).
+- **Area Servant & Couple Coordinators**: Pastoral leadership directory across the 5 servant domains (Campus Servant, MFC High Servant, LIT Servant, Area Kids Servant, Chapter Servant).
+
+### Compact, Minimal, and Clean UI Density
+- **Optimized Layout Footprint**: Streamlined header banners (`rounded-xl px-4 py-3`), compact card padding (`p-3.5 sm:p-4`), and reduced global margins (`p-3.5 sm:p-5 lg:p-6`).
+- **Adaptive Responsive Grids**: Symmetrical layout distribution that dynamically scales to 1, 2, or 3 columns to prevent awkward empty slots.
+- **Accessible Field Targets**: Preserves 44px minimum touch targets and WCAG AA color contrast across both light and dark themes.
+
+### Built-in Presentation Demo Accounts
+Pre-configured demo accounts for presenting role-specific capabilities without exposing real member records:
+- **Area Servant**: `area@demo.mfc` / `AreaDemo2026!`
+- **Couple Coordinator**: `couple@demo.mfc` / `CoupleDemo2026!`
+- **Campus Servant**: `campus@demo.mfc` / `CampusDemo2026!`
+- **MFC High Servant**: `high@demo.mfc` / `HighDemo2026!`
+- **Area LIT Servant**: `lit@demo.mfc` / `LitDemo2026!`
+- **Area Kids Servant**: `kids@demo.mfc` / `KidsDemo2026!`
+- **Chapter Servant**: `chapter@demo.mfc` / `ChapterDemo2026!`
+
 ### Creative Ministries (LIT) Service Catalog
 - **The 5 Pillars**: Dedicated management and servant assignments for Music, Dance, Graphics & Promo, Creative Writing, and Photography & Videography. Unmentioned non-creative services are purged from active catalogs.
 
@@ -131,3 +154,19 @@ npm --prefix frontend-react run dev
 ```bash
 npm --prefix frontend-react run build
 ```
+
+### 5. Automated Verification & Quality Suite
+```bash
+# Contract parity schema tests
+node --test tests/frontend-schemas.test.mjs
+
+# Backend route syntax checks
+npm run test:syntax
+
+# Fast frontend code quality (oxlint)
+npm --prefix frontend-react run lint
+
+# TypeScript compiler validation
+npm --prefix frontend-react run typecheck
+```
+
