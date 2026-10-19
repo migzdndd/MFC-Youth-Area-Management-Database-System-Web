@@ -35,7 +35,7 @@ interface ServiceCardConfig {
 }
 
 export const ServicesPage: React.FC = () => {
-  const { user } = useAuthStore();
+  const { user, simulatedRole } = useAuthStore();
   const { data: members = [] } = useMembers();
   const { data: chapters = [] } = useChapters();
   const { data: servicesList = [] } = useServices();
@@ -47,7 +47,8 @@ export const ServicesPage: React.FC = () => {
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const role = user?.role || 'member';
+  const rawRole = simulatedRole || user?.role || (user as unknown as { access_level?: string })?.access_level || 'member';
+  const role = String(rawRole).toLowerCase().trim().replace(/[\s-]+/g, '_');
 
   const ministryOptions = useMemo(() => {
     const defaultServices = [
@@ -68,6 +69,10 @@ export const ServicesPage: React.FC = () => {
 
   // Role-specific Services configuration
   const { headerTitle, headerSubtitle, serviceCards } = useMemo(() => {
+    const isCampusServant = role === 'campus_servant' || role.includes('campus');
+    const isMfcHighServant = role === 'mfc_high_servant' || (role.includes('mfc') && role.includes('high')) || role === 'high_servant';
+    const isAreaKidsServant = role === 'area_kids_servant' || role.includes('kids');
+    const isLitServant = role === 'lit_servant' || role.includes('lit');
     // Helper to check appointed servant roles strictly
     const hasService = (m: Member, serviceKeywords: string[]) => {
       const active = (m.service || '').toLowerCase().trim();
@@ -104,7 +109,7 @@ export const ServicesPage: React.FC = () => {
     };
 
     // 1. Campus Servant: College and Senior High School (SHS) Academic Tracks
-    if (role === 'campus_servant') {
+    if (isCampusServant) {
       const cards: ServiceCardConfig[] = [
         {
           title: 'College Academic Track',
@@ -113,7 +118,7 @@ export const ServicesPage: React.FC = () => {
           description: 'Active youth members attending college or university (1st to 4th Year).',
           counterLabel: 'College Members',
           filter: (m) => {
-            const track = (m.academic_track || '').toLowerCase();
+            const track = (m.academic_track || '').toLowerCase().trim();
             return track.includes('college');
           },
           emptyLabel: 'No members currently registered under College track.',
@@ -121,26 +126,26 @@ export const ServicesPage: React.FC = () => {
         {
           title: 'SHS Academic Track',
           icon: School,
-          tag: 'Senior High School',
+          tag: 'Senior High School Track',
           description: 'Pre-university youth members in Grades 11 and 12 transitioning to college or careers.',
           counterLabel: 'SHS Members',
           filter: (m) => {
-            const track = (m.academic_track || '').toLowerCase();
-            return track.includes('senior') || track === 'shs';
+            const track = (m.academic_track || '').toLowerCase().trim();
+            return track.includes('senior') || track.includes('shs');
           },
           emptyLabel: 'No members currently registered under Senior High School track.',
         },
       ];
 
       return {
-        headerTitle: 'Campus Ministry Services & Demographics',
-        headerSubtitle: 'Academic track breakdown and member management for Senior High School and College students.',
+        headerTitle: 'College & SHS Academic Tracks',
+        headerSubtitle: 'Academic track breakdown and member management for Senior High School (SHS) and College students.',
         serviceCards: cards,
       };
     }
 
     // 2. MFC High Servant: HS Academic Track
-    if (role === 'mfc_high_servant') {
+    if (isMfcHighServant) {
       const cards: ServiceCardConfig[] = [
         {
           title: 'HS Academic Track',
@@ -149,7 +154,7 @@ export const ServicesPage: React.FC = () => {
           description: 'Secondary education youth members currently in the High School (HS) academic track.',
           counterLabel: 'HS Members',
           filter: (m) => {
-            const track = (m.academic_track || '').toLowerCase();
+            const track = (m.academic_track || '').toLowerCase().trim();
             return (
               (track.includes('high school') && !track.includes('senior')) ||
               track.includes('junior') ||
@@ -162,14 +167,14 @@ export const ServicesPage: React.FC = () => {
       ];
 
       return {
-        headerTitle: 'MFC High Services & Demographics',
+        headerTitle: 'HS Academic Track',
         headerSubtitle: 'Secondary education demographic management for High School (HS) youth.',
         serviceCards: cards,
       };
     }
 
     // 3. Area Kids Servant: Heartchamp Academic Track
-    if (role === 'area_kids_servant') {
+    if (isAreaKidsServant) {
       const cards: ServiceCardConfig[] = [
         {
           title: 'Heartchamp Members',
@@ -178,7 +183,7 @@ export const ServicesPage: React.FC = () => {
           description: 'Children and junior youth registered under the Heartchamp pastoral formation track.',
           counterLabel: 'Heartchamp Members',
           filter: (m) => {
-            const track = (m.academic_track || '').toLowerCase();
+            const track = (m.academic_track || '').toLowerCase().trim();
             return track.includes('heartchamp') || track.includes('kids');
           },
           emptyLabel: 'No members currently registered under Heartchamp track.',
@@ -186,14 +191,14 @@ export const ServicesPage: React.FC = () => {
       ];
 
       return {
-        headerTitle: 'MFC Kids Services & Demographics',
+        headerTitle: 'Heartchamp Members',
         headerSubtitle: 'Pastoral track and formation directory for Heartchamps and junior youth.',
         serviceCards: cards,
       };
     }
 
     // 4. LIT Servant: Creative Ministries (keep as is)
-    if (role === 'lit_servant') {
+    if (isLitServant) {
       const cards: ServiceCardConfig[] = [
         {
           title: 'Music',

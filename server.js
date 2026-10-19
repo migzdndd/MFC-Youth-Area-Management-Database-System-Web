@@ -78,9 +78,13 @@ const server = http.createServer(async (req, res) => {
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
     const content = fs.readFileSync(filePath);
 
-    // Optimized Caching Policies: Immutable long-term cache for Vite content-hashed assets
+    const stat = fs.statSync(filePath);
+
+    // Optimized Caching Policies: HTML must never be cached so client gets latest Vite bundle
     let cacheControl = 'public, max-age=0, must-revalidate';
-    if (lowerPathname.startsWith('/assets/') && (ext === '.js' || ext === '.css')) {
+    if (ext === '.html') {
+      cacheControl = 'no-cache, no-store, must-revalidate';
+    } else if (lowerPathname.startsWith('/assets/') && (ext === '.js' || ext === '.css')) {
       cacheControl = 'public, max-age=31536000, immutable';
     } else if (ext === '.png' || ext === '.jpg' || ext === '.svg' || ext === '.ico') {
       cacheControl = 'public, max-age=604800, stale-while-revalidate=2592000';
@@ -90,10 +94,11 @@ const server = http.createServer(async (req, res) => {
     const shouldGzip = COMPRESSIBLE_EXTS.has(ext) && acceptEncoding.includes('gzip');
 
     if (shouldGzip) {
-      let gzipped = gzipCache.get(filePath);
+      const cached = gzipCache.get(filePath);
+      let gzipped = (cached && cached.mtime === stat.mtimeMs) ? cached.data : null;
       if (!gzipped) {
         gzipped = zlib.gzipSync(content, { level: 6 });
-        gzipCache.set(filePath, gzipped);
+        gzipCache.set(filePath, { mtime: stat.mtimeMs, data: gzipped });
       }
 
       res.writeHead(200, {
