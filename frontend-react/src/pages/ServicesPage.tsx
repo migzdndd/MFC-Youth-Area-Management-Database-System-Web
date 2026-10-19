@@ -107,9 +107,9 @@ export const ServicesPage: React.FC = () => {
     if (role === 'campus_servant') {
       const cards: ServiceCardConfig[] = [
         {
-          title: 'College Students',
+          title: 'College Academic Track',
           icon: GraduationCap,
-          tag: 'Higher Education',
+          tag: 'College Track',
           description: 'Active youth members attending college or university (1st to 4th Year).',
           counterLabel: 'College Members',
           filter: (m) => {
@@ -119,9 +119,9 @@ export const ServicesPage: React.FC = () => {
           emptyLabel: 'No members currently registered under College track.',
         },
         {
-          title: 'Senior High School (SHS)',
+          title: 'SHS Academic Track',
           icon: School,
-          tag: 'Grades 11-12',
+          tag: 'Senior High School',
           description: 'Pre-university youth members in Grades 11 and 12 transitioning to college or careers.',
           counterLabel: 'SHS Members',
           filter: (m) => {
@@ -139,30 +139,31 @@ export const ServicesPage: React.FC = () => {
       };
     }
 
-    // 2. MFC High Servant: High School (JHS) Academic Track
+    // 2. MFC High Servant: HS Academic Track
     if (role === 'mfc_high_servant') {
       const cards: ServiceCardConfig[] = [
         {
-          title: 'High School (JHS) Members',
+          title: 'HS Academic Track',
           icon: BookOpen,
-          tag: 'Grades 7-10',
-          description: 'Junior High School students in Grades 7 through 10 under MFC High pastoral formation.',
-          counterLabel: 'High School Members',
+          tag: 'High School Track',
+          description: 'Secondary education youth members currently in the High School (HS) academic track.',
+          counterLabel: 'HS Members',
           filter: (m) => {
             const track = (m.academic_track || '').toLowerCase();
             return (
               (track.includes('high school') && !track.includes('senior')) ||
               track.includes('junior') ||
-              track === 'jhs'
+              track === 'jhs' ||
+              track === 'hs'
             );
           },
-          emptyLabel: 'No members currently registered under High School (JHS) track.',
+          emptyLabel: 'No members currently registered under High School (HS) track.',
         },
       ];
 
       return {
         headerTitle: 'MFC High Services & Demographics',
-        headerSubtitle: 'Secondary education demographic management for Junior High School youth.',
+        headerSubtitle: 'Secondary education demographic management for High School (HS) youth.',
         serviceCards: cards,
       };
     }
@@ -173,8 +174,8 @@ export const ServicesPage: React.FC = () => {
         {
           title: 'Heartchamp Members',
           icon: Heart,
-          tag: 'MFC Kids Track',
-          description: 'Children and junior youth registered under the Heartchamps pastoral formation track.',
+          tag: 'Heartchamp Track',
+          description: 'Children and junior youth registered under the Heartchamp pastoral formation track.',
           counterLabel: 'Heartchamp Members',
           filter: (m) => {
             const track = (m.academic_track || '').toLowerCase();
