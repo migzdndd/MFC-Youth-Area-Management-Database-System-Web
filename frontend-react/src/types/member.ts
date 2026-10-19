@@ -1,4 +1,11 @@
-export type AcademicTrack = 'High School' | 'Senior High School' | 'College' | 'Working';
+export type AcademicTrack =
+  | 'Heartchamp'
+  | 'Junior High School'
+  | 'High School'
+  | 'Senior High School'
+  | 'College'
+  | 'Working Youth'
+  | 'Working';
 export type MemberStatus = 'active' | 'inactive';
 
 export interface Member {

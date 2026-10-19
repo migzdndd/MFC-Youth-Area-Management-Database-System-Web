@@ -61,7 +61,7 @@ export const ROLE_ALLOWED_PAGES: Record<UserRole, string[]> = {
   lit_servant: ['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings'],
   campus_servant: ['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings'],
   mfc_high_servant: ['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings'],
-  area_kids_servant: ['dashboard', 'members', 'chapters', 'reports', 'events', 'gig', 'readings'],
-  chapter_servant: ['dashboard', 'members', 'chapters', 'reports', 'events', 'gig', 'readings'],
+  area_kids_servant: ['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings'],
+  chapter_servant: ['dashboard', 'members', 'chapters', 'services', 'reports', 'events', 'gig', 'readings'],
   member: ['member'],
 };

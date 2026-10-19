@@ -215,9 +215,12 @@ const MemberFormContent: React.FC<MemberFormContentProps> = ({
           value={track}
           onChange={(e) => setTrack(e.target.value as AcademicTrack)}
           options={[
+            { value: 'Heartchamp', label: 'Heartchamp (MFC Kids)' },
+            { value: 'Junior High School', label: 'Junior High School (JHS 7-10)' },
             { value: 'High School', label: 'High School' },
-            { value: 'Senior High School', label: 'Senior High School' },
+            { value: 'Senior High School', label: 'Senior High School (SHS 11-12)' },
             { value: 'College', label: 'College' },
+            { value: 'Working Youth', label: 'Working Youth' },
             { value: 'Working', label: 'Working' },
           ]}
         />
