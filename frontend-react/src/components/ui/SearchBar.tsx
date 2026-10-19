@@ -31,13 +31,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full pl-10 pr-10 py-2.5 text-sm bg-white text-slate-900 border border-slate-300 hover:border-slate-400 rounded-lg min-h-[44px] transition-all placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/15 focus:border-navy shadow-2xs"
+        className="w-full pl-10 pr-10 py-2.5 text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600 rounded-lg min-h-[44px] transition-all placeholder:text-slate-400 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/15 dark:focus:ring-sky-500/20 focus:border-navy dark:focus:border-sky-400 shadow-2xs"
       />
       {value && (
         <button
           type="button"
           onClick={() => onChange('')}
-          className="absolute right-1.5 p-2 text-slate-400 hover:text-slate-700 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
+          className="absolute right-1.5 p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy dark:focus-visible:ring-sky-400 min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
           aria-label="Clear search"
         >
           <X className="w-4 h-4" aria-hidden="true" />

@@ -21,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen =
   const canSwitchArea = (user?.role === 'national_coordinator' || user?.is_developer) && areas.length > 0;
 
   return (
-    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-xs border-b border-border-subtle h-16 flex items-center justify-between px-4 sm:px-6 shadow-2xs">
+    <header className="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs border-b border-border-subtle h-16 flex items-center justify-between px-4 sm:px-6 shadow-2xs">
       {/* Left: Mobile hamburger & Area Indicator */}
       <div className="flex items-center gap-3">
         <button
@@ -30,15 +30,15 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen =
           aria-expanded={isSidebarOpen}
           aria-controls="main-sidebar"
           aria-label={isSidebarOpen ? 'Close navigation menu' : 'Open navigation menu'}
-          className="lg:hidden p-2 text-slate-600 hover:text-slate-900 active:scale-95 rounded-lg hover:bg-slate-100 min-h-[44px] min-w-[44px] flex items-center justify-center transition-all duration-150 cursor-pointer"
+          className="lg:hidden p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white active:scale-95 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 min-h-[44px] min-w-[44px] flex items-center justify-center transition-all duration-150 cursor-pointer"
         >
           <Menu className="w-5 h-5" aria-hidden="true" />
         </button>
 
         <div className="flex items-center gap-2">
           {canSwitchArea ? (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-200/90 rounded-lg text-xs font-semibold text-slate-800 shadow-2xs">
-              <MapPin className="w-3.5 h-3.5 text-navy shrink-0" aria-hidden="true" />
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-800 dark:text-slate-100 shadow-2xs">
+              <MapPin className="w-3.5 h-3.5 text-navy dark:text-sky-400 shrink-0" aria-hidden="true" />
               <label htmlFor="headerAreaSelect" className="sr-only">Switch active area</label>
               <select
                 id="headerAreaSelect"
@@ -50,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen =
                     queryClient.clear();
                   }
                 }}
-                className="bg-transparent text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer max-w-[140px] sm:max-w-[220px] truncate"
+                className="bg-transparent text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none cursor-pointer max-w-[140px] sm:max-w-[220px] truncate"
               >
                 {areas.map((a: Area) => (
                   <option key={a.id} value={a.id}>
@@ -60,19 +60,19 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen =
               </select>
             </div>
           ) : (
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200/90 rounded-full text-xs font-semibold text-slate-800 shadow-2xs">
-              <MapPin className="w-3.5 h-3.5 text-navy shrink-0" aria-hidden="true" />
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 rounded-full text-xs font-semibold text-slate-800 dark:text-slate-100 shadow-2xs">
+              <MapPin className="w-3.5 h-3.5 text-navy dark:text-sky-400 shrink-0" aria-hidden="true" />
               <span className="truncate max-w-[140px] sm:max-w-[200px]">{currentAreaName}</span>
             </div>
           )}
 
           {user?.role === 'national_coordinator' && (
-            <span className="hidden md:inline-block text-[11px] font-semibold text-amber-900 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/90">
+            <span className="hidden md:inline-block text-[11px] font-semibold text-amber-900 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-200/90 dark:border-amber-800/60">
               National Context
             </span>
           )}
           {user?.is_developer && activeArea && user?.area_id && activeArea.id !== user.area_id && (
-            <span className="hidden md:inline-block text-[11px] font-semibold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-300">
+            <span className="hidden md:inline-block text-[11px] font-semibold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-300 dark:border-amber-800/60">
               Area Simulation
             </span>
           )}
@@ -83,10 +83,10 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen =
       <div className="flex items-center gap-3">
         <ThemeToggle />
         <div className="hidden sm:flex flex-col text-right">
-          <span className="text-xs font-bold text-slate-900 leading-tight truncate max-w-[160px]">
+          <span className="text-xs font-bold text-slate-900 dark:text-slate-100 leading-tight truncate max-w-[160px]">
             {user?.first_name ? [user.first_name, user.middle_name, user.last_name].filter(Boolean).join(' ') : user?.email}
           </span>
-          <span className="text-[11px] text-amber-700 capitalize font-semibold">
+          <span className="text-[11px] text-amber-700 dark:text-amber-400 capitalize font-semibold">
             {user?.role ? user.role.replace(/_/g, ' ') : 'Servant'}
           </span>
         </div>

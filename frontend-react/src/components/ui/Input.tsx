@@ -111,7 +111,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full flex flex-col gap-1.5">
         {label && (
-          <label htmlFor={inputId} className="text-sm font-semibold text-slate-800 select-none flex items-center justify-between">
+          <label htmlFor={inputId} className="text-sm font-semibold text-slate-800 dark:text-slate-100 select-none flex items-center justify-between">
             <span>
               {label}
               {props.required && <span className="text-mfc-red ml-1" aria-hidden="true">*</span>}
@@ -142,10 +142,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             autoCapitalize={preventAutofill ? 'off' : props.autoCapitalize}
             spellCheck={preventAutofill ? false : props.spellCheck}
             ref={ref}
-            className={`w-full px-3.5 py-2.5 text-sm bg-white text-slate-900 border rounded-lg min-h-[44px] transition-all placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/15 focus:border-navy disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed shadow-2xs ${
+            className={`w-full px-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border rounded-lg min-h-[44px] transition-all placeholder:text-slate-400 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy/15 dark:focus:ring-sky-500/20 focus:border-navy dark:focus:border-sky-400 disabled:bg-slate-100 dark:disabled:bg-slate-800/50 disabled:text-slate-500 dark:disabled:text-slate-400 disabled:cursor-not-allowed shadow-2xs ${
               isPassword ? 'pr-11' : ''
             } ${
-              error ? 'border-mfc-red focus:border-mfc-red focus:ring-red-100' : 'border-slate-300 hover:border-slate-400'
+              error ? 'border-mfc-red focus:border-mfc-red focus:ring-red-100' : 'border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600'
             } ${className}`}
           />
           {isPassword && (
@@ -153,7 +153,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               aria-pressed={showPassword}
-              className="absolute right-2 p-2 text-slate-400 hover:text-slate-600 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
+              className="absolute right-2 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy dark:focus-visible:ring-sky-400 min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
               aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
@@ -161,7 +161,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
         {error && <span id={errorId} className="text-xs text-mfc-red font-medium" role="alert">{error}</span>}
-        {helperText && !error && <span id={helperId} className="text-xs text-slate-500">{helperText}</span>}
+        {helperText && !error && <span id={helperId} className="text-xs text-slate-500 dark:text-slate-300 font-medium">{helperText}</span>}
       </div>
     );
   }

@@ -58,9 +58,9 @@
   --bg-surface: #0c1829;
   --bg-surface-hover: #122138;
   --bg-surface-subtle: #0f1c30;
-  --text-main: #f1f5f9;
-  --text-muted: #94a3b8;
-  --text-subtle: #64748b;
+  --text-main: #f8fafc;
+  --text-muted: #cbd5e1;
+  --text-subtle: #94a3b8;
   --border-subtle: #1e2d42;
   --border-strong: #33445c;
 }
@@ -77,7 +77,7 @@ body {
 
 .dark body {
   background-color: #070e18;
-  color: #f1f5f9;
+  color: #f8fafc;
 }
 
 /* Dark mode surface refinements for core cards and containers */
@@ -110,32 +110,171 @@ body {
   border-color: #2b3e59 !important;
 }
 
-.dark .text-slate-900 {
+/* High-contrast typography inversion for dark mode */
+.dark .text-slate-900,
+.dark .text-gray-900,
+.dark .text-black {
+  color: #ffffff !important;
+}
+
+.dark .text-slate-800,
+.dark .text-gray-800 {
   color: #f8fafc !important;
 }
 
-.dark .text-slate-800 {
-  color: #e2e8f0 !important;
+.dark .text-slate-700,
+.dark .text-gray-700 {
+  color: #f1f5f9 !important;
 }
 
-.dark .text-slate-700 {
+.dark .text-slate-600,
+.dark .text-gray-600 {
   color: #cbd5e1 !important;
 }
 
-.dark .text-slate-600 {
+.dark .text-slate-500,
+.dark .text-gray-500 {
   color: #94a3b8 !important;
+}
+
+.dark .text-slate-400,
+.dark .text-gray-400 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-slate-300 {
+  color: #e2e8f0 !important;
+}
+
+/* Brand navy inversion: dark navy becomes luminous accessible sky in dark mode */
+.dark .text-navy,
+.dark .text-navy-deep {
+  color: #38bdf8 !important;
+}
+
+.dark .text-navy-light {
+  color: #7dd3fc !important;
+}
+
+.dark .hover\:text-navy:hover,
+.dark .group:hover .group-hover\:text-navy {
+  color: #7dd3fc !important;
+}
+
+/* Status colors in dark mode: luminous accessible tones */
+.dark .text-amber-900,
+.dark .text-amber-800,
+.dark .text-amber-700,
+.dark .text-mfc-amber {
+  color: #fcd34d !important;
+}
+
+.dark .text-emerald-900,
+.dark .text-emerald-800,
+.dark .text-emerald-700,
+.dark .text-mfc-green {
+  color: #6ee7b7 !important;
+}
+
+.dark .text-sky-900,
+.dark .text-sky-800,
+.dark .text-sky-700,
+.dark .text-mfc-blue {
+  color: #7dd3fc !important;
+}
+
+.dark .text-rose-900,
+.dark .text-rose-800,
+.dark .text-rose-700,
+.dark .text-red-900,
+.dark .text-red-800,
+.dark .text-red-700,
+.dark .text-mfc-red {
+  color: #fda4af !important;
+}
+
+/* Form controls & labels */
+.dark label {
+  color: #f8fafc !important;
 }
 
 .dark input:not([type="checkbox"]):not([type="radio"]),
 .dark select,
 .dark textarea {
   background-color: #0c1829 !important;
-  color: #f1f5f9 !important;
+  color: #f8fafc !important;
   border-color: #2b3e59 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+.dark select option {
+  background-color: #0c1829 !important;
+  color: #f8fafc !important;
+}
+
+/* Tables */
+.dark thead,
+.dark thead.bg-slate-50\/80,
+.dark thead tr {
+  background-color: #0f1c30 !important;
+}
+
+.dark th {
+  color: #cbd5e1 !important;
+  border-color: #1e2d42 !important;
+}
+
+.dark td {
+  color: #f1f5f9 !important;
+  border-color: #1e2d42 !important;
+}
+
+.dark tbody tr:hover,
+.dark tr.hover\:bg-slate-50\/80:hover {
+  background-color: #15243b !important;
+}
+
+/* Status pills and badge backgrounds in dark mode */
+.dark .bg-emerald-50,
+.dark .bg-emerald-100 {
+  background-color: rgba(6, 78, 59, 0.45) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+}
+
+.dark .bg-amber-50,
+.dark .bg-amber-100 {
+  background-color: rgba(120, 53, 15, 0.45) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+.dark .bg-sky-50,
+.dark .bg-sky-100 {
+  background-color: rgba(12, 74, 110, 0.45) !important;
+  border-color: rgba(14, 165, 233, 0.35) !important;
+}
+
+.dark .bg-rose-50,
+.dark .bg-rose-100,
+.dark .bg-red-50,
+.dark .bg-red-100 {
+  background-color: rgba(136, 19, 55, 0.45) !important;
+  border-color: rgba(244, 63, 94, 0.35) !important;
+}
+
+.dark .bg-navy\/10,
+.dark .bg-navy\/15,
+.dark .bg-navy\/20 {
+  background-color: rgba(56, 189, 248, 0.15) !important;
+  border-color: rgba(56, 189, 248, 0.35) !important;
 }
 
 .dark .divide-slate-200\/80 > :not([hidden]) ~ :not([hidden]),
 .dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]),
 .dark .divide-border-subtle > :not([hidden]) ~ :not([hidden]) {
   border-color: #1e2d42 !important;
 }
