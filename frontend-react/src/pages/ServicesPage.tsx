@@ -21,7 +21,7 @@ import { useServices } from '@/hooks/useServices';
 import { useToast } from '@/hooks/useToast';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
-import { MemberFormModal, type MemberFormData } from '@/components/member';
+import { MemberFormModal, type MemberFormData } from '@/components/member/MemberFormModal';
 import type { Member } from '@/types/member';
 
 interface ServiceCardConfig {
@@ -68,22 +68,37 @@ export const ServicesPage: React.FC = () => {
 
   // Role-specific Services configuration
   const { headerTitle, headerSubtitle, serviceCards } = useMemo(() => {
-    // Helper to check if a member has a specific service assigned
+    // Helper to check appointed servant roles strictly
     const hasService = (m: Member, serviceKeywords: string[]) => {
-      const active = (m.service || '').toLowerCase();
+      const active = (m.service || '').toLowerCase().trim();
       const assigned = Array.isArray(m.assigned_services)
-        ? m.assigned_services.map((s) => s.toLowerCase())
+        ? m.assigned_services.map((s) => s.toLowerCase().trim())
         : [];
-      const access = (m as Member & { access_level?: string }).access_level?.toLowerCase() || '';
+      const access = ((m as Member & { access_level?: string }).access_level || '').toLowerCase().trim();
 
       return serviceKeywords.some((kw) => {
-        const k = kw.toLowerCase();
+        const k = kw.toLowerCase().trim();
+        return (
+          active === k ||
+          access === k ||
+          assigned.includes(k)
+        );
+      });
+    };
+
+    // Helper for LIT Servant creative ministry assignments
+    const hasCreativeMinistry = (m: Member, ministryKeywords: string[]) => {
+      const active = (m.service || '').toLowerCase().trim();
+      const assigned = Array.isArray(m.assigned_services)
+        ? m.assigned_services.map((s) => s.toLowerCase().trim())
+        : [];
+      return ministryKeywords.some((kw) => {
+        const k = kw.toLowerCase().trim();
         return (
           active === k ||
           active.includes(k) ||
-          access === k ||
-          access.includes(k) ||
-          assigned.some((as) => as === k || as.includes(k))
+          assigned.includes(k) ||
+          assigned.some((as) => as.includes(k))
         );
       });
     };
@@ -185,7 +200,7 @@ export const ServicesPage: React.FC = () => {
           tag: 'Liturgical Creative',
           description: 'Instrumentalists, vocalists, and psalmists dedicated to liturgical music, praise, and worship.',
           counterLabel: 'Music Servants',
-          filter: (m) => hasService(m, ['music', 'music ministry']),
+          filter: (m) => hasCreativeMinistry(m, ['music', 'music ministry']),
           emptyLabel: 'No servants currently assigned to Music ministry.',
         },
         {
@@ -194,7 +209,7 @@ export const ServicesPage: React.FC = () => {
           tag: 'Creative Liturgical',
           description: 'Creative interpretive movement and choreography for youth conferences, camps, and rallies.',
           counterLabel: 'Dance Servants',
-          filter: (m) => hasService(m, ['dance']),
+          filter: (m) => hasCreativeMinistry(m, ['dance']),
           emptyLabel: 'No servants currently assigned to Dance ministry.',
         },
         {
@@ -203,7 +218,7 @@ export const ServicesPage: React.FC = () => {
           tag: 'Creative Production',
           description: 'Visual branding, promotional posters, event banners, and digital evangelization graphics.',
           counterLabel: 'Graphics Servants',
-          filter: (m) => hasService(m, ['graphics', 'promo', 'graphics & promo']),
+          filter: (m) => hasCreativeMinistry(m, ['graphics', 'promo', 'graphics & promo']),
           emptyLabel: 'No servants currently assigned to Graphics & Promo ministry.',
         },
         {
@@ -212,7 +227,7 @@ export const ServicesPage: React.FC = () => {
           tag: 'Pastoral Content',
           description: 'Pastoral reflections, assembly scripts, social media articles, and youth faith testimonies.',
           counterLabel: 'Writing Servants',
-          filter: (m) => hasService(m, ['creative writing', 'writing']),
+          filter: (m) => hasCreativeMinistry(m, ['creative writing', 'writing']),
           emptyLabel: 'No servants currently assigned to Creative Writing ministry.',
         },
         {
@@ -221,7 +236,7 @@ export const ServicesPage: React.FC = () => {
           tag: 'Media Production',
           description: 'Event photojournalism, recap videos, testimony recordings, and media production.',
           counterLabel: 'Media Servants',
-          filter: (m) => hasService(m, ['photography', 'videography', 'photo', 'photography & videography']),
+          filter: (m) => hasCreativeMinistry(m, ['photography', 'videography', 'photo', 'photography & videography']),
           emptyLabel: 'No servants currently assigned to Photography & Videography ministry.',
         },
       ];
@@ -243,7 +258,7 @@ export const ServicesPage: React.FC = () => {
         tag: 'Domain Moderator',
         description: 'Supervises Senior High School (SHS) and College youth ministries across campus institutions.',
         counterLabel: 'Campus Servants',
-        filter: (m) => hasService(m, ['campus_servant', 'campus servant', 'mfc campus']),
+        filter: (m) => hasService(m, ['campus_servant', 'campus servant']),
         emptyLabel: 'No Campus Servant currently appointed in the roster.',
       },
       {
@@ -252,7 +267,7 @@ export const ServicesPage: React.FC = () => {
         tag: 'Domain Moderator',
         description: 'Supervises Junior High School (JHS Grades 7-10) youth evangelization and chapter activities.',
         counterLabel: 'MFC High Servants',
-        filter: (m) => hasService(m, ['mfc_high_servant', 'mfc high servant', 'mfc high']),
+        filter: (m) => hasService(m, ['mfc_high_servant', 'mfc high servant']),
         emptyLabel: 'No MFC High Servant currently appointed in the roster.',
       },
       {
@@ -261,7 +276,7 @@ export const ServicesPage: React.FC = () => {
         tag: 'Domain Moderator',
         description: 'Oversees the 5 Creative Ministries: Music, Dance, Graphics & Promo, Writing, and Video.',
         counterLabel: 'LIT Servants',
-        filter: (m) => hasService(m, ['lit_servant', 'area lit servant', 'lit servant', 'lit']),
+        filter: (m) => hasService(m, ['lit_servant', 'area lit servant', 'lit servant']),
         emptyLabel: 'No LIT Servant currently appointed in the roster.',
       },
       {
@@ -270,7 +285,7 @@ export const ServicesPage: React.FC = () => {
         tag: 'Domain Moderator',
         description: 'Coordinates pastoral accompaniment and assemblies for MFC Kids and Heartchamps.',
         counterLabel: 'Kids Servants',
-        filter: (m) => hasService(m, ['area_kids_servant', 'area kids servant', 'kids servant', 'heartchamps']),
+        filter: (m) => hasService(m, ['area_kids_servant', 'area kids servant', 'kids servant']),
         emptyLabel: 'No Area Kids Servant currently appointed in the roster.',
       },
       {

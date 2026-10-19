@@ -87,11 +87,11 @@ async function listMembers(req, res) {
   if (isAreaAdminRole(role)) {
     query = query.eq('area_id', areaId);
   } else if (role === 'campus_servant') {
-    query = query.eq('area_id', areaId).in('academic_track', ['College', 'Senior High School']);
+    query = query.eq('area_id', areaId).in('academic_track', ['College', 'Senior High School', 'SHS']);
   } else if (role === 'mfc_high_servant') {
-    query = query.eq('area_id', areaId).eq('academic_track', 'High School');
+    query = query.eq('area_id', areaId).in('academic_track', ['High School', 'Junior High School', 'JHS']);
   } else if (role === 'area_kids_servant') {
-    query = query.eq('area_id', areaId).in('academic_track', ['Heartchamp', 'Heartchamps']);
+    query = query.eq('area_id', areaId).in('academic_track', ['Heartchamp', 'Heartchamps', 'Kids']);
   } else if (role === 'lit_servant') {
     const { data: litServices } = await admin
       .from('services')
@@ -353,15 +353,18 @@ async function updateMember(req, res) {
       return sendJson(res, 403, { ok: false, error: 'You can only edit members in your assigned chapter.' });
     }
   } else if (role === 'campus_servant' && !isSelf) {
-    if (!['college', 'senior high school'].includes(String(existing.academic_track || '').trim().toLowerCase())) {
+    const existingTrack = String(existing.academic_track || '').trim().toLowerCase();
+    if (!['college', 'senior high school', 'shs'].includes(existingTrack)) {
       return sendJson(res, 403, { ok: false, error: 'Campus Servants can only edit College and Senior High School members.' });
     }
   } else if (role === 'mfc_high_servant' && !isSelf) {
-    if (String(existing.academic_track || '').trim().toLowerCase() !== 'high school') {
-      return sendJson(res, 403, { ok: false, error: 'MFC High Servants can only edit High School members.' });
+    const existingTrack = String(existing.academic_track || '').trim().toLowerCase();
+    if (!['high school', 'junior high school', 'jhs'].includes(existingTrack)) {
+      return sendJson(res, 403, { ok: false, error: 'MFC High Servants can only edit High School and Junior High School members.' });
     }
   } else if (role === 'area_kids_servant' && !isSelf) {
-    if (!['heartchamp', 'heartchamps'].includes(String(existing.academic_track || '').trim().toLowerCase())) {
+    const existingTrack = String(existing.academic_track || '').trim().toLowerCase();
+    if (!['heartchamp', 'heartchamps', 'kids'].includes(existingTrack)) {
       return sendJson(res, 403, { ok: false, error: 'Area Kids Servants can only edit Heartchamp members.' });
     }
   }
