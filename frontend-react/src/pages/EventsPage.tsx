@@ -111,6 +111,7 @@ export const EventsPage: React.FC = () => {
   const handleSaveEvent = async (payload: {
     name: string;
     starts_at: string;
+    ends_at?: string | null;
     venue: string;
     fee: number;
     description: string;

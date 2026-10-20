@@ -36,7 +36,7 @@ Unlike generic community databases or unwieldy spreadsheets, the system is purpo
     - **Area Kids Servant**: Demographic tracking and directory for Heartchamp transition members.
     - **LIT Servant**: Creative Ministries catalog focused strictly on the 5 pillars: Music, Dance, Graphics & Promo, Creative Writing, and Photography & Videography.
     - **Area Servant & Couple Coordinators**: Pastoral leadership directory across the 5 servant domains (Campus Servant, MFC High Servant, LIT Servant, Area Kids Servant, Chapter Servant).
-  - Event registration, fee status tracking, and attendance verification.
+  - Event registration, fee status tracking, attendance verification, and Secretariat Operations Briefing (category, target track, registration cutoff, attire/dress code, checklist, and desk logistics without schema bloat).
   - GIG (God is Generous) stewardship catalog and service tracking.
   - Compact, minimal, and clean UI density: streamlined horizontal headers, dynamically balanced responsive card grids, tight member list padding, and 44px minimum touch targets.
   - Frontend Taste & Art Direction: Strict adherence to the `taste` skill (`design-taste-frontend` / tasteskill v2) standards for app screens: two-line headline ceilings, no eyebrows/pill badges, no resting shadows or gradients, no assistant palette, equal outer margins, and automated browser inspection.

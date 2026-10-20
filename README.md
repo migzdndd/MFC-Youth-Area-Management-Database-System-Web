@@ -53,6 +53,7 @@ The database is kept in a clean production-ready state with all sample records a
 ### Event & Activity Management
 - **Event Registrations**: Manage youth camps, conferences, area assemblies, and leadership trainings.
 - **Attendance & Fee Tracking**: Record event participation, fee statuses (free vs paid), and check-in logs.
+- **Secretariat Operations Briefing**: Purpose-built event setup modal with dedicated secretariat logistics (category, demographic track targeting, registration lead & hotlines, expected headcount, deadline, dress code, checklist, and desk logistics) cleanly formatted into event briefings without database schema bloat.
 
 ### GIG (God is Generous) & Financial Stewardship
 - **Stewardship Tracking**: Log community contributions, tithes, and pastoral support records.
