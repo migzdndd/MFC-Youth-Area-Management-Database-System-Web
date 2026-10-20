@@ -62,9 +62,9 @@ export const MemberPortalPage: React.FC = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      <main className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6 animate-page-enter">
         {/* Profile Card */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-7 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-7 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 card-interactive">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-2xl bg-navy text-white font-bold text-2xl ring-4 ring-amber-400/20 flex items-center justify-center font-heading shadow-md shrink-0">
               {user?.first_name ? user.first_name[0].toUpperCase() : 'M'}

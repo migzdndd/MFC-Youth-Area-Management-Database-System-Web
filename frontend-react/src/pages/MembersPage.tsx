@@ -164,7 +164,7 @@ export const MembersPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-page-enter">
       {/* Header and Action */}
       <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -293,14 +293,14 @@ export const MembersPage: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-border-subtle">
                   {filteredMembers.map((member) => (
-                    <tr key={member.id} className="hover:bg-slate-50/80 transition-colors">
+                    <tr key={member.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors duration-150 group">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-navy/10 dark:bg-sky-500/15 text-navy dark:text-sky-400 font-bold text-xs flex items-center justify-center shrink-0 border border-navy/15 dark:border-sky-500/30 shadow-2xs">
+                          <div className="w-9 h-9 rounded-full bg-navy/10 dark:bg-sky-500/15 text-navy dark:text-sky-400 font-bold text-xs flex items-center justify-center shrink-0 border border-navy/15 dark:border-sky-500/30 shadow-2xs group-hover:scale-105 transition-transform duration-150">
                             {member.first_name ? member.first_name[0].toUpperCase() : 'M'}
                           </div>
                           <div>
-                            <div className="font-semibold text-slate-900 dark:text-white">
+                            <div className="font-semibold text-slate-900 dark:text-white group-hover:text-navy dark:group-hover:text-sky-300 transition-colors">
                               {[member.first_name, member.middle_name, member.last_name].filter(Boolean).join(' ')}
                             </div>
                             {member.nickname && (
@@ -309,10 +309,10 @@ export const MembersPage: React.FC = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-4 text-xs font-medium text-slate-600">
+                      <td className="px-5 py-4 text-xs font-medium text-slate-600 dark:text-slate-300">
                         {member.academic_track || '-'}
                       </td>
-                      <td className="px-5 py-4 text-xs font-medium text-slate-600">
+                      <td className="px-5 py-4 text-xs font-medium text-slate-600 dark:text-slate-300">
                         {member.chapter_name ||
                           chapters.find((c) => c.id === member.chapter_id)?.name ||
                           'Unassigned'}
@@ -324,7 +324,7 @@ export const MembersPage: React.FC = () => {
                           <span className="text-slate-400">Unassigned</span>
                         )}
                       </td>
-                      <td className="px-5 py-4 text-xs text-slate-600">
+                      <td className="px-5 py-4 text-xs text-slate-600 dark:text-slate-300">
                         <div>{member.contact || member.contact_number || '-'}</div>
                         <div className="text-[11px] text-slate-400">{member.email || ''}</div>
                       </td>
@@ -338,7 +338,7 @@ export const MembersPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => openEditModal(member)}
-                            className="p-2 text-slate-500 hover:text-navy active:scale-95 rounded-lg hover:bg-slate-100 transition-all duration-150 cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
+                            className="p-2 text-slate-500 hover:text-navy dark:hover:text-sky-300 active:scale-95 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-150 cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
                             aria-label={`Edit ${[member.first_name, member.middle_name, member.last_name].filter(Boolean).join(' ')}`}
                           >
                             <Edit2 className="w-4 h-4" />
@@ -346,7 +346,7 @@ export const MembersPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => setDeletingId(member.id)}
-                            className="p-2 text-slate-500 hover:text-mfc-red active:scale-95 rounded-lg hover:bg-rose-50 transition-all duration-150 cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
+                            className="p-2 text-slate-500 hover:text-mfc-red active:scale-95 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all duration-150 cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
                             aria-label={`Delete ${[member.first_name, member.middle_name, member.last_name].filter(Boolean).join(' ')}`}
                           >
                             <Trash2 className="w-4 h-4" />
@@ -362,10 +362,10 @@ export const MembersPage: React.FC = () => {
             {/* Mobile Cards View */}
             <div className="md:hidden divide-y divide-border-subtle p-3 space-y-3">
               {filteredMembers.map((member) => (
-                <div key={member.id} className="p-4 bg-slate-50/60 rounded-xl border border-slate-200/80 space-y-3">
+                <div key={member.id} className="p-4 bg-slate-50/60 dark:bg-slate-900/60 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-3 card-interactive">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-10 h-10 rounded-full bg-navy/10 text-navy font-bold text-sm flex items-center justify-center shrink-0 border border-navy/15 shadow-2xs">
+                      <div className="w-10 h-10 rounded-full bg-navy/10 dark:bg-sky-500/15 text-navy dark:text-sky-400 font-bold text-sm flex items-center justify-center shrink-0 border border-navy/15 dark:border-sky-500/30 shadow-2xs">
                         {member.first_name ? member.first_name[0].toUpperCase() : 'M'}
                       </div>
                       <div>

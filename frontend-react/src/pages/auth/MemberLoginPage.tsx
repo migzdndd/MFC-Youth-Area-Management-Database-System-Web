@@ -167,10 +167,10 @@ export const MemberLoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-canvas flex flex-col justify-center items-center p-4">
-      <div className="max-w-md w-full bg-white border border-border-subtle rounded-2xl shadow-sm p-6 sm:p-8 space-y-6">
+      <div className="max-w-md w-full bg-white border border-border-subtle rounded-2xl shadow-md p-6 sm:p-8 space-y-6 animate-page-enter">
         <div className="flex items-center justify-between pb-4 border-b border-border-subtle">
-          <Link to="/login" className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-muted hover:text-navy">
-            <ArrowLeft className="w-4 h-4" />
+          <Link to="/login" className="group inline-flex items-center gap-1.5 text-xs font-semibold text-text-muted hover:text-navy transition-colors">
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-150" />
             <span>Leader Portal</span>
           </Link>
           <img src="/img/logo-2.png" alt="MFC Youth" width={32} height={32} />

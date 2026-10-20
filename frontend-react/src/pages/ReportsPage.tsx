@@ -137,7 +137,7 @@ export const ReportsPage: React.FC = () => {
   const avgHeadcount = reports.length > 0 ? Math.round(totalHeadcount / reports.length) : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-page-enter">
       {/* Header */}
       <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -163,7 +163,7 @@ export const ReportsPage: React.FC = () => {
 
       {/* Summary Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs">
+        <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs card-interactive">
           <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Reports Filed</span>
           <div className="text-3xl font-bold text-slate-900 dark:text-white font-heading mt-1">
             {reports.length}
@@ -171,7 +171,7 @@ export const ReportsPage: React.FC = () => {
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Documented activities</p>
         </div>
 
-        <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs">
+        <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs card-interactive">
           <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Youth Reached</span>
           <div className="text-3xl font-bold text-navy dark:text-sky-400 font-heading mt-1">
             {totalHeadcount}
@@ -179,7 +179,7 @@ export const ReportsPage: React.FC = () => {
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Cumulative participants logged</p>
         </div>
 
-        <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs">
+        <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs card-interactive">
           <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Average Attendance</span>
           <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-400 font-heading mt-1">
             {avgHeadcount}

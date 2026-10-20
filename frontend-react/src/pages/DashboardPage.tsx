@@ -47,7 +47,7 @@ export const DashboardPage: React.FC = () => {
   })();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-page-enter">
       {/* Top Banner and Area Switcher */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -91,7 +91,7 @@ export const DashboardPage: React.FC = () => {
         {/* Primary Card - Total Members */}
         <Link
           to="/members"
-          className="lg:col-span-6 p-6 sm:p-7 bg-white dark:bg-[#0e1e36] border-2 border-navy/20 dark:border-sky-500/30 hover:border-navy/50 dark:hover:border-sky-400/60 rounded-2xl shadow-xs hover:shadow-md transition-all duration-200 group flex flex-col justify-between"
+          className="lg:col-span-6 p-6 sm:p-7 bg-white dark:bg-[#0e1e36] border-2 border-navy/20 dark:border-sky-500/30 hover:border-navy/50 dark:hover:border-sky-400/60 rounded-2xl shadow-xs hover:shadow-md transition-all duration-200 group flex flex-col justify-between card-interactive animate-scale-in stagger-1"
         >
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -115,7 +115,7 @@ export const DashboardPage: React.FC = () => {
             <span className="text-xs font-semibold text-navy dark:text-sky-400 group-hover:underline">
               View Community Directory
             </span>
-            <ArrowRight className="w-4 h-4 text-navy dark:text-sky-400 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-4 h-4 text-navy dark:text-sky-400 group-hover:translate-x-1.5 transition-transform duration-200 ease-out" />
           </div>
         </Link>
 
@@ -124,7 +124,7 @@ export const DashboardPage: React.FC = () => {
           {/* Active Chapters */}
           <Link
             to="/chapters"
-            className="p-5 bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-2xs hover:shadow-md hover:border-slate-300 dark:hover:border-sky-500/40 transition-all duration-200 group flex flex-col justify-between"
+            className="p-5 bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-2xs hover:shadow-md hover:border-slate-300 dark:hover:border-sky-500/40 transition-all duration-200 group flex flex-col justify-between card-interactive animate-scale-in stagger-2"
           >
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
@@ -141,7 +141,7 @@ export const DashboardPage: React.FC = () => {
               </div>
               <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <p className="text-xs text-slate-500 dark:text-slate-400">View all registered Chapters</p>
-                <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-navy dark:group-hover:text-sky-400 group-hover:translate-x-0.5 transition-all" />
+                <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-navy dark:group-hover:text-sky-400 group-hover:translate-x-1 transition-all duration-200 ease-out" />
               </div>
             </div>
           </Link>
@@ -149,7 +149,7 @@ export const DashboardPage: React.FC = () => {
           {/* Activity Reports */}
           <Link
             to="/reports"
-            className="p-5 bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-2xs hover:shadow-md hover:border-slate-300 dark:hover:border-sky-500/40 transition-all duration-200 group flex flex-col justify-between"
+            className="p-5 bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-2xs hover:shadow-md hover:border-slate-300 dark:hover:border-sky-500/40 transition-all duration-200 group flex flex-col justify-between card-interactive animate-scale-in stagger-3"
           >
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
@@ -166,7 +166,7 @@ export const DashboardPage: React.FC = () => {
               </div>
               <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <p className="text-xs text-slate-500 dark:text-slate-400">Pastoral logs filed</p>
-                <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-navy dark:group-hover:text-sky-400 group-hover:translate-x-0.5 transition-all" />
+                <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-navy dark:group-hover:text-sky-400 group-hover:translate-x-1 transition-all duration-200 ease-out" />
               </div>
             </div>
           </Link>
@@ -178,7 +178,7 @@ export const DashboardPage: React.FC = () => {
         {/* Upcoming Events Card */}
         <Link
           to="/events"
-          className="lg:col-span-5 bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 shadow-2xs hover:shadow-md hover:border-slate-300 dark:hover:border-sky-500/40 transition-all duration-200 group flex flex-col justify-between"
+          className="lg:col-span-5 bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 shadow-2xs hover:shadow-md hover:border-slate-300 dark:hover:border-sky-500/40 transition-all duration-200 group flex flex-col justify-between card-interactive animate-scale-in stagger-4"
         >
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -209,7 +209,7 @@ export const DashboardPage: React.FC = () => {
         </Link>
 
         {/* Quick Servant Actions Card */}
-        <div className="lg:col-span-7 bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 shadow-2xs">
+        <div className="lg:col-span-7 bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 shadow-2xs animate-scale-in stagger-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-bold text-slate-900 dark:text-white font-heading">
               Quick Servant Actions
@@ -221,7 +221,7 @@ export const DashboardPage: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate('/members')}
-              className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-950/60 hover:bg-slate-100/90 dark:hover:bg-slate-900 active:scale-[0.98] border border-slate-200/90 dark:border-slate-800 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
+              className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-950/60 hover:bg-slate-100/90 dark:hover:bg-slate-900 active:scale-[0.98] border border-slate-200/90 dark:border-slate-800 rounded-xl transition-all duration-200 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px] hover:-translate-y-0.5"
             >
               <div className="p-2.5 rounded-lg bg-navy dark:bg-sky-500/20 text-white dark:text-sky-400 border border-transparent dark:border-sky-500/30 shadow-2xs group-hover:scale-105 transition-transform duration-150">
                 <UserPlus className="w-4 h-4" />
@@ -237,7 +237,7 @@ export const DashboardPage: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate('/events')}
-              className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-950/60 hover:bg-slate-100/90 dark:hover:bg-slate-900 active:scale-[0.98] border border-slate-200/90 dark:border-slate-800 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
+              className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-950/60 hover:bg-slate-100/90 dark:hover:bg-slate-900 active:scale-[0.98] border border-slate-200/90 dark:border-slate-800 rounded-xl transition-all duration-200 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px] hover:-translate-y-0.5"
             >
               <div className="p-2.5 rounded-lg bg-amber-600 dark:bg-amber-500/20 text-white dark:text-amber-300 border border-transparent dark:border-amber-500/30 shadow-2xs group-hover:scale-105 transition-transform duration-150">
                 <CalendarPlus className="w-4 h-4" />
@@ -253,7 +253,7 @@ export const DashboardPage: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate('/reports')}
-              className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-950/60 hover:bg-slate-100/90 dark:hover:bg-slate-900 active:scale-[0.98] border border-slate-200/90 dark:border-slate-800 rounded-xl transition-all duration-150 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px]"
+              className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-950/60 hover:bg-slate-100/90 dark:hover:bg-slate-900 active:scale-[0.98] border border-slate-200/90 dark:border-slate-800 rounded-xl transition-all duration-200 text-left group cursor-pointer shadow-2xs hover:shadow-xs min-h-[56px] hover:-translate-y-0.5"
             >
               <div className="p-2.5 rounded-lg bg-emerald-700 dark:bg-emerald-500/20 text-white dark:text-emerald-300 border border-transparent dark:border-emerald-500/30 shadow-2xs group-hover:scale-105 transition-transform duration-150">
                 <FilePlus className="w-4 h-4" />
@@ -271,7 +271,7 @@ export const DashboardPage: React.FC = () => {
 
       {/* Liturgical Readings Snippet */}
       {readingsData && (
-        <div className="bg-amber-50/70 dark:bg-[#0e1e36] border border-amber-200/80 dark:border-amber-500/30 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="bg-amber-50/70 dark:bg-[#0e1e36] border border-amber-200/80 dark:border-amber-500/30 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 card-interactive animate-scale-in stagger-6">
           <div className="flex items-start gap-3.5">
             <div className="p-3 rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-300/80 dark:border-amber-500/30 shrink-0 shadow-2xs">
               <BookOpen className="w-5 h-5 text-amber-800 dark:text-amber-300" />
@@ -289,10 +289,10 @@ export const DashboardPage: React.FC = () => {
 
           <Link
             to="/readings"
-            className="inline-flex items-center gap-2 px-3.5 py-2 bg-navy dark:bg-sky-500 text-white dark:text-slate-950 text-xs font-bold rounded-lg hover:bg-navy-light dark:hover:bg-sky-400 active:scale-[0.98] transition-all duration-150 shadow-2xs hover:shadow-xs shrink-0 select-none min-h-[40px]"
+            className="group inline-flex items-center gap-2 px-3.5 py-2 bg-navy dark:bg-sky-500 text-white dark:text-slate-950 text-xs font-bold rounded-lg hover:bg-navy-light dark:hover:bg-sky-400 active:scale-[0.98] transition-all duration-150 shadow-2xs hover:shadow-xs shrink-0 select-none min-h-[40px]"
           >
             <span>Read Scriptures</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-150" />
           </Link>
         </div>
       )}

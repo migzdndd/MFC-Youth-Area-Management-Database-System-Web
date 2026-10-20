@@ -66,7 +66,7 @@ export const ChaptersPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-page-enter">
       {/* Header */}
       <div className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -108,7 +108,7 @@ export const ChaptersPage: React.FC = () => {
               <div
                 key={chapter.id}
                 onClick={() => setSelectedChapterForMembers(chapter)}
-                className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-slate-300 dark:hover:border-sky-500/40 transition-all duration-200 flex flex-col justify-between group cursor-pointer"
+                className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-slate-300 dark:hover:border-sky-500/40 transition-all duration-200 flex flex-col justify-between group cursor-pointer card-interactive"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-4">

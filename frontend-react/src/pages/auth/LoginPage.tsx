@@ -199,7 +199,7 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-canvas flex flex-col justify-between">
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-        <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch bg-white border border-border-subtle rounded-2xl shadow-sm overflow-hidden">
+        <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch bg-white border border-border-subtle rounded-2xl shadow-md overflow-hidden animate-page-enter">
           {/* Left Hero Overview */}
           <section className="lg:col-span-6 bg-navy-deep text-white p-6 sm:p-10 flex flex-col justify-between border-r border-navy-surface relative overflow-hidden" aria-label="System overview">
             {/* Atmospheric overlay for optimal text contrast */}
@@ -235,7 +235,7 @@ export const LoginPage: React.FC = () => {
                 </div>
 
                 {/* Liturgical Daily Reading Card */}
-                <div className="bg-navy-surface/90 border border-navy-light/40 rounded-xl p-4 mb-6">
+                <div className="bg-navy-surface/90 border border-navy-light/40 rounded-xl p-4 mb-6 transition-all duration-200 hover:border-amber-400/40 hover:bg-navy-surface shadow-xs">
                   <div className="flex items-center justify-between mb-2 pb-2 border-b border-white/10">
                     <div className="flex items-center gap-2">
                       <BookOpen className="w-4 h-4 text-amber-300" />
@@ -268,8 +268,9 @@ export const LoginPage: React.FC = () => {
 
               <div className="pt-6 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
                 <span>Missionary Families for Christ Youth</span>
-                <Link to="/member-login" className="text-amber-300 hover:text-white font-semibold flex items-center gap-1 transition-colors">
-                  Member Portal <ArrowRight className="w-3.5 h-3.5" />
+                <Link to="/member-login" className="group text-amber-300 hover:text-white font-semibold flex items-center gap-1 transition-colors">
+                  <span>Member Portal</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-150" />
                 </Link>
               </div>
             </div>

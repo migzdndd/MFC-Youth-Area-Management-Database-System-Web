@@ -51,7 +51,7 @@ export const EventCard: React.FC<EventCardProps> = ({
           handleCardClick();
         }
       }}
-      className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-navy/40 dark:hover:border-sky-500/40 transition-all duration-200 flex flex-col justify-between group cursor-pointer text-left focus:outline-none focus:ring-2 focus:ring-navy/30 dark:focus:ring-sky-500/30"
+      className="bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-navy/40 dark:hover:border-sky-500/40 transition-all duration-200 flex flex-col justify-between group cursor-pointer text-left focus:outline-none focus:ring-2 focus:ring-navy/30 dark:focus:ring-sky-500/30 card-interactive"
       title={
         canEdit
           ? 'Click to view Attendance & Payments Data Grid'

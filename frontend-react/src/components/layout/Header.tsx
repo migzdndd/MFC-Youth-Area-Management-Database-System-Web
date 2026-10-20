@@ -37,7 +37,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen =
 
         <div className="flex items-center gap-2">
           {canSwitchArea ? (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-800 dark:text-slate-100 shadow-2xs">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 rounded-lg text-xs font-semibold text-slate-800 dark:text-slate-100 shadow-2xs transition-all duration-200">
               <MapPin className="w-3.5 h-3.5 text-navy dark:text-sky-400 shrink-0" aria-hidden="true" />
               <label htmlFor="headerAreaSelect" className="sr-only">Switch active area</label>
               <select
@@ -60,7 +60,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen =
               </select>
             </div>
           ) : (
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 rounded-full text-xs font-semibold text-slate-800 dark:text-slate-100 shadow-2xs">
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 rounded-full text-xs font-semibold text-slate-800 dark:text-slate-100 shadow-2xs transition-all duration-200">
               <MapPin className="w-3.5 h-3.5 text-navy dark:text-sky-400 shrink-0" aria-hidden="true" />
               <span className="truncate max-w-[140px] sm:max-w-[200px]">{currentAreaName}</span>
             </div>
@@ -91,7 +91,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen =
           </span>
         </div>
         <div
-          className="w-9 h-9 rounded-full bg-navy text-white text-xs font-bold ring-2 ring-amber-400/40 flex items-center justify-center select-none shrink-0 shadow-2xs"
+          className="w-9 h-9 rounded-full bg-navy text-white text-xs font-bold ring-2 ring-amber-400/50 hover:ring-amber-400 transition-all duration-200 ease-out shadow-2xs hover:scale-105 active:scale-95 flex items-center justify-center select-none shrink-0"
           title={user?.first_name ? [user.first_name, user.middle_name, user.last_name].filter(Boolean).join(' ') : user?.email}
         >
           {user?.first_name ? user.first_name[0].toUpperCase() : 'U'}
