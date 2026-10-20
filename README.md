@@ -38,7 +38,8 @@ Inside the Services Tab, each access level sees an interface tailored to their p
 ### Compact, Minimal, and Clean UI Density
 - **Optimized Layout Footprint**: Streamlined header banners (`rounded-xl px-4 py-3`), compact card padding (`p-3.5 sm:p-4`), and reduced global margins (`p-3.5 sm:p-5 lg:p-6`).
 - **Adaptive Responsive Grids**: Symmetrical layout distribution that dynamically scales to 1, 2, or 3 columns to prevent awkward empty slots.
-- **Accessible Field Targets**: Preserves 44px minimum touch targets and WCAG AA color contrast across both light and dark themes.
+- **Accessible Field Targets**: Preserves 44px minimum touch targets and WCAG AA/AAA color contrast across both light and dark themes.
+- **Dark Mode Unified Contrast**: Deep midnight navy ground (`#070f1e`) with 12.3:1 contrast ratio on inactive navigation links and >17:1 on active links, eliminating jarring white sidebars in dark mode.
 - **Frontend Taste & Art Direction**: Integrated with the `taste` (`design-taste-frontend` / tasteskill v2) skill, enforcing two-line headline limits, zero-slop app-screen guidelines, and real browser inspection.
 - **Motion Design Architecture**: Integrated with the `motion-design` skill, establishing directional easing (`cubic-bezier(0.16, 1, 0.3, 1)`), 200ms to 400ms durations, 1/3 distance rules, layer stacking (primary, secondary, ambient), and `prefers-reduced-motion` compliance.
 

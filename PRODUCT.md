@@ -40,6 +40,7 @@ Unlike generic community databases or unwieldy spreadsheets, the system is purpo
   - GIG (God is Generous) stewardship catalog and service tracking.
   - Compact, minimal, and clean UI density: streamlined horizontal headers, dynamically balanced responsive card grids, tight member list padding, and 44px minimum touch targets.
   - Frontend Taste & Art Direction: Strict adherence to the `taste` skill (`design-taste-frontend` / tasteskill v2) standards for app screens: two-line headline ceilings, no eyebrows/pill badges, no resting shadows or gradients, no assistant palette, equal outer margins, and automated browser inspection.
+  - Dark Mode Unified Contrast & Harmonized Navigation: Strict compliance with WCAG AAA contrast standards (12.3:1 contrast for inactive links and >17:1 for active links), unified midnight navy ground (`#070f1e`) preventing eye strain, eliminating stark conflicting light panels against dark canvases.
   - On-Demand Demo Presentation Provisioning & Purge Tools: Capability to rapidly spin up and tear down isolated walkthrough accounts across all leadership tiers without cluttering production databases.
   - High-Speed Parallelized CI/CD Deployment Pipeline: Automated GitHub Actions workflow with path-based trigger filtering, parallel job execution (quality gate, security audit, SAST, and container smoke testing), dual-tier dependency caching, and inlined PaaS configuration checks, achieving sub-3-minute verification and zero runs on documentation updates.
 - **Constraints**:

@@ -76,15 +76,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       {/* Sidebar container */}
       <aside
         id="main-sidebar"
-        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-navy-deep dark:bg-white text-white dark:text-slate-900 flex flex-col transition-transform duration-200 ease-out lg:translate-x-0 border-r border-navy-surface dark:border-slate-200 shadow-xl lg:shadow-none ${
+        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-navy-deep dark:bg-[#070f1e] text-white flex flex-col transition-transform duration-200 ease-out lg:translate-x-0 border-r border-navy-surface dark:border-slate-800/80 shadow-xl lg:shadow-none ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         aria-label="Main navigation"
       >
         {/* Brand header */}
-        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-white/10 dark:border-slate-200">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-white/10 dark:bg-slate-100 p-1 flex items-center justify-center border border-white/15 dark:border-slate-200 shadow-2xs shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-white/10 p-1 flex items-center justify-center border border-white/15 shadow-2xs shrink-0">
               <img
                 src="/img/logo-2.png"
                 alt="MFC Youth Logo"
@@ -94,10 +94,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               />
             </div>
             <div>
-              <h2 className="text-sm font-bold tracking-wider leading-tight text-white dark:text-slate-900 font-heading">
+              <h2 className="text-sm font-bold tracking-wider leading-tight text-white font-heading">
                 MFC YOUTH
               </h2>
-              <p className="text-[10px] text-amber-300 dark:text-amber-600 font-semibold tracking-widest mt-0.5">
+              <p className="text-[10px] text-amber-300 font-semibold tracking-widest mt-0.5">
                 AREA MANAGEMENT
               </p>
             </div>
@@ -105,7 +105,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <button
             type="button"
             onClick={onClose}
-            className="lg:hidden p-2 text-white/70 hover:text-white dark:text-slate-500 dark:hover:text-slate-900 rounded-lg hover:bg-white/10 dark:hover:bg-slate-100 active:scale-95 transition-all duration-150 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
+            className="lg:hidden p-2 text-white/70 hover:text-white rounded-lg hover:bg-white/10 active:scale-95 transition-all duration-150 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
             aria-label="Close navigation"
           >
             <X className="w-5 h-5" />
@@ -124,20 +124,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 className={({ isActive }) =>
                   `group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ease-out active:scale-[0.98] min-h-[44px] select-none ${
                     isActive
-                      ? 'bg-white/15 text-white dark:bg-slate-100 dark:text-slate-900 font-semibold border-l-[3px] border-amber-400 dark:border-amber-600 pl-2.5 shadow-xs'
-                      : 'text-slate-300 dark:text-slate-600 hover:bg-white/10 dark:hover:bg-slate-100 hover:text-white dark:hover:text-slate-900'
+                      ? 'bg-white/15 text-white font-semibold border-l-[3px] border-amber-400 pl-2.5 shadow-xs'
+                      : 'text-slate-300 hover:bg-white/10 hover:text-white'
                   }`
                 }
               >
-                <Icon className="w-5 h-5 shrink-0 opacity-85 group-hover:opacity-100 group-hover:scale-110 group-hover:text-amber-300 dark:group-hover:text-amber-600 transition-all duration-200 ease-out" />
+                <Icon className="w-5 h-5 shrink-0 opacity-85 group-hover:opacity-100 group-hover:scale-110 group-hover:text-amber-300 transition-all duration-200 ease-out" />
                 <span className="transition-transform duration-200 ease-out group-hover:translate-x-0.5">{item.name}</span>
               </NavLink>
             );
           })}
 
           {isDeveloper && (
-            <div className="pt-2 mt-2 border-t border-white/10 dark:border-slate-200">
-              <span className="px-3 text-[10px] font-bold text-amber-300 dark:text-amber-700 uppercase tracking-widest">
+            <div className="pt-2 mt-2 border-t border-white/10">
+              <span className="px-3 text-[10px] font-bold text-amber-300 uppercase tracking-widest">
                 Developer Deck
               </span>
               <NavLink
@@ -146,16 +146,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 className={({ isActive }) =>
                   `group flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ease-out active:scale-[0.98] min-h-[44px] select-none mt-1 ${
                     isActive
-                      ? 'bg-amber-400/20 text-amber-300 dark:bg-amber-100 dark:text-amber-900 font-semibold border-l-[3px] border-amber-400 dark:border-amber-600 pl-2.5 shadow-xs'
-                      : 'text-amber-200/90 dark:text-amber-800 hover:bg-white/10 dark:hover:bg-amber-50 hover:text-amber-100 dark:hover:text-amber-950'
+                      ? 'bg-amber-400/20 text-amber-300 font-semibold border-l-[3px] border-amber-400 pl-2.5 shadow-xs'
+                      : 'text-amber-200/90 hover:bg-white/10 hover:text-amber-100'
                   }`
                 }
               >
                 <div className="flex items-center gap-3">
-                  <Terminal className="w-5 h-5 shrink-0 opacity-90 text-amber-400 dark:text-amber-600 group-hover:scale-110 group-hover:text-amber-300 dark:group-hover:text-amber-700 transition-all duration-200 ease-out" />
+                  <Terminal className="w-5 h-5 shrink-0 opacity-90 text-amber-400 group-hover:scale-110 group-hover:text-amber-300 transition-all duration-200 ease-out" />
                   <span className="transition-transform duration-200 ease-out group-hover:translate-x-0.5">Developer Console</span>
                 </div>
-                <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-amber-400/30 text-amber-300 dark:bg-amber-100 dark:text-amber-800 border border-amber-400/40 dark:border-amber-300">
+                <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-amber-400/30 text-amber-300 border border-amber-400/40">
                   Dev
                 </span>
               </NavLink>
@@ -164,20 +164,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </nav>
 
         {/* User status and logout */}
-        <div className="p-4 border-t border-white/10 dark:border-slate-200 space-y-3 bg-navy-surface/60 dark:bg-slate-50">
-          <div className="bg-white/5 dark:bg-white rounded-lg p-3 border border-white/8 dark:border-slate-200 shadow-2xs space-y-1">
+        <div className="p-4 border-t border-white/10 space-y-3 bg-navy-surface/60 dark:bg-black/30">
+          <div className="bg-white/5 rounded-lg p-3 border border-white/8 shadow-2xs space-y-1">
             <div className="flex items-center justify-between">
-              <span className="font-semibold text-white dark:text-slate-900 text-xs truncate max-w-[150px]">
+              <span className="font-semibold text-white text-xs truncate max-w-[150px]">
                 {user?.first_name ? [user.first_name, user.middle_name, user.last_name].filter(Boolean).join(' ') : user?.email}
               </span>
-              <span className="text-[10px] text-amber-300 dark:text-amber-800 uppercase tracking-wider font-bold bg-amber-400/10 dark:bg-amber-100 px-1.5 py-0.5 rounded border border-amber-400/20 dark:border-amber-300">
+              <span className="text-[10px] text-amber-300 uppercase tracking-wider font-bold bg-amber-400/15 px-1.5 py-0.5 rounded border border-amber-400/30">
                 {user?.role ? user.role.replace(/_/g, ' ') : 'Servant'}
                 {activeArea && user?.area_id && activeArea.id !== user.area_id ? ' (SIM)' : ''}
               </span>
             </div>
             {effectiveAreaName && (
-              <div className="flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-600 pt-0.5 truncate">
-                <MapPin className="w-3 h-3 text-amber-300/80 dark:text-amber-600 shrink-0" />
+              <div className="flex items-center gap-1.5 text-[11px] text-slate-300/80 pt-0.5 truncate">
+                <MapPin className="w-3 h-3 text-amber-300/80 shrink-0" />
                 <span className="truncate">{effectiveAreaName}</span>
               </div>
             )}
@@ -186,13 +186,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <button
             type="button"
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-rose-200 dark:text-rose-700 hover:text-white dark:hover:text-rose-900 bg-rose-500/10 dark:bg-rose-50 hover:bg-rose-600/30 dark:hover:bg-rose-100 border border-rose-400/20 dark:border-rose-200 rounded-lg transition-all duration-150 active:scale-[0.98] min-h-[44px] cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-rose-300 hover:text-white bg-rose-500/10 hover:bg-rose-600/30 border border-rose-400/20 rounded-lg transition-all duration-150 active:scale-[0.98] min-h-[44px] cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Sign Out</span>
           </button>
 
-          <div className="text-[10px] text-slate-400/80 dark:text-slate-500 text-center">
+          <div className="text-[10px] text-slate-400/80 text-center">
             MFC Youth AMS v1.1
           </div>
         </div>
