@@ -40,6 +40,7 @@ Inside the Services Tab, each access level sees an interface tailored to their p
 - **Adaptive Responsive Grids**: Symmetrical layout distribution that dynamically scales to 1, 2, or 3 columns to prevent awkward empty slots.
 - **Accessible Field Targets**: Preserves 44px minimum touch targets and WCAG AA color contrast across both light and dark themes.
 - **Frontend Taste & Art Direction**: Integrated with the `taste` (`design-taste-frontend` / tasteskill v2) skill, enforcing two-line headline limits, zero-slop app-screen guidelines, and real browser inspection.
+- **Motion Design Architecture**: Integrated with the `motion-design` skill, establishing directional easing (`cubic-bezier(0.16, 1, 0.3, 1)`), 200ms to 400ms durations, 1/3 distance rules, layer stacking (primary, secondary, ambient), and `prefers-reduced-motion` compliance.
 
 ### Built-in Presentation Demo Accounts
 Pre-configured demo accounts for presenting role-specific capabilities without exposing real member records:

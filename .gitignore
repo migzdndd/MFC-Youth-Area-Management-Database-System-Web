@@ -99,6 +99,8 @@ Source-Code*.zip
 .codex/
 .gemini/
 .claude/
+.qwen/
+skills-lock.json
 AGENTS.md
 GEMINI.md
 agents.md
