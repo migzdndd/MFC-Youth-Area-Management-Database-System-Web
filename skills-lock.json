@@ -409,6 +409,12 @@
       "skillPath": "skills/decision-navigator/SKILL.md",
       "computedHash": "dab0a37765312f8c482631b7d9c0726992097299e5679460dc04e0b9bd36c178"
     },
+    "design-taste-frontend": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/taste-skill/SKILL.md",
+      "computedHash": "048a9bff8064f1efa51c2733558428ac93a0d8398e33ad11e7b68500f8e0525f"
+    },
     "developer-seo": {
       "source": "sickn33/agentic-awesome-skills",
       "sourceType": "github",
