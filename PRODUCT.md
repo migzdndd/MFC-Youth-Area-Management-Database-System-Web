@@ -40,8 +40,7 @@ Unlike generic community databases or unwieldy spreadsheets, the system is purpo
   - GIG (God is Generous) stewardship catalog and service tracking.
   - Compact, minimal, and clean UI density: streamlined horizontal headers, dynamically balanced responsive card grids, tight member list padding, and 44px minimum touch targets.
   - Frontend Taste & Art Direction: Strict adherence to the `taste` skill (`design-taste-frontend` / tasteskill v2) standards for app screens: two-line headline ceilings, no eyebrows/pill badges, no resting shadows or gradients, no assistant palette, equal outer margins, and automated browser inspection.
-  - Motion Design System: Purposeful, quiet corporate animation framework based on the `motion-design` skill, implementing 200ms to 400ms durations, `cubic-bezier(0.16, 1, 0.3, 1)` easing, strict 1/3 rules, and full `prefers-reduced-motion` accessibility.
-  - Built-in Demo Presentation Accounts across all leadership tiers for live demonstrations and walkthroughs.
+  - On-Demand Demo Presentation Provisioning & Purge Tools: Capability to rapidly spin up and tear down isolated walkthrough accounts across all leadership tiers without cluttering production databases.
 - **Constraints**:
   - Strictly a web application (no native mobile app wrappers, no PWA install prompts, standard browser navigation).
   - Strict compliance with data privacy standards for minors (no public leakage of youth contact details or emergency records).

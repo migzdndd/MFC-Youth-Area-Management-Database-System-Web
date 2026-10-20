@@ -42,15 +42,10 @@ Inside the Services Tab, each access level sees an interface tailored to their p
 - **Frontend Taste & Art Direction**: Integrated with the `taste` (`design-taste-frontend` / tasteskill v2) skill, enforcing two-line headline limits, zero-slop app-screen guidelines, and real browser inspection.
 - **Motion Design Architecture**: Integrated with the `motion-design` skill, establishing directional easing (`cubic-bezier(0.16, 1, 0.3, 1)`), 200ms to 400ms durations, 1/3 distance rules, layer stacking (primary, secondary, ambient), and `prefers-reduced-motion` compliance.
 
-### Built-in Presentation Demo Accounts
-Pre-configured demo accounts for presenting role-specific capabilities without exposing real member records:
-- **Area Servant**: `area@demo.mfc` / `AreaDemo2026!`
-- **Couple Coordinator**: `couple@demo.mfc` / `CoupleDemo2026!`
-- **Campus Servant**: `campus@demo.mfc` / `CampusDemo2026!`
-- **MFC High Servant**: `high@demo.mfc` / `HighDemo2026!`
-- **Area LIT Servant**: `lit@demo.mfc` / `LitDemo2026!`
-- **Area Kids Servant**: `kids@demo.mfc` / `KidsDemo2026!`
-- **Chapter Servant**: `chapter@demo.mfc` / `ChapterDemo2026!`
+### Presentation Demo & Sample Data Management
+The database is kept in a clean production-ready state with all sample records and dummy data purged. On-demand seeding and purge scripts are available in `scratch/`:
+- **Purge All Sample & Demo Data**: `node scratch/purge_sample_data.mjs` (Removes all sample members, presentation events, and demo accounts while preserving the primary administrator).
+- **Provision Presentation Demo Accounts**: `node scratch/seed_demo_accounts.mjs` (Provisions isolated demo accounts across all 10 access levels for live demonstrations).
 
 ### Creative Ministries (LIT) Service Catalog
 - **The 5 Pillars**: Dedicated management and servant assignments for Music, Dance, Graphics & Promo, Creative Writing, and Photography & Videography. Unmentioned non-creative services are purged from active catalogs.
