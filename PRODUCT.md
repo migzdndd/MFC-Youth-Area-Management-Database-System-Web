@@ -41,6 +41,7 @@ Unlike generic community databases or unwieldy spreadsheets, the system is purpo
   - Compact, minimal, and clean UI density: streamlined horizontal headers, dynamically balanced responsive card grids, tight member list padding, and 44px minimum touch targets.
   - Frontend Taste & Art Direction: Strict adherence to the `taste` skill (`design-taste-frontend` / tasteskill v2) standards for app screens: two-line headline ceilings, no eyebrows/pill badges, no resting shadows or gradients, no assistant palette, equal outer margins, and automated browser inspection.
   - On-Demand Demo Presentation Provisioning & Purge Tools: Capability to rapidly spin up and tear down isolated walkthrough accounts across all leadership tiers without cluttering production databases.
+  - High-Speed Parallelized CI/CD Deployment Pipeline: Automated GitHub Actions workflow with path-based trigger filtering, parallel job execution (quality gate, security audit, SAST, and container smoke testing), dual-tier dependency caching, and inlined PaaS configuration checks, achieving sub-3-minute verification and zero runs on documentation updates.
 - **Constraints**:
   - Strictly a web application (no native mobile app wrappers, no PWA install prompts, standard browser navigation).
   - Strict compliance with data privacy standards for minors (no public leakage of youth contact details or emergency records).

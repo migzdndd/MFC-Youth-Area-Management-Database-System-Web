@@ -3,8 +3,22 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main, develop ]
+    paths-ignore:
+      - '**.md'
+      - 'brain/**'
+      - 'docs/**'
+      - 'scratch/**'
+      - '.gitignore'
+      - 'LICENSE'
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - 'brain/**'
+      - 'docs/**'
+      - 'scratch/**'
+      - '.gitignore'
+      - 'LICENSE'
   workflow_dispatch:
 
 # Apply least-privilege permissions globally
@@ -21,20 +35,15 @@ defaults:
     shell: bash
 
 jobs:
-  static-analysis-and-security:
-    name: Code Hygiene, Secrets & Security Audit
+  code-quality-and-tests:
+    name: Code Quality, Contracts & Production Build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
-      - name: Checkout Repository
+      - name: Checkout Repository (Fast Shallow)
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: Run Secret Detection (Gitleaks)
-        uses: gitleaks/gitleaks-action@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
 
       - name: Verify No Committed Environment Secrets
         run: |
@@ -44,13 +53,24 @@ jobs:
           fi
           echo "✓ No tracked .env files detected."
 
-      - name: Lint Dockerfile (Hadolint)
-        uses: hadolint/hadolint-action@v3.5.0
-        with:
-          dockerfile: Dockerfile
-          failure-threshold: error
+      - name: Fast Syntax & Configuration Validation
+        run: |
+          node --check server.js && node --check Backend/api/router.js
+          node -e "JSON.parse(require('fs').readFileSync('package.json', 'utf8'));"
+          node -e "JSON.parse(require('fs').readFileSync('vercel.json', 'utf8'));"
+          node -e "
+            const fs = require('fs');
+            const config = JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
+            const routes = config.routes || config.rewrites;
+            if (!Array.isArray(routes)) throw new Error('Missing routes in vercel.json');
+            const apiRoute = routes.find(r => (r.src === '/api/(.*)' || r.source === '/api/(.*)'));
+            if (!apiRoute) throw new Error('Invalid /api route destination in vercel.json');
+            const spaRoute = routes.find(r => (r.src === '/(.*)' || r.source === '/(.*)'));
+            if (!spaRoute) throw new Error('Missing catch-all SPA route in vercel.json');
+            console.log('✓ Vercel PaaS single-project route configuration verified.');
+          "
 
-      - name: Setup Node.js Runtime
+      - name: Setup Node.js Runtime & Cache
         uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -60,10 +80,13 @@ jobs:
             frontend-react/package-lock.json
 
       - name: Install Root & Workspace Dependencies
-        run: npm ci
+        run: npm ci --prefer-offline --no-audit
 
       - name: Install Frontend Dependencies
-        run: npm --prefix frontend-react ci
+        run: npm --prefix frontend-react ci --prefer-offline --no-audit
+
+      - name: Backend & Contract Parity Tests
+        run: node --test tests/frontend-schemas.test.mjs
 
       - name: Frontend Code Hygiene (Oxlint)
         run: npm --prefix frontend-react run lint
@@ -71,11 +94,38 @@ jobs:
       - name: Build Modern React SPA (TypeScript & Vite)
         run: npm --prefix frontend-react run build
 
-      - name: Syntax & Configuration Validation
-        run: |
-          npm run test:syntax
-          node -e "JSON.parse(require('fs').readFileSync('package.json', 'utf8'));"
-          node -e "JSON.parse(require('fs').readFileSync('vercel.json', 'utf8'));"
+      - name: Standalone API Server Health Test
+        run: npm run test:health
+
+  security-audit-and-hygiene:
+    name: Secrets & Dependency Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Repository (Full History for Secret Audit)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Secret Detection (Gitleaks)
+        uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Lint Dockerfile (Hadolint)
+        uses: hadolint/hadolint-action@v3.5.0
+        with:
+          dockerfile: Dockerfile
+          failure-threshold: error
+
+      - name: Setup Node.js Runtime & Cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            frontend-react/package-lock.json
 
       - name: Strict Dependency Audit (Root & Workspaces)
         run: npm audit --audit-level=high
@@ -83,19 +133,18 @@ jobs:
       - name: Strict Dependency Audit (Frontend React SPA)
         run: npm --prefix frontend-react audit --audit-level=high
 
-      - name: Standalone API Server Health Test
-        run: npm run test:health
-
   codeql-analysis:
     name: CodeQL Static Security Analysis (SAST)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     permissions:
       contents: read
       security-events: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -110,14 +159,16 @@ jobs:
   container-security-and-build:
     name: Container Build, Scan & Smoke Test
     runs-on: ubuntu-latest
-    needs: static-analysis-and-security
-    timeout-minutes: 15
+    needs: code-quality-and-tests
+    timeout-minutes: 12
     permissions:
       contents: read
       security-events: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -131,6 +182,14 @@ jobs:
           tags: mfc-youth-app:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Cache Trivy Vulnerability Database
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trivy
+          key: trivy-db-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            trivy-db-${{ runner.os }}-
 
       - name: Scan Image for Vulnerabilities (Trivy)
         uses: aquasecurity/trivy-action@0.35.0
@@ -154,7 +213,7 @@ jobs:
             -e NODE_ENV=production \
             mfc-youth-app:${{ github.sha }}
 
-          for i in {1..15}; do
+          for i in {1..20}; do
             if curl -s http://localhost:3000/api/health | grep -q "mfc-youth-web-api"; then
               echo "✓ Container API health test passed."
               if curl -s http://localhost:3000/ | grep -q "root"; then
@@ -164,8 +223,8 @@ jobs:
                 exit 0
               fi
             fi
-            echo "Waiting for container startup and assets (attempt $i/15)..."
-            sleep 2
+            echo "Waiting for container startup and assets (attempt $i/20)..."
+            sleep 1
           done
 
           echo "Container smoke test failed! Container logs:"
@@ -173,26 +232,3 @@ jobs:
           docker stop test-app
           docker rm test-app
           exit 1
-
-  vercel-paas-deployment-check:
-    name: PaaS Routing & Deployment Check
-    runs-on: ubuntu-latest
-    needs: static-analysis-and-security
-    timeout-minutes: 10
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Verify Vercel Monorepo Rewrites & API Routes
-        run: |
-          node -e "
-            const fs = require('fs');
-            const config = JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
-            const routes = config.routes || config.rewrites;
-            if (!Array.isArray(routes)) throw new Error('Missing routes in vercel.json');
-            const apiRoute = routes.find(r => (r.src === '/api/(.*)' || r.source === '/api/(.*)'));
-            if (!apiRoute) throw new Error('Invalid /api route destination in vercel.json');
-            const spaRoute = routes.find(r => (r.src === '/(.*)' || r.source === '/(.*)'));
-            if (!spaRoute) throw new Error('Missing catch-all SPA route in vercel.json');
-            console.log('✓ Vercel PaaS single-project route configuration verified.');
-          "

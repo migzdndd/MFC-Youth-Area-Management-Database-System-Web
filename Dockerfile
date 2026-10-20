@@ -9,7 +9,7 @@ COPY package.json package-lock.json ./
 COPY Backend/package.json ./Backend/
 
 # Install only production dependencies deterministically
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev --prefer-offline --no-audit
 
 # ==========================================
 # Stage 2: Modern React Frontend Build
@@ -19,7 +19,7 @@ WORKDIR /app/frontend-react
 
 # Copy frontend lockfile and dependencies
 COPY frontend-react/package.json frontend-react/package-lock.json ./
-RUN npm ci
+RUN npm ci --prefer-offline --no-audit
 
 # Copy frontend source and build production bundle
 COPY frontend-react/ ./

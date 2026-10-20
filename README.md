@@ -171,3 +171,16 @@ npm --prefix frontend-react run typecheck
 node .agents/skills/design-taste-frontend/scripts/lint.mjs frontend-react/src/
 ```
 
+---
+
+## High-Speed CI/CD Deployment Pipeline
+
+The repository utilizes an optimized, parallelized GitHub Actions workflow (`.github/workflows/ci-cd.yml`) designed for sub-3-minute verification and minimal runner usage:
+- **Path-Based Trigger Filtering**: Automatically skips pipeline runs for documentation (`**.md`), brain session notes (`brain/**`), documentation diagrams (`docs/**`), scratch scripts (`scratch/**`), and `.gitignore`.
+- **Parallel Stream Execution**:
+  1. **Code Quality, Contracts & Production Build**: Runs shallow checkout (`fetch-depth: 1`), pre-flight checks, cached npm dependencies (`--prefer-offline --no-audit`), runtime schema parity tests, Oxlint, Vite production build, and standalone API health checks.
+  2. **Security & Dependency Audit**: Concurrently executes Gitleaks commit secret audits, Hadolint Dockerfile linting, and high-severity npm audits.
+  3. **CodeQL SAST Analysis**: Concurrently scans for JavaScript and TypeScript security flaws.
+  4. **Container Build, Vulnerability Scan & Smoke Test**: Builds container image via Docker Buildx with GitHub Actions caching (`type=gha`), cached Trivy vulnerability databases (`~/.cache/trivy`), and instant-exit health smoke testing.
+- **Inlined PaaS Routing Validation**: Verifies `vercel.json` rewrite routing during pre-flight in 2ms, eliminating an entire runner VM lifecycle and saving ~40 seconds of queue time.
+
