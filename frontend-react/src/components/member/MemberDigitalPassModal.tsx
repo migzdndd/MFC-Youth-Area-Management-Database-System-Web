@@ -59,7 +59,7 @@ export const MemberDigitalPassModal: React.FC<MemberDigitalPassModalProps> = ({
             {/* Event Selector */}
             {events.length > 0 && (
               <div className="space-y-1.5">
-                <label htmlFor="event-pass-select" className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                <label htmlFor="event-pass-select" className="block text-xs font-semibold text-slate-700">
                   Select Gathering
                 </label>
                 <div className="relative">
@@ -82,8 +82,8 @@ export const MemberDigitalPassModal: React.FC<MemberDigitalPassModalProps> = ({
             )}
 
             {/* Digital Ticket Card */}
-            <div className="bg-gradient-to-b from-navy-surface to-navy-deep text-white rounded-2xl p-6 shadow-md border border-navy-light/40 text-center relative overflow-hidden">
-              <div className="flex items-center justify-center gap-1.5 text-[11px] font-bold text-amber-300 tracking-wider uppercase mb-3">
+            <div className="bg-navy-deep text-white rounded-2xl p-6 border border-navy-surface text-center relative overflow-hidden">
+              <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-amber-300 mb-3">
                 <ShieldCheck className="w-4 h-4 text-amber-400" />
                 <span>Verified MFC Youth Ticket</span>
               </div>
@@ -114,7 +114,7 @@ export const MemberDigitalPassModal: React.FC<MemberDigitalPassModalProps> = ({
               <p className="text-xs text-slate-300 max-w-xs mx-auto leading-relaxed">
                 Present this QR code to servant leaders at the registration counter for rapid check-in.
               </p>
-              <p className="text-[10px] font-mono text-slate-400 mt-3">
+              <p className="text-[11px] text-slate-400 mt-3 tabular-nums">
                 Pass ID: {memberId.substring(0, 8)} &middot; Ticket Key: {selectedEventId === 'all' ? 'Universal' : selectedEventId.substring(0, 8)}
               </p>
             </div>

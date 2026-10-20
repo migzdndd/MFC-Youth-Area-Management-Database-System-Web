@@ -202,12 +202,8 @@ export const LoginPage: React.FC = () => {
         <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch bg-white border border-border-subtle rounded-2xl shadow-sm overflow-hidden">
           {/* Left Hero Overview */}
           <section className="lg:col-span-6 bg-navy-deep text-white p-6 sm:p-10 flex flex-col justify-between border-r border-navy-surface relative overflow-hidden" aria-label="System overview">
-            {/* Ambient atmospheric lighting & gradient overlays for optimal text contrast */}
-            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
-              <div className="absolute inset-0 bg-gradient-to-t from-navy-deep via-navy-deep/80 to-navy-deep/50" />
-              <div className="absolute -top-32 -left-32 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
-            </div>
+            {/* Atmospheric overlay for optimal text contrast */}
+            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-navy-deep/85" aria-hidden="true" />
 
             {/* Foreground Hero Content (Layered above video wallpaper) */}
             <div className="relative z-10 flex flex-col justify-between h-full">
@@ -220,16 +216,16 @@ export const LoginPage: React.FC = () => {
                     height={84}
                     className="object-contain drop-shadow-sm"
                   />
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-white/10 text-slate-200 border border-white/10 backdrop-blur-xs">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-navy-surface text-slate-200 border border-navy-light/40">
                     <span className="w-2 h-2 rounded-full bg-emerald-400" />
                     Cloud Connected
                   </span>
                 </div>
 
                 <div className="space-y-2 mb-8">
-                  <span className="text-xs font-bold tracking-widest text-amber-300 font-heading">
-                    AREA MANAGEMENT SYSTEM
-                  </span>
+                  <p className="text-xs font-semibold text-amber-300 font-heading">
+                    Area Management System
+                  </p>
                   <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight font-heading">
                     Lead your Area with one clear, secure workspace.
                   </h1>
@@ -239,7 +235,7 @@ export const LoginPage: React.FC = () => {
                 </div>
 
                 {/* Liturgical Daily Reading Card */}
-                <div className="bg-white/10 border border-white/15 rounded-xl p-4 mb-6 backdrop-blur-xs">
+                <div className="bg-navy-surface/90 border border-navy-light/40 rounded-xl p-4 mb-6">
                   <div className="flex items-center justify-between mb-2 pb-2 border-b border-white/10">
                     <div className="flex items-center gap-2">
                       <BookOpen className="w-4 h-4 text-amber-300" />

@@ -72,7 +72,7 @@ export const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({ metrics 
                   <div className="font-bold text-slate-900 truncate">
                     {[m.first_name, m.middle_name, m.last_name].filter(Boolean).join(' ')}
                   </div>
-                  <div className="text-slate-500 truncate font-mono text-[11px]">{m.email}</div>
+                  <div className="text-slate-500 truncate text-xs">{m.email}</div>
                 </div>
                 <div className="text-right shrink-0">
                   <Badge variant={m.status === 'Active' ? 'success' : 'default'}>{m.status}</Badge>

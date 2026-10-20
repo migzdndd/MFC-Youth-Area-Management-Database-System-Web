@@ -275,7 +275,7 @@ export const EmailVerificationField: React.FC<EmailVerificationFieldProps> = ({
                     }}
                     onDrop={(e) => e.preventDefault()}
                     onChange={(e) => setInlineOtpCode(e.target.value.replace(/\D/g, ''))}
-                    className="w-28 h-9 px-2.5 text-center text-sm font-mono tracking-widest rounded border border-slate-300 bg-white focus:outline-none focus:border-navy focus:ring-1 focus:ring-navy"
+                    className="w-28 h-9 px-2.5 text-center text-sm font-semibold tabular-nums tracking-widest rounded border border-slate-300 bg-white focus:outline-none focus:border-navy focus:ring-1 focus:ring-navy"
                   />
                   <Button
                     type="button"

@@ -82,7 +82,7 @@ export const GigPage: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs flex items-center justify-between">
           <div>
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Collections Recorded</span>
+            <span className="text-xs font-semibold text-slate-600">Total Collections Recorded</span>
             <div className="text-3xl font-bold text-navy font-heading mt-1">
               {formatCurrency(totalCollected)}
             </div>
@@ -95,7 +95,7 @@ export const GigPage: React.FC = () => {
 
         <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs flex items-center justify-between">
           <div>
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Givers Logged</span>
+            <span className="text-xs font-semibold text-slate-600">Total Givers Logged</span>
             <div className="text-3xl font-bold text-slate-900 font-heading mt-1">
               {records.length}
             </div>

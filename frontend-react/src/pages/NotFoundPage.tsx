@@ -11,7 +11,7 @@ export const NotFoundPage: React.FC = () => {
           <Compass className="w-7 h-7" />
         </div>
         <div>
-          <span className="text-xs font-bold tracking-widest text-amber-700 font-heading uppercase">
+          <span className="text-xs font-semibold text-amber-700 font-heading">
             Error 404
           </span>
           <h1 className="text-2xl font-bold text-text-main font-heading tracking-tight mt-1">

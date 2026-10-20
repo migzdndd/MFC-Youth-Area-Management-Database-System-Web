@@ -83,12 +83,11 @@ export const DeveloperDashboardPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Banner & Control Deck */}
-      <div className="bg-gradient-to-r from-navy-deep via-navy to-slate-900 text-white rounded-2xl p-6 shadow-md border border-navy-light/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-sky-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+      <div className="bg-navy-deep text-white rounded-2xl p-6 border border-navy-surface relative overflow-hidden">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="space-y-1.5">
             {user?.email && (
-              <span className="text-xs text-slate-300 font-mono block">
+              <span className="text-xs text-slate-300 block">
                 {user.email}
               </span>
             )}

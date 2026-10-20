@@ -51,8 +51,8 @@ export const ReadingsPage: React.FC = () => {
       ) : (
         <div className="space-y-3.5">
           {/* Celebration Header */}
-          <div className="bg-navy-deep text-white rounded-2xl p-4 sm:p-5 shadow-md border border-navy-surface">
-            <span className="text-xs font-bold text-amber-300 uppercase tracking-widest font-heading">
+          <div className="bg-navy-deep text-white rounded-2xl p-4 sm:p-5 border border-navy-surface">
+            <span className="text-xs font-semibold text-amber-300 font-heading">
               {data.day}, {data.date}
             </span>
             <h2 className="text-lg sm:text-xl font-bold font-heading text-white mt-1 leading-snug">
@@ -81,11 +81,11 @@ export const ReadingsPage: React.FC = () => {
                 <div className="flex items-center justify-between pb-2 border-b border-border-subtle">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-amber-500" />
-                    <h3 className="text-xs sm:text-sm font-bold text-navy uppercase tracking-wider font-heading">
+                    <h3 className="text-xs sm:text-sm font-bold text-navy font-heading">
                       {reading.type}
                     </h3>
                   </div>
-                  <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200">
+                  <span className="text-xs font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                     {reading.reference}
                   </span>
                 </div>

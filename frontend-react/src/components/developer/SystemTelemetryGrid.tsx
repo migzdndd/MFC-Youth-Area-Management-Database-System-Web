@@ -33,13 +33,13 @@ export const SystemTelemetryGrid: React.FC<SystemTelemetryGridProps> = ({
       {/* Database Latency */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">System Connection</span>
+          <span className="text-xs font-semibold text-slate-600">System Connection</span>
           <div className="p-2 bg-emerald-50 text-emerald-700 rounded-lg">
             <Database className="w-4 h-4" />
           </div>
         </div>
         <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-extrabold text-slate-900">
+          <span className="text-2xl font-extrabold text-slate-900 tabular-nums">
             {testedLatency !== null
               ? `${testedLatency}ms`
               : metrics?.system.dbLatencyMs !== undefined
@@ -66,39 +66,39 @@ export const SystemTelemetryGrid: React.FC<SystemTelemetryGridProps> = ({
       {/* Runtime & Uptime */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Process Uptime</span>
+          <span className="text-xs font-semibold text-slate-600">Process Uptime</span>
           <div className="p-2 bg-sky-50 text-sky-800 rounded-lg">
             <Clock className="w-4 h-4" />
           </div>
         </div>
-        <div className="text-2xl font-extrabold text-slate-900">
+        <div className="text-2xl font-extrabold text-slate-900 tabular-nums">
           {metrics?.system.uptimeSeconds ? formatUptime(metrics.system.uptimeSeconds) : 'Calculating...'}
         </div>
         <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
           <span>Runtime Engine</span>
-          <span className="font-mono font-medium text-slate-800">{metrics?.system.nodeVersion || 'v20.x'}</span>
+          <span className="font-mono text-xs font-medium text-slate-800">{metrics?.system.nodeVersion || 'v20.x'}</span>
         </div>
       </div>
 
       {/* Memory Allocation */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Memory Usage</span>
+          <span className="text-xs font-semibold text-slate-600">Memory Usage</span>
           <div className="p-2 bg-amber-50 text-amber-700 rounded-lg">
             <Cpu className="w-4 h-4" />
           </div>
         </div>
         <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-extrabold text-slate-900">
+          <span className="text-2xl font-extrabold text-slate-900 tabular-nums">
             {metrics?.system.memory.heapUsedMb ? `${metrics.system.memory.heapUsedMb} MB` : 'N/A'}
           </span>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-slate-500 tabular-nums">
             / {metrics?.system.memory.heapTotalMb ? `${metrics.system.memory.heapTotalMb} MB` : 'N/A'}
           </span>
         </div>
         <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
           <span>Total Memory</span>
-          <span className="font-mono font-medium text-slate-800">
+          <span className="font-semibold text-slate-800 tabular-nums">
             {metrics?.system.memory.rssMb ? `${metrics.system.memory.rssMb} MB` : 'N/A'}
           </span>
         </div>
@@ -107,12 +107,12 @@ export const SystemTelemetryGrid: React.FC<SystemTelemetryGridProps> = ({
       {/* Architecture & Environment */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Host Platform</span>
-          <div className="p-2 bg-violet-50 text-violet-700 rounded-lg">
+          <span className="text-xs font-semibold text-slate-600">Host Platform</span>
+          <div className="p-2 bg-sky-50 text-sky-800 rounded-lg">
             <Server className="w-4 h-4" />
           </div>
         </div>
-        <div className="text-2xl font-extrabold text-slate-900 uppercase">
+        <div className="text-2xl font-extrabold text-slate-900">
           {metrics?.system.platform ? `${metrics.system.platform} (${metrics.system.arch})` : 'Windows'}
         </div>
         <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">

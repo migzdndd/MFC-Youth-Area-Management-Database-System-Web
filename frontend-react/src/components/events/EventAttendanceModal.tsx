@@ -344,7 +344,7 @@ export const EventAttendanceModal: React.FC<EventAttendanceModalProps> = ({
 
           {nonMemberParticipants.length > 0 && (
             <div className="space-y-2 pt-2 border-t border-slate-200">
-              <div className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <div className="text-xs font-bold text-slate-800">
                 Guest Participants List ({filteredGuests.length})
               </div>
 

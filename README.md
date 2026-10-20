@@ -39,6 +39,7 @@ Inside the Services Tab, each access level sees an interface tailored to their p
 - **Optimized Layout Footprint**: Streamlined header banners (`rounded-xl px-4 py-3`), compact card padding (`p-3.5 sm:p-4`), and reduced global margins (`p-3.5 sm:p-5 lg:p-6`).
 - **Adaptive Responsive Grids**: Symmetrical layout distribution that dynamically scales to 1, 2, or 3 columns to prevent awkward empty slots.
 - **Accessible Field Targets**: Preserves 44px minimum touch targets and WCAG AA color contrast across both light and dark themes.
+- **Frontend Taste & Art Direction**: Integrated with the `taste` (`design-taste-frontend` / tasteskill v2) skill, enforcing two-line headline limits, zero-slop app-screen guidelines, and real browser inspection.
 
 ### Built-in Presentation Demo Accounts
 Pre-configured demo accounts for presenting role-specific capabilities without exposing real member records:
@@ -168,5 +169,8 @@ npm --prefix frontend-react run lint
 
 # TypeScript compiler validation
 npm --prefix frontend-react run typecheck
+
+# Frontend taste and anti-slop linting
+node .agents/skills/design-taste-frontend/scripts/lint.mjs frontend-react/src/
 ```
 

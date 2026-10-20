@@ -95,7 +95,7 @@ export const DashboardPage: React.FC = () => {
         >
           <div>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-bold text-navy dark:text-sky-400 uppercase tracking-wider">
+              <span className="text-xs font-semibold text-navy dark:text-sky-400">
                 Primary Focus &middot; Total Members
               </span>
               <div className="p-3 rounded-xl bg-navy dark:bg-sky-500/20 text-white dark:text-sky-400 border border-transparent dark:border-sky-500/30 group-hover:scale-105 transition-transform duration-150 shadow-2xs">
@@ -127,7 +127,7 @@ export const DashboardPage: React.FC = () => {
             className="p-5 bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-2xs hover:shadow-md hover:border-slate-300 dark:hover:border-sky-500/40 transition-all duration-200 group flex flex-col justify-between"
           >
             <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+              <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                 Active Chapters
               </span>
               <div className="p-2.5 rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-transparent dark:border-amber-500/30 group-hover:scale-105 transition-transform duration-150 shadow-2xs">
@@ -152,7 +152,7 @@ export const DashboardPage: React.FC = () => {
             className="p-5 bg-white dark:bg-[#0e1e36] border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-2xs hover:shadow-md hover:border-slate-300 dark:hover:border-sky-500/40 transition-all duration-200 group flex flex-col justify-between"
           >
             <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+              <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                 Activity Reports
               </span>
               <div className="p-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-transparent dark:border-emerald-500/30 group-hover:scale-105 transition-transform duration-150 shadow-2xs">
@@ -271,14 +271,14 @@ export const DashboardPage: React.FC = () => {
 
       {/* Liturgical Readings Snippet */}
       {readingsData && (
-        <div className="bg-gradient-to-r from-amber-50/60 to-white dark:from-amber-950/30 dark:to-[#0e1e36] border border-amber-200/80 dark:border-amber-500/30 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="bg-amber-50/70 dark:bg-[#0e1e36] border border-amber-200/80 dark:border-amber-500/30 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
             <div className="p-3 rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-300/80 dark:border-amber-500/30 shrink-0 shadow-2xs">
               <BookOpen className="w-5 h-5 text-amber-800 dark:text-amber-300" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wide">Daily Liturgical Readings</span>
+                <span className="text-xs font-semibold text-amber-900 dark:text-amber-300">Daily Liturgical Readings</span>
                 <span className="text-xs text-slate-500 dark:text-slate-400">&middot; {readingsData.date}</span>
               </div>
               <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-0.5">

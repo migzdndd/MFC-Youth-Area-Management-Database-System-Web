@@ -39,6 +39,7 @@ Unlike generic community databases or unwieldy spreadsheets, the system is purpo
   - Event registration, fee status tracking, and attendance verification.
   - GIG (God is Generous) stewardship catalog and service tracking.
   - Compact, minimal, and clean UI density: streamlined horizontal headers, dynamically balanced responsive card grids, tight member list padding, and 44px minimum touch targets.
+  - Frontend Taste & Art Direction: Strict adherence to the `taste` skill (`design-taste-frontend` / tasteskill v2) standards for app screens: two-line headline ceilings, no eyebrows/pill badges, no resting shadows or gradients, no assistant palette, equal outer margins, and automated browser inspection.
   - Built-in Demo Presentation Accounts across all leadership tiers for live demonstrations and walkthroughs.
 - **Constraints**:
   - Strictly a web application (no native mobile app wrappers, no PWA install prompts, standard browser navigation).

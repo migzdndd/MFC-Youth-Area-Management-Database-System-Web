@@ -287,7 +287,7 @@ export const QrAttendanceScannerModal: React.FC<QrAttendanceScannerModalProps> =
               <p className="text-xs font-bold text-emerald-950 truncate">Checked In Successfully</p>
               <p className="text-xs text-emerald-800 truncate font-semibold">{lastScannedMember.name}</p>
             </div>
-            <span className="text-[11px] font-mono text-emerald-600 shrink-0">{lastScannedMember.time}</span>
+            <span className="text-xs tabular-nums text-emerald-700 shrink-0">{lastScannedMember.time}</span>
           </div>
         )}
 

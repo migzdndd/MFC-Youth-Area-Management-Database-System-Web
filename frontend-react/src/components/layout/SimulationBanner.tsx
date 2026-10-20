@@ -30,14 +30,14 @@ export const SimulationBanner: React.FC = () => {
   return (
     <aside
       aria-label="Live simulation notification"
-      className="bg-gradient-to-r from-amber-700 via-amber-600 to-amber-700 text-white text-xs px-4 py-2 shadow-sm flex flex-wrap items-center justify-between gap-3 sticky top-0 z-40 border-b border-amber-800"
+      className="bg-amber-800 text-white text-xs px-4 py-2 shadow-2xs flex flex-wrap items-center justify-between gap-3 sticky top-0 z-40 border-b border-amber-900"
     >
       <div className="flex items-center gap-2">
-        <ShieldAlert className="w-4 h-4 text-amber-200 shrink-0 animate-pulse" />
-        <span className="font-bold tracking-wide">
+        <ShieldAlert className="w-4 h-4 text-amber-200 shrink-0" />
+        <span className="font-bold">
           Live Role Simulation:
         </span>
-        <span className="bg-amber-900/60 px-2 py-0.5 rounded-full font-bold text-amber-100 border border-amber-400/40">
+        <span className="bg-amber-950/70 px-2 py-0.5 rounded text-xs font-bold text-amber-100 border border-amber-500/40">
           {simulatedLabel}
         </span>
         <span className="hidden sm:inline text-amber-100/90">

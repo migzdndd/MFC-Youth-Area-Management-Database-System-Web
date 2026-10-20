@@ -78,7 +78,7 @@ export const EventSummaryModal: React.FC<EventSummaryModalProps> = ({
     >
       <div className="space-y-6">
         {/* Header Card */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-navy/5 via-slate-50 to-white border border-slate-200/80 shadow-2xs">
+        <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 shadow-2xs">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-2">
               <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
@@ -109,7 +109,7 @@ export const EventSummaryModal: React.FC<EventSummaryModalProps> = ({
               <Calendar className="w-4 h-4" />
             </div>
             <div>
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <div className="text-xs font-semibold text-slate-600">
                 Schedule & Timing
               </div>
               <div className="text-sm font-bold text-slate-900 mt-0.5">
@@ -124,7 +124,7 @@ export const EventSummaryModal: React.FC<EventSummaryModalProps> = ({
               <MapPin className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <div className="text-xs font-semibold text-slate-600">
                 Venue Location
               </div>
               <div className="text-sm font-bold text-slate-900 mt-0.5 truncate">
@@ -141,7 +141,7 @@ export const EventSummaryModal: React.FC<EventSummaryModalProps> = ({
               <User className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <div className="text-xs font-semibold text-slate-600">
                 Event Organizer
               </div>
               <div className="text-sm font-bold text-slate-900 mt-0.5 truncate">
@@ -161,7 +161,7 @@ export const EventSummaryModal: React.FC<EventSummaryModalProps> = ({
               <CreditCard className="w-4 h-4" />
             </div>
             <div>
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <div className="text-xs font-semibold text-slate-600">
                 Registration Fee
               </div>
               <div className="text-sm font-bold text-slate-900 mt-0.5">

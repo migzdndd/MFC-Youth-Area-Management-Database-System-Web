@@ -74,7 +74,7 @@ body {
   font-family: var(--font-body);
   background-color: var(--color-canvas);
   color: var(--color-text-main);
-  min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -490,7 +490,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .animate-fade-out {
-  animation: mfcFadeOut 120ms ease-in both;
+  animation: mfcFadeOut 120ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .animate-scale-in {

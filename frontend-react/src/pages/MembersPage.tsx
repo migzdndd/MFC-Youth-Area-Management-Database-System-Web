@@ -280,7 +280,7 @@ export const MembersPage: React.FC = () => {
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <thead className="bg-slate-50/80 text-xs font-bold text-slate-600 uppercase border-b border-border-subtle tracking-wider">
+                <thead className="bg-slate-50/80 text-xs font-semibold text-slate-700 border-b border-border-subtle">
                   <tr>
                     <th className="px-5 py-3.5">Member</th>
                     <th className="px-5 py-3.5">Track</th>
