@@ -1,7 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth-store';
-import type { Member, MemberFilter } from '@/types/member';
+import type { Member, MemberFilter, AcademicTrack } from '@/types/member';
+
+export interface UpdateMemberInput extends Partial<Member> {
+  id: string;
+  track?: AcademicTrack | string | null;
+}
 
 export function useMembers(filters?: MemberFilter) {
   const { token, user, activeArea } = useAuthStore();
@@ -52,20 +57,62 @@ export function useCreateMember() {
 export function useUpdateMember() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (member: Partial<Member> & { id: string }) =>
+    mutationFn: (member: UpdateMemberInput) =>
       apiClient<{ ok: boolean; data?: Member; member?: Member }>('/members', {
         method: 'PUT',
         body: JSON.stringify(member),
       }),
-    onSuccess: (res, variables) => {
-      const updated = res.data || (res as unknown as { member?: Member }).member || variables;
+    onMutate: async (newMember: UpdateMemberInput) => {
+      // 1. Cancel in-flight queries so they don't overwrite optimistic state
+      await queryClient.cancelQueries({ queryKey: ['members'] });
+
+      // 2. Snapshot previous cache entries across any filtered member queries
+      const previousQueries = queryClient.getQueriesData<Member[]>({ queryKey: ['members'] });
+
+      // 3. Optimistically update all matching members queries immediately
       queryClient.setQueriesData({ queryKey: ['members'] }, (old: Member[] | undefined) => {
         if (!old || !Array.isArray(old)) return old;
-        return old.map((m) => (m.id === variables.id ? { ...m, ...variables, ...updated } : m));
+        return old.map((m) => {
+          if (m.id !== newMember.id) return m;
+          return {
+            ...m,
+            ...newMember,
+            contact: newMember.contact || newMember.contact_number || m.contact,
+            contact_number: newMember.contact || newMember.contact_number || m.contact_number,
+            service: newMember.service !== undefined ? newMember.service : m.service,
+            assigned_services: newMember.service
+              ? [newMember.service]
+              : (newMember.assigned_services || m.assigned_services),
+            status: newMember.status || m.status,
+            academic_track: newMember.academic_track || newMember.track || m.academic_track,
+            updated_at: new Date().toISOString(),
+          };
+        });
       });
-      queryClient.invalidateQueries({ queryKey: ['members'], refetchType: 'all' });
-      queryClient.invalidateQueries({ queryKey: ['chapters'], refetchType: 'all' });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'], refetchType: 'all' });
+
+      return { previousQueries };
+    },
+    onError: (_err, _newMember, context) => {
+      // Roll back to previous snapshot if the network request fails
+      if (context?.previousQueries) {
+        for (const [queryKey, oldData] of context.previousQueries) {
+          queryClient.setQueryData(queryKey, oldData);
+        }
+      }
+    },
+    onSuccess: (res, variables) => {
+      const updated = res.data || (res as unknown as { member?: Member }).member;
+      if (updated) {
+        queryClient.setQueriesData({ queryKey: ['members'] }, (old: Member[] | undefined) => {
+          if (!old || !Array.isArray(old)) return old;
+          return old.map((m) => (m.id === variables.id ? { ...m, ...updated } : m));
+        });
+      }
+    },
+    onSettled: () => {
+      // Silently revalidate active queries in the background without blocking the UI
+      queryClient.invalidateQueries({ queryKey: ['members'], refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'], refetchType: 'active' });
     },
   });
 }

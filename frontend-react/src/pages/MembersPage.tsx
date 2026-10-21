@@ -98,7 +98,7 @@ export const MembersPage: React.FC = () => {
     const memberFullName = [formData.firstName, formData.middleName, formData.lastName].filter(Boolean).join(' ');
     try {
       if (editingMember) {
-        await updateMember.mutateAsync({
+        const payload = {
           id: editingMember.id,
           first_name: formData.firstName,
           middle_name: formData.middleName || null,
@@ -109,13 +109,23 @@ export const MembersPage: React.FC = () => {
           academic_track: formData.track,
           service: formData.service || null,
           contact: formData.contact,
+          contact_number: formData.contact,
           email: formData.email,
           status: formData.status,
           guardian_name: formData.guardianName,
           guardian_contact: formData.guardianContact,
-        });
+        };
+
+        // Close modal immediately and provide instant visual feedback
         setIsModalOpen(false);
-        toast.success('Successful', `Information for ${memberFullName} has been updated successfully.`);
+        toast.success('Successful', `Information for ${memberFullName} has been updated.`);
+
+        updateMember.mutate(payload, {
+          onError: (err: unknown) => {
+            const errorMsg = err instanceof Error ? err.message : 'Failed to save member record.';
+            toast.error('Update Failed', errorMsg);
+          },
+        });
       } else {
         await createMember.mutateAsync({
           first_name: formData.firstName,
@@ -127,6 +137,7 @@ export const MembersPage: React.FC = () => {
           academic_track: formData.track,
           service: formData.service || null,
           contact: formData.contact,
+          contact_number: formData.contact,
           email: formData.email,
           status: formData.status,
           guardian_name: formData.guardianName,

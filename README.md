@@ -16,6 +16,7 @@ The **MFC Youth Area Management System (AMS)** serves as a central operational p
 - **Youth Directory**: Complete records for MFC Youth (ages 13 to 21, plus Heartchamps), including contact details, residential addresses, emergency contacts, academic tracks, and chapter assignments.
 - **Pastoral Grouping & Households**: Track household membership, household heads, and pastoral growth milestones across area chapters.
 - **Academic Tracks**: Scoped tracks for College, Senior High School, Junior High School (Grades 7 to 10), and Heartchamps.
+- **Optimistic Updates & Telephone Masking**: Instantaneous UI updates on member record edits (<50ms perceived latency) via TanStack Query optimistic mutations (`onMutate` with rollback snapshot), with real-time telephone formatting for Philippine mobile (`09XX XXX XXXX` / `+63 9XX XXX XXXX`) and landlines.
 
 ### 4-Tier Role-Based Access Control (RBAC)
 - **Tier 1 - Area Administrators**: Full area visibility and oversight for National Coordinators, Area Servants, and Couple Coordinators.

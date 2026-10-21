@@ -17,6 +17,10 @@ import {
   CreateReportSchema,
   UpdateReportSchema,
 } from '../frontend-react/src/types/schemas.ts';
+import {
+  formatTelephoneNumber,
+  isValidTelephoneNumber,
+} from '../frontend-react/src/lib/utils.ts';
 
 test('normalizeNullableString handles edge cases', () => {
   assert.equal(normalizeNullableString(null), null);
@@ -234,3 +238,41 @@ test('validatePayload helper returns structured errors and field maps', () => {
   assert.ok(failureRes.fieldErrors.email);
   assert.ok(failureRes.fieldErrors.password);
 });
+
+test('formatTelephoneNumber formats Philippine and international numbers correctly', () => {
+  // Philippine mobile 09XX
+  assert.equal(formatTelephoneNumber('09171234567'), '0917 123 4567');
+  assert.equal(formatTelephoneNumber('0917123'), '0917 123');
+  assert.equal(formatTelephoneNumber('0917'), '0917');
+
+  // Input without leading 0 (auto-expand 9XX)
+  assert.equal(formatTelephoneNumber('9171234567'), '0917 123 4567');
+
+  // International Philippine +63 / 63
+  assert.equal(formatTelephoneNumber('+639171234567'), '+63 917 123 4567');
+  assert.equal(formatTelephoneNumber('639171234567'), '+63 917 123 4567');
+
+  // Metro Manila landline 02
+  assert.equal(formatTelephoneNumber('0281234567'), '(02) 8123 4567');
+
+  // Strips non-digit garbage
+  assert.equal(formatTelephoneNumber('0917-ABC-123-4567'), '0917 123 4567');
+  assert.equal(formatTelephoneNumber(''), '');
+  assert.equal(formatTelephoneNumber(null), '');
+});
+
+test('isValidTelephoneNumber validates complete telephone numbers', () => {
+  // Valid formats
+  assert.equal(isValidTelephoneNumber('0917 123 4567'), true);
+  assert.equal(isValidTelephoneNumber('+63 917 123 4567'), true);
+  assert.equal(isValidTelephoneNumber('(02) 8123 4567'), true);
+  assert.equal(isValidTelephoneNumber(''), true); // optional
+  assert.equal(isValidTelephoneNumber(null), true); // optional
+
+  // Invalid formats (too short, truncated, incomplete)
+  assert.equal(isValidTelephoneNumber('0917'), false);
+  assert.equal(isValidTelephoneNumber('0917 123'), false);
+  assert.equal(isValidTelephoneNumber('+63 917 12'), false);
+  assert.equal(isValidTelephoneNumber('12345'), false);
+});
+

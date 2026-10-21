@@ -352,32 +352,35 @@ export const ServicesPage: React.FC = () => {
     if (!editingMember) return;
     const memberFullName = [formData.firstName, formData.middleName, formData.lastName].filter(Boolean).join(' ');
 
-    try {
-      await updateMember.mutateAsync({
-        id: editingMember.id,
-        first_name: formData.firstName,
-        middle_name: formData.middleName || null,
-        last_name: formData.lastName,
-        nickname: formData.nickname || null,
-        gender: formData.gender,
-        chapter_id: formData.chapterId || null,
-        academic_track: formData.track,
-        service: formData.service || null,
-        assigned_services: formData.service ? [formData.service] : [],
-        contact_number: formData.contact || null,
-        contact: formData.contact || null,
-        email: formData.email,
-        status: formData.status,
-        guardian_name: formData.guardianName || null,
-        guardian_contact: formData.guardianContact || null,
-      });
+    const payload = {
+      id: editingMember.id,
+      first_name: formData.firstName,
+      middle_name: formData.middleName || null,
+      last_name: formData.lastName,
+      nickname: formData.nickname || null,
+      gender: formData.gender,
+      chapter_id: formData.chapterId || null,
+      academic_track: formData.track,
+      service: formData.service || null,
+      assigned_services: formData.service ? [formData.service] : [],
+      contact_number: formData.contact || null,
+      contact: formData.contact || null,
+      email: formData.email,
+      status: formData.status,
+      guardian_name: formData.guardianName || null,
+      guardian_contact: formData.guardianContact || null,
+    };
 
-      toast.success(`Member info for ${memberFullName} updated successfully!`);
-      setIsEditModalOpen(false);
-      setEditingMember(null);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to update member info.');
-    }
+    // Close modal immediately and provide instant feedback
+    setIsEditModalOpen(false);
+    setEditingMember(null);
+    toast.success(`Member info for ${memberFullName} updated successfully!`);
+
+    updateMember.mutate(payload, {
+      onError: (err: unknown) => {
+        toast.error(err instanceof Error ? err.message : 'Failed to update member info.');
+      },
+    });
   };
 
   return (

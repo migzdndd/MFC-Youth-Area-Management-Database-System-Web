@@ -3,6 +3,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
+import { formatTelephoneNumber, isValidTelephoneNumber } from '@/lib/utils';
 import type { Member, AcademicTrack, MemberStatus } from '@/types/member';
 import type { Chapter } from '@/types/chapter';
 
@@ -59,13 +60,17 @@ const MemberFormContent: React.FC<MemberFormContentProps> = ({
   const [service, setService] = useState(
     editingMember?.service || (editingMember?.assigned_services && editingMember.assigned_services[0]) || ''
   );
-  const [contact, setContact] = useState(editingMember?.contact || editingMember?.contact_number || '');
+  const [contact, setContact] = useState(() =>
+    formatTelephoneNumber(editingMember?.contact || editingMember?.contact_number || '')
+  );
   const [email, setEmail] = useState(editingMember?.email || '');
   const [status, setStatus] = useState<MemberStatus>(
     editingMember?.status?.toLowerCase() === 'inactive' ? 'inactive' : 'active'
   );
   const [guardianName, setGuardianName] = useState(editingMember?.guardian_name || '');
-  const [guardianContact, setGuardianContact] = useState(editingMember?.guardian_contact || '');
+  const [guardianContact, setGuardianContact] = useState(() =>
+    formatTelephoneNumber(editingMember?.guardian_contact || '')
+  );
   const [formError, setFormError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -100,12 +105,12 @@ const MemberFormContent: React.FC<MemberFormContentProps> = ({
       errors.email = 'Please provide a valid email address (e.g., name@example.com).';
     }
 
-    if (cleanContact && !/^[0-9+()\-\s]{7,20}$/.test(cleanContact)) {
-      errors.contact = 'Please enter a valid phone number (at least 7 digits).';
+    if (cleanContact && !isValidTelephoneNumber(cleanContact)) {
+      errors.contact = 'Please enter a valid telephone number (e.g. 0917 123 4567 or +63 917 123 4567).';
     }
 
-    if (cleanGuardianContact && !/^[0-9+()\-\s]{7,20}$/.test(cleanGuardianContact)) {
-      errors.guardianContact = 'Please enter a valid emergency contact number.';
+    if (cleanGuardianContact && !isValidTelephoneNumber(cleanGuardianContact)) {
+      errors.guardianContact = 'Please enter a valid emergency telephone number (e.g. 0917 123 4567 or (02) 8123 4567).';
     }
 
     if (Object.keys(errors).length > 0) {
@@ -253,13 +258,16 @@ const MemberFormContent: React.FC<MemberFormContentProps> = ({
         <Input
           label="Mobile Number"
           name="contact"
+          type="tel"
+          inputMode="tel"
           autoComplete="tel"
           value={contact}
           onChange={(e) => {
-            setContact(e.target.value);
+            const formatted = formatTelephoneNumber(e.target.value);
+            setContact(formatted);
             if (fieldErrors.contact) setFieldErrors((prev) => ({ ...prev, contact: '' }));
           }}
-          placeholder="09123456789"
+          placeholder="0917 123 4567 or +63 917 123 4567"
           error={fieldErrors.contact}
         />
         <Input
@@ -290,13 +298,16 @@ const MemberFormContent: React.FC<MemberFormContentProps> = ({
         <Input
           label="Guardian Contact"
           name="guardianContact"
+          type="tel"
+          inputMode="tel"
           autoComplete="tel"
           value={guardianContact}
           onChange={(e) => {
-            setGuardianContact(e.target.value);
+            const formatted = formatTelephoneNumber(e.target.value);
+            setGuardianContact(formatted);
             if (fieldErrors.guardianContact) setFieldErrors((prev) => ({ ...prev, guardianContact: '' }));
           }}
-          placeholder="Emergency phone number"
+          placeholder="0917 123 4567 or (02) 8123 4567"
           error={fieldErrors.guardianContact}
         />
       </div>

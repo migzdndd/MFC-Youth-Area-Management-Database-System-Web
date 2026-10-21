@@ -554,23 +554,41 @@ async function updateMember(req, res) {
   }
 
   const hasServiceInput = input.service !== undefined || input.serviceName !== undefined || input.assigned_services !== undefined || input.assigned_service !== undefined;
+  let assignedServices = [];
+
   if (hasServiceInput) {
     const rawService = input.service ?? input.serviceName ?? input.assigned_service ?? (Array.isArray(input.assigned_services) ? input.assigned_services[0] : null);
     const normalizedService = rawService ? normalizeServiceName(rawService) : '';
 
-    await admin.from('member_services').delete().eq('member_id', memberId);
+    // Check existing service to prevent redundant delete and re-insert cycles
+    const { data: currentAssignments } = await admin
+      .from('member_services')
+      .select('service_id, services(id, name)')
+      .eq('member_id', memberId);
 
-    if (normalizedService) {
-      const services = await ensureStandardServices(admin, areaId);
-      const targetService = services.find(
-        (s) => normalizeServiceName(s.name).toLowerCase() === normalizedService.toLowerCase()
-      );
-      if (targetService?.id) {
-        await admin.from('member_services').insert({
-          member_id: memberId,
-          service_id: targetService.id
-        });
+    const currentServiceName = currentAssignments && currentAssignments[0]?.services?.name
+      ? normalizeServiceName(currentAssignments[0].services.name)
+      : '';
+    const serviceChanged = currentServiceName.toLowerCase() !== normalizedService.toLowerCase();
+
+    if (serviceChanged) {
+      await admin.from('member_services').delete().eq('member_id', memberId);
+
+      if (normalizedService) {
+        const services = await ensureStandardServices(admin, areaId);
+        const targetService = services.find(
+          (s) => normalizeServiceName(s.name).toLowerCase() === normalizedService.toLowerCase()
+        );
+        if (targetService?.id) {
+          await admin.from('member_services').insert({
+            member_id: memberId,
+            service_id: targetService.id
+          });
+          assignedServices = [targetService.name];
+        }
       }
+    } else {
+      assignedServices = (currentAssignments || []).map((ca) => ca.services?.name).filter(Boolean);
     }
   } else if (roleChanged) {
     await ensureRoleServiceAssignment(admin, {
@@ -580,28 +598,36 @@ async function updateMember(req, res) {
     });
   }
 
-  const { data: memberServiceRows } = await admin
-    .from('member_services')
-    .select('service_id')
-    .eq('member_id', updated.id);
-  let assignedServices = [];
-  if (memberServiceRows && memberServiceRows.length > 0) {
-    const sIds = memberServiceRows.map((r) => r.service_id);
-    const { data: sRows } = await admin
-      .from('services')
-      .select('name')
-      .in('id', sIds);
-    assignedServices = (sRows || []).map((s) => s.name);
+  // Query remaining service details and chapter name in parallel
+  const postTasks = [];
+  if (assignedServices.length === 0) {
+    postTasks.push(
+      admin
+        .from('member_services')
+        .select('service_id, services(name)')
+        .eq('member_id', updated.id)
+        .then(({ data: msRows }) => {
+          assignedServices = (msRows || []).map((r) => r.services?.name).filter(Boolean);
+        })
+    );
   }
 
   let chapterName = null;
   if (updated.chapter_id) {
-    const { data: ch } = await admin
-      .from('chapters')
-      .select('name')
-      .eq('id', updated.chapter_id)
-      .maybeSingle();
-    chapterName = ch?.name || null;
+    postTasks.push(
+      admin
+        .from('chapters')
+        .select('name')
+        .eq('id', updated.chapter_id)
+        .maybeSingle()
+        .then(({ data: ch }) => {
+          chapterName = ch?.name || null;
+        })
+    );
+  }
+
+  if (postTasks.length > 0) {
+    await Promise.all(postTasks);
   }
 
   const memberResult = {
