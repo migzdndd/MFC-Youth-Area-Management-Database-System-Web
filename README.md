@@ -186,3 +186,17 @@ The repository utilizes an optimized, parallelized GitHub Actions workflow (`.gi
   4. **Container Build, Vulnerability Scan & Smoke Test**: Builds container image via Docker Buildx with GitHub Actions caching (`type=gha`), cached Trivy vulnerability databases (`~/.cache/trivy`), and instant-exit health smoke testing.
 - **Inlined PaaS Routing Validation**: Verifies `vercel.json` rewrite routing during pre-flight in 2ms, eliminating an entire runner VM lifecycle and saving ~40 seconds of queue time.
 
+---
+
+## Live Cloud & Deployment Observability (MCP Protocol)
+
+The project supports real-time cloud management and observability via **Model Context Protocol (MCP)** integrations:
+- **Vercel Remote MCP**: Connected at `https://mcp.vercel.com` with Bearer authentication (`"Authorization": "Bearer vcp_..."`) in `~/.gemini/config/mcp_config.json`.
+  - Continuous deployment tracking: Inspect production deployment status (`READY`, `BUILDING`, `ERROR`) and rollback candidates.
+  - Zero-guess runtime diagnostics: Stream edge serverless logs and runtime exceptions directly in IDE.
+- **Supabase Cloud MCP**: Connects to project `desmhxtmnmfybrsdwhwz` (Singapore `ap-southeast-1`).
+  - Automated security & performance advisors (`supabase.get_advisors`).
+  - Direct SQL diagnostics (`supabase.execute_sql`).
+- **Instant Brain Recall**: Run `npm run find deployment` to immediately surface live infrastructure IDs and telemetry procedures.
+
+
