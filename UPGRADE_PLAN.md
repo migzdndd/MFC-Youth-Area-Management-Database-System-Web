@@ -1,7 +1,11 @@
 # MFC Youth Area Management System (MFC Youth AMS)
 ## Frontend Modernization & Migration Plan (Static HTML to Vite + React 19 + TypeScript)
 
-> **Audience**: Engineering Team and Contributors  
+> [!IMPORTANT]
+> **STRICTLY A PROJECT / NON-PRODUCTION DISCLAIMER**  
+> This modernization and migration plan documents an educational software engineering and architectural refactoring project. **It is strictly a technical demonstration project and NOT an operational deployment plan for live production systems.**
+
+> **Audience**: Engineering Team, Reviewers, and Contributors  
 > **Status**: Completed (All 6 Phases Executed, Migrated, and Verified)  
 > **Antislop Mode**: Active and strictly validated
 
@@ -9,7 +13,7 @@
 
 ## 1. System & Operational Context
 
-The **MFC Youth Area Management System (MFC Youth AMS)** is a secure, field-ready administrative and pastoral portal for **Missionary Families for Christ (MFC) Youth**.
+The **MFC Youth Area Management System (MFC Youth AMS)** is an educational software engineering prototype demonstrating modern administrative and pastoral portal architectures.
 
 ### Operating Environment & Persona Constraints
 - **Primary Users**: Servant Leaders, Chapter Heads, and Household Leaders operating in parish halls, retreat camps, classrooms, and outdoor event grounds on smartphones under spotty or offline mobile network conditions.

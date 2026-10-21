@@ -1,6 +1,10 @@
 # MFC Youth Area Management System - Setup & Deployment Guide
 
-This step-by-step guide walks you through setting up Supabase, running local environments, and deploying your entire application (React 19 Frontend + Serverless API) into a single Vercel project using the Vercel Web Dashboard.
+> [!IMPORTANT]
+> **STRICTLY A PROJECT / NON-PRODUCTION DISCLAIMER**  
+> This setup and deployment guide is intended strictly for educational, testing, and portfolio demonstration purposes. **This deployment configuration is NOT intended for official production operations or storing live organizational data for Missionary Families for Christ (MFC) Youth.**
+
+This step-by-step guide walks you through setting up Supabase, running local environments, and deploying the demonstration prototype (React 19 Frontend + Serverless API) into a Vercel project for evaluation and portfolio review.
 
 ---
 
@@ -34,7 +38,7 @@ git branch -M main
 
 ### Step 2.1: Supabase Project
 1. Log in to [Supabase Dashboard](https://supabase.com/dashboard).
-2. Open your production project (or create a new project).
+2. Open your demonstration project (or create a new project for testing).
 3. Confirm your region (e.g., `Singapore - ap-southeast-1`).
 
 ### Step 2.2: Obtain API Keys & Project URL

@@ -1,7 +1,11 @@
 # Security Policy
 
+> [!IMPORTANT]
+> **STRICTLY A PROJECT / NON-PRODUCTION DISCLAIMER**  
+> This security policy applies to an educational, demonstration, and portfolio project repository. **This codebase is NOT an enterprise production system, and is not intended to secure or process live production data for Missionary Families for Christ (MFC) Youth.**
+
 ## Supported Versions
-Only the latest **Web Beta (Phase 6)** receives security updates. Older versions are unsupported.
+Only the latest **Web Prototype (Phase 6)** receives maintenance updates. Older prototype versions are unsupported.
 
 ## Reporting a Vulnerability
 Please report security vulnerabilities privately to **miguel7riovaldez@gmail.com**. Do not open public issues for security exploits.

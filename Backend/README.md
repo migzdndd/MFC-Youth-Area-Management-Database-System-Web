@@ -1,6 +1,10 @@
 # Backend API & Cloud Data Services
 
-The backend serves as the production source of truth for Authentication, Areas, Members, Chapters, Services, Events, Event Participants, Activity Reports, and GIG Stewardship.
+> [!IMPORTANT]
+> **STRICTLY A PROJECT / NON-PRODUCTION DISCLAIMER**  
+> This backend service layer is developed strictly as an educational and technical portfolio demonstration project. **It is NOT intended for official production operations, real-world deployment, or storing live organizational data for Missionary Families for Christ (MFC) Youth.**
+
+The backend serves as the demonstration API and data service layer for Authentication, Areas, Members, Chapters, Services, Events, Event Participants, Activity Reports, and GIG Stewardship prototypes.
 
 ## Architecture
 

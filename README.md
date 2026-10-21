@@ -1,12 +1,16 @@
 # MFC Youth Area Management System
 
-A cloud-based web application and pastoral management platform engineered for **Missionary Families for Christ (MFC) Youth**. The system streamlines youth membership tracking, household pastoral groupings, chapter administration, event registrations, service cataloging, and ministry analytics.
+> [!IMPORTANT]
+> **STRICTLY A PROJECT / NON-PRODUCTION DISCLAIMER**  
+> This repository, codebase, and documentation are developed strictly as an academic, educational, and technical demonstration project. **This system is NOT intended for official production use, real-world organizational deployment, or processing live community records for Missionary Families for Christ (MFC) Youth or any affiliated entity.** All workflows, cloud deployments, and configurations serve as software engineering prototypes and educational demonstrations.
+
+A cloud-based web application prototype engineered as a technical demonstration of pastoral management and community administration. The project demonstrates youth directory tracking, pastoral grouping workflows, chapter records, event registration prototypes, service cataloging, and administrative metrics.
 
 ---
 
 ## Executive Summary
 
-The **MFC Youth Area Management System (AMS)** serves as a central operational platform for servant leaders, chapter heads, and area coordinators. Designed around Christian community governance and statutory data privacy compliance, the application enables secure pastoral tracking, event management, and ministry record-keeping across chapters and areas.
+The **MFC Youth Area Management System (AMS)** is a capstone and portfolio project demonstrating a unified web platform architecture for community organization and pastoral administration. Built to explore modern full-stack web engineering, role-based access control, and privacy compliance patterns, this prototype showcases secure record-keeping, event coordination, and directory management within a structured pastoral hierarchy.
 
 ---
 

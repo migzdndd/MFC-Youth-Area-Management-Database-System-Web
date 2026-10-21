@@ -1,6 +1,10 @@
 # MFC Youth Area Management System - React Frontend
 
-The official modern responsive web client for the **MFC Youth Area Management System (AMS)**, built with **React 19**, **TypeScript**, **Vite**, and **Tailwind CSS**.
+> [!IMPORTANT]
+> **STRICTLY A PROJECT / NON-PRODUCTION DISCLAIMER**  
+> This frontend client is developed strictly as an educational and portfolio demonstration project. **It is NOT intended for official production use, real-world deployment, or operational processing of live data for Missionary Families for Christ (MFC) Youth.**
+
+The responsive web client prototype for the **MFC Youth Area Management System (AMS)** demonstration project, built with **React 19**, **TypeScript**, **Vite**, and **Tailwind CSS**.
 
 ---
 

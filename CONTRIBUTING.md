@@ -1,6 +1,10 @@
 # Contributing
 
-Thank you for contributing to the MFC Youth Area Management System Web!
+> [!IMPORTANT]
+> **STRICTLY A PROJECT / NON-PRODUCTION DISCLAIMER**  
+> This repository is strictly an educational and technical demonstration project. **Contributions support academic, technical demonstration, and portfolio development, not production organizational infrastructure.**
+
+Thank you for contributing to the MFC Youth Area Management System Web demonstration project!
 
 ## How to Contribute
 1. **Report Bugs:** Open an issue with a clear description and steps to reproduce. (For security bugs, see `SECURITY.md`).

@@ -1,6 +1,6 @@
 # Code of Conduct
 
-We are committed to providing a welcoming, inclusive, and harassment-free experience for everyone, regardless of background or identity.
+This Code of Conduct applies to contributors, reviewers, and collaborators participating in the MFC Youth Area Management System demonstration project.
 
 ## Our Standards
 - Be respectful, empathetic, and kind to others.

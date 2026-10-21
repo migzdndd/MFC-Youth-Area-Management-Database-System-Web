@@ -2,22 +2,26 @@
 
 <!-- impeccable:product-schema 1 -->
 
+> [!IMPORTANT]
+> **STRICTLY A PROJECT / NON-PRODUCTION PURPOSE**  
+> This product specification defines an educational, capstone, and portfolio demonstration project. It is **strictly a software engineering prototype and NOT intended for official production deployment, live operational use, or processing actual organizational records** for Missionary Families for Christ (MFC) Youth. Any organizational models described herein serve as domain context for technical modeling and architectural demonstration.
+
 ## Platform
 
 web (strictly responsive website across desktop, tablet, and mobile browsers)
 
-## Users
+## Users (Modeled Personas)
 
-- **Primary**: Servant Leaders and Chapter Heads of Missionary Families for Christ (MFC) Youth. They operate in the field during pastoral assemblies, youth camps, household meetings, and chapter events, accessing the website on mobile browsers under varying network conditions.
-- **Secondary**: Area Coordinators, Couple Coordinators, National Coordinators, and Domain Moderators (LIT Servant, Campus Servant, MFC High Servant, Area Kids Servant) requiring pastoral oversight across chapters, aggregate attendance, and ministry analytics.
+- **Primary Persona**: Modeled servant leader and chapter head workflows during pastoral assemblies, youth camps, household meetings, and chapter events on mobile browsers under varying network conditions.
+- **Secondary Persona**: Simulated area coordinators, couple coordinators, national coordinators, and domain moderators (LIT Servant, Campus Servant, MFC High Servant, Area Kids Servant) requiring pastoral oversight across chapters, aggregate attendance, and ministry analytics.
 
 ## Product Purpose
 
-Provide a unified, secure, and field-ready operational management system for MFC Youth. It simplifies pastoral care tracking (ages 13 to 21), household groupings, event registrations, attendance verification, service cataloging, and administrative reporting so servant leaders spend less time on paperwork and more time on ministry.
+Engineered as a comprehensive software engineering demonstration and technical portfolio project. The system models a unified, secure, and field-ready operational management architecture for community youth organizations. It demonstrates how pastoral care tracking (ages 13 to 21), household groupings, event registrations, attendance verification, service cataloging, and administrative reporting can be streamlined through modern web technologies.
 
 ## Positioning
 
-Unlike generic community databases or unwieldy spreadsheets, the system is purpose-built for the specific pastoral structure of MFC Youth: area-scoped governance, household groupings, LIT creative ministries, domain-moderated servant leadership tiers, and strict protection of youth personal data.
+Unlike generic community databases or unwieldy spreadsheets, this prototype models the specific pastoral structure of MFC Youth: area-scoped governance, household groupings, LIT creative ministries, domain-moderated servant leadership tiers, and strict protection of youth personal data within an educational sandbox.
 
 ## Operating Context
 
