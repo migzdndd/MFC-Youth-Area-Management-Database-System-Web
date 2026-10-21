@@ -80,11 +80,18 @@ export function useUpdateMember() {
             contact: newMember.contact || newMember.contact_number || m.contact,
             contact_number: newMember.contact || newMember.contact_number || m.contact_number,
             service: newMember.service !== undefined ? newMember.service : m.service,
-            assigned_services: newMember.service
-              ? [newMember.service]
-              : (newMember.assigned_services || m.assigned_services),
+            assigned_services: newMember.assigned_services !== undefined
+              ? newMember.assigned_services
+              : (newMember.service !== undefined
+                  ? (newMember.service ? [newMember.service] : [])
+                  : m.assigned_services),
             status: newMember.status || m.status,
-            academic_track: newMember.academic_track || newMember.track || m.academic_track,
+            academic_track: newMember.academic_track !== undefined
+              ? newMember.academic_track
+              : (newMember.track !== undefined ? newMember.track : m.academic_track),
+            chapter_id: newMember.chapter_id !== undefined
+              ? newMember.chapter_id
+              : (newMember.chapterId !== undefined ? newMember.chapterId : m.chapter_id),
             updated_at: new Date().toISOString(),
           };
         });
@@ -112,6 +119,7 @@ export function useUpdateMember() {
     onSettled: () => {
       // Silently revalidate active queries in the background without blocking the UI
       queryClient.invalidateQueries({ queryKey: ['members'], refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: ['chapters'], refetchType: 'active' });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'], refetchType: 'active' });
     },
   });

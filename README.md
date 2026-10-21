@@ -35,6 +35,7 @@ Inside the Services Tab, each access level sees an interface tailored to their p
 - **Area Kids Servant**: Demographic track overview and roster for **Heartchamp** transition members.
 - **LIT Servant**: The 5 Creative Ministries (Music, Dance, Graphics & Promo, Creative Writing, Photography & Videography).
 - **Area Servant & Couple Coordinators**: Pastoral leadership directory across the 5 servant domains (Campus Servant, MFC High Servant, LIT Servant, Area Kids Servant, Chapter Servant).
+- **In-Card Member Assignment & Removal**: Core roles (Area Admin, Domain Moderators, Chapter Leaders) can add or remove members directly within Chapter and Service cards and roster modals with candidate member search/filtering and optimistic state updates.
 
 ### Compact, Minimal, and Clean UI Density
 - **Optimized Layout Footprint**: Streamlined header banners (`rounded-xl px-4 py-3`), compact card padding (`p-3.5 sm:p-4`), and reduced global margins (`p-3.5 sm:p-5 lg:p-6`).

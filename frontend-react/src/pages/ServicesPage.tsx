@@ -13,6 +13,8 @@ import {
   Building2,
   School,
   Edit3,
+  UserPlus,
+  UserMinus,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { useMembers, useUpdateMember } from '@/hooks/useMembers';
@@ -21,8 +23,9 @@ import { useServices } from '@/hooks/useServices';
 import { useToast } from '@/hooks/useToast';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
 import { MemberFormModal, type MemberFormData } from '@/components/member/MemberFormModal';
-import type { Member } from '@/types/member';
+import type { Member, AcademicTrack } from '@/types/member';
 
 interface ServiceCardConfig {
   title: string;
@@ -32,6 +35,9 @@ interface ServiceCardConfig {
   counterLabel: string;
   filter: (m: Member) => boolean;
   emptyLabel: string;
+  targetTrack?: AcademicTrack;
+  targetMinistry?: string;
+  targetServantRole?: string;
 }
 
 export const ServicesPage: React.FC = () => {
@@ -46,9 +52,21 @@ export const ServicesPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [selectedMemberToAssign, setSelectedMemberToAssign] = useState('');
 
   const rawRole = simulatedRole || user?.role || (user as unknown as { access_level?: string })?.access_level || 'member';
   const role = String(rawRole).toLowerCase().trim().replace(/[\s-]+/g, '_');
+  const canManageMembers = Boolean(
+    role === 'national_coordinator' ||
+    role === 'area_servant' ||
+    role === 'couple_coordinator' ||
+    role.includes('admin') ||
+    role.includes('servant') ||
+    role.includes('leader') ||
+    role.includes('coordinator') ||
+    role.includes('moderator')
+  );
 
   const ministryOptions = useMemo(() => {
     const defaultServices = [
@@ -117,6 +135,7 @@ export const ServicesPage: React.FC = () => {
           tag: 'College Track',
           description: 'Active youth members attending college or university (1st to 4th Year).',
           counterLabel: 'College Members',
+          targetTrack: 'College',
           filter: (m) => {
             const track = (m.academic_track || '').toLowerCase().trim();
             return track.includes('college');
@@ -129,6 +148,7 @@ export const ServicesPage: React.FC = () => {
           tag: 'Senior High School Track',
           description: 'Pre-university youth members in Grades 11 and 12 transitioning to college or careers.',
           counterLabel: 'SHS Members',
+          targetTrack: 'Senior High School',
           filter: (m) => {
             const track = (m.academic_track || '').toLowerCase().trim();
             return track.includes('senior') || track.includes('shs');
@@ -153,6 +173,7 @@ export const ServicesPage: React.FC = () => {
           tag: 'High School Track',
           description: 'Secondary education youth members currently in the High School (HS) academic track.',
           counterLabel: 'HS Members',
+          targetTrack: 'High School',
           filter: (m) => {
             const track = (m.academic_track || '').toLowerCase().trim();
             return (
@@ -182,6 +203,7 @@ export const ServicesPage: React.FC = () => {
           tag: 'Heartchamp Track',
           description: 'Children and junior youth registered under the Heartchamp pastoral formation track.',
           counterLabel: 'Heartchamp Members',
+          targetTrack: 'Heartchamp',
           filter: (m) => {
             const track = (m.academic_track || '').toLowerCase().trim();
             return track.includes('heartchamp') || track.includes('kids');
@@ -206,6 +228,7 @@ export const ServicesPage: React.FC = () => {
           tag: 'Liturgical Creative',
           description: 'Instrumentalists, vocalists, and psalmists dedicated to liturgical music, praise, and worship.',
           counterLabel: 'Music Servants',
+          targetMinistry: 'Music',
           filter: (m) => hasCreativeMinistry(m, ['music', 'music ministry']),
           emptyLabel: 'No servants currently assigned to Music ministry.',
         },
@@ -215,6 +238,7 @@ export const ServicesPage: React.FC = () => {
           tag: 'Creative Liturgical',
           description: 'Creative interpretive movement and choreography for youth conferences, camps, and rallies.',
           counterLabel: 'Dance Servants',
+          targetMinistry: 'Dance',
           filter: (m) => hasCreativeMinistry(m, ['dance']),
           emptyLabel: 'No servants currently assigned to Dance ministry.',
         },
@@ -224,6 +248,7 @@ export const ServicesPage: React.FC = () => {
           tag: 'Creative Production',
           description: 'Visual branding, promotional posters, event banners, and digital evangelization graphics.',
           counterLabel: 'Graphics Servants',
+          targetMinistry: 'Graphics & Promo',
           filter: (m) => hasCreativeMinistry(m, ['graphics', 'promo', 'graphics & promo']),
           emptyLabel: 'No servants currently assigned to Graphics & Promo ministry.',
         },
@@ -233,6 +258,7 @@ export const ServicesPage: React.FC = () => {
           tag: 'Pastoral Content',
           description: 'Pastoral reflections, assembly scripts, social media articles, and youth faith testimonies.',
           counterLabel: 'Writing Servants',
+          targetMinistry: 'Creative Writing',
           filter: (m) => hasCreativeMinistry(m, ['creative writing', 'writing']),
           emptyLabel: 'No servants currently assigned to Creative Writing ministry.',
         },
@@ -242,6 +268,7 @@ export const ServicesPage: React.FC = () => {
           tag: 'Media Production',
           description: 'Event photojournalism, recap videos, testimony recordings, and media production.',
           counterLabel: 'Media Servants',
+          targetMinistry: 'Photography & Videography',
           filter: (m) => hasCreativeMinistry(m, ['photography', 'videography', 'photo', 'photography & videography']),
           emptyLabel: 'No servants currently assigned to Photography & Videography ministry.',
         },
@@ -264,6 +291,7 @@ export const ServicesPage: React.FC = () => {
         tag: 'Domain Moderator',
         description: 'Supervises Senior High School (SHS) and College youth ministries across campus institutions.',
         counterLabel: 'Campus Servants',
+        targetServantRole: 'Campus Servant',
         filter: (m) => hasService(m, ['campus_servant', 'campus servant']),
         emptyLabel: 'No Campus Servant currently appointed in the roster.',
       },
@@ -273,6 +301,7 @@ export const ServicesPage: React.FC = () => {
         tag: 'Domain Moderator',
         description: 'Supervises Junior High School (JHS Grades 7-10) youth evangelization and chapter activities.',
         counterLabel: 'MFC High Servants',
+        targetServantRole: 'MFC High Servant',
         filter: (m) => hasService(m, ['mfc_high_servant', 'mfc high servant']),
         emptyLabel: 'No MFC High Servant currently appointed in the roster.',
       },
@@ -282,6 +311,7 @@ export const ServicesPage: React.FC = () => {
         tag: 'Domain Moderator',
         description: 'Oversees the 5 Creative Ministries: Music, Dance, Graphics & Promo, Writing, and Video.',
         counterLabel: 'LIT Servants',
+        targetServantRole: 'LIT Servant',
         filter: (m) => hasService(m, ['lit_servant', 'area lit servant', 'lit servant']),
         emptyLabel: 'No LIT Servant currently appointed in the roster.',
       },
@@ -291,6 +321,7 @@ export const ServicesPage: React.FC = () => {
         tag: 'Domain Moderator',
         description: 'Coordinates pastoral accompaniment and assemblies for MFC Kids and Heartchamps.',
         counterLabel: 'Kids Servants',
+        targetServantRole: 'Area Kids Servant',
         filter: (m) => hasService(m, ['area_kids_servant', 'area kids servant', 'kids servant']),
         emptyLabel: 'No Area Kids Servant currently appointed in the roster.',
       },
@@ -300,6 +331,7 @@ export const ServicesPage: React.FC = () => {
         tag: 'Chapter Leadership',
         description: 'Appointed chapter leaders managing local youth rosters, assemblies, and pastoral care.',
         counterLabel: 'Chapter Servants',
+        targetServantRole: 'Chapter Servant',
         filter: (m) => hasService(m, ['chapter_servant', 'chapter servant']),
         emptyLabel: 'No Chapter Servants currently appointed in the roster.',
       },
@@ -383,6 +415,129 @@ export const ServicesPage: React.FC = () => {
     });
   };
 
+  const candidateMembersForService = useMemo(() => {
+    if (!selectedService) return [];
+    return members
+      .filter((m) => !selectedService.filter(m))
+      .sort((a, b) => {
+        const nameA = [a.first_name, a.last_name].filter(Boolean).join(' ');
+        const nameB = [b.first_name, b.last_name].filter(Boolean).join(' ');
+        return nameA.localeCompare(nameB);
+      });
+  }, [members, selectedService]);
+
+  const handleAddMemberToService = async () => {
+    if (!selectedService || !selectedMemberToAssign) return;
+    const memberToAssign = members.find((m) => m.id === selectedMemberToAssign);
+    if (!memberToAssign) return;
+
+    const memberName = [memberToAssign.first_name, memberToAssign.last_name].filter(Boolean).join(' ');
+
+    if (selectedService.targetTrack) {
+      const track = selectedService.targetTrack;
+      updateMember.mutate(
+        { id: memberToAssign.id, academic_track: track },
+        {
+          onSuccess: () => {
+            toast.success(`Assigned ${memberName} to ${selectedService.title}`);
+            setSelectedMemberToAssign('');
+            setIsAddMemberOpen(false);
+          },
+          onError: (err: unknown) => {
+            toast.error(err instanceof Error ? err.message : 'Failed to assign academic track.');
+          },
+        }
+      );
+    } else if (selectedService.targetMinistry) {
+      const ministry = selectedService.targetMinistry;
+      const currentAssigned = Array.isArray(memberToAssign.assigned_services) ? memberToAssign.assigned_services : [];
+      const updated = Array.from(new Set([...currentAssigned, ministry]));
+      updateMember.mutate(
+        {
+          id: memberToAssign.id,
+          service: ministry,
+          assigned_services: updated,
+        },
+        {
+          onSuccess: () => {
+            toast.success(`Added ${memberName} to ${ministry} Ministry`);
+            setSelectedMemberToAssign('');
+            setIsAddMemberOpen(false);
+          },
+          onError: (err: unknown) => {
+            toast.error(err instanceof Error ? err.message : 'Failed to assign ministry.');
+          },
+        }
+      );
+    } else if (selectedService.targetServantRole) {
+      const servantRole = selectedService.targetServantRole;
+      updateMember.mutate(
+        {
+          id: memberToAssign.id,
+          service: servantRole,
+          assigned_services: [servantRole],
+        },
+        {
+          onSuccess: () => {
+            toast.success(`Appointed ${memberName} as ${servantRole}`);
+            setSelectedMemberToAssign('');
+            setIsAddMemberOpen(false);
+          },
+          onError: (err: unknown) => {
+            toast.error(err instanceof Error ? err.message : 'Failed to appoint servant.');
+          },
+        }
+      );
+    }
+  };
+
+  const handleRemoveMemberFromService = async (memberToRemove: Member) => {
+    if (!selectedService) return;
+    const memberName = [memberToRemove.first_name, memberToRemove.last_name].filter(Boolean).join(' ');
+
+    if (!window.confirm(`Are you sure you want to remove ${memberName} from ${selectedService.title}?`)) {
+      return;
+    }
+
+    if (selectedService.targetTrack) {
+      updateMember.mutate(
+        { id: memberToRemove.id, academic_track: null },
+        {
+          onSuccess: () => toast.success(`Removed ${memberName} from ${selectedService.title}`),
+          onError: (err: unknown) => toast.error(err instanceof Error ? err.message : 'Failed to remove member from track.'),
+        }
+      );
+    } else if (selectedService.targetMinistry) {
+      const ministry = selectedService.targetMinistry;
+      const currentAssigned = Array.isArray(memberToRemove.assigned_services) ? memberToRemove.assigned_services : [];
+      const updated = currentAssigned.filter((s) => s.toLowerCase() !== ministry.toLowerCase());
+      const nextService = updated[0] || null;
+      updateMember.mutate(
+        {
+          id: memberToRemove.id,
+          service: nextService,
+          assigned_services: updated,
+        },
+        {
+          onSuccess: () => toast.success(`Removed ${memberName} from ${ministry} Ministry`),
+          onError: (err: unknown) => toast.error(err instanceof Error ? err.message : 'Failed to remove member from ministry.'),
+        }
+      );
+    } else if (selectedService.targetServantRole) {
+      updateMember.mutate(
+        {
+          id: memberToRemove.id,
+          service: null,
+          assigned_services: [],
+        },
+        {
+          onSuccess: () => toast.success(`Removed ${memberName} from ${selectedService.title}`),
+          onError: (err: unknown) => toast.error(err instanceof Error ? err.message : 'Failed to remove servant assignment.'),
+        }
+      );
+    }
+  };
+
   return (
     <div className="space-y-4 sm:space-y-5">
       {/* Header Banner */}
@@ -444,6 +599,22 @@ export const ServicesPage: React.FC = () => {
                     <span className="text-xs font-bold text-navy dark:text-sky-400 px-1.5 py-0.5 rounded-md bg-navy/5 dark:bg-sky-500/10 border border-navy/10 dark:border-sky-500/20 tabular-nums">
                       {matchedCount}
                     </span>
+                    {canManageMembers && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedService(service);
+                          setIsAddMemberOpen(true);
+                          setSearchQuery('');
+                        }}
+                        className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-navy/8 dark:bg-sky-500/15 text-navy dark:text-sky-300 hover:bg-navy hover:text-white dark:hover:bg-sky-500 dark:hover:text-slate-950 transition-colors cursor-pointer min-h-[28px] inline-flex items-center gap-1"
+                        aria-label={`Add member to ${service.title}`}
+                      >
+                        <UserPlus className="w-3 h-3" />
+                        <span>+ Add</span>
+                      </button>
+                    )}
                     <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 group-hover:bg-navy group-hover:text-white dark:group-hover:bg-sky-500 dark:group-hover:text-slate-950 transition-colors">
                       View Roster
                     </span>
@@ -473,33 +644,105 @@ export const ServicesPage: React.FC = () => {
       {/* Service / Track Members Roster Modal */}
       <Modal
         isOpen={Boolean(selectedService)}
-        onClose={() => setSelectedService(null)}
+        onClose={() => {
+          setSelectedService(null);
+          setIsAddMemberOpen(false);
+          setSelectedMemberToAssign('');
+        }}
         title={selectedService?.title || 'Assigned Members'}
         maxWidth="xl"
       >
         <div className="space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
             <p className="text-xs font-medium text-slate-600 dark:text-slate-300">
               Total matched:{' '}
               <span className="font-bold text-navy dark:text-sky-400">{selectedServiceMembers.length}</span>{' '}
               {selectedServiceMembers.length === 1 ? 'member' : 'members'}
             </p>
-            <div className="relative min-w-[200px] sm:w-60">
-              <Search
-                className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
-                aria-hidden="true"
-              />
-              <input
-                id="serviceServantSearch"
-                type="text"
-                aria-label="Search members in this track"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search name, email, school..."
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-navy/20 dark:focus:ring-sky-500/30 focus:border-navy"
-              />
+
+            <div className="flex items-center gap-2">
+              {canManageMembers && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={isAddMemberOpen ? 'secondary' : 'primary'}
+                  onClick={() => setIsAddMemberOpen(!isAddMemberOpen)}
+                  className="text-xs gap-1.5 h-8 min-h-[36px]"
+                >
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span>{isAddMemberOpen ? 'Cancel' : 'Add Member'}</span>
+                </Button>
+              )}
+
+              <div className="relative min-w-[160px] sm:w-56">
+                <Search
+                  className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                  aria-hidden="true"
+                />
+                <input
+                  id="serviceServantSearch"
+                  type="text"
+                  aria-label="Search members in this track"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search name, email, school..."
+                  className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-navy/20 dark:focus:ring-sky-500/30 focus:border-navy"
+                />
+              </div>
             </div>
           </div>
+
+          {canManageMembers && isAddMemberOpen && (
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                  Add Member to {selectedService?.title}
+                </h4>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {candidateMembersForService.length} eligible {candidateMembersForService.length === 1 ? 'member' : 'members'}
+                </span>
+              </div>
+
+              {candidateMembersForService.length === 0 ? (
+                <p className="text-xs text-slate-500 dark:text-slate-400 py-2">
+                  All area members are currently assigned to this track or ministry.
+                </p>
+              ) : (
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="flex-1">
+                    <Select
+                      value={selectedMemberToAssign}
+                      onChange={(e) => setSelectedMemberToAssign(e.target.value)}
+                      options={[
+                        { value: '', label: 'Select a candidate member...' },
+                        ...candidateMembersForService.map((m) => {
+                          const name = [m.first_name, m.middle_name, m.last_name].filter(Boolean).join(' ');
+                          const currentTrack = m.academic_track || 'No Track';
+                          const chapterName = getChapterName(m.chapter_id);
+                          return {
+                            value: m.id,
+                            label: `${name} (${currentTrack} • ${chapterName})`,
+                          };
+                        }),
+                      ]}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    disabled={!selectedMemberToAssign || updateMember.isPending}
+                    isLoading={updateMember.isPending}
+                    onClick={handleAddMemberToService}
+                    className="sm:self-end h-[44px] min-h-[44px] px-4"
+                  >
+                    <UserPlus className="w-4 h-4 mr-1.5" />
+                    Add Member
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="max-h-[55vh] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60">
             {filteredModalMembers.length === 0 ? (
@@ -572,6 +815,19 @@ export const ServicesPage: React.FC = () => {
                         <Edit3 className="w-3 h-3 text-slate-500 dark:text-slate-400" />
                         <span>Edit</span>
                       </Button>
+                      {canManageMembers && (
+                        <Button
+                          type="button"
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleRemoveMemberFromService(member)}
+                          className="text-[11px] gap-1 h-7 min-h-[28px] px-2"
+                          aria-label={`Remove ${member.first_name} from ${selectedService?.title}`}
+                        >
+                          <UserMinus className="w-3 h-3" />
+                          <span>Remove</span>
+                        </Button>
+                      )}
                     </div>
                   </div>
                 );
