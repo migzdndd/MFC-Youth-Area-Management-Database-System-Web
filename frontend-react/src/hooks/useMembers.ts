@@ -6,6 +6,7 @@ import type { Member, MemberFilter, AcademicTrack } from '@/types/member';
 export interface UpdateMemberInput extends Partial<Member> {
   id: string;
   track?: AcademicTrack | string | null;
+  chapterId?: string | null;
 }
 
 export function useMembers(filters?: MemberFilter) {

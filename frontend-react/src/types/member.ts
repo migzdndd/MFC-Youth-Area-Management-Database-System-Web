@@ -12,6 +12,7 @@ export interface Member {
   id: string;
   area_id: string;
   chapter_id: string | null;
+  chapterId?: string | null;
   first_name: string;
   last_name: string;
   middle_name?: string | null;
